@@ -4,10 +4,13 @@ import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import Link from 'next/link';
 import { Memory, MemoryNode } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
+import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import NodeViewer from '@/components/NodeViewer';
 import PasswordGate from '@/components/PasswordGate';
+import PaymentButton from '@/components/PaymentButton';
+import { Eye } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -15,6 +18,7 @@ interface PageProps {
 
 export default function MemoryViewerPage({ params }: PageProps) {
   const { id } = use(params);
+  const { user } = useAuth();
   const [memory, setMemory] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -113,8 +117,12 @@ export default function MemoryViewerPage({ params }: PageProps) {
     );
   }
 
-  // Check if memory is pending payment (only shown to non-owners via RLS)
-  if (sortedMemory.status !== 'active') {
+  // Check ownership for pending memories
+  const isOwner = user && sortedMemory.userId === user.id;
+  const isPreviewMode = sortedMemory.status !== 'active' && isOwner;
+
+  // Block non-owners from viewing pending memories
+  if (sortedMemory.status !== 'active' && !isOwner) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center memory-card p-12">
@@ -175,8 +183,28 @@ export default function MemoryViewerPage({ params }: PageProps) {
         </div>
       </header>
 
+      {/* Preview Mode Banner */}
+      {isPreviewMode && (
+        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-yellow-800">
+              <Eye size={18} />
+              <span className="text-sm font-medium">
+                โหมดตัวอย่าง - ชำระเงินเพื่อแชร์ให้คนพิเศษของคุณ
+              </span>
+            </div>
+            <PaymentButton
+              memoryId={sortedMemory.id}
+              memoryTitle={sortedMemory.title}
+              userId={user!.id}
+              className="text-sm py-1.5 px-4"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Content */}
-      <div className="flex-grow flex items-center justify-center p-4">
+      <div className="grow flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
           {isPasswordLocked && currentNode?.type === 'password' ? (
             <PasswordGate

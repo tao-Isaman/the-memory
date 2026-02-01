@@ -39,6 +39,7 @@ export type MemoryStatus = 'pending' | 'active' | 'failed';
 
 export interface Memory {
   id: string;
+  userId?: string;
   title: string;
   nodes: MemoryNode[];
   createdAt: string;

@@ -247,15 +247,24 @@ function CreatePageContent() {
               <button
                 onClick={() => {
                   setShowPaymentPrompt(false);
-                  router.push('/dashboard');
+                  router.push(`/memory/${savedMemoryId}`);
                 }}
                 className="btn-secondary w-full"
               >
-                ชำระเงินภายหลัง
+                ดูตัวอย่างก่อน
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentPrompt(false);
+                  router.push('/dashboard');
+                }}
+                className="text-gray-500 hover:text-gray-700 text-sm"
+              >
+                กลับไปหน้าหลัก
               </button>
             </div>
             <p className="mt-4 text-sm text-gray-500">
-              คุณสามารถชำระเงินได้จากหน้า Dashboard
+              คุณสามารถดูตัวอย่างได้ แต่ต้องชำระเงินก่อนจึงจะแชร์ได้
             </p>
           </div>
         </div>

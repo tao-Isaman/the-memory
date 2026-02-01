@@ -18,6 +18,7 @@ function toMemory(dbMemory: DbMemory, dbNodes: DbNode[]): Memory {
 
   return {
     id: dbMemory.id,
+    userId: dbMemory.user_id,
     title: dbMemory.title,
     nodes: nodes.sort((a, b) => a.priority - b.priority),
     createdAt: dbMemory.created_at,

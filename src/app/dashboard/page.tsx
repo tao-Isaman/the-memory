@@ -11,7 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
-import { Plus, Share2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Share2, Pencil, Trash2, Eye } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -165,12 +165,22 @@ export default function DashboardPage() {
                       </button>
                     </>
                   ) : (
-                    <PaymentButton
-                      memoryId={memory.id}
-                      memoryTitle={memory.title}
-                      userId={user.id}
-                      className="flex-1 text-sm py-2"
-                    />
+                    <>
+                      <Link
+                        href={`/memory/${memory.id}`}
+                        className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
+                        title="ดูตัวอย่าง"
+                      >
+                        <Eye size={16} />
+                        <span className="hidden sm:inline">ดูตัวอย่าง</span>
+                      </Link>
+                      <PaymentButton
+                        memoryId={memory.id}
+                        memoryTitle={memory.title}
+                        userId={user.id}
+                        className="flex-1 text-sm py-2"
+                      />
+                    </>
                   )}
                   <Link
                     href={`/create?edit=${memory.id}`}
