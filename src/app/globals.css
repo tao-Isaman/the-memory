@@ -1,26 +1,183 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFF0F5;
+  --foreground: #4A1942;
+  --primary: #FF6B9D;
+  --primary-dark: #E63946;
+  --soft-pink: #FFF0F5;
+  --rose: #FFB6C1;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-soft-pink: var(--soft-pink);
+  --color-rose: var(--rose);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Heart animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-heart {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-heart {
+  animation: pulse-heart 1.5s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFF0F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF6B9D;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E63946;
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B9D 0%, #E63946 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: #E63946;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  border: 2px solid #FF6B9D;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: #FFF0F5;
+  transform: translateY(-2px);
+}
+
+/* Card styles */
+.memory-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(255, 107, 157, 0.15);
+  border: 1px solid rgba(255, 182, 193, 0.5);
+  transition: all 0.3s ease;
+}
+
+.memory-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(255, 107, 157, 0.25);
+}
+
+/* Input styles */
+.input-valentine {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #FFB6C1;
+  border-radius: 0.75rem;
+  outline: none;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.input-valentine:focus {
+  border-color: #FF6B9D;
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+}
+
+/* Floating hearts background */
+.hearts-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.hearts-bg::before,
+.hearts-bg::after {
+  content: '❤️';
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.1;
+  animation: float 6s ease-in-out infinite;
+}
+
+.hearts-bg::before {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.hearts-bg::after {
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
 }
