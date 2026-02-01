@@ -31,19 +31,17 @@ export default function StoryViewer({ story }: StoryViewerProps) {
             <HeartIcon size={20} />
             <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
-          <div className="relative min-h-[200px]">
-            <ImageWithLoader
-              src={story.content.imageUrl}
-              alt={story.content.caption || 'รูปภาพความทรงจำ'}
-              className="w-full rounded-lg shadow-md"
-              style={{ maxHeight: '500px', objectFit: 'contain' }}
-            />
-            {story.content.caption && (
-              <p className="mt-4 text-center text-gray-600 italic">
-                {story.content.caption}
-              </p>
-            )}
-          </div>
+          <ImageWithLoader
+            src={story.content.imageUrl}
+            alt={story.content.caption || 'รูปภาพความทรงจำ'}
+            className="w-full rounded-lg shadow-md"
+            style={{ maxHeight: '500px', objectFit: 'contain' }}
+          />
+          {story.content.caption && (
+            <p className="mt-4 text-center text-gray-600 italic">
+              {story.content.caption}
+            </p>
+          )}
         </div>
       );
 
@@ -54,7 +52,7 @@ export default function StoryViewer({ story }: StoryViewerProps) {
             <HeartIcon size={20} />
             <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
-          <div className="relative min-h-[150px] mb-4">
+          <div className="mb-4">
             <ImageWithLoader
               src={story.content.imageUrl}
               alt="ความทรงจำ"
