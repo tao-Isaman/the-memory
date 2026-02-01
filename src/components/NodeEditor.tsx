@@ -13,7 +13,7 @@ interface NodeEditorProps {
 }
 
 const nodeTypeLabels: Record<NodeType, string> = {
-  password: 'ใส่รหัสผ่าน',
+  password: 'รหัส PIN',
   text: 'ข้อความ',
   image: 'รูปภาพ',
   'text-image': 'ข้อความ + รูปภาพ',
@@ -21,7 +21,7 @@ const nodeTypeLabels: Record<NodeType, string> = {
 };
 
 const nodeTypeDescriptions: Record<NodeType, string> = {
-  password: 'เพิ่มรหัสผ่านเพื่อปกป้องเนื้อหาถัดไป',
+  password: 'เพิ่มรหัส PIN 4 หลักเพื่อปกป้องเนื้อหา',
   text: 'เพิ่มข้อความจากใจ',
   image: 'เพิ่มรูปภาพพิเศษ',
   'text-image': 'รวมข้อความกับรูปภาพ',
@@ -86,8 +86,11 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
 
     switch (type) {
       case 'password':
-        if (!password.trim()) return;
-        node = { ...baseNode, type: 'password', content: { password: password.trim() } };
+        if (password.length !== 4 || !/^\d{4}$/.test(password)) {
+          alert('กรุณาใส่รหัส PIN 4 หลัก');
+          return;
+        }
+        node = { ...baseNode, type: 'password', content: { password: password } };
         break;
       case 'text':
         if (!text.trim()) return;
@@ -178,18 +181,43 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {type === 'password' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              รหัสผ่าน
+              รหัส PIN (4 หลัก)
             </label>
-            <input
-              type="text"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="ใส่รหัสผ่านที่จำได้ง่าย..."
-              className="input-valentine"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              รหัสนี้จะปกป้องเนื้อหาถัดไปจนกว่าจะใส่ถูกต้อง
+            <div className="flex justify-center gap-3">
+              {[0, 1, 2, 3].map((index) => (
+                <input
+                  key={index}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={password[index] || ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    if (val.length <= 1) {
+                      const newPin = password.split('');
+                      newPin[index] = val;
+                      setPassword(newPin.join(''));
+                      // Auto-focus next input
+                      if (val && index < 3) {
+                        const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
+                        nextInput?.focus();
+                      }
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    // Handle backspace to go to previous input
+                    if (e.key === 'Backspace' && !password[index] && index > 0) {
+                      const prevInput = (e.target as HTMLElement).parentElement?.children[index - 1] as HTMLInputElement;
+                      prevInput?.focus();
+                    }
+                  }}
+                  className="w-14 h-14 text-center text-2xl font-bold input-valentine"
+                  required={index === 0}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              ใส่ตัวเลข 4 หลักเพื่อปกป้องเนื้อหาถัดไป
             </p>
           </div>
         )}

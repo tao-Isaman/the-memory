@@ -26,6 +26,26 @@ const leckerliOne = Leckerli_One({
 export const metadata: Metadata = {
   title: "The Memory - สร้างความทรงจำสวยๆ ให้คนที่คุณรัก",
   description: "แอปสำหรับสร้างและแชร์ความทรงจำสวยๆ ให้คนที่คุณรัก",
+  openGraph: {
+    title: "The Memory - สร้างความทรงจำสวยๆ ให้คนที่คุณรัก",
+    description: "แอปสำหรับสร้างและแชร์ความทรงจำสวยๆ ให้คนที่คุณรัก",
+    images: [
+      {
+        url: "/og-image.webp",
+        width: 420,
+        height: 300,
+        alt: "The Memory",
+      },
+    ],
+    locale: "th_TH",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Memory - สร้างความทรงจำสวยๆ ให้คนที่คุณรัก",
+    description: "แอปสำหรับสร้างและแชร์ความทรงจำสวยๆ ให้คนที่คุณรัก",
+    images: ["/og-image.webp"],
+  },
 };
 
 export default function RootLayout({
