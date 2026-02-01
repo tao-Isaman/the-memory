@@ -125,7 +125,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
 
   return (
     <div className="memory-card p-6">
-      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">เพิ่มโหนดความทรงจำใหม่</h3>
+      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">เพิ่มเรื่องราวความทรงจำใหม่</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Node Type Selector */}
@@ -163,7 +163,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {/* Node Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ชื่อโหนด (ไม่จำเป็น)
+            ชื่อเรื่องราว (ไม่จำเป็น)
           </label>
           <input
             type="text"
@@ -173,7 +173,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
             className="input-valentine"
           />
           <p className="text-xs text-gray-500 mt-1">
-            ชื่อนี้จะแสดงแทนประเภทโหนดในรายการ
+            ชื่อนี้จะแสดงแทนประเภทเรื่องราวในรายการ
           </p>
         </div>
 

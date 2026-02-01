@@ -236,7 +236,7 @@ export default function LandingPage() {
               },
               {
                 step: '2',
-                title: 'เพิ่มโหนดความทรงจำ',
+                title: 'เพิ่มเรื่องราวความทรงจำ',
                 description: 'ใส่รูปภาพ ข้อความ เพลง และรหัสผ่านตามที่ต้องการ',
                 icon: Gift,
               },

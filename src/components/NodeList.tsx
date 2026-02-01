@@ -70,9 +70,9 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
     return (
       <div className="memory-card p-8 text-center">
         <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
-        <p className="text-gray-500">ยังไม่มีโหนดความทรงจำ</p>
+        <p className="text-gray-500">ยังไม่มีเรื่องราวความทรงจำ</p>
         <p className="text-sm text-gray-400 mt-1">
-          เพิ่มโหนดแรกเพื่อเริ่มสร้างความทรงจำของคุณ!
+          เพิ่มเรื่องราวแรกเพื่อเริ่มสร้างความทรงจำของคุณ!
         </p>
       </div>
     );
@@ -140,7 +140,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
           <button
             onClick={() => onDelete(node.id)}
             className="flex-shrink-0 w-8 h-8 rounded bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
-            title="ลบโหนด"
+            title="ลบเรื่องราว"
           >
             <X size={18} />
           </button>

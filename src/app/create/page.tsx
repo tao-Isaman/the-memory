@@ -88,7 +88,7 @@ function CreatePageContent() {
     }
 
     if (nodes.length === 0) {
-      alert('กรุณาเพิ่มอย่างน้อยหนึ่งโหนด');
+      alert('กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว');
       return;
     }
 
@@ -173,9 +173,9 @@ function CreatePageContent() {
         {/* Node List */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-kanit text-lg font-semibold text-[#E63946]">โหนดความทรงจำ</h2>
+            <h2 className="font-kanit text-lg font-semibold text-[#E63946]">เรื่องราวความทรงจำ</h2>
             <span className="text-sm text-gray-500">
-              {nodes.length} โหนด
+              {nodes.length} เรื่องราว
             </span>
           </div>
           <NodeList nodes={nodes} onReorder={handleReorder} onDelete={handleDelete} />
@@ -190,7 +190,7 @@ function CreatePageContent() {
             className="w-full memory-card p-6 text-center hover:shadow-lg transition-shadow border-2 border-dashed border-[#FFB6C1] hover:border-[#FF6B9D]"
           >
             <Plus size={32} className="mx-auto mb-2 text-[#E63946]" />
-            <span className="text-[#E63946] font-medium">เพิ่มโหนดความทรงจำ</span>
+            <span className="text-[#E63946] font-medium">เพิ่มเรื่องราวความทรงจำ</span>
           </button>
         )}
 
