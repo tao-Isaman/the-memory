@@ -135,40 +135,7 @@ export default function LandingPage() {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
           >
-            <div className="relative mx-auto max-w-md">
-              {/* Phone Mockup */}
-              <div className="bg-white rounded-[3rem] p-4 shadow-2xl shadow-pink-500/20 border border-pink-100">
-                <div className="bg-gradient-to-br from-[#FFF0F5] to-white rounded-[2.5rem] p-6 aspect-[9/16] flex flex-col">
-                  {/* Mock Header */}
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <HeartIcon size={20} className="animate-pulse-heart" />
-                    <span className="font-semibold text-[#E63946]">วันครบรอบของเรา</span>
-                  </div>
-                  {/* Mock Content */}
-                  <div className="flex-grow flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center">
-                        <HeartIcon size={48} color="#E63946" />
-                      </div>
-                      <p className="text-gray-600 text-sm px-4">
-                        &ldquo;ขอบคุณที่อยู่ข้างกันเสมอ รักนะ&rdquo;
-                      </p>
-                    </div>
-                  </div>
-                  {/* Mock Progress */}
-                  <div className="h-1 bg-pink-100 rounded-full overflow-hidden">
-                    <div className="h-full w-2/3 bg-gradient-to-r from-[#FF6B9D] to-[#E63946]" />
-                  </div>
-                </div>
-              </div>
-              {/* Decorative Elements */}
-              <div className="absolute -top-4 -right-4 animate-float">
-                <HeartIcon size={40} color="#FF6B9D" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 animate-float" style={{ animationDelay: '1s' }}>
-                <HeartIcon size={32} color="#E63946" />
-              </div>
-            </div>
+
           </div>
         </div>
       </section>
