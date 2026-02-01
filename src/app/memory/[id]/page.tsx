@@ -81,11 +81,17 @@ export default function MemoryViewerPage({ params }: PageProps) {
   }, [autoAdvance, currentIndex, sortedMemory, isPasswordLocked, handleNext]);
 
   const handlePrevious = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setIsPasswordLocked(false);
+    if (!sortedMemory || currentIndex <= 0) return;
+
+    const prevIndex = currentIndex - 1;
+    const prevNode = sortedMemory.nodes[prevIndex];
+
+    setCurrentIndex(prevIndex);
+    // Lock if previous node is a password node
+    if (prevNode?.type === 'password') {
+      setIsPasswordLocked(true);
     }
-  }, [currentIndex]);
+  }, [currentIndex, sortedMemory]);
 
   const handlePasswordUnlock = useCallback(() => {
     setIsPasswordLocked(false);
@@ -147,9 +153,12 @@ export default function MemoryViewerPage({ params }: PageProps) {
       {/* Header */}
       <header className="py-6 px-4 border-b border-pink-100 bg-white/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
+          <Link
+            href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
+            className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2"
+          >
             <span>&larr;</span>
-            <span>ออก</span>
+            <span>{isPreviewMode ? 'กลับไปแก้ไข' : 'ออก'}</span>
           </Link>
           <div className="flex items-center gap-2">
             <HeartIcon size={20} className="animate-pulse-heart" />
@@ -248,8 +257,11 @@ export default function MemoryViewerPage({ params }: PageProps) {
           </div>
 
           {isLastNode && !isPasswordLocked ? (
-            <Link href="/" className="btn-primary flex items-center gap-2">
-              เสร็จสิ้น
+            <Link
+              href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
+              className="btn-primary flex items-center gap-2"
+            >
+              {isPreviewMode ? 'แก้ไขต่อ' : 'เสร็จสิ้น'}
               <HeartIcon size={16} filled />
             </Link>
           ) : (
