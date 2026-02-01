@@ -239,32 +239,48 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
             <label className="block text-sm font-medium text-gray-700 mb-2">
               รหัส PIN (6 หลัก)
             </label>
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-2" id="pin-inputs">
               {[0, 1, 2, 3, 4, 5].map((index) => (
                 <input
                   key={index}
                   type="text"
-                  inputMode="numeric"
+                  inputMode="none"
                   maxLength={1}
                   value={password[index] || ''}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    if (val.length <= 1) {
+                  readOnly
+                  onKeyDown={(e) => {
+                    // Handle number keys (for desktop keyboard)
+                    if (/^[0-9]$/.test(e.key)) {
+                      e.preventDefault();
                       const newPin = password.split('');
-                      newPin[index] = val;
+                      newPin[index] = e.key;
                       setPassword(newPin.join(''));
                       // Auto-focus next input
-                      if (val && index < 5) {
-                        const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
+                      if (index < 5) {
+                        const nextInput = (e.target as HTMLElement).parentElement?.children[index + 1] as HTMLInputElement;
                         nextInput?.focus();
                       }
+                      return;
                     }
-                  }}
-                  onKeyDown={(e) => {
                     // Handle backspace to go to previous input
-                    if (e.key === 'Backspace' && !password[index] && index > 0) {
+                    if (e.key === 'Backspace') {
+                      if (!password[index] && index > 0) {
+                        const prevInput = (e.target as HTMLElement).parentElement?.children[index - 1] as HTMLInputElement;
+                        prevInput?.focus();
+                        const newPin = password.split('');
+                        newPin[index - 1] = '';
+                        setPassword(newPin.join(''));
+                      } else {
+                        const newPin = password.split('');
+                        newPin[index] = '';
+                        setPassword(newPin.join(''));
+                      }
+                    } else if (e.key === 'ArrowLeft' && index > 0) {
                       const prevInput = (e.target as HTMLElement).parentElement?.children[index - 1] as HTMLInputElement;
                       prevInput?.focus();
+                    } else if (e.key === 'ArrowRight' && index < 5) {
+                      const nextInput = (e.target as HTMLElement).parentElement?.children[index + 1] as HTMLInputElement;
+                      nextInput?.focus();
                     }
                   }}
                   className="w-11 h-12 text-center text-xl font-bold input-valentine"
@@ -275,6 +291,53 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
             <p className="text-xs text-gray-500 mt-3 text-center">
               ใส่ตัวเลข 6 หลักเพื่อปกป้องเนื้อหาถัดไป
             </p>
+            {/* Number pad for mobile */}
+            <div className="mt-4 grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, null, 0, 'del'].map((num, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    if (num === 'del') {
+                      // Find last filled input and clear it
+                      const lastFilledIndex = password.split('').findLastIndex(p => p !== '');
+                      if (lastFilledIndex >= 0) {
+                        const newPin = password.split('');
+                        newPin[lastFilledIndex] = '';
+                        setPassword(newPin.join(''));
+                        // Focus that input
+                        const container = document.getElementById('pin-inputs');
+                        const input = container?.children[lastFilledIndex] as HTMLInputElement;
+                        input?.focus();
+                      }
+                    } else if (num !== null) {
+                      // Find first empty input and fill it
+                      const firstEmptyIndex = password.split('').findIndex((p, i) => i < 6 && (p === '' || p === undefined));
+                      const targetIndex = firstEmptyIndex === -1 ? (password.length < 6 ? password.length : -1) : firstEmptyIndex;
+                      if (targetIndex >= 0 && targetIndex < 6) {
+                        const newPin = password.split('');
+                        while (newPin.length < 6) newPin.push('');
+                        newPin[targetIndex] = num.toString();
+                        setPassword(newPin.join(''));
+                        // Focus next input
+                        const container = document.getElementById('pin-inputs');
+                        const nextInput = container?.children[Math.min(targetIndex + 1, 5)] as HTMLInputElement;
+                        nextInput?.focus();
+                      }
+                    }
+                  }}
+                  className={`h-12 rounded-lg text-xl font-semibold transition-all
+                    ${num === null
+                      ? 'invisible'
+                      : num === 'del'
+                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-pink-50 text-[#E63946] hover:bg-pink-100 active:scale-95'
+                    }`}
+                >
+                  {num === 'del' ? '⌫' : num}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

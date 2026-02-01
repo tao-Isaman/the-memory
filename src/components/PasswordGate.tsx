@@ -45,6 +45,13 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Handle number keys (for desktop keyboard)
+    if (/^[0-9]$/.test(e.key)) {
+      e.preventDefault();
+      handleChange(index, e.key);
+      return;
+    }
+
     if (e.key === 'Backspace') {
       if (!pin[index] && index > 0) {
         // Move to previous input on backspace if current is empty
@@ -113,10 +120,10 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
                 key={index}
                 ref={(el) => { inputRefs.current[index] = el; }}
                 type="text"
-                inputMode="numeric"
+                inputMode="none"
                 maxLength={1}
                 value={pin[index]}
-                onChange={(e) => handleChange(index, e.target.value)}
+                readOnly
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className={`w-11 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none
                   ${error

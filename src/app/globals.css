@@ -73,6 +73,20 @@ body {
   animation: fade-in-up 0.5s ease-out forwards;
 }
 
+/* Shimmer animation for loading */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
 /* Spin animations for HeartLoader */
 @keyframes spin-slow {
   from {

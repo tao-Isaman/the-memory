@@ -3,6 +3,7 @@
 import { MemoryStory } from '@/types/memory';
 import YouTubeEmbed from './YouTubeEmbed';
 import HeartIcon from './HeartIcon';
+import ImageWithLoader from './ImageWithLoader';
 
 interface StoryViewerProps {
   story: MemoryStory;
@@ -30,9 +31,8 @@ export default function StoryViewer({ story }: StoryViewerProps) {
             <HeartIcon size={20} />
             <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
-          <div className="relative">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+          <div className="relative min-h-[200px]">
+            <ImageWithLoader
               src={story.content.imageUrl}
               alt={story.content.caption || 'รูปภาพความทรงจำ'}
               className="w-full rounded-lg shadow-md"
@@ -54,13 +54,14 @@ export default function StoryViewer({ story }: StoryViewerProps) {
             <HeartIcon size={20} />
             <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={story.content.imageUrl}
-            alt="ความทรงจำ"
-            className="w-full rounded-lg shadow-md mb-4"
-            style={{ maxHeight: '400px', objectFit: 'contain' }}
-          />
+          <div className="relative min-h-[150px] mb-4">
+            <ImageWithLoader
+              src={story.content.imageUrl}
+              alt="ความทรงจำ"
+              className="w-full rounded-lg shadow-md"
+              style={{ maxHeight: '400px', objectFit: 'contain' }}
+            />
+          </div>
           <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
             {story.content.text}
           </p>
