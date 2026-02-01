@@ -11,6 +11,7 @@ interface StoryEditorProps {
   onCancel: () => void;
   editingStory?: MemoryStory;
   initialType?: StoryType;
+  noCard?: boolean;
 }
 
 export const storyTypeLabels: Record<StoryType, string> = {
@@ -37,7 +38,7 @@ export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   youtube: Music,
 };
 
-export default function StoryEditor({ onSave, onCancel, editingStory, initialType }: StoryEditorProps) {
+export default function StoryEditor({ onSave, onCancel, editingStory, initialType, noCard }: StoryEditorProps) {
   const isEditing = !!editingStory;
 
   // Initialize state from editing story if provided
@@ -166,7 +167,7 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
   };
 
   return (
-    <div className="memory-card p-6">
+    <div className={noCard ? '' : 'memory-card p-6'}>
       <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">
         {isEditing ? 'แก้ไขเรื่องราว' : 'เพิ่มเรื่องราวความทรงจำใหม่'}
       </h3>

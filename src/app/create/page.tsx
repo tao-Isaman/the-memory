@@ -12,7 +12,7 @@ import StoryEditor from '@/components/StoryEditor';
 import StoryList from '@/components/StoryList';
 import ShareModal from '@/components/ShareModal';
 import PaymentButton from '@/components/PaymentButton';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ArrowLeft, X } from 'lucide-react';
 
 function CreatePageContent() {
   const router = useRouter();
@@ -196,15 +196,14 @@ function CreatePageContent() {
           <StoryList stories={stories} onReorder={handleReorder} onDelete={handleDelete} onEdit={handleEditStory} />
         </div>
 
-        {/* Add Story Button / Editor */}
-        {showEditor ? (
+        {/* Add Story Button / Editor (for new stories) */}
+        {showEditor && !editingStory ? (
           <StoryEditor
             onSave={handleSaveStory}
             onCancel={() => {
               setShowEditor(false);
               setEditingStory(null);
             }}
-            editingStory={editingStory || undefined}
           />
         ) : (
           <button
@@ -288,6 +287,34 @@ function CreatePageContent() {
             <p className="mt-4 text-sm text-gray-500">
               คุณสามารถดูตัวอย่างได้ แต่ต้องชำระเงินก่อนจึงจะแชร์ได้
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Story Modal */}
+      {editingStory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-xl">
+            <button
+              onClick={() => {
+                setEditingStory(null);
+                setShowEditor(false);
+              }}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors z-10"
+            >
+              <X size={18} className="text-gray-600" />
+            </button>
+            <div className="p-6">
+              <StoryEditor
+                onSave={handleSaveStory}
+                onCancel={() => {
+                  setEditingStory(null);
+                  setShowEditor(false);
+                }}
+                editingStory={editingStory}
+                noCard
+              />
+            </div>
           </div>
         </div>
       )}
