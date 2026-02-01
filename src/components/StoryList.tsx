@@ -3,12 +3,13 @@
 import { MemoryStory } from '@/types/memory';
 import { storyTypeLabels, storyTypeIcons } from './StoryEditor';
 import HeartIcon from './HeartIcon';
-import { ChevronUp, ChevronDown, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, X, Pencil } from 'lucide-react';
 
 interface StoryListProps {
   stories: MemoryStory[];
   onReorder: (stories: MemoryStory[]) => void;
   onDelete: (id: string) => void;
+  onEdit: (story: MemoryStory) => void;
 }
 
 function getStoryPreview(story: MemoryStory): string {
@@ -28,7 +29,7 @@ function getStoryPreview(story: MemoryStory): string {
   }
 }
 
-export default function StoryList({ stories, onReorder, onDelete }: StoryListProps) {
+export default function StoryList({ stories, onReorder, onDelete, onEdit }: StoryListProps) {
   const moveUp = (index: number) => {
     if (index === 0) return;
     const newStories = [...stories];
@@ -120,6 +121,15 @@ export default function StoryList({ stories, onReorder, onDelete }: StoryListPro
               <ChevronDown size={18} />
             </button>
           </div>
+
+          {/* Edit Button */}
+          <button
+            onClick={() => onEdit(story)}
+            className="flex-shrink-0 w-8 h-8 rounded bg-blue-100 text-blue-500 hover:bg-blue-200 flex items-center justify-center transition-colors"
+            title="แก้ไขเรื่องราว"
+          >
+            <Pencil size={16} />
+          </button>
 
           {/* Delete Button */}
           <button

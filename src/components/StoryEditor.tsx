@@ -7,8 +7,9 @@ import { uploadImage } from '@/lib/upload';
 import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon } from 'lucide-react';
 
 interface StoryEditorProps {
-  onAdd: (story: MemoryStory) => void;
+  onSave: (story: MemoryStory) => void;
   onCancel: () => void;
+  editingStory?: MemoryStory;
   initialType?: StoryType;
 }
 
@@ -36,16 +37,57 @@ export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   youtube: Music,
 };
 
-export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEditorProps) {
-  const [type, setType] = useState<StoryType>(initialType || 'text');
-  const [title, setTitle] = useState('');
-  const [text, setText] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+export default function StoryEditor({ onSave, onCancel, editingStory, initialType }: StoryEditorProps) {
+  const isEditing = !!editingStory;
+
+  // Initialize state from editing story if provided
+  const getInitialType = (): StoryType => {
+    if (editingStory) return editingStory.type;
+    if (initialType) return initialType;
+    return 'text';
+  };
+
+  const getInitialText = (): string => {
+    if (!editingStory) return '';
+    if (editingStory.type === 'text') return editingStory.content.text;
+    if (editingStory.type === 'text-image') return editingStory.content.text;
+    return '';
+  };
+
+  const getInitialImageUrl = (): string => {
+    if (!editingStory) return '';
+    if (editingStory.type === 'image') return editingStory.content.imageUrl;
+    if (editingStory.type === 'text-image') return editingStory.content.imageUrl;
+    return '';
+  };
+
+  const getInitialCaption = (): string => {
+    if (!editingStory) return '';
+    if (editingStory.type === 'image') return editingStory.content.caption || '';
+    return '';
+  };
+
+  const getInitialPassword = (): string => {
+    if (!editingStory) return '';
+    if (editingStory.type === 'password') return editingStory.content.password;
+    return '';
+  };
+
+  const getInitialYoutubeUrl = (): string => {
+    if (!editingStory) return '';
+    if (editingStory.type === 'youtube') return editingStory.content.youtubeUrl;
+    return '';
+  };
+
+  const [type, setType] = useState<StoryType>(getInitialType());
+  const [title, setTitle] = useState(editingStory?.title || '');
+  const [text, setText] = useState(getInitialText());
+  const [imageUrl, setImageUrl] = useState(getInitialImageUrl());
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState('');
-  const [caption, setCaption] = useState('');
-  const [password, setPassword] = useState('');
-  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState(getInitialImageUrl());
+  const [caption, setCaption] = useState(getInitialCaption());
+  const [password, setPassword] = useState(getInitialPassword());
+  const [youtubeUrl, setYoutubeUrl] = useState(getInitialYoutubeUrl());
   const [uploading, setUploading] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,10 +103,10 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
     e.preventDefault();
 
     const baseStory = {
-      id: generateId(),
-      priority: 0,
+      id: editingStory?.id || generateId(),
+      priority: editingStory?.priority || 0,
       title: title.trim() || undefined,
-      createdAt: new Date().toISOString(),
+      createdAt: editingStory?.createdAt || new Date().toISOString(),
     };
 
     let story: MemoryStory;
@@ -120,12 +162,14 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
         return;
     }
 
-    onAdd(story);
+    onSave(story);
   };
 
   return (
     <div className="memory-card p-6">
-      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">เพิ่มเรื่องราวความทรงจำใหม่</h3>
+      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">
+        {isEditing ? 'แก้ไขเรื่องราว' : 'เพิ่มเรื่องราวความทรงจำใหม่'}
+      </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Story Type Selector */}
@@ -133,31 +177,42 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
           <label className="block text-sm font-medium text-gray-700 mb-2">
             ประเภทความทรงจำ
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {(Object.keys(storyTypeLabels) as StoryType[]).map((t) => {
-              const IconComponent = storyTypeIcons[t];
-              return (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(t)}
-                  className={`p-3 rounded-lg border-2 text-left transition-all ${
-                    type === t
-                      ? 'border-[#FF6B9D] bg-pink-50'
-                      : 'border-gray-200 hover:border-pink-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <IconComponent size={18} className={type === t ? 'text-[#E63946]' : 'text-gray-500'} />
-                    <span className="font-medium text-sm">{storyTypeLabels[t]}</span>
-                  </div>
-                  <span className="block text-xs text-gray-500">
-                    {storyTypeDescriptions[t]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {isEditing ? (
+            // Show current type only when editing (can't change type)
+            <div className="p-3 rounded-lg border-2 border-[#FF6B9D] bg-pink-50 inline-flex items-center gap-2">
+              {(() => {
+                const IconComponent = storyTypeIcons[type];
+                return <IconComponent size={18} className="text-[#E63946]" />;
+              })()}
+              <span className="font-medium text-sm">{storyTypeLabels[type]}</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(Object.keys(storyTypeLabels) as StoryType[]).map((t) => {
+                const IconComponent = storyTypeIcons[t];
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setType(t)}
+                    className={`p-3 rounded-lg border-2 text-left transition-all ${
+                      type === t
+                        ? 'border-[#FF6B9D] bg-pink-50'
+                        : 'border-gray-200 hover:border-pink-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <IconComponent size={18} className={type === t ? 'text-[#E63946]' : 'text-gray-500'} />
+                      <span className="font-medium text-sm">{storyTypeLabels[t]}</span>
+                    </div>
+                    <span className="block text-xs text-gray-500">
+                      {storyTypeDescriptions[t]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Story Title */}
@@ -240,14 +295,14 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
         {(type === 'image' || type === 'text-image') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              อัพโหลดรูปภาพ
+              {imageUrl && !imageFile ? 'เปลี่ยนรูปภาพ (ไม่จำเป็น)' : 'อัพโหลดรูปภาพ'}
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
               className="input-valentine file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-[#E63946] hover:file:bg-pink-100"
-              required={!imageUrl}
+              required={!imageUrl && !imageFile}
             />
             {imagePreview && (
               <div className="mt-2 p-2 border rounded-lg bg-gray-50">
@@ -306,7 +361,7 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
             className="btn-primary flex-1"
             disabled={uploading}
           >
-            {uploading ? 'กำลังอัพโหลด...' : 'เพิ่ม'}
+            {uploading ? 'กำลังอัพโหลด...' : isEditing ? 'บันทึก' : 'เพิ่ม'}
           </button>
         </div>
       </form>

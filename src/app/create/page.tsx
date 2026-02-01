@@ -23,6 +23,7 @@ function CreatePageContent() {
   const [title, setTitle] = useState('');
   const [stories, setStories] = useState<MemoryStory[]>([]);
   const [showEditor, setShowEditor] = useState(false);
+  const [editingStory, setEditingStory] = useState<MemoryStory | null>(null);
   const [saving, setSaving] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -60,12 +61,26 @@ function CreatePageContent() {
     }
   }, [editId, authLoading, user]);
 
-  const handleAddStory = useCallback((story: MemoryStory) => {
-    setStories((prev) => {
-      const newStory = { ...story, priority: prev.length };
-      return [...prev, newStory];
-    });
+  const handleSaveStory = useCallback((story: MemoryStory) => {
+    if (editingStory) {
+      // Update existing story
+      setStories((prev) =>
+        prev.map((s) => (s.id === story.id ? story : s))
+      );
+    } else {
+      // Add new story
+      setStories((prev) => {
+        const newStory = { ...story, priority: prev.length };
+        return [...prev, newStory];
+      });
+    }
     setShowEditor(false);
+    setEditingStory(null);
+  }, [editingStory]);
+
+  const handleEditStory = useCallback((story: MemoryStory) => {
+    setEditingStory(story);
+    setShowEditor(true);
   }, []);
 
   const handleReorder = useCallback((newStories: MemoryStory[]) => {
@@ -178,12 +193,19 @@ function CreatePageContent() {
               {stories.length} เรื่องราว
             </span>
           </div>
-          <StoryList stories={stories} onReorder={handleReorder} onDelete={handleDelete} />
+          <StoryList stories={stories} onReorder={handleReorder} onDelete={handleDelete} onEdit={handleEditStory} />
         </div>
 
         {/* Add Story Button / Editor */}
         {showEditor ? (
-          <StoryEditor onAdd={handleAddStory} onCancel={() => setShowEditor(false)} />
+          <StoryEditor
+            onSave={handleSaveStory}
+            onCancel={() => {
+              setShowEditor(false);
+              setEditingStory(null);
+            }}
+            editingStory={editingStory || undefined}
+          />
         ) : (
           <button
             onClick={() => setShowEditor(true)}
