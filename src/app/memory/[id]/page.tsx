@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import Link from 'next/link';
-import { Memory, MemoryNode } from '@/types/memory';
+import { Memory, MemoryStory } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
-import NodeViewer from '@/components/NodeViewer';
+import StoryViewer from '@/components/StoryViewer';
 import PasswordGate from '@/components/PasswordGate';
 import PaymentButton from '@/components/PaymentButton';
 import { Eye } from 'lucide-react';
@@ -28,8 +28,8 @@ export default function MemoryViewerPage({ params }: PageProps) {
   // Memoize sorted memory
   const sortedMemory = useMemo(() => {
     if (!memory) return null;
-    const sortedNodes = [...memory.nodes].sort((a, b) => a.priority - b.priority);
-    return { ...memory, nodes: sortedNodes };
+    const sortedStories = [...memory.stories].sort((a, b) => a.priority - b.priority);
+    return { ...memory, stories: sortedStories };
   }, [memory]);
 
   // Load memory on mount
@@ -38,9 +38,9 @@ export default function MemoryViewerPage({ params }: PageProps) {
       const foundMemory = await getMemoryById(id);
       if (foundMemory) {
         setMemory(foundMemory);
-        // Check if first node is a password
-        const sortedNodes = [...foundMemory.nodes].sort((a, b) => a.priority - b.priority);
-        if (sortedNodes.length > 0 && sortedNodes[0].type === 'password') {
+        // Check if first story is a password
+        const sortedStories = [...foundMemory.stories].sort((a, b) => a.priority - b.priority);
+        if (sortedStories.length > 0 && sortedStories[0].type === 'password') {
           setIsPasswordLocked(true);
         }
       }
@@ -53,12 +53,12 @@ export default function MemoryViewerPage({ params }: PageProps) {
     if (!sortedMemory) return;
 
     const nextIndex = currentIndex + 1;
-    if (nextIndex >= sortedMemory.nodes.length) {
+    if (nextIndex >= sortedMemory.stories.length) {
       return;
     }
 
-    const nextNode = sortedMemory.nodes[nextIndex];
-    if (nextNode.type === 'password') {
+    const nextStory = sortedMemory.stories[nextIndex];
+    if (nextStory.type === 'password') {
       setIsPasswordLocked(true);
     }
     setCurrentIndex(nextIndex);
@@ -68,11 +68,11 @@ export default function MemoryViewerPage({ params }: PageProps) {
   useEffect(() => {
     if (!autoAdvance || !sortedMemory || isPasswordLocked) return;
 
-    const currentNode = sortedMemory.nodes[currentIndex];
-    if (!currentNode || currentNode.type === 'password' || currentNode.type === 'youtube') return;
+    const currentStory = sortedMemory.stories[currentIndex];
+    if (!currentStory || currentStory.type === 'password' || currentStory.type === 'youtube') return;
 
     const timer = setTimeout(() => {
-      if (currentIndex < sortedMemory.nodes.length - 1) {
+      if (currentIndex < sortedMemory.stories.length - 1) {
         handleNext();
       }
     }, 5000);
@@ -84,18 +84,18 @@ export default function MemoryViewerPage({ params }: PageProps) {
     if (!sortedMemory || currentIndex <= 0) return;
 
     const prevIndex = currentIndex - 1;
-    const prevNode = sortedMemory.nodes[prevIndex];
+    const prevStory = sortedMemory.stories[prevIndex];
 
     setCurrentIndex(prevIndex);
-    // Lock if previous node is a password node
-    if (prevNode?.type === 'password') {
+    // Lock if previous story is a password story
+    if (prevStory?.type === 'password') {
       setIsPasswordLocked(true);
     }
   }, [currentIndex, sortedMemory]);
 
   const handlePasswordUnlock = useCallback(() => {
     setIsPasswordLocked(false);
-    if (sortedMemory && currentIndex < sortedMemory.nodes.length - 1) {
+    if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
   }, [sortedMemory, currentIndex]);
@@ -143,10 +143,10 @@ export default function MemoryViewerPage({ params }: PageProps) {
     );
   }
 
-  const currentNode: MemoryNode | undefined = sortedMemory.nodes[currentIndex];
-  const isLastNode = currentIndex >= sortedMemory.nodes.length - 1;
-  const isFirstNode = currentIndex === 0;
-  const progress = ((currentIndex + 1) / sortedMemory.nodes.length) * 100;
+  const currentStory: MemoryStory | undefined = sortedMemory.stories[currentIndex];
+  const isLastStory = currentIndex >= sortedMemory.stories.length - 1;
+  const isFirstStory = currentIndex === 0;
+  const progress = ((currentIndex + 1) / sortedMemory.stories.length) * 100;
 
   return (
     <main className="min-h-screen relative z-10 flex flex-col">
@@ -187,7 +187,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 text-center">
-            {currentIndex + 1} จาก {sortedMemory.nodes.length}
+            {currentIndex + 1} จาก {sortedMemory.stories.length}
           </p>
         </div>
       </header>
@@ -215,14 +215,14 @@ export default function MemoryViewerPage({ params }: PageProps) {
       {/* Content */}
       <div className="grow flex items-center justify-center p-4">
         <div className="w-full max-w-2xl">
-          {isPasswordLocked && currentNode?.type === 'password' ? (
+          {isPasswordLocked && currentStory?.type === 'password' ? (
             <PasswordGate
-              correctPassword={currentNode.content.password}
-              title={currentNode.title}
+              correctPassword={currentStory.content.password}
+              title={currentStory.title}
               onUnlock={handlePasswordUnlock}
             />
-          ) : currentNode ? (
-            <NodeViewer node={currentNode} />
+          ) : currentStory ? (
+            <StoryViewer story={currentStory} />
           ) : null}
         </div>
       </div>
@@ -232,9 +232,9 @@ export default function MemoryViewerPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <button
             onClick={handlePrevious}
-            disabled={isFirstNode}
+            disabled={isFirstStory}
             className={`btn-secondary ${
-              isFirstNode ? 'opacity-50 cursor-not-allowed' : ''
+              isFirstStory ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             &larr; ก่อนหน้า
@@ -242,7 +242,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
           {/* Dots indicator */}
           <div className="flex items-center gap-1">
-            {sortedMemory.nodes.map((_, index) => (
+            {sortedMemory.stories.map((_, index) => (
               <div
                 key={index}
                 className={`w-2 h-2 rounded-full transition-colors ${
@@ -256,7 +256,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
             ))}
           </div>
 
-          {isLastNode && !isPasswordLocked ? (
+          {isLastStory && !isPasswordLocked ? (
             <Link
               href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
               className="btn-primary flex items-center gap-2"

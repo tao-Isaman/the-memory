@@ -1,24 +1,24 @@
 'use client';
 
-import { MemoryNode } from '@/types/memory';
+import { MemoryStory } from '@/types/memory';
 import YouTubeEmbed from './YouTubeEmbed';
 import HeartIcon from './HeartIcon';
 
-interface NodeViewerProps {
-  node: MemoryNode;
+interface StoryViewerProps {
+  story: MemoryStory;
 }
 
-export default function NodeViewer({ node }: NodeViewerProps) {
-  switch (node.type) {
+export default function StoryViewer({ story }: StoryViewerProps) {
+  switch (story.type) {
     case 'text':
       return (
         <div className="memory-card p-8 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
           <p className="text-xl text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {node.content.text}
+            {story.content.text}
           </p>
         </div>
       );
@@ -28,19 +28,19 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
           <div className="relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={node.content.imageUrl}
-              alt={node.content.caption || 'รูปภาพความทรงจำ'}
+              src={story.content.imageUrl}
+              alt={story.content.caption || 'รูปภาพความทรงจำ'}
               className="w-full rounded-lg shadow-md"
               style={{ maxHeight: '500px', objectFit: 'contain' }}
             />
-            {node.content.caption && (
+            {story.content.caption && (
               <p className="mt-4 text-center text-gray-600 italic">
-                {node.content.caption}
+                {story.content.caption}
               </p>
             )}
           </div>
@@ -52,17 +52,17 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={node.content.imageUrl}
+            src={story.content.imageUrl}
             alt="ความทรงจำ"
             className="w-full rounded-lg shadow-md mb-4"
             style={{ maxHeight: '400px', objectFit: 'contain' }}
           />
           <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {node.content.text}
+            {story.content.text}
           </p>
         </div>
       );
@@ -72,9 +72,9 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {story.title} </span>
           </div>
-          <YouTubeEmbed url={node.content.youtubeUrl} />
+          <YouTubeEmbed url={story.content.youtubeUrl} />
         </div>
       );
 

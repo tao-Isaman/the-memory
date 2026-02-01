@@ -1,26 +1,26 @@
-import { Memory, MemoryNode, MemoryStatus } from '@/types/memory';
+import { Memory, MemoryStory, MemoryStatus } from '@/types/memory';
 import { getSupabaseBrowserClient } from './supabase';
 import { Database, Json } from '@/types/database';
 
 type DbMemory = Database['public']['Tables']['memories']['Row'];
-type DbNode = Database['public']['Tables']['nodes']['Row'];
+type DbStory = Database['public']['Tables']['nodes']['Row']; // DB table is still 'nodes'
 
-// Convert database memory + nodes to app Memory format
-function toMemory(dbMemory: DbMemory, dbNodes: DbNode[]): Memory {
-  const nodes = dbNodes.map((node) => ({
-    id: node.id,
-    type: node.type as MemoryNode['type'],
-    priority: node.priority,
-    title: node.title || undefined,
-    content: node.content as MemoryNode['content'],
-    createdAt: node.created_at,
-  })) as MemoryNode[];
+// Convert database memory + stories to app Memory format
+function toMemory(dbMemory: DbMemory, dbStories: DbStory[]): Memory {
+  const stories = dbStories.map((story) => ({
+    id: story.id,
+    type: story.type as MemoryStory['type'],
+    priority: story.priority,
+    title: story.title || undefined,
+    content: story.content as MemoryStory['content'],
+    createdAt: story.created_at,
+  })) as MemoryStory[];
 
   return {
     id: dbMemory.id,
     userId: dbMemory.user_id,
     title: dbMemory.title,
-    nodes: nodes.sort((a, b) => a.priority - b.priority),
+    stories: stories.sort((a, b) => a.priority - b.priority),
     createdAt: dbMemory.created_at,
     updatedAt: dbMemory.updated_at,
     status: (dbMemory.status || 'pending') as MemoryStatus,
@@ -47,19 +47,19 @@ export async function getMemories(userId: string): Promise<Memory[]> {
   if (memories.length === 0) return [];
 
   const memoryIds = memories.map((m) => m.id);
-  const { data: nodes, error: nodesError } = await supabase
-    .from('nodes')
+  const { data: stories, error: storiesError } = await supabase
+    .from('nodes') // DB table is still 'nodes'
     .select('*')
     .in('memory_id', memoryIds);
 
-  if (nodesError) {
-    console.error('Error fetching nodes:', nodesError);
+  if (storiesError) {
+    console.error('Error fetching stories:', storiesError);
     return [];
   }
 
   return memories.map((memory) => {
-    const memoryNodes = (nodes || []).filter((n) => n.memory_id === memory.id);
-    return toMemory(memory, memoryNodes);
+    const memoryStories = (stories || []).filter((s) => s.memory_id === memory.id);
+    return toMemory(memory, memoryStories);
   });
 }
 
@@ -79,18 +79,18 @@ export async function getMemoryById(id: string): Promise<Memory | null> {
     return null;
   }
 
-  const { data: nodes, error: nodesError } = await supabase
-    .from('nodes')
+  const { data: stories, error: storiesError } = await supabase
+    .from('nodes') // DB table is still 'nodes'
     .select('*')
     .eq('memory_id', id)
     .order('priority', { ascending: true });
 
-  if (nodesError) {
-    console.error('Error fetching nodes:', nodesError);
+  if (storiesError) {
+    console.error('Error fetching stories:', storiesError);
     return null;
   }
 
-  return toMemory(memory, nodes || []);
+  return toMemory(memory, stories || []);
 }
 
 // Save (create or update) a memory
@@ -121,7 +121,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       return null;
     }
 
-    // Delete existing nodes and re-insert
+    // Delete existing stories and re-insert
     await supabase.from('nodes').delete().eq('memory_id', memory.id);
   } else {
     // Insert new memory
@@ -140,22 +140,22 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
     }
   }
 
-  // Insert nodes
-  if (memory.nodes.length > 0) {
-    const nodesToInsert = memory.nodes.map((node, index) => ({
-      id: node.id,
+  // Insert stories
+  if (memory.stories.length > 0) {
+    const storiesToInsert = memory.stories.map((story, index) => ({
+      id: story.id,
       memory_id: memory.id,
-      type: node.type,
+      type: story.type,
       priority: index,
-      title: node.title || null,
-      content: node.content as Json,
-      created_at: node.createdAt,
+      title: story.title || null,
+      content: story.content as Json,
+      created_at: story.createdAt,
     }));
 
-    const { error: nodesError } = await supabase.from('nodes').insert(nodesToInsert);
+    const { error: storiesError } = await supabase.from('nodes').insert(storiesToInsert);
 
-    if (nodesError) {
-      console.error('Error inserting nodes:', nodesError);
+    if (storiesError) {
+      console.error('Error inserting stories:', storiesError);
       return null;
     }
   }

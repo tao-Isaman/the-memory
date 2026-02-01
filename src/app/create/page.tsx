@@ -3,13 +3,13 @@
 import { useState, useCallback, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Memory, MemoryNode, MemoryStatus } from '@/types/memory';
+import { Memory, MemoryStory, MemoryStatus } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
-import NodeEditor from '@/components/NodeEditor';
-import NodeList from '@/components/NodeList';
+import StoryEditor from '@/components/StoryEditor';
+import StoryList from '@/components/StoryList';
 import ShareModal from '@/components/ShareModal';
 import PaymentButton from '@/components/PaymentButton';
 import { Plus, ArrowLeft } from 'lucide-react';
@@ -21,7 +21,7 @@ function CreatePageContent() {
   const { user, loading: authLoading } = useAuth();
 
   const [title, setTitle] = useState('');
-  const [nodes, setNodes] = useState<MemoryNode[]>([]);
+  const [stories, setStories] = useState<MemoryStory[]>([]);
   const [showEditor, setShowEditor] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -46,7 +46,7 @@ function CreatePageContent() {
         const existingMemory = await getMemoryById(editId);
         if (existingMemory) {
           setTitle(existingMemory.title);
-          setNodes(existingMemory.nodes);
+          setStories(existingMemory.stories);
           setIsEditMode(true);
           setOriginalCreatedAt(existingMemory.createdAt);
           setSavedMemoryStatus(existingMemory.status);
@@ -60,22 +60,22 @@ function CreatePageContent() {
     }
   }, [editId, authLoading, user]);
 
-  const handleAddNode = useCallback((node: MemoryNode) => {
-    setNodes((prev) => {
-      const newNode = { ...node, priority: prev.length };
-      return [...prev, newNode];
+  const handleAddStory = useCallback((story: MemoryStory) => {
+    setStories((prev) => {
+      const newStory = { ...story, priority: prev.length };
+      return [...prev, newStory];
     });
     setShowEditor(false);
   }, []);
 
-  const handleReorder = useCallback((newNodes: MemoryNode[]) => {
-    setNodes(newNodes);
+  const handleReorder = useCallback((newStories: MemoryStory[]) => {
+    setStories(newStories);
   }, []);
 
   const handleDelete = useCallback((id: string) => {
-    setNodes((prev) => {
-      const filtered = prev.filter((n) => n.id !== id);
-      return filtered.map((node, index) => ({ ...node, priority: index }));
+    setStories((prev) => {
+      const filtered = prev.filter((s) => s.id !== id);
+      return filtered.map((story, index) => ({ ...story, priority: index }));
     });
   }, []);
 
@@ -87,7 +87,7 @@ function CreatePageContent() {
       return;
     }
 
-    if (nodes.length === 0) {
+    if (stories.length === 0) {
       alert('กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว');
       return;
     }
@@ -100,7 +100,7 @@ function CreatePageContent() {
     const memory: Memory = {
       id: memoryId,
       title: title.trim(),
-      nodes,
+      stories,
       createdAt: originalCreatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: currentStatus,
@@ -170,20 +170,20 @@ function CreatePageContent() {
           />
         </div>
 
-        {/* Node List */}
+        {/* Story List */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-kanit text-lg font-semibold text-[#E63946]">เรื่องราวความทรงจำ</h2>
             <span className="text-sm text-gray-500">
-              {nodes.length} เรื่องราว
+              {stories.length} เรื่องราว
             </span>
           </div>
-          <NodeList nodes={nodes} onReorder={handleReorder} onDelete={handleDelete} />
+          <StoryList stories={stories} onReorder={handleReorder} onDelete={handleDelete} />
         </div>
 
-        {/* Add Node Button / Editor */}
+        {/* Add Story Button / Editor */}
         {showEditor ? (
-          <NodeEditor onAdd={handleAddNode} onCancel={() => setShowEditor(false)} />
+          <StoryEditor onAdd={handleAddStory} onCancel={() => setShowEditor(false)} />
         ) : (
           <button
             onClick={() => setShowEditor(true)}

@@ -143,7 +143,7 @@ export default function DashboardPage() {
                   <PaymentStatus status={memory.status} size="sm" />
                 </div>
                 <p className="text-sm text-gray-500 mb-4">
-                  {memory.nodes.length} เรื่องราว &bull; สร้างเมื่อ {formatDate(memory.createdAt)}
+                  {memory.stories.length} เรื่องราว &bull; สร้างเมื่อ {formatDate(memory.createdAt)}
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {memory.status === 'active' ? (

@@ -1,41 +1,26 @@
 'use client';
 
-import { MemoryNode, NodeType } from '@/types/memory';
+import { MemoryStory } from '@/types/memory';
+import { storyTypeLabels, storyTypeIcons } from './StoryEditor';
 import HeartIcon from './HeartIcon';
-import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon, ChevronUp, ChevronDown, X } from 'lucide-react';
+import { ChevronUp, ChevronDown, X } from 'lucide-react';
 
-interface NodeListProps {
-  nodes: MemoryNode[];
-  onReorder: (nodes: MemoryNode[]) => void;
+interface StoryListProps {
+  stories: MemoryStory[];
+  onReorder: (stories: MemoryStory[]) => void;
   onDelete: (id: string) => void;
 }
 
-const nodeTypeIcons: Record<NodeType, LucideIcon> = {
-  password: Lock,
-  text: MessageCircleHeart,
-  image: Camera,
-  'text-image': ImagePlus,
-  youtube: Music,
-};
-
-const nodeTypeLabels: Record<NodeType, string> = {
-  password: 'ใส่รหัสผ่าน',
-  text: 'ข้อความ',
-  image: 'รูปภาพ',
-  'text-image': 'ข้อความ + รูปภาพ',
-  youtube: 'วิดีโอ YouTube',
-};
-
-function getNodePreview(node: MemoryNode): string {
-  switch (node.type) {
+function getStoryPreview(story: MemoryStory): string {
+  switch (story.type) {
     case 'password':
-      return '••••••••';
+      return '••••';
     case 'text':
-      return node.content.text.substring(0, 50) + (node.content.text.length > 50 ? '...' : '');
+      return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
     case 'image':
-      return node.content.caption || 'รูปภาพ';
+      return story.content.caption || 'รูปภาพ';
     case 'text-image':
-      return node.content.text.substring(0, 50) + (node.content.text.length > 50 ? '...' : '');
+      return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
     case 'youtube':
       return 'วิดีโอ YouTube';
     default:
@@ -43,30 +28,30 @@ function getNodePreview(node: MemoryNode): string {
   }
 }
 
-export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) {
+export default function StoryList({ stories, onReorder, onDelete }: StoryListProps) {
   const moveUp = (index: number) => {
     if (index === 0) return;
-    const newNodes = [...nodes];
-    [newNodes[index - 1], newNodes[index]] = [newNodes[index], newNodes[index - 1]];
+    const newStories = [...stories];
+    [newStories[index - 1], newStories[index]] = [newStories[index], newStories[index - 1]];
     // Update priorities
-    newNodes.forEach((node, i) => {
-      node.priority = i;
+    newStories.forEach((story, i) => {
+      story.priority = i;
     });
-    onReorder(newNodes);
+    onReorder(newStories);
   };
 
   const moveDown = (index: number) => {
-    if (index === nodes.length - 1) return;
-    const newNodes = [...nodes];
-    [newNodes[index], newNodes[index + 1]] = [newNodes[index + 1], newNodes[index]];
+    if (index === stories.length - 1) return;
+    const newStories = [...stories];
+    [newStories[index], newStories[index + 1]] = [newStories[index + 1], newStories[index]];
     // Update priorities
-    newNodes.forEach((node, i) => {
-      node.priority = i;
+    newStories.forEach((story, i) => {
+      story.priority = i;
     });
-    onReorder(newNodes);
+    onReorder(newStories);
   };
 
-  if (nodes.length === 0) {
+  if (stories.length === 0) {
     return (
       <div className="memory-card p-8 text-center">
         <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
@@ -80,9 +65,9 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
 
   return (
     <div className="space-y-3">
-      {nodes.map((node, index) => (
+      {stories.map((story, index) => (
         <div
-          key={node.id}
+          key={story.id}
           className="memory-card p-4 flex items-center gap-4"
         >
           {/* Priority Number */}
@@ -90,21 +75,21 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
             {index + 1}
           </div>
 
-          {/* Node Icon */}
+          {/* Story Icon */}
           <div className="flex-shrink-0">
             {(() => {
-              const IconComponent = nodeTypeIcons[node.type];
+              const IconComponent = storyTypeIcons[story.type];
               return <IconComponent size={24} className="text-[#E63946]" />;
             })()}
           </div>
 
-          {/* Node Info */}
+          {/* Story Info */}
           <div className="flex-grow min-w-0">
             <p className="font-kanit font-medium text-[#E63946] text-sm">
-              {node.title || nodeTypeLabels[node.type]}
+              {story.title || storyTypeLabels[story.type]}
             </p>
             <p className="text-gray-600 text-sm truncate">
-              {node.title ? `${nodeTypeLabels[node.type]} • ${getNodePreview(node)}` : getNodePreview(node)}
+              {story.title ? `${storyTypeLabels[story.type]} • ${getStoryPreview(story)}` : getStoryPreview(story)}
             </p>
           </div>
 
@@ -124,9 +109,9 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
             </button>
             <button
               onClick={() => moveDown(index)}
-              disabled={index === nodes.length - 1}
+              disabled={index === stories.length - 1}
               className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                index === nodes.length - 1
+                index === stories.length - 1
                   ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   : 'bg-pink-100 text-[#E63946] hover:bg-pink-200'
               }`}
@@ -138,7 +123,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
 
           {/* Delete Button */}
           <button
-            onClick={() => onDelete(node.id)}
+            onClick={() => onDelete(story.id)}
             className="flex-shrink-0 w-8 h-8 rounded bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
             title="ลบเรื่องราว"
           >

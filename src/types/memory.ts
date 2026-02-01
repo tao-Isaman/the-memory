@@ -1,39 +1,39 @@
-export type NodeType = 'password' | 'image' | 'text' | 'text-image' | 'youtube';
+export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube';
 
-export interface BaseNode {
+export interface BaseStory {
   id: string;
-  type: NodeType;
+  type: StoryType;
   priority: number;
   title?: string;
   createdAt: string;
 }
 
-export interface PasswordNode extends BaseNode {
+export interface PasswordStory extends BaseStory {
   type: 'password';
   content: { password: string };
 }
 
-export interface ImageNode extends BaseNode {
+export interface ImageStory extends BaseStory {
   type: 'image';
   content: { imageUrl: string; caption?: string };
 }
 
-export interface TextNode extends BaseNode {
+export interface TextStory extends BaseStory {
   type: 'text';
   content: { text: string };
 }
 
-export interface TextImageNode extends BaseNode {
+export interface TextImageStory extends BaseStory {
   type: 'text-image';
   content: { text: string; imageUrl: string };
 }
 
-export interface YouTubeNode extends BaseNode {
+export interface YouTubeStory extends BaseStory {
   type: 'youtube';
   content: { youtubeUrl: string };
 }
 
-export type MemoryNode = PasswordNode | ImageNode | TextNode | TextImageNode | YouTubeNode;
+export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory;
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 
@@ -41,7 +41,7 @@ export interface Memory {
   id: string;
   userId?: string;
   title: string;
-  nodes: MemoryNode[];
+  stories: MemoryStory[];
   createdAt: string;
   updatedAt: string;
   status: MemoryStatus;

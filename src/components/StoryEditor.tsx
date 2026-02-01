@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { NodeType, MemoryNode } from '@/types/memory';
+import { StoryType, MemoryStory } from '@/types/memory';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
 import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon } from 'lucide-react';
 
-interface NodeEditorProps {
-  onAdd: (node: MemoryNode) => void;
+interface StoryEditorProps {
+  onAdd: (story: MemoryStory) => void;
   onCancel: () => void;
-  initialType?: NodeType;
+  initialType?: StoryType;
 }
 
-const nodeTypeLabels: Record<NodeType, string> = {
+export const storyTypeLabels: Record<StoryType, string> = {
   password: 'รหัส PIN',
   text: 'ข้อความ',
   image: 'รูปภาพ',
@@ -20,7 +20,7 @@ const nodeTypeLabels: Record<NodeType, string> = {
   youtube: 'วิดีโอ YouTube',
 };
 
-const nodeTypeDescriptions: Record<NodeType, string> = {
+const storyTypeDescriptions: Record<StoryType, string> = {
   password: 'เพิ่มรหัส PIN 4 หลักเพื่อปกป้องเนื้อหา',
   text: 'เพิ่มข้อความจากใจ',
   image: 'เพิ่มรูปภาพพิเศษ',
@@ -28,7 +28,7 @@ const nodeTypeDescriptions: Record<NodeType, string> = {
   youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
 };
 
-const nodeTypeIcons: Record<NodeType, LucideIcon> = {
+export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   password: Lock,
   text: MessageCircleHeart,
   image: Camera,
@@ -36,8 +36,8 @@ const nodeTypeIcons: Record<NodeType, LucideIcon> = {
   youtube: Music,
 };
 
-export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorProps) {
-  const [type, setType] = useState<NodeType>(initialType || 'text');
+export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEditorProps) {
+  const [type, setType] = useState<StoryType>(initialType || 'text');
   const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -60,14 +60,14 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const baseNode = {
+    const baseStory = {
       id: generateId(),
       priority: 0,
       title: title.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
-    let node: MemoryNode;
+    let story: MemoryStory;
     let uploadedImageUrl = imageUrl;
 
     // Upload image if there's a file
@@ -90,37 +90,37 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
           alert('กรุณาใส่รหัส PIN 4 หลัก');
           return;
         }
-        node = { ...baseNode, type: 'password', content: { password: password } };
+        story = { ...baseStory, type: 'password', content: { password: password } };
         break;
       case 'text':
         if (!text.trim()) return;
-        node = { ...baseNode, type: 'text', content: { text: text.trim() } };
+        story = { ...baseStory, type: 'text', content: { text: text.trim() } };
         break;
       case 'image':
         if (!uploadedImageUrl.trim()) return;
-        node = {
-          ...baseNode,
+        story = {
+          ...baseStory,
           type: 'image',
           content: { imageUrl: uploadedImageUrl.trim(), caption: caption.trim() || undefined },
         };
         break;
       case 'text-image':
         if (!text.trim() || !uploadedImageUrl.trim()) return;
-        node = {
-          ...baseNode,
+        story = {
+          ...baseStory,
           type: 'text-image',
           content: { text: text.trim(), imageUrl: uploadedImageUrl.trim() },
         };
         break;
       case 'youtube':
         if (!youtubeUrl.trim()) return;
-        node = { ...baseNode, type: 'youtube', content: { youtubeUrl: youtubeUrl.trim() } };
+        story = { ...baseStory, type: 'youtube', content: { youtubeUrl: youtubeUrl.trim() } };
         break;
       default:
         return;
     }
 
-    onAdd(node);
+    onAdd(story);
   };
 
   return (
@@ -128,14 +128,14 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
       <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">เพิ่มเรื่องราวความทรงจำใหม่</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Node Type Selector */}
+        {/* Story Type Selector */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             ประเภทความทรงจำ
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {(Object.keys(nodeTypeLabels) as NodeType[]).map((t) => {
-              const IconComponent = nodeTypeIcons[t];
+            {(Object.keys(storyTypeLabels) as StoryType[]).map((t) => {
+              const IconComponent = storyTypeIcons[t];
               return (
                 <button
                   key={t}
@@ -149,10 +149,10 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <IconComponent size={18} className={type === t ? 'text-[#E63946]' : 'text-gray-500'} />
-                    <span className="font-medium text-sm">{nodeTypeLabels[t]}</span>
+                    <span className="font-medium text-sm">{storyTypeLabels[t]}</span>
                   </div>
                   <span className="block text-xs text-gray-500">
-                    {nodeTypeDescriptions[t]}
+                    {storyTypeDescriptions[t]}
                   </span>
                 </button>
               );
@@ -160,7 +160,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
           </div>
         </div>
 
-        {/* Node Title */}
+        {/* Story Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             ชื่อเรื่องราว (ไม่จำเป็น)
