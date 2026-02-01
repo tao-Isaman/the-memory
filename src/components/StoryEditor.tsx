@@ -21,7 +21,7 @@ export const storyTypeLabels: Record<StoryType, string> = {
 };
 
 const storyTypeDescriptions: Record<StoryType, string> = {
-  password: 'เพิ่มรหัส PIN 4 หลักเพื่อปกป้องเนื้อหา',
+  password: 'เพิ่มรหัส PIN 6 หลักเพื่อปกป้องเนื้อหา',
   text: 'เพิ่มข้อความจากใจ',
   image: 'เพิ่มรูปภาพพิเศษ',
   'text-image': 'รวมข้อความกับรูปภาพ',
@@ -86,8 +86,8 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
 
     switch (type) {
       case 'password':
-        if (password.length !== 4 || !/^\d{4}$/.test(password)) {
-          alert('กรุณาใส่รหัส PIN 4 หลัก');
+        if (password.length !== 6 || !/^\d{6}$/.test(password)) {
+          alert('กรุณาใส่รหัส PIN 6 หลัก');
           return;
         }
         story = { ...baseStory, type: 'password', content: { password: password } };
@@ -181,10 +181,10 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
         {type === 'password' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              รหัส PIN (4 หลัก)
+              รหัส PIN (6 หลัก)
             </label>
-            <div className="flex justify-center gap-3">
-              {[0, 1, 2, 3].map((index) => (
+            <div className="flex justify-center gap-2">
+              {[0, 1, 2, 3, 4, 5].map((index) => (
                 <input
                   key={index}
                   type="text"
@@ -198,7 +198,7 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
                       newPin[index] = val;
                       setPassword(newPin.join(''));
                       // Auto-focus next input
-                      if (val && index < 3) {
+                      if (val && index < 5) {
                         const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
                         nextInput?.focus();
                       }
@@ -211,13 +211,13 @@ export default function StoryEditor({ onAdd, onCancel, initialType }: StoryEdito
                       prevInput?.focus();
                     }
                   }}
-                  className="w-14 h-14 text-center text-2xl font-bold input-valentine"
+                  className="w-11 h-12 text-center text-xl font-bold input-valentine"
                   required={index === 0}
                 />
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-3 text-center">
-              ใส่ตัวเลข 4 หลักเพื่อปกป้องเนื้อหาถัดไป
+              ใส่ตัวเลข 6 หลักเพื่อปกป้องเนื้อหาถัดไป
             </p>
           </div>
         )}

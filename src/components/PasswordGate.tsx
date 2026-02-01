@@ -10,7 +10,7 @@ interface PasswordGateProps {
 }
 
 export default function PasswordGate({ correctPassword, title, onUnlock }: PasswordGateProps) {
-  const [pin, setPin] = useState(['', '', '', '']);
+  const [pin, setPin] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -31,14 +31,14 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
     setError(false);
 
     // Auto-focus next input
-    if (numValue && index < 3) {
+    if (numValue && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit when all digits entered
-    if (numValue && index === 3) {
+    if (numValue && index === 5) {
       const enteredPin = newPin.join('');
-      if (enteredPin.length === 4) {
+      if (enteredPin.length === 6) {
         setTimeout(() => checkPin(enteredPin), 100);
       }
     }
@@ -61,7 +61,7 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
       setError(false);
     } else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && index < 3) {
+    } else if (e.key === 'ArrowRight' && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -74,7 +74,7 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
       setShake(true);
       setTimeout(() => {
         setShake(false);
-        setPin(['', '', '', '']);
+        setPin(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }, 500);
     }
@@ -83,7 +83,7 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const enteredPin = pin.join('');
-    if (enteredPin.length === 4) {
+    if (enteredPin.length === 6) {
       checkPin(enteredPin);
     }
   };
@@ -98,7 +98,7 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
           ความทรงจำถูกล็อค
         </h2>
         <p className="text-gray-600 mb-2">
-          ใส่รหัส PIN 4 หลักเพื่อปลดล็อค
+          ใส่รหัส PIN 6 หลักเพื่อปลดล็อค
         </p>
         {title && (
           <p className="text-gray-400 mb-6 italic text-sm">
@@ -107,8 +107,8 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-center gap-3">
-            {[0, 1, 2, 3].map((index) => (
+          <div className="flex justify-center gap-2">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
               <input
                 key={index}
                 ref={(el) => { inputRefs.current[index] = el; }}
@@ -118,7 +118,7 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
                 value={pin[index]}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`w-14 h-16 text-center text-3xl font-bold rounded-xl border-2 transition-all outline-none
+                className={`w-11 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none
                   ${error
                     ? 'border-red-500 bg-red-50'
                     : pin[index]

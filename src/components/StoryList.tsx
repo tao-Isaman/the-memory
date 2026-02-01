@@ -14,7 +14,7 @@ interface StoryListProps {
 function getStoryPreview(story: MemoryStory): string {
   switch (story.type) {
     case 'password':
-      return '••••';
+      return '••••••';
     case 'text':
       return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
     case 'image':
