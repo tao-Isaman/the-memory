@@ -66,6 +66,9 @@ export const metadata: Metadata = {
     canonical: "https://thememory.app",
   },
   category: "gift",
+  verification: {
+    google: "rmJ1lfrMVRg7O8BWKQPV7wc1YAmrQ8gzsbFXUfCS-68",
+  },
 };
 
 export default function RootLayout({
