@@ -3,7 +3,7 @@
 import { useState, useCallback, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Memory, MemoryNode } from '@/types/memory';
+import { Memory, MemoryNode, MemoryStatus } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
@@ -11,6 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import NodeEditor from '@/components/NodeEditor';
 import NodeList from '@/components/NodeList';
 import ShareModal from '@/components/ShareModal';
+import PaymentButton from '@/components/PaymentButton';
 import { Plus, ArrowLeft } from 'lucide-react';
 
 function CreatePageContent() {
@@ -27,7 +28,9 @@ function CreatePageContent() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [originalCreatedAt, setOriginalCreatedAt] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
   const [savedMemoryId, setSavedMemoryId] = useState<string | null>(null);
+  const [savedMemoryStatus, setSavedMemoryStatus] = useState<MemoryStatus>('pending');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -46,6 +49,7 @@ function CreatePageContent() {
           setNodes(existingMemory.nodes);
           setIsEditMode(true);
           setOriginalCreatedAt(existingMemory.createdAt);
+          setSavedMemoryStatus(existingMemory.status);
         }
       }
       setInitialLoading(false);
@@ -91,18 +95,27 @@ function CreatePageContent() {
     setSaving(true);
 
     const memoryId = editId || generateId();
+    // Preserve existing status for edits, set pending for new memories
+    const currentStatus = isEditMode ? savedMemoryStatus : 'pending';
     const memory: Memory = {
       id: memoryId,
       title: title.trim(),
       nodes,
       createdAt: originalCreatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      status: currentStatus,
     };
 
     await saveMemory(memory, user.id);
     setSaving(false);
     setSavedMemoryId(memoryId);
-    setShowShareModal(true);
+
+    // Show payment prompt for new/pending memories, share modal for active ones
+    if (currentStatus === 'active') {
+      setShowShareModal(true);
+    } else {
+      setShowPaymentPrompt(true);
+    }
   };
 
   const handleCloseShareModal = () => {
@@ -211,6 +224,41 @@ function CreatePageContent() {
           memoryId={savedMemoryId}
           memoryTitle={title}
         />
+      )}
+
+      {/* Payment Prompt Modal */}
+      {showPaymentPrompt && savedMemoryId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="memory-card p-8 max-w-md w-full text-center">
+            <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" />
+            <h2 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+              บันทึกสำเร็จ!
+            </h2>
+            <p className="text-gray-600 mb-6">
+              ความทรงจำของคุณถูกบันทึกแล้ว ชำระเงินเพื่อเปิดใช้งานและแชร์ให้คนพิเศษของคุณได้เลย
+            </p>
+            <div className="flex flex-col gap-3">
+              <PaymentButton
+                memoryId={savedMemoryId}
+                memoryTitle={title}
+                userId={user!.id}
+                className="w-full"
+              />
+              <button
+                onClick={() => {
+                  setShowPaymentPrompt(false);
+                  router.push('/dashboard');
+                }}
+                className="btn-secondary w-full"
+              >
+                ชำระเงินภายหลัง
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-gray-500">
+              คุณสามารถชำระเงินได้จากหน้า Dashboard
+            </p>
+          </div>
+        </div>
       )}
     </main>
   );

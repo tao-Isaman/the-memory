@@ -35,10 +35,14 @@ export interface YouTubeNode extends BaseNode {
 
 export type MemoryNode = PasswordNode | ImageNode | TextNode | TextImageNode | YouTubeNode;
 
+export type MemoryStatus = 'pending' | 'active' | 'failed';
+
 export interface Memory {
   id: string;
   title: string;
   nodes: MemoryNode[];
   createdAt: string;
   updatedAt: string;
+  status: MemoryStatus;
+  paidAt?: string;
 }

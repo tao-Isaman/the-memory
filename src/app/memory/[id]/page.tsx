@@ -113,6 +113,22 @@ export default function MemoryViewerPage({ params }: PageProps) {
     );
   }
 
+  // Check if memory is pending payment (only shown to non-owners via RLS)
+  if (sortedMemory.status !== 'active') {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center memory-card p-12">
+          <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+          <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">ความทรงจำนี้ยังไม่พร้อมใช้งาน</h2>
+          <p className="text-gray-500 mb-6">ผู้สร้างความทรงจำยังไม่ได้เปิดใช้งาน กรุณาติดต่อผู้ส่งลิงก์</p>
+          <Link href="/" className="btn-primary inline-block">
+            กลับหน้าหลัก
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   const currentNode: MemoryNode | undefined = sortedMemory.nodes[currentIndex];
   const isLastNode = currentIndex >= sortedMemory.nodes.length - 1;
   const isFirstNode = currentIndex === 0;

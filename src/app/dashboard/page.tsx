@@ -9,7 +9,9 @@ import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
-import { Plus, Share2, Eye, Pencil, Trash2 } from 'lucide-react';
+import PaymentStatus from '@/components/PaymentStatus';
+import PaymentButton from '@/components/PaymentButton';
+import { Plus, Share2, Pencil, Trash2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -138,19 +140,38 @@ export default function DashboardPage() {
                   <h2 className="font-kanit text-xl font-bold text-[#E63946] truncate grow">
                     {memory.title}
                   </h2>
-                  <HeartIcon size={20} className="shrink-0 ml-2" />
+                  <PaymentStatus status={memory.status} size="sm" />
                 </div>
                 <p className="text-sm text-gray-500 mb-4">
                   {memory.nodes.length} โหนด &bull; สร้างเมื่อ {formatDate(memory.createdAt)}
                 </p>
-                <div className="flex gap-2">
-                  <Link
-                    href={`/memory/${memory.id}`}
-                    className="btn-primary text-sm py-2 px-3 flex-1 text-center flex items-center justify-center gap-1"
-                    title="ดูความทรงจำ"
-                  >
-                    <span>ดูความทรงจำ</span>
-                  </Link>
+                <div className="flex gap-2 flex-wrap">
+                  {memory.status === 'active' ? (
+                    <>
+                      <Link
+                        href={`/memory/${memory.id}`}
+                        className="btn-primary text-sm py-2 px-3 flex-1 text-center flex items-center justify-center gap-1"
+                        title="ดูความทรงจำ"
+                      >
+                        <span>ดูความทรงจำ</span>
+                      </Link>
+                      <button
+                        onClick={() => handleShare(memory)}
+                        className="px-3 py-2 text-sm rounded-full bg-pink-100 text-[#E63946] hover:bg-pink-200 transition-colors flex items-center justify-center gap-1"
+                        title="แชร์"
+                      >
+                        <Share2 size={16} />
+                        <span className="hidden sm:inline">แชร์</span>
+                      </button>
+                    </>
+                  ) : (
+                    <PaymentButton
+                      memoryId={memory.id}
+                      memoryTitle={memory.title}
+                      userId={user.id}
+                      className="flex-1 text-sm py-2"
+                    />
+                  )}
                   <Link
                     href={`/create?edit=${memory.id}`}
                     className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
@@ -159,14 +180,6 @@ export default function DashboardPage() {
                     <Pencil size={16} />
                     <span className="hidden sm:inline">แก้ไข</span>
                   </Link>
-                  <button
-                    onClick={() => handleShare(memory)}
-                    className="px-3 py-2 text-sm rounded-full bg-pink-100 text-[#E63946] hover:bg-pink-200 transition-colors flex items-center justify-center gap-1"
-                    title="แชร์"
-                  >
-                    <Share2 size={16} />
-                    <span className="hidden sm:inline">แชร์</span>
-                  </button>
                   <button
                     onClick={() => handleDelete(memory.id)}
                     className="px-3 py-2 text-sm rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center gap-1"

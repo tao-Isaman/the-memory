@@ -16,6 +16,10 @@ export interface Database {
           title: string
           created_at: string
           updated_at: string
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          paid_at: string | null
         }
         Insert: {
           id?: string
@@ -23,6 +27,10 @@ export interface Database {
           title: string
           created_at?: string
           updated_at?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          paid_at?: string | null
         }
         Update: {
           id?: string
@@ -30,6 +38,10 @@ export interface Database {
           title?: string
           created_at?: string
           updated_at?: string
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          paid_at?: string | null
         }
         Relationships: []
       }

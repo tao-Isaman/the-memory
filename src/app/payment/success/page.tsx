@@ -1,0 +1,122 @@
+'use client';
+
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
+import ShareModal from '@/components/ShareModal';
+import { CheckCircle } from 'lucide-react';
+
+function PaymentSuccessContent() {
+  const searchParams = useSearchParams();
+  const memoryId = searchParams.get('memory_id');
+  const sessionId = searchParams.get('session_id');
+
+  const [status, setStatus] = useState<'loading' | 'success' | 'pending'>('loading');
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  useEffect(() => {
+    async function checkPaymentStatus() {
+      if (!memoryId) {
+        setStatus('success'); // Assume success if no memory ID
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/payment/status?memory_id=${memoryId}`);
+        const data = await response.json();
+
+        if (data.status === 'active') {
+          setStatus('success');
+        } else {
+          // Payment might still be processing (PromptPay)
+          setStatus('pending');
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+        setStatus('success'); // Optimistic
+      }
+    }
+
+    // Small delay to allow webhook to process
+    const timer = setTimeout(checkPaymentStatus, 1000);
+    return () => clearTimeout(timer);
+  }, [memoryId]);
+
+  if (status === 'loading') {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <HeartLoader message="กำลังตรวจสอบการชำระเงิน..." size="lg" />
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <div className="memory-card p-8 max-w-md w-full text-center">
+        <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+          <CheckCircle size={40} className="text-green-600" />
+        </div>
+
+        <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+          {status === 'success' ? 'ชำระเงินสำเร็จ!' : 'กำลังดำเนินการชำระเงิน'}
+        </h1>
+
+        {status === 'pending' ? (
+          <p className="text-gray-600 mb-6">
+            การชำระเงินของคุณกำลังดำเนินการ หากใช้ PromptPay อาจใช้เวลาสักครู่
+            คุณสามารถแชร์ลิงก์ได้ทันทีที่การชำระเงินเสร็จสมบูรณ์
+          </p>
+        ) : (
+          <p className="text-gray-600 mb-6">
+            ความทรงจำของคุณพร้อมแชร์กับคนพิเศษแล้ว!
+          </p>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {memoryId && status === 'success' && (
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              <HeartIcon size={16} filled />
+              แชร์ความทรงจำ
+            </button>
+          )}
+
+          <Link
+            href="/dashboard"
+            className="btn-secondary w-full text-center"
+          >
+            กลับไปหน้าหลัก
+          </Link>
+        </div>
+      </div>
+
+      {memoryId && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          memoryId={memoryId}
+          memoryTitle="ความทรงจำของคุณ"
+          showSuccessMessage={true}
+        />
+      )}
+    </main>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <HeartLoader message="กำลังโหลด..." size="lg" />
+        </main>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}

@@ -1,4 +1,4 @@
-import { Memory, MemoryNode } from '@/types/memory';
+import { Memory, MemoryNode, MemoryStatus } from '@/types/memory';
 import { getSupabaseBrowserClient } from './supabase';
 import { Database, Json } from '@/types/database';
 
@@ -22,6 +22,8 @@ function toMemory(dbMemory: DbMemory, dbNodes: DbNode[]): Memory {
     nodes: nodes.sort((a, b) => a.priority - b.priority),
     createdAt: dbMemory.created_at,
     updatedAt: dbMemory.updated_at,
+    status: (dbMemory.status || 'pending') as MemoryStatus,
+    paidAt: dbMemory.paid_at || undefined,
   };
 }
 
@@ -128,6 +130,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       title: memory.title,
       created_at: memory.createdAt,
       updated_at: new Date().toISOString(),
+      status: memory.status || 'pending',
     });
 
     if (insertError) {
