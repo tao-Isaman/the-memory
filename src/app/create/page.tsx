@@ -11,6 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import NodeEditor from '@/components/NodeEditor';
 import NodeList from '@/components/NodeList';
 import ShareModal from '@/components/ShareModal';
+import { Plus, ArrowLeft } from 'lucide-react';
 
 function CreatePageContent() {
   const router = useRouter();
@@ -127,7 +128,7 @@ function CreatePageContent() {
       <header className="py-8 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/dashboard" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
-            <span>&larr;</span>
+            <ArrowLeft size={20} />
             <span>กลับ</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -175,8 +176,8 @@ function CreatePageContent() {
             onClick={() => setShowEditor(true)}
             className="w-full memory-card p-6 text-center hover:shadow-lg transition-shadow border-2 border-dashed border-[#FFB6C1] hover:border-[#FF6B9D]"
           >
-            <span className="text-3xl mb-2 block">+</span>
-            <span className="font-kanit text-[#E63946] font-medium">เพิ่มโหนดความทรงจำ</span>
+            <Plus size={32} className="mx-auto mb-2 text-[#E63946]" />
+            <span className="text-[#E63946] font-medium">เพิ่มโหนดความทรงจำ</span>
           </button>
         )}
 

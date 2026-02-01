@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { NodeType, MemoryNode } from '@/types/memory';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
+import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon } from 'lucide-react';
 
 interface NodeEditorProps {
   onAdd: (node: MemoryNode) => void;
@@ -25,6 +26,14 @@ const nodeTypeDescriptions: Record<NodeType, string> = {
   image: 'เพิ่มรูปภาพพิเศษ',
   'text-image': 'รวมข้อความกับรูปภาพ',
   youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
+};
+
+const nodeTypeIcons: Record<NodeType, LucideIcon> = {
+  password: Lock,
+  text: MessageCircleHeart,
+  image: Camera,
+  'text-image': ImagePlus,
+  youtube: Music,
 };
 
 export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorProps) {
@@ -122,23 +131,29 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
             ประเภทความทรงจำ
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {(Object.keys(nodeTypeLabels) as NodeType[]).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setType(t)}
-                className={`p-3 rounded-lg border-2 text-left transition-all ${
-                  type === t
-                    ? 'border-[#FF6B9D] bg-pink-50'
-                    : 'border-gray-200 hover:border-pink-200'
-                }`}
-              >
-                <span className="block font-medium text-sm">{nodeTypeLabels[t]}</span>
-                <span className="block text-xs text-gray-500 mt-1">
-                  {nodeTypeDescriptions[t]}
-                </span>
-              </button>
-            ))}
+            {(Object.keys(nodeTypeLabels) as NodeType[]).map((t) => {
+              const IconComponent = nodeTypeIcons[t];
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    type === t
+                      ? 'border-[#FF6B9D] bg-pink-50'
+                      : 'border-gray-200 hover:border-pink-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <IconComponent size={18} className={type === t ? 'text-[#E63946]' : 'text-gray-500'} />
+                    <span className="font-medium text-sm">{nodeTypeLabels[t]}</span>
+                  </div>
+                  <span className="block text-xs text-gray-500">
+                    {nodeTypeDescriptions[t]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

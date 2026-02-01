@@ -8,12 +8,21 @@ import { getMemories, deleteMemory } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
+import ShareModal from '@/components/ShareModal';
+import { Plus, Share2, Eye, Pencil, Trash2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+
+  const handleShare = (memory: Memory) => {
+    setSelectedMemory(memory);
+    setShowShareModal(true);
+  };
 
   const loadMemories = useCallback(async () => {
     if (!user) return;
@@ -94,11 +103,11 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 pb-12">
+      <div className="max-w-4xl mx-auto px-2 pb-12">
         {/* Create New Button */}
         <div className="mb-8 text-center">
           <Link href="/create" className="btn-primary inline-flex items-center gap-2">
-            <span className="text-xl">+</span>
+            <Plus size={20} />
             สร้างความทรงจำใหม่
           </Link>
         </div>
@@ -137,21 +146,34 @@ export default function DashboardPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/memory/${memory.id}`}
-                    className="btn-primary text-sm py-2 px-4 grow text-center"
+                    className="btn-primary text-sm py-2 px-3 flex-1 text-center flex items-center justify-center gap-1"
+                    title="ดูความทรงจำ"
                   >
-                    ดูความทรงจำ
+                    <span>ดูความทรงจำ</span>
                   </Link>
                   <Link
                     href={`/create?edit=${memory.id}`}
-                    className="btn-secondary text-sm py-2 px-4"
+                    className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
+                    title="แก้ไข"
                   >
-                    แก้ไข
+                    <Pencil size={16} />
+                    <span className="hidden sm:inline">แก้ไข</span>
                   </Link>
                   <button
-                    onClick={() => handleDelete(memory.id)}
-                    className="px-4 py-2 text-sm rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                    onClick={() => handleShare(memory)}
+                    className="px-3 py-2 text-sm rounded-full bg-pink-100 text-[#E63946] hover:bg-pink-200 transition-colors flex items-center justify-center gap-1"
+                    title="แชร์"
                   >
-                    ลบ
+                    <Share2 size={16} />
+                    <span className="hidden sm:inline">แชร์</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(memory.id)}
+                    className="px-3 py-2 text-sm rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                    title="ลบ"
+                  >
+                    <Trash2 size={16} />
+                    <span className="hidden sm:inline">ลบ</span>
                   </button>
                 </div>
               </div>
@@ -164,6 +186,20 @@ export default function DashboardPage() {
       <footer className="py-8 text-center text-gray-400 text-sm">
         <p>สร้างด้วย <HeartIcon size={14} className="inline-block align-middle mx-1" /> สำหรับช่วงเวลาพิเศษของคุณ</p>
       </footer>
+
+      {/* Share Modal */}
+      {selectedMemory && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+            setSelectedMemory(null);
+          }}
+          memoryId={selectedMemory.id}
+          memoryTitle={selectedMemory.title}
+          showSuccessMessage={false}
+        />
+      )}
     </main>
   );
 }

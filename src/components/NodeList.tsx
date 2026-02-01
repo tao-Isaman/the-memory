@@ -2,6 +2,7 @@
 
 import { MemoryNode, NodeType } from '@/types/memory';
 import HeartIcon from './HeartIcon';
+import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon, ChevronUp, ChevronDown, X } from 'lucide-react';
 
 interface NodeListProps {
   nodes: MemoryNode[];
@@ -9,12 +10,12 @@ interface NodeListProps {
   onDelete: (id: string) => void;
 }
 
-const nodeTypeIcons: Record<NodeType, string> = {
-  password: '🔒',
-  text: '💬',
-  image: '📷',
-  'text-image': '📝',
-  youtube: '🎵',
+const nodeTypeIcons: Record<NodeType, LucideIcon> = {
+  password: Lock,
+  text: MessageCircleHeart,
+  image: Camera,
+  'text-image': ImagePlus,
+  youtube: Music,
 };
 
 const nodeTypeLabels: Record<NodeType, string> = {
@@ -90,8 +91,11 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
           </div>
 
           {/* Node Icon */}
-          <div className="flex-shrink-0 text-2xl">
-            {nodeTypeIcons[node.type]}
+          <div className="flex-shrink-0">
+            {(() => {
+              const IconComponent = nodeTypeIcons[node.type];
+              return <IconComponent size={24} className="text-[#E63946]" />;
+            })()}
           </div>
 
           {/* Node Info */}
@@ -116,7 +120,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
               }`}
               title="เลื่อนขึ้น"
             >
-              &#9650;
+              <ChevronUp size={18} />
             </button>
             <button
               onClick={() => moveDown(index)}
@@ -128,7 +132,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
               }`}
               title="เลื่อนลง"
             >
-              &#9660;
+              <ChevronDown size={18} />
             </button>
           </div>
 
@@ -138,7 +142,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
             className="flex-shrink-0 w-8 h-8 rounded bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
             title="ลบโหนด"
           >
-            &#10005;
+            <X size={18} />
           </button>
         </div>
       ))}
