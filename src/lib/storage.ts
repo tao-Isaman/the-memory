@@ -3,7 +3,7 @@ import { getSupabaseBrowserClient } from './supabase';
 import { Database, Json } from '@/types/database';
 
 type DbMemory = Database['public']['Tables']['memories']['Row'];
-type DbStory = Database['public']['Tables']['nodes']['Row']; // DB table is still 'nodes'
+type DbStory = Database['public']['Tables']['stories']['Row'];
 
 // Convert database memory + stories to app Memory format
 function toMemory(dbMemory: DbMemory, dbStories: DbStory[]): Memory {
@@ -48,7 +48,7 @@ export async function getMemories(userId: string): Promise<Memory[]> {
 
   const memoryIds = memories.map((m) => m.id);
   const { data: stories, error: storiesError } = await supabase
-    .from('nodes') // DB table is still 'nodes'
+    .from('stories')
     .select('*')
     .in('memory_id', memoryIds);
 
@@ -80,7 +80,7 @@ export async function getMemoryById(id: string): Promise<Memory | null> {
   }
 
   const { data: stories, error: storiesError } = await supabase
-    .from('nodes') // DB table is still 'nodes'
+    .from('stories')
     .select('*')
     .eq('memory_id', id)
     .order('priority', { ascending: true });
@@ -122,7 +122,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
     }
 
     // Delete existing stories and re-insert
-    await supabase.from('nodes').delete().eq('memory_id', memory.id);
+    await supabase.from('stories').delete().eq('memory_id', memory.id);
   } else {
     // Insert new memory
     const { error: insertError } = await supabase.from('memories').insert({
@@ -152,7 +152,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       created_at: story.createdAt,
     }));
 
-    const { error: storiesError } = await supabase.from('nodes').insert(storiesToInsert);
+    const { error: storiesError } = await supabase.from('stories').insert(storiesToInsert);
 
     if (storiesError) {
       console.error('Error inserting stories:', storiesError);

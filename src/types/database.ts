@@ -45,7 +45,7 @@ export interface Database {
         }
         Relationships: []
       }
-      nodes: {
+      stories: {
         Row: {
           id: string
           memory_id: string
@@ -75,7 +75,7 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "nodes_memory_id_fkey"
+            foreignKeyName: "stories_memory_id_fkey"
             columns: ["memory_id"]
             referencedRelation: "memories"
             referencedColumns: ["id"]
