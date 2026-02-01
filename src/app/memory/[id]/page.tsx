@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Memory, MemoryNode } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
 import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
 import NodeViewer from '@/components/NodeViewer';
 import PasswordGate from '@/components/PasswordGate';
 
@@ -29,16 +30,19 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
   // Load memory on mount
   useEffect(() => {
-    const foundMemory = getMemoryById(id);
-    if (foundMemory) {
-      setMemory(foundMemory);
-      // Check if first node is a password
-      const sortedNodes = [...foundMemory.nodes].sort((a, b) => a.priority - b.priority);
-      if (sortedNodes.length > 0 && sortedNodes[0].type === 'password') {
-        setIsPasswordLocked(true);
+    async function loadMemory() {
+      const foundMemory = await getMemoryById(id);
+      if (foundMemory) {
+        setMemory(foundMemory);
+        // Check if first node is a password
+        const sortedNodes = [...foundMemory.nodes].sort((a, b) => a.priority - b.priority);
+        if (sortedNodes.length > 0 && sortedNodes[0].type === 'password') {
+          setIsPasswordLocked(true);
+        }
       }
+      setLoading(false);
     }
-    setLoading(false);
+    loadMemory();
   }, [id]);
 
   const handleNext = useCallback(() => {
@@ -89,10 +93,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <HeartIcon size={64} className="mx-auto animate-pulse-heart" />
-          <p className="text-gray-500 mt-4">Loading your memory...</p>
-        </div>
+        <HeartLoader message="กำลังโหลดความทรงจำของคุณ..." size="lg" />
       </main>
     );
   }
@@ -102,10 +103,10 @@ export default function MemoryViewerPage({ params }: PageProps) {
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center memory-card p-12">
           <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">Memory Not Found</h2>
-          <p className="text-gray-500 mb-6">This memory doesn&apos;t exist or has been deleted.</p>
+          <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">ไม่พบความทรงจำ</h2>
+          <p className="text-gray-500 mb-6">ความทรงจำนี้ไม่มีอยู่หรือถูกลบไปแล้ว</p>
           <Link href="/" className="btn-primary inline-block">
-            Go Home
+            กลับหน้าหลัก
           </Link>
         </div>
       </main>
@@ -124,11 +125,11 @@ export default function MemoryViewerPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link href="/" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
             <span>&larr;</span>
-            <span>Exit</span>
+            <span>ออก</span>
           </Link>
           <div className="flex items-center gap-2">
             <HeartIcon size={20} className="animate-pulse-heart" />
-            <span className="font-semibold text-[#E63946] truncate max-w-[200px]">
+            <span className="font-kanit font-semibold text-[#E63946] truncate max-w-[200px]">
               {sortedMemory.title}
             </span>
           </div>
@@ -140,7 +141,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
                 : 'bg-pink-100 text-[#E63946]'
             }`}
           >
-            Auto: {autoAdvance ? 'ON' : 'OFF'}
+            อัตโนมัติ: {autoAdvance ? 'เปิด' : 'ปิด'}
           </button>
         </div>
 
@@ -153,7 +154,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 text-center">
-            {currentIndex + 1} of {sortedMemory.nodes.length}
+            {currentIndex + 1} จาก {sortedMemory.nodes.length}
           </p>
         </div>
       </header>
@@ -164,6 +165,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
           {isPasswordLocked && currentNode?.type === 'password' ? (
             <PasswordGate
               correctPassword={currentNode.content.password}
+              title={currentNode.title}
               onUnlock={handlePasswordUnlock}
             />
           ) : currentNode ? (
@@ -182,7 +184,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
               isFirstNode ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            &larr; Previous
+            &larr; ก่อนหน้า
           </button>
 
           {/* Dots indicator */}
@@ -203,7 +205,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
           {isLastNode && !isPasswordLocked ? (
             <Link href="/" className="btn-primary flex items-center gap-2">
-              Finish
+              เสร็จสิ้น
               <HeartIcon size={16} filled />
             </Link>
           ) : (
@@ -214,7 +216,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
                 isPasswordLocked ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              Next &rarr;
+              ถัดไป &rarr;
             </button>
           )}
         </div>

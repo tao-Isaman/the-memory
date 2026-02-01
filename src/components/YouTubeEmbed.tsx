@@ -23,7 +23,7 @@ export default function YouTubeEmbed({ url }: YouTubeEmbedProps) {
   if (!videoId) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-        Invalid YouTube URL
+        URL YouTube ไม่ถูกต้อง
       </div>
     );
   }
@@ -32,7 +32,7 @@ export default function YouTubeEmbed({ url }: YouTubeEmbedProps) {
     <div className="relative w-full pt-[56.25%] rounded-xl overflow-hidden shadow-lg">
       <iframe
         className="absolute top-0 left-0 w-full h-full"
-        src={`https://www.youtube.com/embed/${videoId}`}
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
         title="YouTube video"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen

@@ -18,11 +18,11 @@ const nodeTypeIcons: Record<NodeType, string> = {
 };
 
 const nodeTypeLabels: Record<NodeType, string> = {
-  password: 'Password Gate',
-  text: 'Text Message',
-  image: 'Image',
-  'text-image': 'Text + Image',
-  youtube: 'YouTube Video',
+  password: 'ใส่รหัสผ่าน',
+  text: 'ข้อความ',
+  image: 'รูปภาพ',
+  'text-image': 'ข้อความ + รูปภาพ',
+  youtube: 'วิดีโอ YouTube',
 };
 
 function getNodePreview(node: MemoryNode): string {
@@ -32,11 +32,11 @@ function getNodePreview(node: MemoryNode): string {
     case 'text':
       return node.content.text.substring(0, 50) + (node.content.text.length > 50 ? '...' : '');
     case 'image':
-      return node.content.caption || 'Photo';
+      return node.content.caption || 'รูปภาพ';
     case 'text-image':
       return node.content.text.substring(0, 50) + (node.content.text.length > 50 ? '...' : '');
     case 'youtube':
-      return 'YouTube Video';
+      return 'วิดีโอ YouTube';
     default:
       return '';
   }
@@ -69,9 +69,9 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
     return (
       <div className="memory-card p-8 text-center">
         <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
-        <p className="text-gray-500">No memory nodes yet.</p>
+        <p className="text-gray-500">ยังไม่มีโหนดความทรงจำ</p>
         <p className="text-sm text-gray-400 mt-1">
-          Add your first node to start building your memory!
+          เพิ่มโหนดแรกเพื่อเริ่มสร้างความทรงจำของคุณ!
         </p>
       </div>
     );
@@ -96,11 +96,11 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
 
           {/* Node Info */}
           <div className="flex-grow min-w-0">
-            <p className="font-medium text-[#E63946] text-sm">
-              {nodeTypeLabels[node.type]}
+            <p className="font-kanit font-medium text-[#E63946] text-sm">
+              {node.title || nodeTypeLabels[node.type]}
             </p>
             <p className="text-gray-600 text-sm truncate">
-              {getNodePreview(node)}
+              {node.title ? `${nodeTypeLabels[node.type]} • ${getNodePreview(node)}` : getNodePreview(node)}
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
                   ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   : 'bg-pink-100 text-[#E63946] hover:bg-pink-200'
               }`}
-              title="Move up"
+              title="เลื่อนขึ้น"
             >
               &#9650;
             </button>
@@ -126,7 +126,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
                   ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   : 'bg-pink-100 text-[#E63946] hover:bg-pink-200'
               }`}
-              title="Move down"
+              title="เลื่อนลง"
             >
               &#9660;
             </button>
@@ -136,7 +136,7 @@ export default function NodeList({ nodes, onReorder, onDelete }: NodeListProps) 
           <button
             onClick={() => onDelete(node.id)}
             className="flex-shrink-0 w-8 h-8 rounded bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
-            title="Delete node"
+            title="ลบโหนด"
           >
             &#10005;
           </button>

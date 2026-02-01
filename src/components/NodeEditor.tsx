@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { NodeType, MemoryNode } from '@/types/memory';
 import { generateId } from '@/lib/storage';
+import { uploadImage } from '@/lib/upload';
 
 interface NodeEditorProps {
   onAdd: (node: MemoryNode) => void;
@@ -11,39 +12,68 @@ interface NodeEditorProps {
 }
 
 const nodeTypeLabels: Record<NodeType, string> = {
-  password: 'Password Gate',
-  text: 'Text Message',
-  image: 'Image',
-  'text-image': 'Text + Image',
-  youtube: 'YouTube Video',
+  password: 'ใส่รหัสผ่าน',
+  text: 'ข้อความ',
+  image: 'รูปภาพ',
+  'text-image': 'ข้อความ + รูปภาพ',
+  youtube: 'วิดีโอ YouTube',
 };
 
 const nodeTypeDescriptions: Record<NodeType, string> = {
-  password: 'Add a password to protect following content',
-  text: 'Add a heartfelt message',
-  image: 'Add a special photo',
-  'text-image': 'Combine text with an image',
-  youtube: 'Add a meaningful song or video',
+  password: 'เพิ่มรหัสผ่านเพื่อปกป้องเนื้อหาถัดไป',
+  text: 'เพิ่มข้อความจากใจ',
+  image: 'เพิ่มรูปภาพพิเศษ',
+  'text-image': 'รวมข้อความกับรูปภาพ',
+  youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
 };
 
 export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorProps) {
   const [type, setType] = useState<NodeType>(initialType || 'text');
+  const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
   const [caption, setCaption] = useState('');
   const [password, setPassword] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const baseNode = {
       id: generateId(),
       priority: 0,
+      title: title.trim() || undefined,
       createdAt: new Date().toISOString(),
     };
 
     let node: MemoryNode;
+    let uploadedImageUrl = imageUrl;
+
+    // Upload image if there's a file
+    if ((type === 'image' || type === 'text-image') && imageFile) {
+      try {
+        setUploading(true);
+        uploadedImageUrl = await uploadImage(imageFile);
+      } catch (error) {
+        alert('อัพโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+        setUploading(false);
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
 
     switch (type) {
       case 'password':
@@ -55,19 +85,19 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         node = { ...baseNode, type: 'text', content: { text: text.trim() } };
         break;
       case 'image':
-        if (!imageUrl.trim()) return;
+        if (!uploadedImageUrl.trim()) return;
         node = {
           ...baseNode,
           type: 'image',
-          content: { imageUrl: imageUrl.trim(), caption: caption.trim() || undefined },
+          content: { imageUrl: uploadedImageUrl.trim(), caption: caption.trim() || undefined },
         };
         break;
       case 'text-image':
-        if (!text.trim() || !imageUrl.trim()) return;
+        if (!text.trim() || !uploadedImageUrl.trim()) return;
         node = {
           ...baseNode,
           type: 'text-image',
-          content: { text: text.trim(), imageUrl: imageUrl.trim() },
+          content: { text: text.trim(), imageUrl: uploadedImageUrl.trim() },
         };
         break;
       case 'youtube':
@@ -83,13 +113,13 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
 
   return (
     <div className="memory-card p-6">
-      <h3 className="text-xl font-bold text-[#E63946] mb-4">Add New Memory Node</h3>
+      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">เพิ่มโหนดความทรงจำใหม่</h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Node Type Selector */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Type of Memory
+            ประเภทความทรงจำ
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {(Object.keys(nodeTypeLabels) as NodeType[]).map((t) => (
@@ -112,22 +142,39 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
           </div>
         </div>
 
+        {/* Node Title */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            ชื่อโหนด (ไม่จำเป็น)
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="ตั้งชื่อให้จดจำง่าย เช่น 'วันแรกที่เจอกัน'"
+            className="input-valentine"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            ชื่อนี้จะแสดงแทนประเภทโหนดในรายการ
+          </p>
+        </div>
+
         {/* Dynamic Fields based on type */}
         {type === 'password' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              รหัสผ่าน
             </label>
             <input
               type="text"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter a memorable password..."
+              placeholder="ใส่รหัสผ่านที่จำได้ง่าย..."
               className="input-valentine"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              This will protect all following content until entered correctly
+              รหัสนี้จะปกป้องเนื้อหาถัดไปจนกว่าจะใส่ถูกต้อง
             </p>
           </div>
         )}
@@ -135,12 +182,12 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {(type === 'text' || type === 'text-image') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Your Message
+              ข้อความของคุณ
             </label>
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Write something from your heart..."
+              placeholder="เขียนอะไรบางอย่างจากใจ..."
               className="input-valentine min-h-[120px] resize-y"
               required
             />
@@ -150,25 +197,22 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {(type === 'image' || type === 'text-image') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Image URL
+              อัพโหลดรูปภาพ
             </label>
             <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="https://example.com/image.jpg"
-              className="input-valentine"
-              required
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="input-valentine file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-[#E63946] hover:file:bg-pink-100"
+              required={!imageUrl}
             />
-            {imageUrl && (
+            {imagePreview && (
               <div className="mt-2 p-2 border rounded-lg bg-gray-50">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={imageUrl}
-                  alt="Preview"
+                  src={imagePreview}
+                  alt="ตัวอย่าง"
                   className="max-h-40 mx-auto rounded"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
                 />
               </div>
             )}
@@ -178,13 +222,13 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {type === 'image' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Caption (optional)
+              คำบรรยาย (ไม่จำเป็น)
             </label>
             <input
               type="text"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="Add a sweet caption..."
+              placeholder="เพิ่มคำบรรยายน่ารักๆ..."
               className="input-valentine"
             />
           </div>
@@ -193,7 +237,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {type === 'youtube' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              YouTube URL
+              URL YouTube
             </label>
             <input
               type="url"
@@ -204,7 +248,7 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              Paste a YouTube link to share a meaningful song or video
+              วางลิงก์ YouTube เพื่อแชร์เพลงหรือวิดีโอที่มีความหมาย
             </p>
           </div>
         )}
@@ -212,10 +256,14 @@ export default function NodeEditor({ onAdd, onCancel, initialType }: NodeEditorP
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">
           <button type="button" onClick={onCancel} className="btn-secondary flex-1">
-            Cancel
+            ยกเลิก
           </button>
-          <button type="submit" className="btn-primary flex-1">
-            Add Node
+          <button
+            type="submit"
+            className="btn-primary flex-1"
+            disabled={uploading}
+          >
+            {uploading ? 'กำลังอัพโหลด...' : 'เพิ่ม'}
           </button>
         </div>
       </form>

@@ -4,6 +4,7 @@ export interface BaseNode {
   id: string;
   type: NodeType;
   priority: number;
+  title?: string;
   createdAt: string;
 }
 

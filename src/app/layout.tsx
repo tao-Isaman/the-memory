@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Itim, Kanit, Leckerli_One } from "next/font/google";
 import "./globals.css";
 import FloatingHearts from "@/components/FloatingHearts";
+import ClientProviders from "@/components/ClientProviders";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const itim = Itim({
+  weight: "400",
+  subsets: ["thai", "latin"],
+  variable: "--font-itim",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const kanit = Kanit({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  subsets: ["thai", "latin"],
+  variable: "--font-kanit",
+});
+
+const leckerliOne = Leckerli_One({
+  weight: "400",
   subsets: ["latin"],
+  variable: "--font-leckerli",
 });
 
 export const metadata: Metadata = {
-  title: "The Memory - Create Beautiful Memory Presentations",
-  description: "A Valentine-themed app to create and share beautiful memory presentations with your loved ones",
+  title: "The Memory - สร้างความทรงจำสวยๆ ให้คนที่คุณรัก",
+  description: "แอปสำหรับสร้างและแชร์ความทรงจำสวยๆ ให้คนที่คุณรัก",
 };
 
 export default function RootLayout({
@@ -24,12 +33,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="th">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen`}
+        className={`${itim.variable} ${kanit.variable} ${leckerliOne.variable} antialiased min-h-screen`}
       >
-        <FloatingHearts />
-        {children}
+        <ClientProviders>
+          <FloatingHearts />
+          {children}
+        </ClientProviders>
       </body>
     </html>
   );

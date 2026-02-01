@@ -1,55 +1,184 @@
-import { Memory } from '@/types/memory';
+import { Memory, MemoryNode } from '@/types/memory';
+import { getSupabaseBrowserClient } from './supabase';
+import { Database, Json } from '@/types/database';
 
-const STORAGE_KEY = 'the-memory-data';
+type DbMemory = Database['public']['Tables']['memories']['Row'];
+type DbNode = Database['public']['Tables']['nodes']['Row'];
 
-export function getMemories(): Memory[] {
-  if (typeof window === 'undefined') return [];
+// Convert database memory + nodes to app Memory format
+function toMemory(dbMemory: DbMemory, dbNodes: DbNode[]): Memory {
+  const nodes = dbNodes.map((node) => ({
+    id: node.id,
+    type: node.type as MemoryNode['type'],
+    priority: node.priority,
+    title: node.title || undefined,
+    content: node.content as MemoryNode['content'],
+    createdAt: node.created_at,
+  })) as MemoryNode[];
 
-  try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch {
-    console.error('Error reading from localStorage');
+  return {
+    id: dbMemory.id,
+    title: dbMemory.title,
+    nodes: nodes.sort((a, b) => a.priority - b.priority),
+    createdAt: dbMemory.created_at,
+    updatedAt: dbMemory.updated_at,
+  };
+}
+
+// Get all memories for a user
+export async function getMemories(userId: string): Promise<Memory[]> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return [];
+
+  const { data: memories, error: memoriesError } = await supabase
+    .from('memories')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+
+  if (memoriesError || !memories) {
+    console.error('Error fetching memories:', memoriesError);
     return [];
   }
+
+  if (memories.length === 0) return [];
+
+  const memoryIds = memories.map((m) => m.id);
+  const { data: nodes, error: nodesError } = await supabase
+    .from('nodes')
+    .select('*')
+    .in('memory_id', memoryIds);
+
+  if (nodesError) {
+    console.error('Error fetching nodes:', nodesError);
+    return [];
+  }
+
+  return memories.map((memory) => {
+    const memoryNodes = (nodes || []).filter((n) => n.memory_id === memory.id);
+    return toMemory(memory, memoryNodes);
+  });
 }
 
-export function saveMemory(memory: Memory): void {
-  if (typeof window === 'undefined') return;
+// Get a single memory by ID (public - no auth required for viewing)
+export async function getMemoryById(id: string): Promise<Memory | null> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return null;
 
-  try {
-    const memories = getMemories();
-    const existingIndex = memories.findIndex(m => m.id === memory.id);
+  const { data: memory, error: memoryError } = await supabase
+    .from('memories')
+    .select('*')
+    .eq('id', id)
+    .single();
 
-    if (existingIndex >= 0) {
-      memories[existingIndex] = { ...memory, updatedAt: new Date().toISOString() };
-    } else {
-      memories.push(memory);
+  if (memoryError || !memory) {
+    console.error('Error fetching memory:', memoryError);
+    return null;
+  }
+
+  const { data: nodes, error: nodesError } = await supabase
+    .from('nodes')
+    .select('*')
+    .eq('memory_id', id)
+    .order('priority', { ascending: true });
+
+  if (nodesError) {
+    console.error('Error fetching nodes:', nodesError);
+    return null;
+  }
+
+  return toMemory(memory, nodes || []);
+}
+
+// Save (create or update) a memory
+export async function saveMemory(memory: Memory, userId: string): Promise<Memory | null> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return null;
+
+  // Check if memory exists (for update)
+  const { data: existing } = await supabase
+    .from('memories')
+    .select('id')
+    .eq('id', memory.id)
+    .single();
+
+  if (existing) {
+    // Update existing memory
+    const { error: updateError } = await supabase
+      .from('memories')
+      .update({
+        title: memory.title,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', memory.id)
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('Error updating memory:', updateError);
+      return null;
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(memories));
-  } catch {
-    console.error('Error saving to localStorage');
+    // Delete existing nodes and re-insert
+    await supabase.from('nodes').delete().eq('memory_id', memory.id);
+  } else {
+    // Insert new memory
+    const { error: insertError } = await supabase.from('memories').insert({
+      id: memory.id,
+      user_id: userId,
+      title: memory.title,
+      created_at: memory.createdAt,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (insertError) {
+      console.error('Error inserting memory:', insertError);
+      return null;
+    }
   }
-}
 
-export function deleteMemory(id: string): void {
-  if (typeof window === 'undefined') return;
+  // Insert nodes
+  if (memory.nodes.length > 0) {
+    const nodesToInsert = memory.nodes.map((node, index) => ({
+      id: node.id,
+      memory_id: memory.id,
+      type: node.type,
+      priority: index,
+      title: node.title || null,
+      content: node.content as Json,
+      created_at: node.createdAt,
+    }));
 
-  try {
-    const memories = getMemories();
-    const filtered = memories.filter(m => m.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
-  } catch {
-    console.error('Error deleting from localStorage');
+    const { error: nodesError } = await supabase.from('nodes').insert(nodesToInsert);
+
+    if (nodesError) {
+      console.error('Error inserting nodes:', nodesError);
+      return null;
+    }
   }
+
+  return getMemoryById(memory.id);
 }
 
-export function getMemoryById(id: string): Memory | null {
-  const memories = getMemories();
-  return memories.find(m => m.id === id) || null;
+// Delete a memory
+export async function deleteMemory(id: string, userId: string): Promise<boolean> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return false;
+
+  const { error } = await supabase
+    .from('memories')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error deleting memory:', error);
+    return false;
+  }
+
+  return true;
 }
 
+// Generate a UUID for new memories
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return crypto.randomUUID();
 }

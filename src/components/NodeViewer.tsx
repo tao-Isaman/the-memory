@@ -15,7 +15,7 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-8 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="text-sm text-[#FF6B9D] font-medium">Message</span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
           </div>
           <p className="text-xl text-gray-700 leading-relaxed whitespace-pre-wrap">
             {node.content.text}
@@ -28,13 +28,13 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="text-sm text-[#FF6B9D] font-medium">Photo</span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
           </div>
           <div className="relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={node.content.imageUrl}
-              alt={node.content.caption || 'Memory image'}
+              alt={node.content.caption || 'รูปภาพความทรงจำ'}
               className="w-full rounded-lg shadow-md"
               style={{ maxHeight: '500px', objectFit: 'contain' }}
             />
@@ -52,12 +52,12 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="text-sm text-[#FF6B9D] font-medium">Moment</span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={node.content.imageUrl}
-            alt="Memory"
+            alt="ความทรงจำ"
             className="w-full rounded-lg shadow-md mb-4"
             style={{ maxHeight: '400px', objectFit: 'contain' }}
           />
@@ -72,7 +72,7 @@ export default function NodeViewer({ node }: NodeViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <HeartIcon size={20} />
-            <span className="text-sm text-[#FF6B9D] font-medium">Our Song</span>
+            <span className="font-kanit text-sm text-[#FF6B9D] font-medium"> {node.title} </span>
           </div>
           <YouTubeEmbed url={node.content.youtubeUrl} />
         </div>

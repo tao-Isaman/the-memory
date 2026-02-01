@@ -1,39 +1,59 @@
 'use client';
 
-import { useState, useCallback, Suspense, useMemo } from 'react';
+import { useState, useCallback, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Memory, MemoryNode } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
+import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
 import NodeEditor from '@/components/NodeEditor';
 import NodeList from '@/components/NodeList';
+import ShareModal from '@/components/ShareModal';
 
 function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
+  const { user, loading: authLoading } = useAuth();
 
-  // Initialize state based on editId (computed once)
-  const initialData = useMemo(() => {
-    if (editId && typeof window !== 'undefined') {
-      const existingMemory = getMemoryById(editId);
-      if (existingMemory) {
-        return {
-          title: existingMemory.title,
-          nodes: existingMemory.nodes,
-          isEditMode: true,
-        };
-      }
-    }
-    return { title: '', nodes: [] as MemoryNode[], isEditMode: false };
-  }, [editId]);
-
-  const [title, setTitle] = useState(initialData.title);
-  const [nodes, setNodes] = useState<MemoryNode[]>(initialData.nodes);
+  const [title, setTitle] = useState('');
+  const [nodes, setNodes] = useState<MemoryNode[]>([]);
   const [showEditor, setShowEditor] = useState(false);
   const [saving, setSaving] = useState(false);
-  const isEditMode = initialData.isEditMode;
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [originalCreatedAt, setOriginalCreatedAt] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [savedMemoryId, setSavedMemoryId] = useState<string | null>(null);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [authLoading, user, router]);
+
+  // Load existing memory for edit mode
+  useEffect(() => {
+    async function loadMemory() {
+      if (editId) {
+        const existingMemory = await getMemoryById(editId);
+        if (existingMemory) {
+          setTitle(existingMemory.title);
+          setNodes(existingMemory.nodes);
+          setIsEditMode(true);
+          setOriginalCreatedAt(existingMemory.createdAt);
+        }
+      }
+      setInitialLoading(false);
+    }
+
+    if (!authLoading && user) {
+      loadMemory();
+    }
+  }, [editId, authLoading, user]);
 
   const handleAddNode = useCallback((node: MemoryNode) => {
     setNodes((prev) => {
@@ -50,56 +70,73 @@ function CreatePageContent() {
   const handleDelete = useCallback((id: string) => {
     setNodes((prev) => {
       const filtered = prev.filter((n) => n.id !== id);
-      // Update priorities
       return filtered.map((node, index) => ({ ...node, priority: index }));
     });
   }, []);
 
   const handleSave = async () => {
+    if (!user) return;
+
     if (!title.trim()) {
-      alert('Please enter a title for your memory');
+      alert('กรุณาใส่ชื่อความทรงจำ');
       return;
     }
 
     if (nodes.length === 0) {
-      alert('Please add at least one node to your memory');
+      alert('กรุณาเพิ่มอย่างน้อยหนึ่งโหนด');
       return;
     }
 
     setSaving(true);
 
+    const memoryId = editId || generateId();
     const memory: Memory = {
-      id: editId || generateId(),
+      id: memoryId,
       title: title.trim(),
       nodes,
-      createdAt: editId ? (getMemoryById(editId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+      createdAt: originalCreatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    saveMemory(memory);
-
-    // Small delay for visual feedback
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    router.push('/');
+    await saveMemory(memory, user.id);
+    setSaving(false);
+    setSavedMemoryId(memoryId);
+    setShowShareModal(true);
   };
+
+  const handleCloseShareModal = () => {
+    setShowShareModal(false);
+    router.push('/dashboard');
+  };
+
+  if (authLoading || initialLoading) {
+    return (
+      <main className="min-h-screen relative z-10 flex items-center justify-center">
+        <HeartLoader message="กำลังโหลด..." size="lg" />
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen relative z-10">
       {/* Header */}
       <header className="py-8 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
+          <Link href="/dashboard" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
             <span>&larr;</span>
-            <span>Back</span>
+            <span>กลับ</span>
           </Link>
           <div className="flex items-center gap-2">
             <HeartIcon size={24} className="animate-pulse-heart" />
-            <span className="text-lg font-semibold text-[#E63946]">
-              {isEditMode ? 'Edit Memory' : 'Create Memory'}
+            <span className="font-kanit text-lg font-semibold text-[#E63946]">
+              {isEditMode ? 'แก้ไขความทรงจำ' : 'สร้างความทรงจำ'}
             </span>
           </div>
-          <div className="w-16" /> {/* Spacer for alignment */}
+          <div className="w-16" />
         </div>
       </header>
 
@@ -108,13 +145,13 @@ function CreatePageContent() {
         {/* Title Input */}
         <div className="mb-8">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Memory Title
+            ชื่อความทรงจำ
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Give your memory a special name..."
+            placeholder="ตั้งชื่อพิเศษให้ความทรงจำของคุณ..."
             className="input-valentine text-xl font-semibold"
           />
         </div>
@@ -122,9 +159,9 @@ function CreatePageContent() {
         {/* Node List */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-[#E63946]">Memory Nodes</h2>
+            <h2 className="font-kanit text-lg font-semibold text-[#E63946]">โหนดความทรงจำ</h2>
             <span className="text-sm text-gray-500">
-              {nodes.length} {nodes.length === 1 ? 'node' : 'nodes'}
+              {nodes.length} โหนด
             </span>
           </div>
           <NodeList nodes={nodes} onReorder={handleReorder} onDelete={handleDelete} />
@@ -139,14 +176,14 @@ function CreatePageContent() {
             className="w-full memory-card p-6 text-center hover:shadow-lg transition-shadow border-2 border-dashed border-[#FFB6C1] hover:border-[#FF6B9D]"
           >
             <span className="text-3xl mb-2 block">+</span>
-            <span className="text-[#E63946] font-medium">Add Memory Node</span>
+            <span className="font-kanit text-[#E63946] font-medium">เพิ่มโหนดความทรงจำ</span>
           </button>
         )}
 
         {/* Save Button */}
         <div className="mt-8 flex gap-4 justify-center">
-          <Link href="/" className="btn-secondary">
-            Cancel
+          <Link href="/dashboard" className="btn-secondary">
+            ยกเลิก
           </Link>
           <button
             onClick={handleSave}
@@ -156,14 +193,24 @@ function CreatePageContent() {
             {saving ? (
               <span className="flex items-center justify-center gap-2">
                 <HeartIcon size={16} className="animate-pulse-heart" />
-                Saving...
+                กำลังบันทึก...
               </span>
             ) : (
-              `${isEditMode ? 'Update' : 'Save'} Memory`
+              `${isEditMode ? 'อัพเดท' : 'บันทึก'}ความทรงจำ`
             )}
           </button>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {savedMemoryId && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={handleCloseShareModal}
+          memoryId={savedMemoryId}
+          memoryTitle={title}
+        />
+      )}
     </main>
   );
 }
@@ -172,10 +219,7 @@ export default function CreatePage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen relative z-10 flex items-center justify-center">
-        <div className="text-center">
-          <HeartIcon size={48} className="mx-auto animate-pulse-heart" />
-          <p className="text-gray-500 mt-4">Loading...</p>
-        </div>
+        <HeartLoader message="กำลังโหลด..." size="lg" />
       </main>
     }>
       <CreatePageContent />

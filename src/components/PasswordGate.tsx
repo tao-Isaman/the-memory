@@ -5,10 +5,11 @@ import HeartIcon from './HeartIcon';
 
 interface PasswordGateProps {
   correctPassword: string;
+  title?: string;
   onUnlock: () => void;
 }
 
-export default function PasswordGate({ correctPassword, onUnlock }: PasswordGateProps) {
+export default function PasswordGate({ correctPassword, title, onUnlock }: PasswordGateProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
@@ -30,11 +31,14 @@ export default function PasswordGate({ correctPassword, onUnlock }: PasswordGate
         <div className="mb-6">
           <HeartIcon size={64} className="mx-auto animate-pulse-heart" />
         </div>
-        <h2 className="text-2xl font-bold text-[#E63946] mb-2">
-          Protected Memory
+        <h2 className="font-kanit text-2xl font-bold text-[#E63946] mb-2">
+          ความทรงจำถูกล็อค
         </h2>
         <p className="text-gray-600 mb-6">
-          Enter the password to unlock this special moment
+          ใส่รหัสผ่านเพื่อปลดล็อคช่วงเวลาพิเศษนี้
+        </p>
+        <p className="text-gray-400 mb-6 italic">
+          {title}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -45,18 +49,18 @@ export default function PasswordGate({ correctPassword, onUnlock }: PasswordGate
                 setPassword(e.target.value);
                 setError(false);
               }}
-              placeholder="Enter password..."
+              placeholder="ใส่รหัสผ่าน..."
               className={`input-valentine ${error ? 'border-red-500' : ''}`}
               autoFocus
             />
             {error && (
               <p className="text-red-500 text-sm mt-2">
-                Incorrect password. Try again!
+                รหัสผ่านไม่ถูกต้อง ลองใหม่อีกครั้ง!
               </p>
             )}
           </div>
           <button type="submit" className="btn-primary w-full">
-            Unlock Memory
+            ปลดล็อคความทรงจำ
           </button>
         </form>
       </div>
