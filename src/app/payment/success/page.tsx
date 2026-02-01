@@ -13,36 +13,40 @@ function PaymentSuccessContent() {
   const memoryId = searchParams.get('memory_id');
   const sessionId = searchParams.get('session_id');
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'pending'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'pending' | 'error'>('loading');
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
-    async function checkPaymentStatus() {
-      if (!memoryId) {
-        setStatus('success'); // Assume success if no memory ID
+    async function verifyPayment() {
+      if (!sessionId) {
+        setStatus('error');
         return;
       }
 
       try {
-        const response = await fetch(`/api/payment/status?memory_id=${memoryId}`);
+        const response = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        });
+
         const data = await response.json();
 
         if (data.status === 'active') {
           setStatus('success');
-        } else {
-          // Payment might still be processing (PromptPay)
+        } else if (data.status === 'pending') {
           setStatus('pending');
+        } else {
+          setStatus('error');
         }
       } catch (error) {
-        console.error('Error checking payment status:', error);
-        setStatus('success'); // Optimistic
+        console.error('Error verifying payment:', error);
+        setStatus('error');
       }
     }
 
-    // Small delay to allow webhook to process
-    const timer = setTimeout(checkPaymentStatus, 1000);
-    return () => clearTimeout(timer);
-  }, [memoryId]);
+    verifyPayment();
+  }, [sessionId]);
 
   if (status === 'loading') {
     return (
@@ -60,7 +64,7 @@ function PaymentSuccessContent() {
         </div>
 
         <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
-          {status === 'success' ? 'ชำระเงินสำเร็จ!' : 'กำลังดำเนินการชำระเงิน'}
+          {status === 'success' ? 'ชำระเงินสำเร็จ!' : status === 'pending' ? 'กำลังดำเนินการชำระเงิน' : 'เกิดข้อผิดพลาด'}
         </h1>
 
         {status === 'pending' ? (
@@ -68,9 +72,13 @@ function PaymentSuccessContent() {
             การชำระเงินของคุณกำลังดำเนินการ หากใช้ PromptPay อาจใช้เวลาสักครู่
             คุณสามารถแชร์ลิงก์ได้ทันทีที่การชำระเงินเสร็จสมบูรณ์
           </p>
-        ) : (
+        ) : status === 'success' ? (
           <p className="text-gray-600 mb-6">
             ความทรงจำของคุณพร้อมแชร์กับคนพิเศษแล้ว!
+          </p>
+        ) : (
+          <p className="text-gray-600 mb-6">
+            ไม่สามารถตรวจสอบการชำระเงินได้ กรุณาลองอีกครั้งหรือติดต่อเรา
           </p>
         )}
 
