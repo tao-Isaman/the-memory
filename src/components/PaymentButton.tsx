@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { CreditCard } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CreditCard, Tag } from 'lucide-react';
 import HeartIcon from './HeartIcon';
 
 interface PaymentButtonProps {
@@ -13,6 +13,11 @@ interface PaymentButtonProps {
   onPaymentError?: (error: string) => void;
 }
 
+interface DiscountInfo {
+  eligible: boolean;
+  discountAmount: number;
+}
+
 export default function PaymentButton({
   memoryId,
   memoryTitle,
@@ -22,6 +27,37 @@ export default function PaymentButton({
   onPaymentError,
 }: PaymentButtonProps) {
   const [loading, setLoading] = useState(false);
+  const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null);
+  const [checkingDiscount, setCheckingDiscount] = useState(true);
+
+  // Check if user is eligible for referral discount
+  useEffect(() => {
+    const checkDiscount = async () => {
+      try {
+        const response = await fetch(`/api/referral/status?userId=${userId}`);
+        const data = await response.json();
+
+        // User is eligible if:
+        // 1. They were referred (referredBy is set)
+        // 2. They haven't used the discount yet
+        const isEligible = data.hasReferral &&
+                          data.referredBy &&
+                          !data.hasUsedReferralDiscount;
+
+        setDiscountInfo({
+          eligible: isEligible,
+          discountAmount: isEligible ? 50 : 0
+        });
+      } catch (error) {
+        console.error('Error checking discount:', error);
+        setDiscountInfo({ eligible: false, discountAmount: 0 });
+      } finally {
+        setCheckingDiscount(false);
+      }
+    };
+
+    checkDiscount();
+  }, [userId]);
 
   const handlePayment = async () => {
     setLoading(true);
@@ -58,24 +94,36 @@ export default function PaymentButton({
   };
 
   return (
-    <button
-      onClick={handlePayment}
-      disabled={loading}
-      className={`btn-primary flex items-center justify-center gap-2 ${
-        loading ? 'opacity-70 cursor-not-allowed' : ''
-      } ${className}`}
-    >
-      {loading ? (
-        <>
-          <HeartIcon size={16} className="animate-pulse-heart" />
-          <span>กำลังดำเนินการ...</span>
-        </>
-      ) : (
-        <>
-          <CreditCard size={16} />
-          <span>ชำระเงิน</span>
-        </>
+    <div className="space-y-2">
+      {/* Discount indicator */}
+      {!checkingDiscount && discountInfo?.eligible && (
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 border border-yellow-200 flex items-center gap-2">
+          <Tag size={18} className="text-yellow-600" />
+          <p className="text-sm text-yellow-800">
+            คุณได้รับส่วนลด <span className="font-bold">{discountInfo.discountAmount} บาท</span> จากโค้ดแนะนำ!
+          </p>
+        </div>
       )}
-    </button>
+
+      <button
+        onClick={handlePayment}
+        disabled={loading}
+        className={`btn-primary flex items-center justify-center gap-2 ${
+          loading ? 'opacity-70 cursor-not-allowed' : ''
+        } ${className}`}
+      >
+        {loading ? (
+          <>
+            <HeartIcon size={16} className="animate-pulse-heart" />
+            <span>กำลังดำเนินการ...</span>
+          </>
+        ) : (
+          <>
+            <CreditCard size={16} />
+            <span>ชำระเงิน{discountInfo?.eligible ? ` (ลด ${discountInfo.discountAmount} บาท)` : ''}</span>
+          </>
+        )}
+      </button>
+    </div>
   );
 }

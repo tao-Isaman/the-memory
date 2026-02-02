@@ -1,6 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { isEligibleForReferralDiscount } from '@/lib/referral';
+import Stripe from 'stripe';
+
+const REFERRAL_COUPON_ID = 'REFERRAL_50_THB';
+const DISCOUNT_AMOUNT = 5000; // 50 THB in satang (cents)
+
+// Ensure the referral discount coupon exists in Stripe
+async function ensureReferralCouponExists(): Promise<string | null> {
+  try {
+    // Try to retrieve existing coupon
+    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
+    return REFERRAL_COUPON_ID;
+  } catch {
+    // Coupon doesn't exist, create it
+    try {
+      await stripe.coupons.create({
+        id: REFERRAL_COUPON_ID,
+        amount_off: DISCOUNT_AMOUNT,
+        currency: 'thb',
+        name: 'ส่วนลดจากโค้ดแนะนำ 50 บาท',
+        duration: 'once',
+      });
+      return REFERRAL_COUPON_ID;
+    } catch (createError) {
+      console.error('Failed to create referral coupon:', createError);
+      return null;
+    }
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,8 +76,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe Checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Check if user is eligible for referral discount
+    const { eligible: hasReferralDiscount, discountAmount } =
+      await isEligibleForReferralDiscount(supabase, userId);
+
+    // Prepare checkout session options
+    const sessionOptions: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card', 'promptpay'],
       line_items: [
         {
@@ -63,8 +96,21 @@ export async function POST(request: NextRequest) {
         memory_id: memoryId,
         user_id: userId,
         memory_title: memoryTitle || 'Memory',
+        has_referral_discount: hasReferralDiscount ? 'true' : 'false',
+        discount_amount: hasReferralDiscount ? discountAmount.toString() : '0',
       },
-    });
+    };
+
+    // Apply referral discount if eligible
+    if (hasReferralDiscount) {
+      const couponId = await ensureReferralCouponExists();
+      if (couponId) {
+        sessionOptions.discounts = [{ coupon: couponId }];
+      }
+    }
+
+    // Create Stripe Checkout session
+    const session = await stripe.checkout.sessions.create(sessionOptions);
 
     // Store checkout session ID in memory record
     const { error: updateError } = await supabase
@@ -81,6 +127,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sessionId: session.id,
       url: session.url,
+      hasDiscount: hasReferralDiscount,
+      discountAmount: hasReferralDiscount ? discountAmount : 0,
     });
   } catch (error) {
     console.error('Checkout error:', error);

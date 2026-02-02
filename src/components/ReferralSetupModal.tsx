@@ -75,9 +75,15 @@ export default function ReferralSetupModal({ isOpen, onSubmit, onSkip }: Referra
         {/* Info Text */}
         <div className="text-center mb-6 p-4 bg-pink-50 rounded-xl border border-pink-200">
           <HeartIcon size={32} className="mx-auto mb-2 text-[#E63946]" filled />
-          <p className="text-gray-700 font-medium">คุณมาจากลิงก์แนะนำหรือไม่?</p>
+          <p className="text-gray-700 font-medium">คุณมีโค้ดแนะนำหรือไม่?</p>
           <p className="text-sm text-gray-500 mt-1">
-            หากคุณได้รับโค้ดแนะนำ ใส่โค้ดเพื่อบันทึกผู้แนะนำ
+            หากคุณได้รับโค้ดจากเพื่อน ใส่โค้ดเพื่อรับ
+          </p>
+          <p className="text-lg font-bold text-[#E63946] mt-2">
+            ส่วนลด 50 บาท
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            สำหรับการชำระเงินครั้งแรก
           </p>
         </div>
 

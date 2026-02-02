@@ -3,6 +3,7 @@ export interface UserReferral {
   userId: string;
   referralCode: string;
   referredBy: string | null;
+  hasUsedReferralDiscount: boolean;
   paidReferralCount: number;
   pendingDiscountClaims: number;
   totalDiscountsClaimed: number;

@@ -91,6 +91,7 @@ export interface Database {
           user_id: string
           referral_code: string
           referred_by: string | null
+          has_used_referral_discount: boolean
           paid_referral_count: number
           pending_discount_claims: number
           total_discounts_claimed: number
@@ -102,6 +103,7 @@ export interface Database {
           user_id: string
           referral_code: string
           referred_by?: string | null
+          has_used_referral_discount?: boolean
           paid_referral_count?: number
           pending_discount_claims?: number
           total_discounts_claimed?: number
@@ -113,6 +115,7 @@ export interface Database {
           user_id?: string
           referral_code?: string
           referred_by?: string | null
+          has_used_referral_discount?: boolean
           paid_referral_count?: number
           pending_discount_claims?: number
           total_discounts_claimed?: number

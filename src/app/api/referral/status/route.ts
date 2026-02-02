@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
       hasReferral: true,
       referralCode: referral.referralCode,
       referralLink,
+      referredBy: referral.referredBy,
+      hasUsedReferralDiscount: referral.hasUsedReferralDiscount,
       stats: {
         totalSignups,
         totalPaidConversions: referral.paidReferralCount,

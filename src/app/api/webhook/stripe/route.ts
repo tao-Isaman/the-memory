@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
-import { getUserReferral, recordReferralConversion, hasUserPaidBefore } from '@/lib/referral';
+import { getUserReferral, recordReferralConversion, hasUserPaidBefore, markReferralDiscountUsed } from '@/lib/referral';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -121,6 +121,15 @@ async function activateMemory(
   // Track referral conversion if this is user's first payment
   if (userId) {
     await trackReferralConversion(supabase, userId, memoryId);
+
+    // Mark referral discount as used if it was applied
+    const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
+    if (hasReferralDiscount) {
+      const marked = await markReferralDiscountUsed(supabase, userId);
+      if (marked) {
+        console.log(`Referral discount marked as used for user ${userId}`);
+      }
+    }
   }
 }
 

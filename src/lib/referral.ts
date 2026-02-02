@@ -24,6 +24,7 @@ export function toUserReferral(row: Database['public']['Tables']['user_referrals
     userId: row.user_id,
     referralCode: row.referral_code,
     referredBy: row.referred_by,
+    hasUsedReferralDiscount: row.has_used_referral_discount,
     paidReferralCount: row.paid_referral_count,
     pendingDiscountClaims: row.pending_discount_claims,
     totalDiscountsClaimed: row.total_discounts_claimed,
@@ -252,4 +253,43 @@ export async function hasUserPaidBefore(
   }
 
   return (count || 0) > 0;
+}
+
+// Check if user is eligible for referral discount (new user who applied a code)
+export async function isEligibleForReferralDiscount(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<{ eligible: boolean; discountAmount: number }> {
+  const referral = await getUserReferral(supabase, userId);
+
+  // User must have a referral record with referred_by set and not used discount yet
+  if (!referral || !referral.referredBy || referral.hasUsedReferralDiscount) {
+    return { eligible: false, discountAmount: 0 };
+  }
+
+  // Check if this is their first payment
+  const hasPaid = await hasUserPaidBefore(supabase, userId);
+  if (hasPaid) {
+    return { eligible: false, discountAmount: 0 };
+  }
+
+  return { eligible: true, discountAmount: 50 }; // 50 THB discount
+}
+
+// Mark referral discount as used after successful payment
+export async function markReferralDiscountUsed(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('user_referrals')
+    .update({ has_used_referral_discount: true })
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error marking referral discount as used:', error);
+    return false;
+  }
+
+  return true;
 }

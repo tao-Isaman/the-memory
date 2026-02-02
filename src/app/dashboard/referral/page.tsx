@@ -125,8 +125,8 @@ export default function ReferralPage() {
             <Users size={24} className="text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">ลิงก์แนะนำ</h2>
-            <p className="text-sm text-gray-500">แชร์ลิงก์เพื่อรับเงิน 50 บาท</p>
+            <h2 className="text-2xl font-bold text-gray-800">โค้ดแนะนำ</h2>
+            <p className="text-sm text-gray-500">แชร์โค้ดให้เพื่อนรับส่วนลด 50 บาท</p>
           </div>
         </div>
 
@@ -136,15 +136,15 @@ export default function ReferralPage() {
           <ul className="text-sm text-gray-600 space-y-2">
             <li className="flex items-start gap-2">
               <span className="text-[#E63946] font-bold">1.</span>
-              <span>แชร์ลิงก์แนะนำของคุณให้เพื่อน</span>
+              <span>บอกโค้ดแนะนำของคุณให้เพื่อนหรือคนรู้จัก</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[#E63946] font-bold">2.</span>
-              <span>เมื่อเพื่อนสมัครและชำระเงินครั้งแรก</span>
+              <span>เพื่อนใส่โค้ดตอนสมัครใช้งาน</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[#E63946] font-bold">3.</span>
-              <span>คุณจะได้รับเงิน 50 บาท</span>
+              <span>เพื่อนได้รับส่วนลด <span className="font-bold text-[#E63946]">50 บาท</span> ในการชำระเงินครั้งแรก!</span>
             </li>
           </ul>
         </div>
@@ -154,23 +154,20 @@ export default function ReferralPage() {
           <div className="text-center py-12">
             <HeartLoader message="กำลังโหลดข้อมูล..." size="md" />
           </div>
-        ) : referralStatus?.referralCode && referralStatus?.referralLink ? (
+        ) : referralStatus?.referralCode ? (
           <ReferralCodeDisplay
             code={referralStatus.referralCode}
-            referralLink={referralStatus.referralLink}
             stats={referralStatus.stats}
-            userId={user.id}
-            onClaimSuccess={checkReferralStatus}
           />
         ) : (
           <div className="memory-card p-6 text-center">
             <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
-            <p className="text-gray-600 mb-4">ยังไม่มีลิงก์แนะนำ</p>
+            <p className="text-gray-600 mb-4">ยังไม่มีโค้ดแนะนำ</p>
             <button
               onClick={() => setShowReferralSetup(true)}
               className="btn-primary"
             >
-              สร้างลิงก์แนะนำ
+              สร้างโค้ดแนะนำ
             </button>
           </div>
         )}
