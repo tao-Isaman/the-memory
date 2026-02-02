@@ -29,7 +29,10 @@ CREATE INDEX IF NOT EXISTS idx_referral_conversions_referred ON public.referral_
 -- Enable RLS on referral_conversions
 ALTER TABLE public.referral_conversions ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for referral_conversions
+-- RLS Policies for referral_conversions (drop first if exists)
+DROP POLICY IF EXISTS "Users can view their own conversions as referrer" ON public.referral_conversions;
+DROP POLICY IF EXISTS "Service role can manage conversions" ON public.referral_conversions;
+
 CREATE POLICY "Users can view their own conversions as referrer"
   ON public.referral_conversions
   FOR SELECT

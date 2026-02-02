@@ -24,6 +24,11 @@ CREATE INDEX IF NOT EXISTS idx_referral_claims_created_at ON public.referral_cla
 -- RLS policies
 ALTER TABLE public.referral_claims ENABLE ROW LEVEL SECURITY;
 
+-- Drop policies if they exist (for re-running migration)
+DROP POLICY IF EXISTS "Users can view own claims" ON public.referral_claims;
+DROP POLICY IF EXISTS "Users can create own claims" ON public.referral_claims;
+DROP POLICY IF EXISTS "Service role full access" ON public.referral_claims;
+
 -- Users can view their own claims
 CREATE POLICY "Users can view own claims"
   ON public.referral_claims FOR SELECT
