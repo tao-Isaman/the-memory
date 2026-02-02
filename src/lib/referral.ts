@@ -173,13 +173,14 @@ export async function recordReferralConversion(
 
   console.log(`Conversion record created: referrer=${referrerId}, referred=${referredId}`);
 
-  // Update referrer's stats - increment paid_referral_count
+  // Update referrer's stats - increment paid_referral_count AND pending_discount_claims
   const referral = await getUserReferral(supabase, referrerId);
   if (referral) {
     const { error: updateError } = await supabase
       .from('user_referrals')
       .update({
         paid_referral_count: referral.paidReferralCount + 1,
+        pending_discount_claims: referral.pendingDiscountClaims + 1,
       })
       .eq('user_id', referrerId);
 
@@ -187,7 +188,7 @@ export async function recordReferralConversion(
       console.error('Error updating referrer stats:', updateError);
       return false;
     }
-    console.log(`Referrer ${referrerId} paid_referral_count updated to ${referral.paidReferralCount + 1}`);
+    console.log(`Referrer ${referrerId} paid_referral_count updated to ${referral.paidReferralCount + 1}, pending_discount_claims updated to ${referral.pendingDiscountClaims + 1}`);
   } else {
     console.error(`Referrer ${referrerId} not found in user_referrals`);
   }
