@@ -165,7 +165,7 @@ export default function ReferralCodeDisplay({
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-yellow-800">
-                คุณมีสิทธิ์ส่วนลด 50%
+                คุณมีสิทธิ์รับเงิน 50 บาท
               </p>
               <p className="text-sm text-yellow-600">
                 {stats.pendingDiscounts} สิทธิ์ (จากคนที่ชำระเงินผ่านลิงก์คุณ)
@@ -181,7 +181,7 @@ export default function ReferralCodeDisplay({
               ) : (
                 <Gift size={16} />
               )}
-              ขอรับส่วนลด
+              ขอรับเงิน
             </button>
           </div>
           {claimMessage && (
@@ -195,7 +195,7 @@ export default function ReferralCodeDisplay({
       {/* Claimed discounts info */}
       {stats.claimedDiscounts > 0 && (
         <p className="text-xs text-gray-400 text-center">
-          ขอรับส่วนลดไปแล้ว {stats.claimedDiscounts} ครั้ง
+          ขอรับเงินไปแล้ว {stats.claimedDiscounts} ครั้ง
         </p>
       )}
     </div>

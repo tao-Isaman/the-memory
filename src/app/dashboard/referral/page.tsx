@@ -126,7 +126,7 @@ export default function ReferralPage() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-800">ลิงก์แนะนำ</h2>
-            <p className="text-sm text-gray-500">แชร์ลิงก์เพื่อรับส่วนลด 50%</p>
+            <p className="text-sm text-gray-500">แชร์ลิงก์เพื่อรับเงิน 50 บาท</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export default function ReferralPage() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[#E63946] font-bold">3.</span>
-              <span>คุณจะได้รับสิทธิ์ส่วนลด 50% สำหรับ Memory ถัดไป</span>
+              <span>คุณจะได้รับเงิน 50 บาท</span>
             </li>
           </ul>
         </div>

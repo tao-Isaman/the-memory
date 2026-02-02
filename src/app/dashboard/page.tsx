@@ -110,7 +110,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full text-sm text-[#E63946] hover:from-pink-100 hover:to-red-100 transition-colors"
           >
             <Users size={16} />
-            <span>ลิงก์แนะนำ &amp; รับส่วนลด</span>
+            <span>ลิงก์แนะนำ &amp; รับเงิน 50 บาท</span>
           </Link>
         </div>
       </header>
