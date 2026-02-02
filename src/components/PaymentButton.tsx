@@ -34,22 +34,16 @@ export default function PaymentButton({
   useEffect(() => {
     const checkDiscount = async () => {
       try {
-        const response = await fetch(`/api/referral/status?userId=${userId}`);
+        // Use dedicated endpoint that checks:
+        // 1. User was referred
+        // 2. User hasn't used discount yet
+        // 3. User hasn't made any payment yet
+        const response = await fetch(`/api/referral/check-discount?userId=${userId}`);
         const data = await response.json();
 
-        // User is eligible ONLY if:
-        // 1. They have a referral record
-        // 2. They were referred by someone (referredBy is set)
-        // 3. They have NOT used the discount yet (hasUsedReferralDiscount is false)
-        const isEligible = Boolean(
-          data.hasReferral &&
-          data.referredBy &&
-          data.hasUsedReferralDiscount === false
-        );
-
         setDiscountInfo({
-          eligible: isEligible,
-          discountAmount: isEligible ? 50 : 0
+          eligible: data.eligible === true,
+          discountAmount: data.discountAmount || 0
         });
       } catch (error) {
         console.error('Error checking discount:', error);

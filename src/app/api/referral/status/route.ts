@@ -36,6 +36,34 @@ export async function GET(request: NextRequest) {
 
     const totalSignups = await getReferralSignupCount(supabase, userId);
 
+    // Count actual paid users (users who used this code and have active memories)
+    const { data: referredUsers } = await supabase
+      .from('user_referrals')
+      .select('user_id')
+      .eq('referred_by', userId);
+
+    let paidCount = 0;
+    if (referredUsers && referredUsers.length > 0) {
+      const userIds = referredUsers.map(u => u.user_id);
+      const { count } = await supabase
+        .from('memories')
+        .select('user_id', { count: 'exact', head: true })
+        .in('user_id', userIds)
+        .eq('status', 'active');
+
+      // Count unique users who have paid
+      const { data: paidMemories } = await supabase
+        .from('memories')
+        .select('user_id')
+        .in('user_id', userIds)
+        .eq('status', 'active');
+
+      if (paidMemories) {
+        const uniquePaidUsers = new Set(paidMemories.map(m => m.user_id));
+        paidCount = uniquePaidUsers.size;
+      }
+    }
+
     // Build referral link
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thememory.app';
     const referralLink = `${baseUrl}?ref=${referral.referralCode}`;
@@ -48,7 +76,7 @@ export async function GET(request: NextRequest) {
       hasUsedReferralDiscount: referral.hasUsedReferralDiscount,
       stats: {
         totalSignups,
-        totalPaidConversions: referral.paidReferralCount,
+        totalPaidConversions: paidCount,
         pendingDiscounts: referral.pendingDiscountClaims,
         claimedDiscounts: referral.totalDiscountsClaimed,
       },
