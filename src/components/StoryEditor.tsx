@@ -183,8 +183,17 @@ export default function StoryEditor({
     onSave(story);
   };
 
+  // CSS variables for themed inputs
+  const cssVariables = {
+    '--theme-primary': themeColors.primary,
+    '--theme-dark': themeColors.dark,
+    '--theme-accent': themeColors.accent,
+    '--theme-background': themeColors.background,
+    '--theme-focus-shadow': `${themeColors.primary}33`,
+  } as React.CSSProperties;
+
   return (
-    <div className={noCard ? '' : 'memory-card p-6'}>
+    <div className={noCard ? '' : 'memory-card p-6'} style={cssVariables}>
       <h3 className="font-kanit text-xl font-bold mb-4" style={{ color: themeColors.dark }}>
         {isEditing ? 'แก้ไขเรื่องราว' : 'เพิ่มเรื่องราวความทรงจำใหม่'}
       </h3>
@@ -390,7 +399,7 @@ export default function StoryEditor({
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="input-valentine file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-[#E63946] hover:file:bg-pink-100"
+              className="input-valentine file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:transition-opacity"
               required={!imageUrl && !imageFile}
             />
             {imagePreview && (

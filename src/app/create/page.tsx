@@ -158,10 +158,19 @@ function CreatePageContent() {
     return null;
   }
 
+  // CSS variables for themed inputs
+  const cssVariables = {
+    '--theme-primary': themeColors.primary,
+    '--theme-dark': themeColors.dark,
+    '--theme-accent': themeColors.accent,
+    '--theme-background': themeColors.background,
+    '--theme-focus-shadow': `${themeColors.primary}33`,
+  } as React.CSSProperties;
+
   return (
     <main
       className="min-h-screen relative z-10 transition-colors duration-300"
-      style={{ backgroundColor: themeColors.background }}
+      style={{ backgroundColor: themeColors.background, ...cssVariables }}
     >
       {/* Header */}
       <header className="py-8 px-4">
@@ -293,7 +302,7 @@ function CreatePageContent() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
             className="memory-card p-8 max-w-md w-full text-center"
-            style={{ backgroundColor: themeColors.background }}
+            style={{ backgroundColor: themeColors.background, ...cssVariables }}
           >
             <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" color={themeColors.primary} />
             <h2
@@ -343,7 +352,7 @@ function CreatePageContent() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div
             className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-xl"
-            style={{ backgroundColor: themeColors.background }}
+            style={{ backgroundColor: themeColors.background, ...cssVariables }}
           >
             <button
               onClick={() => {

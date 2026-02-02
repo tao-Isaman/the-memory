@@ -181,11 +181,11 @@ body {
   box-shadow: 0 8px 30px rgba(255, 107, 157, 0.25);
 }
 
-/* Input styles */
+/* Input styles - uses CSS variables for theming */
 .input-valentine {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #FFB6C1;
+  border: 2px solid var(--theme-accent, #FFB6C1);
   border-radius: 0.75rem;
   outline: none;
   transition: all 0.3s ease;
@@ -193,8 +193,19 @@ body {
 }
 
 .input-valentine:focus {
-  border-color: #FF6B9D;
-  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+  border-color: var(--theme-primary, #FF6B9D);
+  box-shadow: 0 0 0 3px var(--theme-focus-shadow, rgba(255, 107, 157, 0.2));
+}
+
+/* Themed file input button */
+.input-valentine::file-selector-button {
+  background-color: var(--theme-accent, #FFB6C1);
+  color: var(--theme-dark, #E63946);
+  opacity: 0.5;
+}
+
+.input-valentine:hover::file-selector-button {
+  opacity: 0.7;
 }
 
 /* Floating hearts background */
