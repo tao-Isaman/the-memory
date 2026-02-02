@@ -1,110 +1,148 @@
 # The Memory
 
 ## Project Overview
-A web application where users create memory presentations using a **story-based workflow system** to share with their loved ones. Users can combine text, images, YouTube videos, and PIN protection to create a unique memory experience.
+A romantic gift web application (Thai-targeted) where users create memory presentations using a **story-based workflow system** to share with loved ones. Users combine text, images, YouTube videos, and PIN protection to create unique experiences for Valentine's Day, anniversaries, and special occasions.
 
 ## Tech Stack
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS 4
-- **Database**: Supabase (PostgreSQL)
+- **Framework**: Next.js 16.1.6 (App Router)
+- **Language**: TypeScript 5 (strict mode)
+- **Runtime**: React 19.2.3
+- **Styling**: Tailwind CSS 4 (with @tailwindcss/postcss)
+- **Fonts**: Kanit (UI), Itim (body), Leckerli One (display) - Google Fonts
+- **Database**: Supabase (PostgreSQL with RLS)
 - **Authentication**: Supabase Auth (Google OAuth)
-- **Payment**: Stripe (Checkout with Card & PromptPay)
-- **Image Upload**: Supabase Storage
+- **Payment**: Stripe (Card & PromptPay) - API v2026-01-28
+- **Image Upload**: Supabase Storage (WebP conversion, 0.85 quality)
+- **QR Code**: react-qrcode-logo
+- **Icons**: Lucide React 0.563.0
+- **Analytics**: Google Analytics GA4 (G-MZKHDF94QX)
 - **Hosting**: Vercel
-- **Icons**: Lucide React
 
 ## Core Concept
 Users build a memory presentation by creating and arranging **stories**. Each story represents a step in the memory experience. The sequence is determined by story priority. Memories require payment to activate and share.
 
 ## Story Types
-| Story Type | Description |
-|------------|-------------|
-| **Password (PIN)** | Requires viewer to enter a 6-digit PIN to continue |
-| **Image** | Displays an image with optional caption |
-| **Text** | Displays a message/text |
-| **Text + Image** | Displays text alongside an image |
-| **YouTube** | Embeds a YouTube video/song via URL |
+| Story Type | Description | Content Structure |
+|------------|-------------|-------------------|
+| **Password (PIN)** | 6-digit PIN gate with mobile numpad | `{ password: "123456" }` |
+| **Image** | Image with optional caption | `{ imageUrl: "...", caption?: "..." }` |
+| **Text** | Multi-line text message | `{ text: "..." }` |
+| **Text + Image** | Combined text and image | `{ text: "...", imageUrl: "..." }` |
+| **YouTube** | Embedded video (supports multiple URL formats) | `{ youtubeUrl: "..." }` |
 
-## User Flow
+### YouTube URL Formats Supported
+- `youtube.com/watch?v=ID`
+- `youtu.be/ID`
+- `youtube.com/embed/ID`
+- `youtube.com/shorts/ID`
+
+## User Flows
 
 ### Creator Flow
-1. Login with Google (Supabase Auth)
-2. Create new memory from dashboard
-3. Add stories (image, text, password, youtube, etc.)
-4. Reorder stories using up/down buttons
-5. Edit or delete stories as needed
-6. Save memory (status: `pending`)
-7. Pay via Stripe Checkout (Card or PromptPay)
-8. After payment, memory becomes `active`
-9. Share URL or QR code with loved one
+1. Sign in with Google → `/login` → OAuth callback
+2. Dashboard → View all memories + Create new
+3. Create/Edit page:
+   - Set memory title
+   - Add stories (type selection, content input)
+   - Reorder via up/down buttons
+   - Edit or delete stories
+4. Save memory (status: `pending`)
+5. Click "ชำระเงิน" → Stripe Checkout
+6. Payment success → status becomes `active`
+7. Share via URL, QR code, or native share
 
 ### Viewer Flow
 1. Open shared URL (`/memory/[id]`)
-2. Experience stories in sequence (by priority)
-3. If PIN story exists, must enter correct 6-digit PIN to proceed
-4. View images, text, videos in order
-5. Auto-advance option available
+2. Status check:
+   - If pending/failed and non-owner → "not ready" message
+   - If active or owner → Show preview banner for pending
+3. Experience stories sequentially:
+   - Sorted by priority (ascending)
+   - Password stories lock next content until unlocked
+   - Navigation: Previous/Next buttons, dot indicator
+4. Optional: Auto-advance mode (5-second intervals, skips password/youtube)
+5. Progress bar and counter display
+6. Finish button at end
 
 ### Payment Flow
 1. User saves memory → status: `pending`
-2. Click "ชำระเงิน" → redirects to Stripe Checkout
-3. Complete payment → redirects to `/payment/success`
-4. Success page verifies payment and updates status to `active`
-5. User can now share the memory
+2. Click "ชำระเงิน" → POST to `/api/checkout`
+3. Redirect to Stripe Checkout
+4. Success → `/payment/success?session_id=...&memory_id=...`
+5. Verify endpoint updates status to `active`
+6. Cancel → `/payment/cancel` → Allow retry
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── (landing)/          # Landing page with separate layout
-│   │   ├── layout.tsx
-│   │   └── page.tsx
+│   ├── (landing)/              # Marketing landing page
+│   │   ├── layout.tsx          # Metadata + FloatingHearts
+│   │   └── page.tsx            # Features, testimonials, FAQ
 │   ├── api/
-│   │   ├── checkout/       # Create Stripe Checkout session
+│   │   ├── checkout/           # POST: Create Stripe session
 │   │   ├── payment/
-│   │   │   ├── status/     # Check payment status
-│   │   │   └── verify/     # Verify and activate memory
-│   │   └── webhook/stripe/ # Stripe webhook (backup)
-│   ├── auth/callback/      # Supabase OAuth callback
-│   ├── create/             # Create/Edit memory page
-│   ├── dashboard/          # User's memories list
-│   ├── login/              # Login page
-│   ├── memory/[id]/        # Memory viewer
+│   │   │   ├── status/         # GET: Check payment status
+│   │   │   └── verify/         # POST: Verify and activate
+│   │   └── webhook/stripe/     # POST: Handle Stripe events
+│   ├── auth/callback/          # GET: OAuth callback
+│   ├── create/                 # Create/Edit memory page
+│   ├── dashboard/              # User's memories list
+│   ├── login/                  # Google login page
+│   ├── memory/[id]/            # Memory viewer
 │   ├── payment/
-│   │   ├── cancel/         # Payment cancelled
-│   │   └── success/        # Payment success
-│   ├── layout.tsx          # Root layout
-│   └── globals.css         # Global styles
+│   │   ├── cancel/             # Payment cancelled
+│   │   └── success/            # Payment verified + share modal
+│   ├── layout.tsx              # Root with fonts, GA, JSON-LD
+│   └── globals.css             # Tailwind + custom animations
 ├── components/
-│   ├── StoryEditor.tsx     # Add/Edit story form
-│   ├── StoryList.tsx       # List stories with reorder/edit/delete
-│   ├── StoryViewer.tsx     # Display story content
-│   ├── PasswordGate.tsx    # PIN entry UI (6-digit)
-│   ├── ShareModal.tsx      # Share URL/QR code modal
-│   ├── PaymentButton.tsx   # Stripe checkout button
-│   ├── PaymentStatus.tsx   # Status badge (pending/active)
-│   ├── HeartIcon.tsx       # Custom heart SVG
-│   ├── HeartLoader.tsx     # Loading spinner
-│   ├── HeartFirework.tsx   # Success animation
-│   ├── FloatingHearts.tsx  # Background animation
-│   ├── YouTubeEmbed.tsx    # YouTube player embed
-│   └── ClientProviders.tsx # Client-side providers
+│   ├── StoryEditor.tsx         # Multi-type form for adding/editing
+│   ├── StoryList.tsx           # Reorderable story list
+│   ├── StoryViewer.tsx         # Display story content
+│   ├── PasswordGate.tsx        # 6-digit PIN input (mobile numpad)
+│   ├── ShareModal.tsx          # URL/QR code sharing
+│   ├── PaymentButton.tsx       # Stripe checkout initiator
+│   ├── PaymentStatus.tsx       # Status badge component
+│   ├── HeartIcon.tsx           # Custom SVG heart
+│   ├── HeartLoader.tsx         # Animated loading spinner
+│   ├── HeartFirework.tsx       # Click-triggered particle animation
+│   ├── FloatingHearts.tsx      # Background decoration (15 hearts)
+│   ├── YouTubeEmbed.tsx        # YouTube player (16:9)
+│   ├── ImageWithLoader.tsx     # Image with loading/error states
+│   └── ClientProviders.tsx     # AuthProvider + HeartFirework
 ├── contexts/
-│   └── AuthContext.tsx     # Authentication context
+│   └── AuthContext.tsx         # Authentication state management
 ├── hooks/
-│   └── useAuth.ts          # Auth hook
+│   └── useAuth.ts              # Auth hook
 ├── lib/
-│   ├── storage.ts          # Supabase data operations
-│   ├── supabase.ts         # Supabase browser client
-│   ├── supabase-server.ts  # Supabase server client
-│   ├── stripe.ts           # Stripe client
-│   └── upload.ts           # Image upload to Supabase Storage
+│   ├── storage.ts              # Memory/Story CRUD operations
+│   ├── supabase.ts             # Browser client
+│   ├── supabase-server.ts      # Server client (service role)
+│   ├── stripe.ts               # Stripe instance
+│   └── upload.ts               # Image processing & upload
 └── types/
-    ├── memory.ts           # Memory & Story types
-    └── database.ts         # Supabase database types
+    ├── memory.ts               # Memory & Story interfaces
+    └── database.ts             # Supabase generated types
 ```
+
+## API Routes
+
+### Authentication
+- `GET /auth/callback` - OAuth callback, exchanges code for session
+
+### Payment & Checkout
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/checkout` | POST | Creates Stripe checkout session |
+| `/api/payment/verify` | POST | Verifies payment, activates memory |
+| `/api/payment/status` | GET | Returns memory status + paid_at |
+| `/api/webhook/stripe` | POST | Handles Stripe webhook events |
+
+### Webhook Events Handled
+- `checkout.session.completed` - Activates memory (Card payments)
+- `checkout.session.async_payment_succeeded` - Activates memory (PromptPay)
+- `checkout.session.async_payment_failed` - Sets status to "failed"
 
 ## Database Schema
 
@@ -134,18 +172,15 @@ src/
 | content | jsonb | Story content (varies by type) |
 | created_at | timestamptz | Creation timestamp |
 
-### Story Content Structure (JSONB)
-```json
-Password: { "password": "123456" }
-Image: { "imageUrl": "...", "caption": "..." }
-Text: { "text": "..." }
-Text+Image: { "text": "...", "imageUrl": "..." }
-YouTube: { "youtubeUrl": "https://youtube.com/watch?v=..." }
-```
+### Database Indexes
+- `memories(user_id)` - Fast user lookup
+- `stories(memory_id)` - Fast story lookup
+- `stories(memory_id, priority)` - Ordered story retrieval
 
 ### Row Level Security (RLS)
-- **Memories**: Users can CRUD their own memories. Active memories are viewable by anyone.
-- **Stories**: Users can CRUD stories of their own memories. Stories of active memories are viewable by anyone.
+- **Memories**: Viewable by anyone (public sharing). CRUD by owner only.
+- **Stories**: Viewable by anyone. CRUD by owner only.
+- Service role key bypasses RLS for payment verification.
 
 ## TypeScript Interfaces
 
@@ -200,12 +235,68 @@ interface Memory {
 }
 ```
 
+## Key Components
+
+### Story Management
+- **StoryEditor** - Dynamic form based on story type, image preview, PIN numpad
+- **StoryList** - Reorderable list with up/down, edit/delete buttons
+- **StoryViewer** - Type-specific rendering with HeartIcon decorations
+
+### PIN/Password
+- **PasswordGate** - 6-digit input with:
+  - Mobile numpad UI
+  - Desktop keyboard support
+  - Auto-focus navigation
+  - Auto-submit on completion
+  - Shake animation on error
+
+### Sharing
+- **ShareModal** - Features:
+  - QR code with rounded eye patterns
+  - Copy-to-clipboard with feedback
+  - QR code download as PNG
+  - Native Web Share API support
+
+### Animations
+- **HeartFirework** - Click-triggered particle effects (8-12 hearts per click)
+- **FloatingHearts** - 15 background hearts with deterministic positioning
+- **HeartLoader** - 3-layer orbiting hearts spinner
+- **ImageWithLoader** - Shimmer effect during load, error fallback
+
+## Image Upload Pipeline
+
+1. Browser loads image file
+2. Resize if needed (max 1200x1200, maintains aspect ratio)
+3. Convert to WebP (quality: 0.85)
+4. Generate unique filename: `{timestamp}-{random}.webp`
+5. Upload to Supabase Storage ("images" bucket)
+6. Return public URL
+
+## Custom Animations (globals.css)
+
+| Animation | Description |
+|-----------|-------------|
+| `float` | Vertical movement with rotation |
+| `pulse-heart` | Scale pulsing (1.5s) |
+| `fade-in-up` | Entry animation |
+| `shimmer` | Loading effect |
+| `spin-slow` | Slow rotation variants |
+| `shake` | Error feedback |
+
+## SEO & Structured Data
+
+- Open Graph & Twitter Card meta tags
+- JSON-LD schemas: WebApplication + FAQPage
+- Google Search Console verification
+- Thai keyword targeting for romantic occasions
+
 ## Environment Variables
 
 ```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=xxx
 SUPABASE_SERVICE_ROLE_KEY=xxx
 
 # Stripe
@@ -219,25 +310,48 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 
 ## Features Implemented
 
+### Core
 - [x] Google OAuth login (Supabase Auth)
 - [x] Memory CRUD operations
 - [x] Story editor with add/edit/delete
 - [x] Story reordering (up/down buttons)
-- [x] Story types: password (6-digit PIN), image, text, text+image, youtube
-- [x] Image upload to Supabase Storage
-- [x] Shareable URL generation
-- [x] QR code generation
-- [x] Memory viewer with sequential story display
-- [x] PIN protection with auto-submit
-- [x] Auto-advance mode for viewer
+- [x] 5 story types: password, image, text, text+image, youtube
+- [x] Image upload with WebP conversion
 - [x] Preview mode for unpaid memories (owner only)
-- [x] Stripe payment integration (Card + PromptPay)
-- [x] Payment verification on success redirect
-- [x] Responsive design
-- [x] Valentine/romantic theme styling
+
+### Viewer
+- [x] Sequential story display
+- [x] PIN protection with auto-submit
+- [x] Auto-advance mode (5-second intervals)
+- [x] Progress bar and counter
+- [x] Multi-format YouTube URL support
+
+### Sharing
+- [x] Shareable URL generation
+- [x] QR code with download
+- [x] Copy-to-clipboard
+- [x] Native Web Share API
+
+### Payment
+- [x] Stripe Checkout (Card + PromptPay)
+- [x] Payment verification on redirect
+- [x] Webhook backup for async payments
+- [x] Payment status tracking
+
+### UI/UX
+- [x] Responsive design (mobile-first)
+- [x] Valentine/romantic theme
+- [x] Click-triggered heart fireworks
+- [x] Floating hearts background
+- [x] Image loading states with shimmer
+- [x] Mobile-optimized PIN numpad
+
+### SEO & Analytics
 - [x] Custom favicon (heart icon)
 - [x] Open Graph / Twitter Card meta tags
-- [x] Google Analytics integration
+- [x] JSON-LD structured data
+- [x] Google Analytics GA4
+- [x] Google Search Console
 
 ## Migrations
 
@@ -263,6 +377,14 @@ npm run build
 npm start
 ```
 
+## Performance Optimizations
+
+- WebP image conversion (reduces file size)
+- Database indexes on frequently queried columns
+- useCallback/useMemo for complex components
+- Progressive image loading with shimmer
+- Suspense boundaries for code splitting
+
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-01*
+*Last updated: 2026-02-02*
