@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import YouTubeEmbed from './YouTubeEmbed';
@@ -18,7 +19,7 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-export default function StoryViewer({ story, themeColors = defaultColors }: StoryViewerProps) {
+function StoryViewer({ story, themeColors = defaultColors }: StoryViewerProps) {
   const TitleHeader = ({ title }: { title?: string }) => (
     <div className="flex items-center gap-2 mb-4">
       <HeartIcon size={20} style={{ color: themeColors.primary }} />
@@ -89,3 +90,5 @@ export default function StoryViewer({ story, themeColors = defaultColors }: Stor
       return null;
   }
 }
+
+export default memo(StoryViewer);

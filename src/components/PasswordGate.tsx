@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -18,7 +18,7 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-export default function PasswordGate({ correctPassword, title, onUnlock, themeColors = defaultColors }: PasswordGateProps) {
+const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlock, themeColors = defaultColors }: PasswordGateProps) {
   const [pin, setPin] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
@@ -224,4 +224,6 @@ export default function PasswordGate({ correctPassword, title, onUnlock, themeCo
       `}</style>
     </div>
   );
-}
+});
+
+export default PasswordGate;

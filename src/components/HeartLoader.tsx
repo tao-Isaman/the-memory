@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -16,7 +17,7 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-export default function HeartLoader({ message = 'กำลังโหลด...', size = 'md', themeColors = defaultColors }: HeartLoaderProps) {
+const HeartLoader = memo(function HeartLoader({ message = 'กำลังโหลด...', size = 'md', themeColors = defaultColors }: HeartLoaderProps) {
   const sizes = {
     sm: { heart: 32, text: 'text-sm' },
     md: { heart: 48, text: 'text-base' },
@@ -60,4 +61,6 @@ export default function HeartLoader({ message = 'กำลังโหลด...'
       )}
     </div>
   );
-}
+});
+
+export default HeartLoader;

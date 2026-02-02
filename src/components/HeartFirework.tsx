@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -24,10 +24,16 @@ interface HeartFireworkProps {
 const DEFAULT_COLORS = ['#FF6B9D', '#E63946', '#FFB6C1', '#FF1493', '#FF69B4'];
 
 export default function HeartFirework({ enabled = true, themeColors }: HeartFireworkProps) {
-  const colors = themeColors
-    ? [themeColors.primary, themeColors.dark, themeColors.accent, themeColors.primary, themeColors.dark]
-    : DEFAULT_COLORS;
+  // Memoize colors to prevent recreation on every render
+  const colors = useMemo(() =>
+    themeColors
+      ? [themeColors.primary, themeColors.dark, themeColors.accent, themeColors.primary, themeColors.dark]
+      : DEFAULT_COLORS,
+    [themeColors]
+  );
+
   const [particles, setParticles] = useState<Particle[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
 
   const createParticles = useCallback((x: number, y: number) => {
     const newParticles: Particle[] = [];
@@ -50,8 +56,9 @@ export default function HeartFirework({ enabled = true, themeColors }: HeartFire
       });
     }
 
-    setParticles((prev) => [...prev, ...newParticles]);
-  }, []);
+    particlesRef.current = [...particlesRef.current, ...newParticles];
+    setParticles([...particlesRef.current]);
+  }, [colors]);
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -68,27 +75,34 @@ export default function HeartFirework({ enabled = true, themeColors }: HeartFire
     return () => window.removeEventListener('click', handleClick);
   }, [enabled, handleClick]);
 
-  // Animation loop
+  // Optimized animation loop using ref to batch updates
   useEffect(() => {
-    if (particles.length === 0) return;
+    if (particlesRef.current.length === 0) return;
 
-    const animationFrame = requestAnimationFrame(() => {
-      setParticles((prev) =>
-        prev
-          .map((p) => ({
-            ...p,
-            x: p.x + p.vx,
-            y: p.y + p.vy,
-            vy: p.vy + 0.15, // Gravity
-            opacity: p.opacity - 0.02,
-            rotation: p.rotation + p.vx * 2,
-          }))
-          .filter((p) => p.opacity > 0)
-      );
-    });
+    let animationFrameId: number;
 
-    return () => cancelAnimationFrame(animationFrame);
-  }, [particles]);
+    const animate = () => {
+      particlesRef.current = particlesRef.current
+        .map((p) => ({
+          ...p,
+          x: p.x + p.vx,
+          y: p.y + p.vy,
+          vy: p.vy + 0.15, // Gravity
+          opacity: p.opacity - 0.02,
+          rotation: p.rotation + p.vx * 2,
+        }))
+        .filter((p) => p.opacity > 0);
+
+      setParticles([...particlesRef.current]);
+
+      if (particlesRef.current.length > 0) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [particles.length > 0]); // Only restart when particles appear/disappear
 
   if (!enabled || particles.length === 0) return null;
 

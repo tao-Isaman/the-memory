@@ -29,121 +29,95 @@ function toMemory(dbMemory: DbMemory, dbStories: DbStory[]): Memory {
   };
 }
 
-// Get all memories for a user
+// Type for memory with embedded stories from Supabase join
+type DbMemoryWithStories = DbMemory & {
+  stories: DbStory[];
+};
+
+// Get all memories for a user - OPTIMIZED: Single query with join
 export async function getMemories(userId: string): Promise<Memory[]> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return [];
 
-  const { data: memories, error: memoriesError } = await supabase
+  // Single query with join instead of N+1
+  const { data: memoriesWithStories, error } = await supabase
     .from('memories')
-    .select('*')
+    .select('*, stories(*)')
     .eq('user_id', userId)
     .order('updated_at', { ascending: false });
 
-  if (memoriesError || !memories) {
-    console.error('Error fetching memories:', memoriesError);
+  if (error || !memoriesWithStories) {
+    console.error('Error fetching memories:', error);
     return [];
   }
 
-  if (memories.length === 0) return [];
-
-  const memoryIds = memories.map((m) => m.id);
-  const { data: stories, error: storiesError } = await supabase
-    .from('stories')
-    .select('*')
-    .in('memory_id', memoryIds);
-
-  if (storiesError) {
-    console.error('Error fetching stories:', storiesError);
-    return [];
-  }
-
-  return memories.map((memory) => {
-    const memoryStories = (stories || []).filter((s) => s.memory_id === memory.id);
-    return toMemory(memory, memoryStories);
-  });
+  return (memoriesWithStories as DbMemoryWithStories[]).map((memory) =>
+    toMemory(memory, memory.stories || [])
+  );
 }
 
 // Get a single memory by ID (public - no auth required for viewing)
+// OPTIMIZED: Single query with join
 export async function getMemoryById(id: string): Promise<Memory | null> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
 
-  const { data: memory, error: memoryError } = await supabase
+  const { data: memoryWithStories, error } = await supabase
     .from('memories')
-    .select('*')
+    .select('*, stories(*)')
     .eq('id', id)
     .single();
 
-  if (memoryError || !memory) {
-    console.error('Error fetching memory:', memoryError);
+  if (error || !memoryWithStories) {
+    console.error('Error fetching memory:', error);
     return null;
   }
 
-  const { data: stories, error: storiesError } = await supabase
-    .from('stories')
-    .select('*')
-    .eq('memory_id', id)
-    .order('priority', { ascending: true });
-
-  if (storiesError) {
-    console.error('Error fetching stories:', storiesError);
-    return null;
-  }
-
-  return toMemory(memory, stories || []);
+  const memory = memoryWithStories as DbMemoryWithStories;
+  // Sort stories by priority
+  const sortedStories = (memory.stories || []).sort((a, b) => a.priority - b.priority);
+  return toMemory(memory, sortedStories);
 }
 
-// Save (create or update) a memory
+// Save (create or update) a memory - OPTIMIZED: Reduced round-trips
 export async function saveMemory(memory: Memory, userId: string): Promise<Memory | null> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
 
-  // Check if memory exists (for update)
-  const { data: existing } = await supabase
+  const now = new Date().toISOString();
+
+  // Use upsert for memory (insert or update in single query)
+  const { error: upsertError } = await supabase
     .from('memories')
-    .select('id')
-    .eq('id', memory.id)
-    .single();
-
-  if (existing) {
-    // Update existing memory
-    const { error: updateError } = await supabase
-      .from('memories')
-      .update({
-        title: memory.title,
-        theme: memory.theme,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', memory.id)
-      .eq('user_id', userId);
-
-    if (updateError) {
-      console.error('Error updating memory:', updateError);
-      return null;
-    }
-
-    // Delete existing stories and re-insert
-    await supabase.from('stories').delete().eq('memory_id', memory.id);
-  } else {
-    // Insert new memory
-    const { error: insertError } = await supabase.from('memories').insert({
+    .upsert({
       id: memory.id,
       user_id: userId,
       title: memory.title,
       theme: memory.theme,
       created_at: memory.createdAt,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       status: memory.status || 'pending',
+    }, {
+      onConflict: 'id',
     });
 
-    if (insertError) {
-      console.error('Error inserting memory:', insertError);
-      return null;
-    }
+  if (upsertError) {
+    console.error('Error upserting memory:', upsertError);
+    return null;
   }
 
-  // Insert stories
+  // Delete existing stories and re-insert (needed to handle reordering/deletions)
+  const { error: deleteError } = await supabase
+    .from('stories')
+    .delete()
+    .eq('memory_id', memory.id);
+
+  if (deleteError) {
+    console.error('Error deleting stories:', deleteError);
+    return null;
+  }
+
+  // Insert stories if any
   if (memory.stories.length > 0) {
     const storiesToInsert = memory.stories.map((story, index) => ({
       id: story.id,
@@ -155,7 +129,9 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       created_at: story.createdAt,
     }));
 
-    const { error: storiesError } = await supabase.from('stories').insert(storiesToInsert);
+    const { error: storiesError } = await supabase
+      .from('stories')
+      .insert(storiesToInsert);
 
     if (storiesError) {
       console.error('Error inserting stories:', storiesError);
@@ -163,7 +139,13 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
     }
   }
 
-  return getMemoryById(memory.id);
+  // Return constructed memory instead of re-fetching
+  return {
+    ...memory,
+    userId,
+    updatedAt: now,
+    status: memory.status || 'pending',
+  };
 }
 
 // Delete a memory

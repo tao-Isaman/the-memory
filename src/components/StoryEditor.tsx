@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
@@ -108,11 +108,28 @@ export default function StoryEditor({
   const [youtubeUrl, setYoutubeUrl] = useState(getInitialYoutubeUrl());
   const [uploading, setUploading] = useState(false);
 
+  // Track Object URL for cleanup to prevent memory leaks
+  const objectUrlRef = useRef<string | null>(null);
+
+  // Cleanup Object URL on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
+    };
+  }, []);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Cleanup previous Object URL if exists
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
       setImageFile(file);
       const previewUrl = URL.createObjectURL(file);
+      objectUrlRef.current = previewUrl;
       setImagePreview(previewUrl);
     }
   };
