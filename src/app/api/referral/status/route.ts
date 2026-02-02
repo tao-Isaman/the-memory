@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
-import { getUserReferral, getReferralCount } from '@/lib/referral';
+import { getUserReferral, getReferralSignupCount } from '@/lib/referral';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,20 +22,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         hasReferral: false,
         referralCode: null,
-        hasFreeMemory: false,
-        freeMemoryUsed: false,
-        referralCount: 0,
+        referralLink: null,
+        stats: {
+          totalSignups: 0,
+          totalPaidConversions: 0,
+          pendingDiscounts: 0,
+          claimedDiscounts: 0,
+        },
       });
     }
 
-    const referralCount = await getReferralCount(supabase, userId);
+    const totalSignups = await getReferralSignupCount(supabase, userId);
+
+    // Build referral link
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thememory.app';
+    const referralLink = `${baseUrl}?ref=${referral.referralCode}`;
 
     return NextResponse.json({
       hasReferral: true,
       referralCode: referral.referralCode,
-      hasFreeMemory: !!referral.referredBy && !referral.freeMemoryUsed,
-      freeMemoryUsed: referral.freeMemoryUsed,
-      referralCount,
+      referralLink,
+      stats: {
+        totalSignups,
+        totalPaidConversions: referral.paidReferralCount,
+        pendingDiscounts: referral.pendingDiscountClaims,
+        claimedDiscounts: referral.totalDiscountsClaimed,
+      },
     });
   } catch (error) {
     console.error('Referral status error:', error);

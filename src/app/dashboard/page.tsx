@@ -14,13 +14,13 @@ import PaymentButton from '@/components/PaymentButton';
 import ReferralSetupModal from '@/components/ReferralSetupModal';
 import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
 import { Plus, Share2, Pencil, Trash2, Eye } from 'lucide-react';
+import { ReferralStats } from '@/types/referral';
 
-interface ReferralStatus {
+interface ReferralStatusResponse {
   hasReferral: boolean;
   referralCode: string | null;
-  hasFreeMemory: boolean;
-  freeMemoryUsed: boolean;
-  referralCount: number;
+  referralLink: string | null;
+  stats: ReferralStats;
 }
 
 export default function DashboardPage() {
@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [showReferralSetup, setShowReferralSetup] = useState(false);
-  const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
+  const [referralStatus, setReferralStatus] = useState<ReferralStatusResponse | null>(null);
   const [referralLoading, setReferralLoading] = useState(true);
 
   const handleShare = (memory: Memory) => {
@@ -86,14 +86,8 @@ export default function DashboardPage() {
       throw new Error(data.error || 'Failed to setup referral');
     }
 
-    // Update referral status
-    setReferralStatus({
-      hasReferral: true,
-      referralCode: data.userReferralCode,
-      hasFreeMemory: data.hasFreeMemory,
-      freeMemoryUsed: false,
-      referralCount: 0,
-    });
+    // Refresh referral status
+    await checkReferralStatus();
     setShowReferralSetup(false);
   };
 
@@ -167,12 +161,15 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Referral Code Display */}
-        {!referralLoading && referralStatus?.referralCode && (
-          <div className="mt-6 max-w-sm mx-auto px-4">
+        {/* Referral Section */}
+        {!referralLoading && referralStatus?.referralCode && referralStatus?.referralLink && (
+          <div className="mt-6 max-w-md mx-auto px-4">
             <ReferralCodeDisplay
               code={referralStatus.referralCode}
-              referralCount={referralStatus.referralCount}
+              referralLink={referralStatus.referralLink}
+              stats={referralStatus.stats}
+              userId={user.id}
+              onClaimSuccess={checkReferralStatus}
             />
           </div>
         )}

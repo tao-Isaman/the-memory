@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         userReferralCode: existingReferral.referralCode,
-        hasFreeMemory: !!existingReferral.referredBy && !existingReferral.freeMemoryUsed,
         referredBy: existingReferral.referredBy,
+        isExisting: true,
       });
     }
 
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       userReferralCode: newReferral.referralCode,
-      hasFreeMemory: !!referredByUserId,
       referredBy: referredByUserId || null,
+      isExisting: false,
     });
   } catch (error) {
     console.error('Referral setup error:', error);

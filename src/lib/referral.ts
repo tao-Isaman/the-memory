@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
-import { UserReferral } from '@/types/referral';
+import { UserReferral, ReferralConversion } from '@/types/referral';
 
 // Characters for referral code (no confusing chars: 0, O, 1, I, L)
 const CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -14,15 +14,33 @@ export function generateReferralCode(): string {
   return code;
 }
 
+export function generateReferralLink(code: string, baseUrl: string): string {
+  return `${baseUrl}?ref=${code}`;
+}
+
 export function toUserReferral(row: Database['public']['Tables']['user_referrals']['Row']): UserReferral {
   return {
     id: row.id,
     userId: row.user_id,
     referralCode: row.referral_code,
     referredBy: row.referred_by,
-    freeMemoryUsed: row.free_memory_used,
+    paidReferralCount: row.paid_referral_count,
+    pendingDiscountClaims: row.pending_discount_claims,
+    totalDiscountsClaimed: row.total_discounts_claimed,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+export function toReferralConversion(row: Database['public']['Tables']['referral_conversions']['Row']): ReferralConversion {
+  return {
+    id: row.id,
+    referrerId: row.referrer_id,
+    referredId: row.referred_id,
+    memoryId: row.memory_id,
+    convertedAt: row.converted_at,
+    discountClaimed: row.discount_claimed,
+    claimedAt: row.claimed_at,
   };
 }
 
@@ -78,7 +96,9 @@ export async function createUserReferral(
         user_id: userId,
         referral_code: code,
         referred_by: referredByUserId || null,
-        free_memory_used: false,
+        paid_referral_count: 0,
+        pending_discount_claims: 0,
+        total_discounts_claimed: 0,
       })
       .select()
       .single();
@@ -99,7 +119,8 @@ export async function createUserReferral(
   return null;
 }
 
-export async function getReferralCount(
+// Get count of users who signed up with this user's referral code
+export async function getReferralSignupCount(
   supabase: SupabaseClient<Database>,
   userId: string
 ): Promise<number> {
@@ -115,32 +136,120 @@ export async function getReferralCount(
   return count || 0;
 }
 
-export async function markFreeMemoryUsed(
+// Record a conversion when a referred user makes their first payment
+export async function recordReferralConversion(
   supabase: SupabaseClient<Database>,
-  userId: string
+  referrerId: string,
+  referredId: string,
+  memoryId: string
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from('user_referrals')
-    .update({ free_memory_used: true })
-    .eq('user_id', userId);
+  // Check if conversion already exists for this referred user
+  const { data: existing } = await supabase
+    .from('referral_conversions')
+    .select('id')
+    .eq('referred_id', referredId)
+    .single();
 
-  return !error;
+  if (existing) {
+    // Already converted, skip
+    return true;
+  }
+
+  // Create conversion record
+  const { error: conversionError } = await supabase
+    .from('referral_conversions')
+    .insert({
+      referrer_id: referrerId,
+      referred_id: referredId,
+      memory_id: memoryId,
+    });
+
+  if (conversionError) {
+    console.error('Error creating conversion:', conversionError);
+    return false;
+  }
+
+  // Update referrer's stats - manual increment
+  const referral = await getUserReferral(supabase, referrerId);
+  if (referral) {
+    const { error: updateError } = await supabase
+      .from('user_referrals')
+      .update({
+        paid_referral_count: referral.paidReferralCount + 1,
+        pending_discount_claims: referral.pendingDiscountClaims + 1,
+      })
+      .eq('user_id', referrerId);
+
+    if (updateError) {
+      console.error('Error updating referrer stats:', updateError);
+      return false;
+    }
+  }
+
+  return true;
 }
 
-export async function activateMemoryForFree(
+// Claim a discount (decrement pending, increment claimed)
+export async function claimDiscount(
   supabase: SupabaseClient<Database>,
-  memoryId: string,
   userId: string
-): Promise<boolean> {
-  // Update memory status to active
+): Promise<{ success: boolean; remainingClaims: number }> {
+  const referral = await getUserReferral(supabase, userId);
+
+  if (!referral || referral.pendingDiscountClaims <= 0) {
+    return { success: false, remainingClaims: 0 };
+  }
+
   const { error } = await supabase
-    .from('memories')
+    .from('user_referrals')
     .update({
-      status: 'active',
-      paid_at: new Date().toISOString(),
+      pending_discount_claims: referral.pendingDiscountClaims - 1,
+      total_discounts_claimed: referral.totalDiscountsClaimed + 1,
     })
-    .eq('id', memoryId)
     .eq('user_id', userId);
 
-  return !error;
+  if (error) {
+    return { success: false, remainingClaims: referral.pendingDiscountClaims };
+  }
+
+  // Mark one conversion as claimed
+  await supabase
+    .from('referral_conversions')
+    .update({
+      discount_claimed: true,
+      claimed_at: new Date().toISOString(),
+    })
+    .eq('referrer_id', userId)
+    .eq('discount_claimed', false)
+    .limit(1);
+
+  return {
+    success: true,
+    remainingClaims: referral.pendingDiscountClaims - 1,
+  };
+}
+
+// Check if user has made any payment before (for first payment detection)
+export async function hasUserPaidBefore(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  excludeMemoryId?: string
+): Promise<boolean> {
+  let query = supabase
+    .from('memories')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'active');
+
+  if (excludeMemoryId) {
+    query = query.neq('id', excludeMemoryId);
+  }
+
+  const { count, error } = await query;
+
+  if (error) {
+    return false;
+  }
+
+  return (count || 0) > 0;
 }

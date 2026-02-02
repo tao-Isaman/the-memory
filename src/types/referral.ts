@@ -3,22 +3,40 @@ export interface UserReferral {
   userId: string;
   referralCode: string;
   referredBy: string | null;
-  freeMemoryUsed: boolean;
+  paidReferralCount: number;
+  pendingDiscountClaims: number;
+  totalDiscountsClaimed: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ReferralStatus {
-  referralCode: string;
-  hasFreeMemory: boolean;
-  freeMemoryUsed: boolean;
-  referralCount: number;
+export interface ReferralConversion {
+  id: string;
+  referrerId: string;
+  referredId: string;
+  memoryId: string;
+  convertedAt: string;
+  discountClaimed: boolean;
+  claimedAt: string | null;
+}
+
+export interface ReferralStats {
+  totalSignups: number;
+  totalPaidConversions: number;
+  pendingDiscounts: number;
+  claimedDiscounts: number;
+}
+
+export interface ReferralStatusResponse {
+  hasReferral: boolean;
+  referralCode: string | null;
+  referralLink: string | null;
+  stats: ReferralStats;
 }
 
 export interface ReferralSetupResponse {
   success: boolean;
   userReferralCode: string;
-  hasFreeMemory: boolean;
   referredBy: string | null;
   error?: string;
 }
@@ -28,9 +46,8 @@ export interface ReferralValidateResponse {
   error?: string;
 }
 
-export interface UseFreeMemoryResponse {
+export interface ClaimDiscountResponse {
   success: boolean;
-  memoryId: string;
-  status: string;
+  remainingClaims: number;
   error?: string;
 }

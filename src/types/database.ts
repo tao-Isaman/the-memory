@@ -91,7 +91,9 @@ export interface Database {
           user_id: string
           referral_code: string
           referred_by: string | null
-          free_memory_used: boolean
+          paid_referral_count: number
+          pending_discount_claims: number
+          total_discounts_claimed: number
           created_at: string
           updated_at: string
         }
@@ -100,7 +102,9 @@ export interface Database {
           user_id: string
           referral_code: string
           referred_by?: string | null
-          free_memory_used?: boolean
+          paid_referral_count?: number
+          pending_discount_claims?: number
+          total_discounts_claimed?: number
           created_at?: string
           updated_at?: string
         }
@@ -109,7 +113,9 @@ export interface Database {
           user_id?: string
           referral_code?: string
           referred_by?: string | null
-          free_memory_used?: boolean
+          paid_referral_count?: number
+          pending_discount_claims?: number
+          total_discounts_claimed?: number
           created_at?: string
           updated_at?: string
         }
@@ -124,6 +130,55 @@ export interface Database {
             foreignKeyName: "user_referrals_referred_by_fkey"
             columns: ["referred_by"]
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          id: string
+          referrer_id: string
+          referred_id: string
+          memory_id: string
+          converted_at: string
+          discount_claimed: boolean
+          claimed_at: string | null
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          referred_id: string
+          memory_id: string
+          converted_at?: string
+          discount_claimed?: boolean
+          claimed_at?: string | null
+        }
+        Update: {
+          id?: string
+          referrer_id?: string
+          referred_id?: string
+          memory_id?: string
+          converted_at?: string
+          discount_claimed?: boolean
+          claimed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_conversions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_conversions_referred_id_fkey"
+            columns: ["referred_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_conversions_memory_id_fkey"
+            columns: ["memory_id"]
+            referencedRelation: "memories"
             referencedColumns: ["id"]
           }
         ]

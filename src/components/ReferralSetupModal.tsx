@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import HeartIcon from './HeartIcon';
-import { X, Gift, Loader2 } from 'lucide-react';
+import { X, Users, Loader2 } from 'lucide-react';
 
 interface ReferralSetupModalProps {
   isOpen: boolean;
@@ -60,8 +60,8 @@ export default function ReferralSetupModal({ isOpen, onSubmit, onSkip }: Referra
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <Gift size={24} className="text-[#E63946]" />
-            <h2 className="text-xl font-bold text-[#E63946]">โค้ดแนะนำ</h2>
+            <Users size={24} className="text-[#E63946]" />
+            <h2 className="text-xl font-bold text-[#E63946]">ลิงก์แนะนำ</h2>
           </div>
           <button
             onClick={handleSkip}
@@ -72,12 +72,12 @@ export default function ReferralSetupModal({ isOpen, onSubmit, onSkip }: Referra
           </button>
         </div>
 
-        {/* Promo Text */}
+        {/* Info Text */}
         <div className="text-center mb-6 p-4 bg-pink-50 rounded-xl border border-pink-200">
           <HeartIcon size={32} className="mx-auto mb-2 text-[#E63946]" filled />
-          <p className="text-gray-700 font-medium">คุณมีโค้ดแนะนำหรือไม่?</p>
+          <p className="text-gray-700 font-medium">คุณมาจากลิงก์แนะนำหรือไม่?</p>
           <p className="text-sm text-gray-500 mt-1">
-            ใส่โค้ดแนะนำเพื่อรับสิทธิ์สร้างความทรงจำฟรี 1 ครั้ง!
+            หากคุณได้รับโค้ดแนะนำ ใส่โค้ดเพื่อบันทึกผู้แนะนำ
           </p>
         </div>
 
@@ -110,9 +110,9 @@ export default function ReferralSetupModal({ isOpen, onSubmit, onSkip }: Referra
             {loading ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
-              <Gift size={18} />
+              <Users size={18} />
             )}
-            {loading ? 'กำลังตรวจสอบ...' : 'ใช้โค้ด'}
+            {loading ? 'กำลังตรวจสอบ...' : 'ยืนยันโค้ด'}
           </button>
           <button
             onClick={handleSkip}
