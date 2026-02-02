@@ -263,7 +263,21 @@ function CreatePageContent() {
 
         {/* Save Button */}
         <div className="mt-8 flex gap-4 justify-center">
-          <Link href="/dashboard" className="btn-secondary">
+          <Link
+            href="/dashboard"
+            className="font-semibold py-3 px-6 rounded-full transition-all border-2"
+            style={{
+              borderColor: themeColors.primary,
+              color: themeColors.dark,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
             ยกเลิก
           </Link>
           <button
@@ -326,7 +340,18 @@ function CreatePageContent() {
                   setShowPaymentPrompt(false);
                   router.push(`/memory/${savedMemoryId}`);
                 }}
-                className="btn-secondary w-full"
+                className="w-full font-semibold py-3 px-6 rounded-full transition-all border-2"
+                style={{
+                  borderColor: themeColors.primary,
+                  color: themeColors.dark,
+                  backgroundColor: 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = themeColors.accent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 ดูตัวอย่างก่อน
               </button>
@@ -335,7 +360,14 @@ function CreatePageContent() {
                   setShowPaymentPrompt(false);
                   router.push('/dashboard');
                 }}
-                className="text-gray-500 hover:text-gray-700 text-sm"
+                className="text-sm transition-colors"
+                style={{ color: themeColors.dark }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.7';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
               >
                 กลับไปหน้าหลัก
               </button>
