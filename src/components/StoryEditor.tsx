@@ -451,7 +451,22 @@ export default function StoryEditor({
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">
-          <button type="button" onClick={onCancel} className="btn-secondary flex-1">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 font-semibold py-3 px-6 rounded-full transition-all border-2"
+            style={{
+              borderColor: themeColors.primary,
+              color: themeColors.dark,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
             ยกเลิก
           </button>
           <button
