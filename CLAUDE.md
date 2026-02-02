@@ -346,6 +346,13 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 - [x] Webhook backup for async payments
 - [x] Payment status tracking
 
+### Referral System
+- [x] 6-character referral codes
+- [x] New user discount (50 THB)
+- [x] Referrer money claim (50 THB per paid referral)
+- [x] Claim via PromptPay or Bank Transfer
+- [x] Admin claim processing
+
 ### UI/UX
 - [x] Responsive design (mobile-first)
 - [x] Valentine/romantic theme
@@ -385,6 +392,71 @@ npm run build
 # Start production server
 npm start
 ```
+
+## Referral System Architecture
+
+### Overview
+- **Referrer (old user)**: Shares 6-char code, earns 50 THB when referred users pay
+- **Referred (new user)**: Uses code at signup, gets 50 THB discount on first payment
+
+### Database Tables
+- `user_referrals`: User's referral code and who referred them
+- `referral_claims`: Admin records of payout requests (PromptPay/Bank)
+- `referral_conversions`: Records when referred users pay (optional, for tracking)
+
+### CRITICAL: Pending Claims Calculation
+**ALWAYS calculate `pendingDiscounts` dynamically, NEVER use stored counters!**
+
+```
+pendingDiscounts = (paid referred users) - (claims submitted)
+```
+
+**Why:** Stored counters (`pending_discount_claims` column) can get out of sync if:
+- Payment webhook fails to increment counter
+- Manual database changes
+- Race conditions
+
+**Correct Implementation (`/api/referral/status` and `/api/referral/claim-discount`):**
+```typescript
+// Count paid referred users from memories table
+const { data: referredUsers } = await supabase
+  .from('user_referrals')
+  .select('user_id')
+  .eq('referred_by', userId);
+
+const userIds = referredUsers.map(u => u.user_id);
+const { data: paidMemories } = await supabase
+  .from('memories')
+  .select('user_id')
+  .in('user_id', userIds)
+  .eq('status', 'active');
+
+const paidCount = new Set(paidMemories.map(m => m.user_id)).size;
+
+// Count claims already submitted
+const { count: claimedCount } = await supabase
+  .from('referral_claims')
+  .select('*', { count: 'exact', head: true })
+  .eq('user_id', userId);
+
+// Dynamic calculation
+const pendingDiscounts = Math.max(0, paidCount - (claimedCount || 0));
+```
+
+### API Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/referral/setup` | POST | Create/link referral code |
+| `/api/referral/status` | GET | Get code + stats (uses dynamic calculation) |
+| `/api/referral/claim-discount` | POST | Submit claim request |
+| `/api/referral/claim-discount` | GET | Get claim history |
+| `/api/referral/check-discount` | GET | Check new user discount eligibility |
+| `/api/referral/referred-users` | GET | List users who used referrer's code |
+
+### Components
+- `ReferralCodeDisplay.tsx`: Shows code, stats, claim button, referred users list
+- `ClaimMoneyModal.tsx`: Form for PromptPay/Bank Transfer claim
+- `ClaimHistorySection.tsx`: Shows claim status (pending/completed/rejected)
 
 ## Performance Optimizations
 
