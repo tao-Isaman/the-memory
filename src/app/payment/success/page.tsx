@@ -12,12 +12,19 @@ function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const memoryId = searchParams.get('memory_id');
   const sessionId = searchParams.get('session_id');
+  const isFree = searchParams.get('free') === 'true';
 
   const [status, setStatus] = useState<'loading' | 'success' | 'pending' | 'error'>('loading');
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     async function verifyPayment() {
+      // If this is a free memory activation, skip payment verification
+      if (isFree && memoryId) {
+        setStatus('success');
+        return;
+      }
+
       if (!sessionId) {
         setStatus('error');
         return;
@@ -46,7 +53,7 @@ function PaymentSuccessContent() {
     }
 
     verifyPayment();
-  }, [sessionId]);
+  }, [sessionId, isFree, memoryId]);
 
   if (status === 'loading') {
     return (
@@ -64,7 +71,11 @@ function PaymentSuccessContent() {
         </div>
 
         <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
-          {status === 'success' ? 'ชำระเงินสำเร็จ!' : status === 'pending' ? 'กำลังดำเนินการชำระเงิน' : 'เกิดข้อผิดพลาด'}
+          {status === 'success'
+            ? (isFree ? 'ใช้สิทธิ์ฟรีสำเร็จ!' : 'ชำระเงินสำเร็จ!')
+            : status === 'pending'
+              ? 'กำลังดำเนินการชำระเงิน'
+              : 'เกิดข้อผิดพลาด'}
         </h1>
 
         {status === 'pending' ? (
@@ -74,7 +85,9 @@ function PaymentSuccessContent() {
           </p>
         ) : status === 'success' ? (
           <p className="text-gray-600 mb-6">
-            ความทรงจำของคุณพร้อมแชร์กับคนพิเศษแล้ว!
+            {isFree
+              ? 'คุณได้ใช้สิทธิ์ความทรงจำฟรีจากโค้ดแนะนำเรียบร้อยแล้ว!'
+              : 'ความทรงจำของคุณพร้อมแชร์กับคนพิเศษแล้ว!'}
           </p>
         ) : (
           <p className="text-gray-600 mb-6">

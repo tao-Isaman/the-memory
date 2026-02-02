@@ -11,7 +11,17 @@ import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
+import ReferralSetupModal from '@/components/ReferralSetupModal';
+import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
 import { Plus, Share2, Pencil, Trash2, Eye } from 'lucide-react';
+
+interface ReferralStatus {
+  hasReferral: boolean;
+  referralCode: string | null;
+  hasFreeMemory: boolean;
+  freeMemoryUsed: boolean;
+  referralCount: number;
+}
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -20,6 +30,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [showReferralSetup, setShowReferralSetup] = useState(false);
+  const [referralStatus, setReferralStatus] = useState<ReferralStatus | null>(null);
+  const [referralLoading, setReferralLoading] = useState(true);
 
   const handleShare = (memory: Memory) => {
     setSelectedMemory(memory);
@@ -34,6 +47,56 @@ export default function DashboardPage() {
     setLoading(false);
   }, [user]);
 
+  const checkReferralStatus = useCallback(async () => {
+    if (!user) return;
+    setReferralLoading(true);
+    try {
+      const response = await fetch(`/api/referral/status?userId=${user.id}`);
+      const data = await response.json();
+      setReferralStatus(data);
+
+      // Show setup modal if user doesn't have a referral record yet
+      if (!data.hasReferral) {
+        setShowReferralSetup(true);
+      }
+    } catch (error) {
+      console.error('Error checking referral status:', error);
+    } finally {
+      setReferralLoading(false);
+    }
+  }, [user]);
+
+  const handleReferralSetup = async (code: string | null) => {
+    if (!user) return;
+
+    const response = await fetch('/api/referral/setup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        referralCode: code,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to setup referral');
+    }
+
+    // Update referral status
+    setReferralStatus({
+      hasReferral: true,
+      referralCode: data.userReferralCode,
+      hasFreeMemory: data.hasFreeMemory,
+      freeMemoryUsed: false,
+      referralCount: 0,
+    });
+    setShowReferralSetup(false);
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -43,8 +106,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       loadMemories();
+      checkReferralStatus();
     }
-  }, [user, loadMemories]);
+  }, [user, loadMemories, checkReferralStatus]);
 
   const handleDelete = async (id: string) => {
     if (!user) return;
@@ -102,6 +166,16 @@ export default function DashboardPage() {
             ออกจากระบบ
           </button>
         </div>
+
+        {/* Referral Code Display */}
+        {!referralLoading && referralStatus?.referralCode && (
+          <div className="mt-6 max-w-sm mx-auto px-4">
+            <ReferralCodeDisplay
+              code={referralStatus.referralCode}
+              referralCount={referralStatus.referralCount}
+            />
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -223,6 +297,13 @@ export default function DashboardPage() {
           showSuccessMessage={false}
         />
       )}
+
+      {/* Referral Setup Modal */}
+      <ReferralSetupModal
+        isOpen={showReferralSetup}
+        onSubmit={handleReferralSetup}
+        onSkip={() => setShowReferralSetup(false)}
+      />
     </main>
   );
 }

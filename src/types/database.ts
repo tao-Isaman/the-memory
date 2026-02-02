@@ -85,6 +85,49 @@ export interface Database {
           }
         ]
       }
+      user_referrals: {
+        Row: {
+          id: string
+          user_id: string
+          referral_code: string
+          referred_by: string | null
+          free_memory_used: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          referral_code: string
+          referred_by?: string | null
+          free_memory_used?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          referral_code?: string
+          referred_by?: string | null
+          free_memory_used?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_referrals_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_referrals_referred_by_fkey"
+            columns: ["referred_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
