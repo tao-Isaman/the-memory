@@ -183,6 +183,58 @@ export interface Database {
           }
         ]
       }
+      referral_claims: {
+        Row: {
+          id: string
+          user_id: string
+          user_email: string
+          amount: number
+          payment_method: string
+          payment_info: string
+          bank_name: string | null
+          account_name: string | null
+          status: string
+          admin_note: string | null
+          created_at: string
+          processed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          user_email: string
+          amount?: number
+          payment_method: string
+          payment_info: string
+          bank_name?: string | null
+          account_name?: string | null
+          status?: string
+          admin_note?: string | null
+          created_at?: string
+          processed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          user_email?: string
+          amount?: number
+          payment_method?: string
+          payment_info?: string
+          bank_name?: string | null
+          account_name?: string | null
+          status?: string
+          admin_note?: string | null
+          created_at?: string
+          processed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_claims_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

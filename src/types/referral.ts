@@ -46,8 +46,34 @@ export interface ReferralValidateResponse {
   error?: string;
 }
 
+export type PaymentMethod = 'promptpay' | 'bank_transfer';
+export type ClaimStatus = 'pending' | 'completed' | 'rejected';
+
+export interface ReferralClaim {
+  id: string;
+  userId: string;
+  userEmail: string;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  paymentInfo: string;
+  bankName: string | null;
+  accountName: string | null;
+  status: ClaimStatus;
+  adminNote: string | null;
+  createdAt: string;
+  processedAt: string | null;
+}
+
+export interface ClaimRequest {
+  paymentMethod: PaymentMethod;
+  paymentInfo: string;
+  bankName?: string;
+  accountName?: string;
+}
+
 export interface ClaimDiscountResponse {
   success: boolean;
+  claim?: ReferralClaim;
   remainingClaims: number;
   error?: string;
 }

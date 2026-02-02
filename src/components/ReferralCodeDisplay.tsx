@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Copy, Check, Share2, Users, Gift, Loader2 } from 'lucide-react';
-import { ReferralStats } from '@/types/referral';
+import { useState, useEffect } from 'react';
+import { Copy, Check, Share2, Users, Gift, Loader2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { ReferralStats, PaymentMethod } from '@/types/referral';
 
 interface ReferralCodeDisplayProps {
   code: string;
@@ -10,6 +10,18 @@ interface ReferralCodeDisplayProps {
   stats: ReferralStats;
   userId: string;
   onClaimSuccess?: () => void;
+}
+
+interface ClaimRecord {
+  id: string;
+  amount: number;
+  paymentMethod: string;
+  paymentInfo: string;
+  bankName: string | null;
+  status: string;
+  adminNote: string | null;
+  createdAt: string;
+  processedAt: string | null;
 }
 
 export default function ReferralCodeDisplay({
@@ -21,8 +33,17 @@ export default function ReferralCodeDisplay({
 }: ReferralCodeDisplayProps) {
   const [copied, setCopied] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showClaimForm, setShowClaimForm] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimMessage, setClaimMessage] = useState<string | null>(null);
+  const [claims, setClaims] = useState<ClaimRecord[]>([]);
+  const [loadingClaims, setLoadingClaims] = useState(false);
+
+  // Form state
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('promptpay');
+  const [paymentInfo, setPaymentInfo] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [accountName, setAccountName] = useState('');
 
   const handleCopyCode = async () => {
     try {
@@ -58,8 +79,38 @@ export default function ReferralCodeDisplay({
     }
   };
 
-  const handleClaimDiscount = async () => {
-    if (claiming || stats.pendingDiscounts <= 0) return;
+  const fetchClaims = async () => {
+    setLoadingClaims(true);
+    try {
+      const response = await fetch(`/api/referral/claim-discount?userId=${userId}`);
+      const data = await response.json();
+      if (data.claims) {
+        setClaims(data.claims);
+      }
+    } catch (error) {
+      console.error('Failed to fetch claims:', error);
+    } finally {
+      setLoadingClaims(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchClaims();
+  }, [userId]);
+
+  const handleSubmitClaim = async () => {
+    if (claiming) return;
+
+    // Validation
+    if (!paymentInfo.trim()) {
+      setClaimMessage('กรุณากรอกข้อมูลการรับเงิน');
+      return;
+    }
+
+    if (paymentMethod === 'bank_transfer' && (!bankName.trim() || !accountName.trim())) {
+      setClaimMessage('กรุณากรอกชื่อธนาคารและชื่อบัญชี');
+      return;
+    }
 
     setClaiming(true);
     setClaimMessage(null);
@@ -68,13 +119,24 @@ export default function ReferralCodeDisplay({
       const response = await fetch('/api/referral/claim-discount', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({
+          userId,
+          paymentMethod,
+          paymentInfo: paymentInfo.trim(),
+          bankName: bankName.trim() || undefined,
+          accountName: accountName.trim() || undefined,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         setClaimMessage(data.message);
+        setShowClaimForm(false);
+        setPaymentInfo('');
+        setBankName('');
+        setAccountName('');
+        fetchClaims();
         onClaimSuccess?.();
       } else {
         setClaimMessage(data.error || 'เกิดข้อผิดพลาด');
@@ -84,6 +146,44 @@ export default function ReferralCodeDisplay({
     } finally {
       setClaiming(false);
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+            <Clock size={12} />
+            รอดำเนินการ
+          </span>
+        );
+      case 'completed':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+            <CheckCircle size={12} />
+            โอนแล้ว
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+            <XCircle size={12} />
+            ปฏิเสธ
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -159,41 +259,191 @@ export default function ReferralCodeDisplay({
         </div>
       </div>
 
-      {/* Discount Claims Section */}
+      {/* Claim Section */}
       {stats.pendingDiscounts > 0 && (
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-yellow-800">
-                คุณมีสิทธิ์รับเงิน 50 บาท
-              </p>
-              <p className="text-sm text-yellow-600">
-                {stats.pendingDiscounts} สิทธิ์ (จากคนที่ชำระเงินผ่านลิงก์คุณ)
-              </p>
-            </div>
-            <button
-              onClick={handleClaimDiscount}
-              disabled={claiming}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {claiming ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
+          {!showClaimForm ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-yellow-800">
+                  คุณมีสิทธิ์รับเงิน 50 บาท
+                </p>
+                <p className="text-sm text-yellow-600">
+                  {stats.pendingDiscounts} สิทธิ์ (จากคนที่ชำระเงินผ่านลิงก์คุณ)
+                </p>
+              </div>
+              <button
+                onClick={() => setShowClaimForm(true)}
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2"
+              >
                 <Gift size={16} />
+                ขอรับเงิน
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h4 className="font-medium text-yellow-800">กรอกข้อมูลรับเงิน</h4>
+
+              {/* Payment Method Selection */}
+              <div>
+                <label className="block text-sm text-gray-700 mb-2">วิธีรับเงิน</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('promptpay')}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      paymentMethod === 'promptpay'
+                        ? 'bg-yellow-500 text-white'
+                        : 'bg-white text-gray-700 border border-gray-200'
+                    }`}
+                  >
+                    PromptPay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('bank_transfer')}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      paymentMethod === 'bank_transfer'
+                        ? 'bg-yellow-500 text-white'
+                        : 'bg-white text-gray-700 border border-gray-200'
+                    }`}
+                  >
+                    โอนผ่านธนาคาร
+                  </button>
+                </div>
+              </div>
+
+              {/* PromptPay */}
+              {paymentMethod === 'promptpay' && (
+                <div>
+                  <label className="block text-sm text-gray-700 mb-1">
+                    เบอร์โทร PromptPay
+                  </label>
+                  <input
+                    type="tel"
+                    value={paymentInfo}
+                    onChange={(e) => setPaymentInfo(e.target.value)}
+                    placeholder="0812345678"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                  />
+                </div>
               )}
-              ขอรับเงิน
-            </button>
-          </div>
-          {claimMessage && (
-            <p className={`mt-2 text-sm ${claimMessage.includes('สำเร็จ') ? 'text-green-600' : 'text-red-600'}`}>
-              {claimMessage}
-            </p>
+
+              {/* Bank Transfer */}
+              {paymentMethod === 'bank_transfer' && (
+                <>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">ธนาคาร</label>
+                    <select
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    >
+                      <option value="">เลือกธนาคาร</option>
+                      <option value="กสิกรไทย">กสิกรไทย (KBANK)</option>
+                      <option value="ไทยพาณิชย์">ไทยพาณิชย์ (SCB)</option>
+                      <option value="กรุงเทพ">กรุงเทพ (BBL)</option>
+                      <option value="กรุงไทย">กรุงไทย (KTB)</option>
+                      <option value="กรุงศรี">กรุงศรี (BAY)</option>
+                      <option value="ทหารไทยธนชาต">ทหารไทยธนชาต (TTB)</option>
+                      <option value="ออมสิน">ออมสิน (GSB)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">เลขบัญชี</label>
+                    <input
+                      type="text"
+                      value={paymentInfo}
+                      onChange={(e) => setPaymentInfo(e.target.value)}
+                      placeholder="1234567890"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-1">ชื่อบัญชี</label>
+                    <input
+                      type="text"
+                      value={accountName}
+                      onChange={(e) => setAccountName(e.target.value)}
+                      placeholder="ชื่อ นามสกุล"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+                    />
+                  </div>
+                </>
+              )}
+
+              {claimMessage && (
+                <p className={`text-sm ${claimMessage.includes('สำเร็จ') ? 'text-green-600' : 'text-red-600'}`}>
+                  {claimMessage}
+                </p>
+              )}
+
+              {/* Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowClaimForm(false);
+                    setClaimMessage(null);
+                  }}
+                  className="flex-1 py-2 px-3 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  onClick={handleSubmitClaim}
+                  disabled={claiming}
+                  className="flex-1 py-2 px-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {claiming ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Gift size={16} />
+                  )}
+                  {claiming ? 'กำลังส่ง...' : 'ยืนยันขอรับเงิน'}
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
 
-      {/* Claimed discounts info */}
-      {stats.claimedDiscounts > 0 && (
+      {/* Claim History */}
+      {claims.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+            <h4 className="font-medium text-gray-800">ประวัติการขอรับเงิน</h4>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {loadingClaims ? (
+              <div className="p-4 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+            ) : (
+              claims.map((claim) => (
+                <div key={claim.id} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-800">{claim.amount} บาท</span>
+                    {getStatusBadge(claim.status)}
+                  </div>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>
+                      {claim.paymentMethod === 'promptpay' ? 'PromptPay' : claim.bankName}: {claim.paymentInfo}
+                    </p>
+                    <p>ส่งคำขอเมื่อ: {formatDate(claim.createdAt)}</p>
+                    {claim.processedAt && (
+                      <p>ดำเนินการเมื่อ: {formatDate(claim.processedAt)}</p>
+                    )}
+                    {claim.adminNote && (
+                      <p className="text-gray-600">หมายเหตุ: {claim.adminNote}</p>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Claimed count info */}
+      {stats.claimedDiscounts > 0 && claims.length === 0 && (
         <p className="text-xs text-gray-400 text-center">
           ขอรับเงินไปแล้ว {stats.claimedDiscounts} ครั้ง
         </p>
