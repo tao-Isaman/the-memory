@@ -11,17 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
-import ReferralSetupModal from '@/components/ReferralSetupModal';
-import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
-import { Plus, Share2, Pencil, Trash2, Eye } from 'lucide-react';
-import { ReferralStats } from '@/types/referral';
-
-interface ReferralStatusResponse {
-  hasReferral: boolean;
-  referralCode: string | null;
-  referralLink: string | null;
-  stats: ReferralStats;
-}
+import { Plus, Share2, Pencil, Trash2, Eye, Users } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -30,9 +20,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  const [showReferralSetup, setShowReferralSetup] = useState(false);
-  const [referralStatus, setReferralStatus] = useState<ReferralStatusResponse | null>(null);
-  const [referralLoading, setReferralLoading] = useState(true);
 
   const handleShare = (memory: Memory) => {
     setSelectedMemory(memory);
@@ -47,50 +34,6 @@ export default function DashboardPage() {
     setLoading(false);
   }, [user]);
 
-  const checkReferralStatus = useCallback(async () => {
-    if (!user) return;
-    setReferralLoading(true);
-    try {
-      const response = await fetch(`/api/referral/status?userId=${user.id}`);
-      const data = await response.json();
-      setReferralStatus(data);
-
-      // Show setup modal if user doesn't have a referral record yet
-      if (!data.hasReferral) {
-        setShowReferralSetup(true);
-      }
-    } catch (error) {
-      console.error('Error checking referral status:', error);
-    } finally {
-      setReferralLoading(false);
-    }
-  }, [user]);
-
-  const handleReferralSetup = async (code: string | null) => {
-    if (!user) return;
-
-    const response = await fetch('/api/referral/setup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        referralCode: code,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || 'Failed to setup referral');
-    }
-
-    // Refresh referral status
-    await checkReferralStatus();
-    setShowReferralSetup(false);
-  };
-
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
@@ -100,9 +43,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       loadMemories();
-      checkReferralStatus();
     }
-  }, [user, loadMemories, checkReferralStatus]);
+  }, [user, loadMemories]);
 
   const handleDelete = async (id: string) => {
     if (!user) return;
@@ -161,18 +103,16 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Referral Section */}
-        {!referralLoading && referralStatus?.referralCode && referralStatus?.referralLink && (
-          <div className="mt-6 max-w-md mx-auto px-4">
-            <ReferralCodeDisplay
-              code={referralStatus.referralCode}
-              referralLink={referralStatus.referralLink}
-              stats={referralStatus.stats}
-              userId={user.id}
-              onClaimSuccess={checkReferralStatus}
-            />
-          </div>
-        )}
+        {/* Referral Link */}
+        <div className="mt-4">
+          <Link
+            href="/dashboard/referral"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full text-sm text-[#E63946] hover:from-pink-100 hover:to-red-100 transition-colors"
+          >
+            <Users size={16} />
+            <span>ลิงก์แนะนำ &amp; รับส่วนลด</span>
+          </Link>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -295,12 +235,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Referral Setup Modal */}
-      <ReferralSetupModal
-        isOpen={showReferralSetup}
-        onSubmit={handleReferralSetup}
-        onSkip={() => setShowReferralSetup(false)}
-      />
     </main>
   );
 }

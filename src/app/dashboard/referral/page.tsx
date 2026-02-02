@@ -1,0 +1,187 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
+import ReferralSetupModal from '@/components/ReferralSetupModal';
+import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
+import { ArrowLeft, Users } from 'lucide-react';
+import { ReferralStats } from '@/types/referral';
+
+interface ReferralStatusResponse {
+  hasReferral: boolean;
+  referralCode: string | null;
+  referralLink: string | null;
+  stats: ReferralStats;
+}
+
+export default function ReferralPage() {
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [showReferralSetup, setShowReferralSetup] = useState(false);
+  const [referralStatus, setReferralStatus] = useState<ReferralStatusResponse | null>(null);
+  const [referralLoading, setReferralLoading] = useState(true);
+
+  const checkReferralStatus = useCallback(async () => {
+    if (!user) return;
+    setReferralLoading(true);
+    try {
+      const response = await fetch(`/api/referral/status?userId=${user.id}`);
+      const data = await response.json();
+      setReferralStatus(data);
+
+      // Show setup modal if user doesn't have a referral record yet
+      if (!data.hasReferral) {
+        setShowReferralSetup(true);
+      }
+    } catch (error) {
+      console.error('Error checking referral status:', error);
+    } finally {
+      setReferralLoading(false);
+    }
+  }, [user]);
+
+  const handleReferralSetup = async (code: string | null) => {
+    if (!user) return;
+
+    const response = await fetch('/api/referral/setup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        referralCode: code,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to setup referral');
+    }
+
+    // Refresh referral status
+    await checkReferralStatus();
+    setShowReferralSetup(false);
+  };
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [authLoading, user, router]);
+
+  useEffect(() => {
+    if (user) {
+      checkReferralStatus();
+    }
+  }, [user, checkReferralStatus]);
+
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <HeartLoader message="กำลังเชื่อมต่อ..." size="lg" />
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <main className="min-h-screen relative z-10">
+      {/* Header */}
+      <header className="py-8 text-center">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <HeartIcon size={32} className="animate-pulse-heart" />
+          <Link href="/">
+            <h1 className="font-leckerli text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent hover:opacity-80 transition-opacity">
+              The Memory
+            </h1>
+          </Link>
+          <HeartIcon size={32} className="animate-pulse-heart" />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-lg mx-auto px-4 pb-12">
+        {/* Back Button */}
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-[#E63946] transition-colors mb-6"
+        >
+          <ArrowLeft size={20} />
+          <span>กลับไปหน้าหลัก</span>
+        </Link>
+
+        {/* Title */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#FF6B9D] to-[#E63946] flex items-center justify-center">
+            <Users size={24} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">ลิงก์แนะนำ</h2>
+            <p className="text-sm text-gray-500">แชร์ลิงก์เพื่อรับส่วนลด 50%</p>
+          </div>
+        </div>
+
+        {/* Info Card */}
+        <div className="memory-card p-4 mb-6">
+          <h3 className="font-medium text-gray-800 mb-2">วิธีการทำงาน</h3>
+          <ul className="text-sm text-gray-600 space-y-2">
+            <li className="flex items-start gap-2">
+              <span className="text-[#E63946] font-bold">1.</span>
+              <span>แชร์ลิงก์แนะนำของคุณให้เพื่อน</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#E63946] font-bold">2.</span>
+              <span>เมื่อเพื่อนสมัครและชำระเงินครั้งแรก</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#E63946] font-bold">3.</span>
+              <span>คุณจะได้รับสิทธิ์ส่วนลด 50% สำหรับ Memory ถัดไป</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Referral Content */}
+        {referralLoading ? (
+          <div className="text-center py-12">
+            <HeartLoader message="กำลังโหลดข้อมูล..." size="md" />
+          </div>
+        ) : referralStatus?.referralCode && referralStatus?.referralLink ? (
+          <ReferralCodeDisplay
+            code={referralStatus.referralCode}
+            referralLink={referralStatus.referralLink}
+            stats={referralStatus.stats}
+            userId={user.id}
+            onClaimSuccess={checkReferralStatus}
+          />
+        ) : (
+          <div className="memory-card p-6 text-center">
+            <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
+            <p className="text-gray-600 mb-4">ยังไม่มีลิงก์แนะนำ</p>
+            <button
+              onClick={() => setShowReferralSetup(true)}
+              className="btn-primary"
+            >
+              สร้างลิงก์แนะนำ
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Referral Setup Modal */}
+      <ReferralSetupModal
+        isOpen={showReferralSetup}
+        onSubmit={handleReferralSetup}
+        onSkip={() => setShowReferralSetup(false)}
+      />
+    </main>
+  );
+}
