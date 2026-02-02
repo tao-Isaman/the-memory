@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
+import { getThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
@@ -34,6 +35,9 @@ function CreatePageContent() {
   const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
   const [savedMemoryId, setSavedMemoryId] = useState<string | null>(null);
   const [savedMemoryStatus, setSavedMemoryStatus] = useState<MemoryStatus>('pending');
+
+  // Get theme colors
+  const themeColors = getThemeColors(theme);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -155,17 +159,27 @@ function CreatePageContent() {
   }
 
   return (
-    <main className="min-h-screen relative z-10">
+    <main
+      className="min-h-screen relative z-10 transition-colors duration-300"
+      style={{ backgroundColor: themeColors.background }}
+    >
       {/* Header */}
       <header className="py-8 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/dashboard" className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="hover:opacity-80 transition-opacity flex items-center gap-2"
+            style={{ color: themeColors.dark }}
+          >
             <ArrowLeft size={20} />
             <span>กลับ</span>
           </Link>
           <div className="flex items-center gap-2">
-            <HeartIcon size={24} className="animate-pulse-heart" />
-            <span className="font-kanit text-lg font-semibold text-[#E63946]">
+            <HeartIcon size={24} className="animate-pulse-heart" color={themeColors.primary} />
+            <span
+              className="font-kanit text-lg font-semibold"
+              style={{ color: themeColors.dark }}
+            >
               {isEditMode ? 'แก้ไขความทรงจำ' : 'สร้างความทรงจำ'}
             </span>
           </div>
@@ -197,12 +211,20 @@ function CreatePageContent() {
         {/* Story List */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-kanit text-lg font-semibold text-[#E63946]">เรื่องราวความทรงจำ</h2>
+            <h2 className="font-kanit text-lg font-semibold" style={{ color: themeColors.dark }}>
+              เรื่องราวความทรงจำ
+            </h2>
             <span className="text-sm text-gray-500">
               {stories.length} เรื่องราว
             </span>
           </div>
-          <StoryList stories={stories} onReorder={handleReorder} onDelete={handleDelete} onEdit={handleEditStory} />
+          <StoryList
+            stories={stories}
+            onReorder={handleReorder}
+            onDelete={handleDelete}
+            onEdit={handleEditStory}
+            themeColors={themeColors}
+          />
         </div>
 
         {/* Add Story Button / Editor (for new stories) */}
@@ -213,14 +235,20 @@ function CreatePageContent() {
               setShowEditor(false);
               setEditingStory(null);
             }}
+            themeColors={themeColors}
           />
         ) : (
           <button
             onClick={() => setShowEditor(true)}
-            className="w-full memory-card p-6 text-center hover:shadow-lg transition-shadow border-2 border-dashed border-[#FFB6C1] hover:border-[#FF6B9D]"
+            className="w-full memory-card p-6 text-center hover:shadow-lg transition-shadow border-2 border-dashed"
+            style={{
+              borderColor: themeColors.accent,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = themeColors.primary)}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = themeColors.accent)}
           >
-            <Plus size={32} className="mx-auto mb-2 text-[#E63946]" />
-            <span className="text-[#E63946] font-medium">เพิ่มเรื่องราวความทรงจำ</span>
+            <Plus size={32} className="mx-auto mb-2" style={{ color: themeColors.dark }} />
+            <span className="font-medium" style={{ color: themeColors.dark }}>เพิ่มเรื่องราวความทรงจำ</span>
           </button>
         )}
 
@@ -232,11 +260,15 @@ function CreatePageContent() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className={`btn-primary min-w-[160px] ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all min-w-[160px] ${saving ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-xl hover:scale-105'}`}
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+              boxShadow: `0 4px 15px ${themeColors.dark}4D`,
+            }}
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
-                <HeartIcon size={16} className="animate-pulse-heart" />
+                <HeartIcon size={16} className="animate-pulse-heart" color="#fff" />
                 กำลังบันทึก...
               </span>
             ) : (
@@ -259,9 +291,15 @@ function CreatePageContent() {
       {/* Payment Prompt Modal */}
       {showPaymentPrompt && savedMemoryId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="memory-card p-8 max-w-md w-full text-center">
-            <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" />
-            <h2 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+          <div
+            className="memory-card p-8 max-w-md w-full text-center"
+            style={{ backgroundColor: themeColors.background }}
+          >
+            <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" color={themeColors.primary} />
+            <h2
+              className="font-kanit text-2xl font-bold mb-4"
+              style={{ color: themeColors.dark }}
+            >
               บันทึกสำเร็จ!
             </h2>
             <p className="text-gray-600 mb-6">
@@ -303,7 +341,10 @@ function CreatePageContent() {
       {/* Edit Story Modal */}
       {editingStory && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-xl">
+          <div
+            className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto relative shadow-xl"
+            style={{ backgroundColor: themeColors.background }}
+          >
             <button
               onClick={() => {
                 setEditingStory(null);
@@ -322,6 +363,7 @@ function CreatePageContent() {
                 }}
                 editingStory={editingStory}
                 noCard
+                themeColors={themeColors}
               />
             </div>
           </div>

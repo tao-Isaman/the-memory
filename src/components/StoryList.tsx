@@ -1,6 +1,7 @@
 'use client';
 
 import { MemoryStory } from '@/types/memory';
+import { ThemeColors } from '@/lib/themes';
 import { storyTypeLabels, storyTypeIcons } from './StoryEditor';
 import HeartIcon from './HeartIcon';
 import { ChevronUp, ChevronDown, X, Pencil } from 'lucide-react';
@@ -10,7 +11,16 @@ interface StoryListProps {
   onReorder: (stories: MemoryStory[]) => void;
   onDelete: (id: string) => void;
   onEdit: (story: MemoryStory) => void;
+  themeColors?: ThemeColors;
 }
+
+// Default theme colors (love theme)
+const defaultColors: ThemeColors = {
+  primary: '#FF6B9D',
+  dark: '#E63946',
+  accent: '#FFB6C1',
+  background: '#FFF0F5',
+};
 
 function getStoryPreview(story: MemoryStory): string {
   switch (story.type) {
@@ -29,7 +39,13 @@ function getStoryPreview(story: MemoryStory): string {
   }
 }
 
-export default function StoryList({ stories, onReorder, onDelete, onEdit }: StoryListProps) {
+export default function StoryList({
+  stories,
+  onReorder,
+  onDelete,
+  onEdit,
+  themeColors = defaultColors,
+}: StoryListProps) {
   const moveUp = (index: number) => {
     if (index === 0) return;
     const newStories = [...stories];
@@ -55,7 +71,7 @@ export default function StoryList({ stories, onReorder, onDelete, onEdit }: Stor
   if (stories.length === 0) {
     return (
       <div className="memory-card p-8 text-center">
-        <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
+        <HeartIcon size={48} className="mx-auto mb-4 opacity-50" color={themeColors.primary} />
         <p className="text-gray-500">ยังไม่มีเรื่องราวความทรงจำ</p>
         <p className="text-sm text-gray-400 mt-1">
           เพิ่มเรื่องราวแรกเพื่อเริ่มสร้างความทรงจำของคุณ!
@@ -72,7 +88,12 @@ export default function StoryList({ stories, onReorder, onDelete, onEdit }: Stor
           className="memory-card p-4 flex items-center gap-4"
         >
           {/* Priority Number */}
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#E63946] text-white flex items-center justify-center font-bold text-sm">
+          <div
+            className="flex-shrink-0 w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-sm"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+            }}
+          >
             {index + 1}
           </div>
 
@@ -80,13 +101,13 @@ export default function StoryList({ stories, onReorder, onDelete, onEdit }: Stor
           <div className="flex-shrink-0">
             {(() => {
               const IconComponent = storyTypeIcons[story.type];
-              return <IconComponent size={24} className="text-[#E63946]" />;
+              return <IconComponent size={24} style={{ color: themeColors.dark }} />;
             })()}
           </div>
 
           {/* Story Info */}
           <div className="flex-grow min-w-0">
-            <p className="font-kanit font-medium text-[#E63946] text-sm">
+            <p className="font-kanit font-medium text-sm" style={{ color: themeColors.dark }}>
               {story.title || storyTypeLabels[story.type]}
             </p>
             <p className="text-gray-600 text-sm truncate">
@@ -99,11 +120,11 @@ export default function StoryList({ stories, onReorder, onDelete, onEdit }: Stor
             <button
               onClick={() => moveUp(index)}
               disabled={index === 0}
-              className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                index === 0
-                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                  : 'bg-pink-100 text-[#E63946] hover:bg-pink-200'
-              }`}
+              className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+              style={{
+                backgroundColor: index === 0 ? '#f3f4f6' : `${themeColors.accent}66`,
+                color: index === 0 ? '#d1d5db' : themeColors.dark,
+              }}
               title="เลื่อนขึ้น"
             >
               <ChevronUp size={18} />
@@ -111,11 +132,11 @@ export default function StoryList({ stories, onReorder, onDelete, onEdit }: Stor
             <button
               onClick={() => moveDown(index)}
               disabled={index === stories.length - 1}
-              className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                index === stories.length - 1
-                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                  : 'bg-pink-100 text-[#E63946] hover:bg-pink-200'
-              }`}
+              className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+              style={{
+                backgroundColor: index === stories.length - 1 ? '#f3f4f6' : `${themeColors.accent}66`,
+                color: index === stories.length - 1 ? '#d1d5db' : themeColors.dark,
+              }}
               title="เลื่อนลง"
             >
               <ChevronDown size={18} />

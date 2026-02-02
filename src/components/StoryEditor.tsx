@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { StoryType, MemoryStory } from '@/types/memory';
+import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
 import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon } from 'lucide-react';
@@ -12,7 +13,16 @@ interface StoryEditorProps {
   editingStory?: MemoryStory;
   initialType?: StoryType;
   noCard?: boolean;
+  themeColors?: ThemeColors;
 }
+
+// Default theme colors (love theme)
+const defaultColors: ThemeColors = {
+  primary: '#FF6B9D',
+  dark: '#E63946',
+  accent: '#FFB6C1',
+  background: '#FFF0F5',
+};
 
 export const storyTypeLabels: Record<StoryType, string> = {
   password: 'รหัส PIN',
@@ -38,7 +48,14 @@ export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   youtube: Music,
 };
 
-export default function StoryEditor({ onSave, onCancel, editingStory, initialType, noCard }: StoryEditorProps) {
+export default function StoryEditor({
+  onSave,
+  onCancel,
+  editingStory,
+  initialType,
+  noCard,
+  themeColors = defaultColors,
+}: StoryEditorProps) {
   const isEditing = !!editingStory;
 
   // Initialize state from editing story if provided
@@ -168,7 +185,7 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
 
   return (
     <div className={noCard ? '' : 'memory-card p-6'}>
-      <h3 className="font-kanit text-xl font-bold text-[#E63946] mb-4">
+      <h3 className="font-kanit text-xl font-bold mb-4" style={{ color: themeColors.dark }}>
         {isEditing ? 'แก้ไขเรื่องราว' : 'เพิ่มเรื่องราวความทรงจำใหม่'}
       </h3>
 
@@ -180,10 +197,16 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
           </label>
           {isEditing ? (
             // Show current type only when editing (can't change type)
-            <div className="p-3 rounded-lg border-2 border-[#FF6B9D] bg-pink-50 inline-flex items-center gap-2">
+            <div
+              className="p-3 rounded-lg border-2 inline-flex items-center gap-2"
+              style={{
+                borderColor: themeColors.primary,
+                backgroundColor: `${themeColors.accent}33`,
+              }}
+            >
               {(() => {
                 const IconComponent = storyTypeIcons[type];
-                return <IconComponent size={18} className="text-[#E63946]" />;
+                return <IconComponent size={18} style={{ color: themeColors.dark }} />;
               })()}
               <span className="font-medium text-sm">{storyTypeLabels[type]}</span>
             </div>
@@ -191,19 +214,20 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {(Object.keys(storyTypeLabels) as StoryType[]).map((t) => {
                 const IconComponent = storyTypeIcons[t];
+                const isSelected = type === t;
                 return (
                   <button
                     key={t}
                     type="button"
                     onClick={() => setType(t)}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      type === t
-                        ? 'border-[#FF6B9D] bg-pink-50'
-                        : 'border-gray-200 hover:border-pink-200'
-                    }`}
+                    className="p-3 rounded-lg border-2 text-left transition-all"
+                    style={{
+                      borderColor: isSelected ? themeColors.primary : '#e5e7eb',
+                      backgroundColor: isSelected ? `${themeColors.accent}33` : 'transparent',
+                    }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <IconComponent size={18} className={type === t ? 'text-[#E63946]' : 'text-gray-500'} />
+                      <IconComponent size={18} style={{ color: isSelected ? themeColors.dark : '#6b7280' }} />
                       <span className="font-medium text-sm">{storyTypeLabels[t]}</span>
                     </div>
                     <span className="block text-xs text-gray-500">
@@ -326,13 +350,14 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
                       }
                     }
                   }}
-                  className={`h-12 rounded-lg text-xl font-semibold transition-all
-                    ${num === null
-                      ? 'invisible'
+                  className={`h-12 rounded-lg text-xl font-semibold transition-all ${num === null ? 'invisible' : ''}`}
+                  style={
+                    num === null
+                      ? {}
                       : num === 'del'
-                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        : 'bg-pink-50 text-[#E63946] hover:bg-pink-100 active:scale-95'
-                    }`}
+                        ? { backgroundColor: '#f3f4f6', color: '#4b5563' }
+                        : { backgroundColor: `${themeColors.accent}33`, color: themeColors.dark }
+                  }
                 >
                   {num === 'del' ? '⌫' : num}
                 </button>
@@ -422,7 +447,11 @@ export default function StoryEditor({ onSave, onCancel, editingStory, initialTyp
           </button>
           <button
             type="submit"
-            className="btn-primary flex-1"
+            className="flex-1 text-white font-semibold py-3 px-6 rounded-full shadow-lg transition-all hover:shadow-xl hover:scale-105 disabled:opacity-70"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+              boxShadow: `0 4px 15px ${themeColors.dark}4D`,
+            }}
             disabled={uploading}
           >
             {uploading ? 'กำลังอัพโหลด...' : isEditing ? 'บันทึก' : 'เพิ่ม'}
