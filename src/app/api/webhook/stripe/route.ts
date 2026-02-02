@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
-import { getUserReferral, recordReferralConversion, hasUserPaidBefore, markReferralDiscountUsed } from '@/lib/referral';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -42,8 +41,6 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-
-        // For card payments, payment is complete immediately
         if (session.payment_status === 'paid') {
           await activateMemory(supabase, session);
         }
@@ -51,7 +48,6 @@ export async function POST(request: NextRequest) {
       }
 
       case 'checkout.session.async_payment_succeeded': {
-        // For PromptPay and other async payment methods
         const session = event.data.object as Stripe.Checkout.Session;
         await activateMemory(supabase, session);
         break;
@@ -60,18 +56,11 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const memoryId = session.metadata?.memory_id;
-
         if (memoryId) {
-          const { error } = await supabase
+          await supabase
             .from('memories')
-            .update({
-              status: 'failed',
-            })
+            .update({ status: 'failed' })
             .eq('id', memoryId);
-
-          if (error) {
-            console.error('Error updating memory status to failed:', error);
-          }
         }
         break;
       }
@@ -92,7 +81,6 @@ async function activateMemory(
   session: Stripe.Checkout.Session
 ) {
   const memoryId = session.metadata?.memory_id;
-  const userId = session.metadata?.user_id;
   const paymentIntentId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : session.payment_intent?.id;
@@ -116,58 +104,5 @@ async function activateMemory(
     throw error;
   }
 
-  console.log(`Memory ${memoryId} activated successfully`);
-
-  // Track referral conversion if this is user's first payment
-  if (userId) {
-    await trackReferralConversion(supabase, userId, memoryId);
-
-    // Mark referral discount as used if it was applied
-    const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
-    if (hasReferralDiscount) {
-      const marked = await markReferralDiscountUsed(supabase, userId);
-      if (marked) {
-        console.log(`Referral discount marked as used for user ${userId}`);
-      }
-    }
-  }
-}
-
-async function trackReferralConversion(
-  supabase: ReturnType<typeof getSupabaseServiceClient>,
-  userId: string,
-  memoryId: string
-) {
-  try {
-    // Check if this is the user's first payment
-    const hasPaidBefore = await hasUserPaidBefore(supabase, userId, memoryId);
-
-    if (hasPaidBefore) {
-      // Not first payment, skip conversion tracking
-      return;
-    }
-
-    // Get user's referral record to check if they were referred
-    const referral = await getUserReferral(supabase, userId);
-
-    if (!referral || !referral.referredBy) {
-      // User wasn't referred, skip
-      return;
-    }
-
-    // Record the conversion - referrer gets credit
-    const success = await recordReferralConversion(
-      supabase,
-      referral.referredBy,
-      userId,
-      memoryId
-    );
-
-    if (success) {
-      console.log(`Referral conversion recorded: referrer=${referral.referredBy}, referred=${userId}`);
-    }
-  } catch (error) {
-    // Don't fail the payment if referral tracking fails
-    console.error('Error tracking referral conversion:', error);
-  }
+  console.log(`Memory ${memoryId} activated via webhook`);
 }

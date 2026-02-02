@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
         hasReferral: false,
         referralCode: null,
         referralLink: null,
+        referredBy: null,
+        hasUsedReferralDiscount: false,
         stats: {
           totalSignups: 0,
           totalPaidConversions: 0,

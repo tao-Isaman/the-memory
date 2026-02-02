@@ -145,14 +145,15 @@ export async function recordReferralConversion(
   memoryId: string
 ): Promise<boolean> {
   // Check if conversion already exists for this referred user
-  const { data: existing } = await supabase
+  const { data: existingList } = await supabase
     .from('referral_conversions')
     .select('id')
     .eq('referred_id', referredId)
-    .single();
+    .limit(1);
 
-  if (existing) {
+  if (existingList && existingList.length > 0) {
     // Already converted, skip
+    console.log(`Conversion already exists for referred user ${referredId}`);
     return true;
   }
 
@@ -170,14 +171,15 @@ export async function recordReferralConversion(
     return false;
   }
 
-  // Update referrer's stats - manual increment
+  console.log(`Conversion record created: referrer=${referrerId}, referred=${referredId}`);
+
+  // Update referrer's stats - increment paid_referral_count
   const referral = await getUserReferral(supabase, referrerId);
   if (referral) {
     const { error: updateError } = await supabase
       .from('user_referrals')
       .update({
         paid_referral_count: referral.paidReferralCount + 1,
-        pending_discount_claims: referral.pendingDiscountClaims + 1,
       })
       .eq('user_id', referrerId);
 
@@ -185,6 +187,9 @@ export async function recordReferralConversion(
       console.error('Error updating referrer stats:', updateError);
       return false;
     }
+    console.log(`Referrer ${referrerId} paid_referral_count updated to ${referral.paidReferralCount + 1}`);
+  } else {
+    console.error(`Referrer ${referrerId} not found in user_referrals`);
   }
 
   return true;

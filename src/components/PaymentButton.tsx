@@ -37,12 +37,15 @@ export default function PaymentButton({
         const response = await fetch(`/api/referral/status?userId=${userId}`);
         const data = await response.json();
 
-        // User is eligible if:
-        // 1. They were referred (referredBy is set)
-        // 2. They haven't used the discount yet
-        const isEligible = data.hasReferral &&
-                          data.referredBy &&
-                          !data.hasUsedReferralDiscount;
+        // User is eligible ONLY if:
+        // 1. They have a referral record
+        // 2. They were referred by someone (referredBy is set)
+        // 3. They have NOT used the discount yet (hasUsedReferralDiscount is false)
+        const isEligible = Boolean(
+          data.hasReferral &&
+          data.referredBy &&
+          data.hasUsedReferralDiscount === false
+        );
 
         setDiscountInfo({
           eligible: isEligible,

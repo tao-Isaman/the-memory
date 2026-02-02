@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getUserReferral, markReferralDiscountUsed } from '@/lib/referral';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,8 @@ export async function POST(request: NextRequest) {
     }
 
     const memoryId = session.metadata?.memory_id;
+    const userId = session.metadata?.user_id;
+    const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
 
     if (!memoryId) {
       return NextResponse.json(
@@ -34,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     // Check payment status
     if (session.payment_status !== 'paid') {
-      // For async payments like PromptPay, might still be pending
       return NextResponse.json({
         memoryId,
         status: 'pending',
@@ -65,6 +67,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // If user paid with referral discount, update referrer's stats
+    if (userId && hasReferralDiscount) {
+      await handleReferralPayment(supabase, userId);
+    }
+
     return NextResponse.json({
       memoryId,
       status: 'active',
@@ -76,5 +83,38 @@ export async function POST(request: NextRequest) {
       { error: 'Failed to verify payment' },
       { status: 500 }
     );
+  }
+}
+
+async function handleReferralPayment(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+  userId: string
+) {
+  try {
+    // Get user's referral to find who referred them
+    const referral = await getUserReferral(supabase, userId);
+
+    if (!referral || !referral.referredBy || referral.hasUsedReferralDiscount) {
+      // No referrer or already used discount
+      return;
+    }
+
+    // Mark discount as used for this user
+    await markReferralDiscountUsed(supabase, userId);
+
+    // Increment referrer's paid_referral_count
+    const referrerReferral = await getUserReferral(supabase, referral.referredBy);
+    if (referrerReferral) {
+      await supabase
+        .from('user_referrals')
+        .update({
+          paid_referral_count: referrerReferral.paidReferralCount + 1,
+        })
+        .eq('user_id', referral.referredBy);
+
+      console.log(`Referrer ${referral.referredBy} paid_referral_count increased to ${referrerReferral.paidReferralCount + 1}`);
+    }
+  } catch (error) {
+    console.error('Error handling referral payment:', error);
   }
 }

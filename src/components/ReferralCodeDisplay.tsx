@@ -1,19 +1,30 @@
 'use client';
 
-import { useState } from 'react';
-import { Copy, Check, Users, Gift } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Copy, Check, Users, Gift, CheckCircle, Clock } from 'lucide-react';
 import { ReferralStats } from '@/types/referral';
 
 interface ReferralCodeDisplayProps {
   code: string;
   stats: ReferralStats;
+  userId: string;
+}
+
+interface ReferredUser {
+  userId: string;
+  appliedAt: string;
+  hasPaid: boolean;
+  usedDiscount: boolean;
 }
 
 export default function ReferralCodeDisplay({
   code,
   stats,
+  userId,
 }: ReferralCodeDisplayProps) {
   const [copied, setCopied] = useState(false);
+  const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
   const handleCopyCode = async () => {
     try {
@@ -23,6 +34,33 @@ export default function ReferralCodeDisplay({
     } catch (error) {
       console.error('Failed to copy:', error);
     }
+  };
+
+  // Fetch referred users
+  useEffect(() => {
+    const fetchReferredUsers = async () => {
+      try {
+        const response = await fetch(`/api/referral/referred-users?userId=${userId}`);
+        const data = await response.json();
+        if (data.users) {
+          setReferredUsers(data.users);
+        }
+      } catch (error) {
+        console.error('Error fetching referred users:', error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchReferredUsers();
+  }, [userId]);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
@@ -76,10 +114,54 @@ export default function ReferralCodeDisplay({
         </div>
       </div>
 
-      {/* Info note */}
-      <p className="text-xs text-gray-400 text-center">
-        สถิตินี้แสดงจำนวนคนที่ใช้โค้ดของคุณและชำระเงินสำเร็จ
-      </p>
+      {/* Referred Users List */}
+      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
+          <h4 className="font-medium text-gray-800">รายชื่อผู้ใช้โค้ด</h4>
+        </div>
+
+        {loadingUsers ? (
+          <div className="p-4 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+        ) : referredUsers.length === 0 ? (
+          <div className="p-6 text-center text-gray-400">
+            <Users size={32} className="mx-auto mb-2 opacity-50" />
+            <p className="text-sm">ยังไม่มีผู้ใช้โค้ดของคุณ</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {referredUsers.map((user, index) => (
+              <div key={user.userId} className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-[#E63946] font-medium text-sm">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      ผู้ใช้ #{user.userId.slice(0, 8)}...
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      ใช้โค้ดเมื่อ {formatDate(user.appliedAt)}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  {user.hasPaid ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                      <CheckCircle size={12} />
+                      ชำระแล้ว
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+                      <Clock size={12} />
+                      รอชำระ
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

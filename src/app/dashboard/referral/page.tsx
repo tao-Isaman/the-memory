@@ -158,6 +158,7 @@ export default function ReferralPage() {
           <ReferralCodeDisplay
             code={referralStatus.referralCode}
             stats={referralStatus.stats}
+            userId={user.id}
           />
         ) : (
           <div className="memory-card p-6 text-center">
