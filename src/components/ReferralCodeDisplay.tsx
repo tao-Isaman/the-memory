@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Copy, Check, Users, Gift, CheckCircle, Clock } from 'lucide-react';
+import { Copy, Check, Users, Gift, CheckCircle, Clock, Wallet } from 'lucide-react';
 import { ReferralStats } from '@/types/referral';
+import ClaimMoneyModal from './ClaimMoneyModal';
+import ClaimHistorySection from './ClaimHistorySection';
 
 interface ReferralCodeDisplayProps {
   code: string;
@@ -25,6 +27,14 @@ export default function ReferralCodeDisplay({
   const [copied, setCopied] = useState(false);
   const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [currentPendingClaims, setCurrentPendingClaims] = useState(stats.pendingDiscounts);
+  const [claimHistoryRefresh, setClaimHistoryRefresh] = useState(0);
+
+  const handleClaimSuccess = (remainingClaims: number) => {
+    setCurrentPendingClaims(remainingClaims);
+    setClaimHistoryRefresh((prev) => prev + 1);
+  };
 
   const handleCopyCode = async () => {
     try {
@@ -114,6 +124,29 @@ export default function ReferralCodeDisplay({
         </div>
       </div>
 
+      {/* Claim Money Section */}
+      {currentPendingClaims > 0 && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">
+                คุณมี <span className="font-bold text-green-600">{currentPendingClaims}</span> สิทธิ์รับเงิน
+              </p>
+              <p className="text-lg font-bold text-green-700">
+                รวม {currentPendingClaims * 50} บาท
+              </p>
+            </div>
+            <button
+              onClick={() => setShowClaimModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-medium hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <Wallet size={18} />
+              ขอรับเงิน
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Referred Users List */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
@@ -162,6 +195,18 @@ export default function ReferralCodeDisplay({
           </div>
         )}
       </div>
+
+      {/* Claim History Section */}
+      <ClaimHistorySection userId={userId} refreshTrigger={claimHistoryRefresh} />
+
+      {/* Claim Money Modal */}
+      <ClaimMoneyModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        onSuccess={handleClaimSuccess}
+        userId={userId}
+        pendingClaims={currentPendingClaims}
+      />
     </div>
   );
 }
