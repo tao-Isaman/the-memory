@@ -1,4 +1,4 @@
-import { Memory, MemoryStory, MemoryStatus } from '@/types/memory';
+import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { getSupabaseBrowserClient } from './supabase';
 import { Database, Json } from '@/types/database';
 
@@ -25,6 +25,7 @@ function toMemory(dbMemory: DbMemory, dbStories: DbStory[]): Memory {
     updatedAt: dbMemory.updated_at,
     status: (dbMemory.status || 'pending') as MemoryStatus,
     paidAt: dbMemory.paid_at || undefined,
+    theme: (dbMemory.theme || 'love') as MemoryTheme,
   };
 }
 
@@ -111,6 +112,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       .from('memories')
       .update({
         title: memory.title,
+        theme: memory.theme,
         updated_at: new Date().toISOString(),
       })
       .eq('id', memory.id)
@@ -129,6 +131,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       id: memory.id,
       user_id: userId,
       title: memory.title,
+      theme: memory.theme,
       created_at: memory.createdAt,
       updated_at: new Date().toISOString(),
       status: memory.status || 'pending',

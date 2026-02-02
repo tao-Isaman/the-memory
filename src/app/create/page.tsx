@@ -3,7 +3,7 @@
 import { useState, useCallback, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Memory, MemoryStory, MemoryStatus } from '@/types/memory';
+import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
@@ -11,6 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import StoryEditor from '@/components/StoryEditor';
 import StoryList from '@/components/StoryList';
 import ShareModal from '@/components/ShareModal';
+import ThemeSelector from '@/components/ThemeSelector';
 import PaymentButton from '@/components/PaymentButton';
 import { Plus, ArrowLeft, X } from 'lucide-react';
 
@@ -21,6 +22,7 @@ function CreatePageContent() {
   const { user, loading: authLoading } = useAuth();
 
   const [title, setTitle] = useState('');
+  const [theme, setTheme] = useState<MemoryTheme>('love');
   const [stories, setStories] = useState<MemoryStory[]>([]);
   const [showEditor, setShowEditor] = useState(false);
   const [editingStory, setEditingStory] = useState<MemoryStory | null>(null);
@@ -47,6 +49,7 @@ function CreatePageContent() {
         const existingMemory = await getMemoryById(editId);
         if (existingMemory) {
           setTitle(existingMemory.title);
+          setTheme(existingMemory.theme);
           setStories(existingMemory.stories);
           setIsEditMode(true);
           setOriginalCreatedAt(existingMemory.createdAt);
@@ -115,6 +118,7 @@ function CreatePageContent() {
     const memory: Memory = {
       id: memoryId,
       title: title.trim(),
+      theme,
       stories,
       createdAt: originalCreatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -172,7 +176,7 @@ function CreatePageContent() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 pb-12">
         {/* Title Input */}
-        <div className="mb-8">
+        <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             ชื่อความทรงจำ
           </label>
@@ -183,6 +187,11 @@ function CreatePageContent() {
             placeholder="ตั้งชื่อพิเศษให้ความทรงจำของคุณ..."
             className="input-valentine text-xl font-semibold"
           />
+        </div>
+
+        {/* Theme Selector */}
+        <div className="mb-8">
+          <ThemeSelector selected={theme} onChange={setTheme} />
         </div>
 
         {/* Story List */}

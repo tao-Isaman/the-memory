@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import Link from 'next/link';
 import { Memory, MemoryStory } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
+import { getThemeColors, ThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
@@ -147,32 +148,34 @@ export default function MemoryViewerPage({ params }: PageProps) {
   const isLastStory = currentIndex >= sortedMemory.stories.length - 1;
   const isFirstStory = currentIndex === 0;
   const progress = ((currentIndex + 1) / sortedMemory.stories.length) * 100;
+  const themeColors = getThemeColors(sortedMemory.theme);
 
   return (
-    <main className="min-h-screen relative z-10 flex flex-col">
+    <main className="min-h-screen relative z-10 flex flex-col" style={{ backgroundColor: themeColors.background }}>
       {/* Header */}
-      <header className="py-6 px-4 border-b border-pink-100 bg-white/80 backdrop-blur-sm">
+      <header className="py-6 px-4 border-b bg-white/80 backdrop-blur-sm" style={{ borderColor: themeColors.accent }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <Link
             href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
-            className="text-[#E63946] hover:opacity-80 transition-opacity flex items-center gap-2"
+            className="hover:opacity-80 transition-opacity flex items-center gap-2"
+            style={{ color: themeColors.dark }}
           >
             <span>&larr;</span>
             <span>{isPreviewMode ? 'กลับไปแก้ไข' : 'ออก'}</span>
           </Link>
           <div className="flex items-center gap-2">
-            <HeartIcon size={20} className="animate-pulse-heart" />
-            <span className="font-kanit font-semibold text-[#E63946] truncate max-w-[200px]">
+            <HeartIcon size={20} className="animate-pulse-heart" style={{ color: themeColors.primary }} />
+            <span className="font-kanit font-semibold truncate max-w-[200px]" style={{ color: themeColors.dark }}>
               {sortedMemory.title}
             </span>
           </div>
           <button
             onClick={() => setAutoAdvance(!autoAdvance)}
-            className={`text-sm px-3 py-1 rounded-full transition-colors ${
-              autoAdvance
-                ? 'bg-[#FF6B9D] text-white'
-                : 'bg-pink-100 text-[#E63946]'
-            }`}
+            className="text-sm px-3 py-1 rounded-full transition-colors"
+            style={{
+              backgroundColor: autoAdvance ? themeColors.primary : themeColors.accent,
+              color: autoAdvance ? 'white' : themeColors.dark,
+            }}
           >
             อัตโนมัติ: {autoAdvance ? 'เปิด' : 'ปิด'}
           </button>
@@ -180,10 +183,13 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
         {/* Progress Bar */}
         <div className="max-w-4xl mx-auto mt-4">
-          <div className="h-2 bg-pink-100 rounded-full overflow-hidden">
+          <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: themeColors.accent }}>
             <div
-              className="h-full bg-gradient-to-r from-[#FF6B9D] to-[#E63946] transition-all duration-500"
-              style={{ width: `${progress}%` }}
+              className="h-full transition-all duration-500"
+              style={{
+                width: `${progress}%`,
+                background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.dark})`,
+              }}
             />
           </div>
           <p className="text-xs text-gray-500 mt-1 text-center">
@@ -220,22 +226,27 @@ export default function MemoryViewerPage({ params }: PageProps) {
               correctPassword={currentStory.content.password}
               title={currentStory.title}
               onUnlock={handlePasswordUnlock}
+              themeColors={themeColors}
             />
           ) : currentStory ? (
-            <StoryViewer story={currentStory} />
+            <StoryViewer story={currentStory} themeColors={themeColors} />
           ) : null}
         </div>
       </div>
 
       {/* Navigation */}
-      <footer className="py-6 px-4 border-t border-pink-100 bg-white/80 backdrop-blur-sm">
+      <footer className="py-6 px-4 border-t bg-white/80 backdrop-blur-sm" style={{ borderColor: themeColors.accent }}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <button
             onClick={handlePrevious}
             disabled={isFirstStory}
-            className={`btn-secondary ${
-              isFirstStory ? 'opacity-50 cursor-not-allowed' : ''
+            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
+              isFirstStory ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'
             }`}
+            style={{
+              backgroundColor: themeColors.accent,
+              color: themeColors.dark,
+            }}
           >
             &larr; ก่อนหน้า
           </button>
@@ -245,13 +256,15 @@ export default function MemoryViewerPage({ params }: PageProps) {
             {sortedMemory.stories.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex
-                    ? 'bg-[#E63946]'
-                    : index < currentIndex
-                    ? 'bg-[#FF6B9D]'
-                    : 'bg-pink-200'
-                }`}
+                className="w-2 h-2 rounded-full transition-colors"
+                style={{
+                  backgroundColor:
+                    index === currentIndex
+                      ? themeColors.dark
+                      : index < currentIndex
+                      ? themeColors.primary
+                      : themeColors.accent,
+                }}
               />
             ))}
           </div>
@@ -259,18 +272,26 @@ export default function MemoryViewerPage({ params }: PageProps) {
           {isLastStory && !isPasswordLocked ? (
             <Link
               href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
-              className="btn-primary flex items-center gap-2"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
+              style={{
+                background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+                boxShadow: `0 4px 15px ${themeColors.dark}4D`,
+              }}
             >
               {isPreviewMode ? 'แก้ไขต่อ' : 'เสร็จสิ้น'}
-              <HeartIcon size={16} filled />
+              <HeartIcon size={16} filled color="white" />
             </Link>
           ) : (
             <button
               onClick={handleNext}
               disabled={isPasswordLocked}
-              className={`btn-primary ${
-                isPasswordLocked ? 'opacity-50 cursor-not-allowed' : ''
+              className={`px-6 py-2.5 rounded-full font-semibold text-white transition-all ${
+                isPasswordLocked ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 hover:-translate-y-0.5'
               }`}
+              style={{
+                background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+                boxShadow: `0 4px 15px ${themeColors.dark}4D`,
+              }}
             >
               ถัดไป &rarr;
             </button>
@@ -280,10 +301,10 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
       {/* Decorative hearts */}
       <div className="fixed bottom-20 left-4 opacity-20 pointer-events-none">
-        <HeartIcon size={40} className="animate-float" />
+        <HeartIcon size={40} className="animate-float" style={{ color: themeColors.primary }} />
       </div>
       <div className="fixed top-20 right-4 opacity-20 pointer-events-none">
-        <HeartIcon size={30} className="animate-float" />
+        <HeartIcon size={30} className="animate-float" style={{ color: themeColors.primary }} />
       </div>
     </main>
   );

@@ -37,6 +37,8 @@ export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStor
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 
+export type MemoryTheme = 'love' | 'friend' | 'family';
+
 export interface Memory {
   id: string;
   userId?: string;
@@ -46,4 +48,5 @@ export interface Memory {
   updatedAt: string;
   status: MemoryStatus;
   paidAt?: string;
+  theme: MemoryTheme;
 }

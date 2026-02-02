@@ -17,13 +17,16 @@ export default function HeartIcon({
   color = '#E63946',
   style,
 }: HeartIconProps) {
+  // Allow style.color to override the color prop for theme support
+  const effectiveColor = (style?.color as string) || color;
+
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill={filled ? color : 'none'}
-      stroke={color}
+      fill={filled ? effectiveColor : 'none'}
+      stroke={effectiveColor}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"

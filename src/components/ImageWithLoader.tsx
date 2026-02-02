@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
 interface ImageWithLoaderProps {
@@ -8,9 +9,17 @@ interface ImageWithLoaderProps {
   alt: string;
   className?: string;
   style?: React.CSSProperties;
+  themeColors?: ThemeColors;
 }
 
-export default function ImageWithLoader({ src, alt, className = '', style }: ImageWithLoaderProps) {
+const defaultColors: ThemeColors = {
+  primary: '#FF6B9D',
+  dark: '#E63946',
+  accent: '#FFB6C1',
+  background: '#FFF0F5',
+};
+
+export default function ImageWithLoader({ src, alt, className = '', style, themeColors = defaultColors }: ImageWithLoaderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -24,16 +33,21 @@ export default function ImageWithLoader({ src, alt, className = '', style }: Ima
     <div className="relative" style={containerStyle}>
       {/* Loading State - shows while image is loading */}
       {isLoading && !hasError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-pink-50 to-pink-100 rounded-lg">
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center rounded-lg"
+          style={{
+            background: `linear-gradient(to bottom right, ${themeColors.background}, ${themeColors.accent}40)`,
+          }}
+        >
           <div className="relative">
             {/* Pulsing ring */}
             <div className="absolute inset-0 animate-ping">
-              <HeartIcon size={48} className="text-pink-200" />
+              <HeartIcon size={48} style={{ color: themeColors.accent }} />
             </div>
             {/* Main heart */}
-            <HeartIcon size={48} className="text-[#FF6B9D] animate-pulse-heart relative z-10" />
+            <HeartIcon size={48} className="animate-pulse-heart relative z-10" style={{ color: themeColors.primary }} />
           </div>
-          <p className="mt-4 text-sm text-[#FF6B9D] font-medium animate-pulse">
+          <p className="mt-4 text-sm font-medium animate-pulse" style={{ color: themeColors.primary }}>
             กำลังโหลดรูปภาพ...
           </p>
           {/* Shimmer effect */}

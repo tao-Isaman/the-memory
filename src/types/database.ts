@@ -20,6 +20,7 @@ export interface Database {
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           paid_at: string | null
+          theme: string
         }
         Insert: {
           id?: string
@@ -31,6 +32,7 @@ export interface Database {
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           paid_at?: string | null
+          theme?: string
         }
         Update: {
           id?: string
@@ -42,6 +44,7 @@ export interface Database {
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           paid_at?: string | null
+          theme?: string
         }
         Relationships: []
       }

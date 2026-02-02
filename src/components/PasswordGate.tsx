@@ -1,15 +1,24 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
 interface PasswordGateProps {
   correctPassword: string;
   title?: string;
   onUnlock: () => void;
+  themeColors?: ThemeColors;
 }
 
-export default function PasswordGate({ correctPassword, title, onUnlock }: PasswordGateProps) {
+const defaultColors: ThemeColors = {
+  primary: '#FF6B9D',
+  dark: '#E63946',
+  accent: '#FFB6C1',
+  background: '#FFF0F5',
+};
+
+export default function PasswordGate({ correctPassword, title, onUnlock, themeColors = defaultColors }: PasswordGateProps) {
   const [pin, setPin] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
@@ -99,9 +108,9 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
     <div className="flex flex-col items-center justify-center min-h-[400px] animate-fade-in-up">
       <div className={`memory-card p-8 max-w-md w-full text-center ${shake ? 'animate-shake' : ''}`}>
         <div className="mb-6">
-          <HeartIcon size={64} className="mx-auto animate-pulse-heart" />
+          <HeartIcon size={64} className="mx-auto animate-pulse-heart" style={{ color: themeColors.primary }} />
         </div>
-        <h2 className="font-kanit text-2xl font-bold text-[#E63946] mb-2">
+        <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
           ความทรงจำถูกล็อค
         </h2>
         <p className="text-gray-600 mb-2">
@@ -125,13 +134,11 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
                 value={pin[index]}
                 readOnly
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className={`w-11 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none
-                  ${error
-                    ? 'border-red-500 bg-red-50'
-                    : pin[index]
-                      ? 'border-[#FF6B9D] bg-pink-50'
-                      : 'border-gray-200 bg-white focus:border-[#FF6B9D] focus:bg-pink-50'
-                  }`}
+                className="w-11 h-14 text-center text-2xl font-bold rounded-xl border-2 transition-all outline-none"
+                style={{
+                  borderColor: error ? '#ef4444' : pin[index] ? themeColors.primary : '#e5e7eb',
+                  backgroundColor: error ? '#fef2f2' : pin[index] ? themeColors.background : 'white',
+                }}
                 autoComplete="off"
               />
             ))}
@@ -143,7 +150,14 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
             </p>
           )}
 
-          <button type="submit" className="btn-primary w-full">
+          <button
+            type="submit"
+            className="w-full px-6 py-3 rounded-full font-semibold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+              boxShadow: `0 4px 15px ${themeColors.dark}4D`,
+            }}
+          >
             ปลดล็อคความทรงจำ
           </button>
         </form>
@@ -173,13 +187,17 @@ export default function PasswordGate({ correctPassword, title, onUnlock }: Passw
                 }
                 setError(false);
               }}
-              className={`h-12 rounded-lg text-xl font-semibold transition-all
-                ${num === null
-                  ? 'invisible'
-                  : num === 'del'
-                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    : 'bg-pink-50 text-[#E63946] hover:bg-pink-100 active:scale-95'
-                }`}
+              className={`h-12 rounded-lg text-xl font-semibold transition-all ${
+                num === null ? 'invisible' : num === 'del' ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' : ''
+              }`}
+              style={
+                num !== null && num !== 'del'
+                  ? {
+                      backgroundColor: themeColors.background,
+                      color: themeColors.dark,
+                    }
+                  : undefined
+              }
             >
               {num === 'del' ? '⌫' : num}
             </button>

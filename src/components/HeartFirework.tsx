@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
 interface Particle {
@@ -17,11 +18,15 @@ interface Particle {
 
 interface HeartFireworkProps {
   enabled?: boolean;
+  themeColors?: ThemeColors;
 }
 
-const COLORS = ['#FF6B9D', '#E63946', '#FFB6C1', '#FF1493', '#FF69B4'];
+const DEFAULT_COLORS = ['#FF6B9D', '#E63946', '#FFB6C1', '#FF1493', '#FF69B4'];
 
-export default function HeartFirework({ enabled = true }: HeartFireworkProps) {
+export default function HeartFirework({ enabled = true, themeColors }: HeartFireworkProps) {
+  const colors = themeColors
+    ? [themeColors.primary, themeColors.dark, themeColors.accent, themeColors.primary, themeColors.dark]
+    : DEFAULT_COLORS;
   const [particles, setParticles] = useState<Particle[]>([]);
 
   const createParticles = useCallback((x: number, y: number) => {
@@ -40,7 +45,7 @@ export default function HeartFirework({ enabled = true }: HeartFireworkProps) {
         vy: Math.sin(angle) * speed - 2, // Initial upward boost
         size: 12 + Math.random() * 16,
         opacity: 1,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        color: colors[Math.floor(Math.random() * colors.length)],
         rotation: Math.random() * 360,
       });
     }
