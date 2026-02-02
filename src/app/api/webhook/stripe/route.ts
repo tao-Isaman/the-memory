@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getUserReferral, markReferralDiscountUsed, recordReferralConversion } from '@/lib/referral';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -81,6 +82,8 @@ async function activateMemory(
   session: Stripe.Checkout.Session
 ) {
   const memoryId = session.metadata?.memory_id;
+  const userId = session.metadata?.user_id;
+  const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
   const paymentIntentId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : session.payment_intent?.id;
@@ -105,4 +108,35 @@ async function activateMemory(
   }
 
   console.log(`Memory ${memoryId} activated via webhook`);
+
+  // Handle referral payment if user used a referral discount
+  if (userId && hasReferralDiscount) {
+    await handleReferralPayment(supabase, userId, memoryId);
+  }
+}
+
+async function handleReferralPayment(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+  userId: string,
+  memoryId: string
+) {
+  try {
+    // Get user's referral to find who referred them
+    const referral = await getUserReferral(supabase, userId);
+
+    if (!referral || !referral.referredBy || referral.hasUsedReferralDiscount) {
+      // No referrer or already used discount
+      return;
+    }
+
+    // Mark discount as used for this user
+    await markReferralDiscountUsed(supabase, userId);
+
+    // Record the conversion (this increments referrer's paid_referral_count and pending_discount_claims)
+    await recordReferralConversion(supabase, referral.referredBy, userId, memoryId);
+
+    console.log(`Referral conversion recorded via webhook: referrer=${referral.referredBy}, referred=${userId}, memory=${memoryId}`);
+  } catch (error) {
+    console.error('Error handling referral payment:', error);
+  }
 }

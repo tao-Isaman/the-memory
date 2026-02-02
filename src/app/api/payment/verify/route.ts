@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
-import { getUserReferral, markReferralDiscountUsed } from '@/lib/referral';
+import { getUserReferral, markReferralDiscountUsed, recordReferralConversion } from '@/lib/referral';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,9 +67,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If user paid with referral discount, update referrer's stats
+    // If user paid with referral discount, update referrer's stats and create conversion record
     if (userId && hasReferralDiscount) {
-      await handleReferralPayment(supabase, userId);
+      await handleReferralPayment(supabase, userId, memoryId);
     }
 
     return NextResponse.json({
@@ -88,7 +88,8 @@ export async function POST(request: NextRequest) {
 
 async function handleReferralPayment(
   supabase: ReturnType<typeof getSupabaseServiceClient>,
-  userId: string
+  userId: string,
+  memoryId: string
 ) {
   try {
     // Get user's referral to find who referred them
@@ -102,18 +103,10 @@ async function handleReferralPayment(
     // Mark discount as used for this user
     await markReferralDiscountUsed(supabase, userId);
 
-    // Increment referrer's paid_referral_count
-    const referrerReferral = await getUserReferral(supabase, referral.referredBy);
-    if (referrerReferral) {
-      await supabase
-        .from('user_referrals')
-        .update({
-          paid_referral_count: referrerReferral.paidReferralCount + 1,
-        })
-        .eq('user_id', referral.referredBy);
+    // Record the conversion (this increments referrer's paid_referral_count and pending_discount_claims)
+    await recordReferralConversion(supabase, referral.referredBy, userId, memoryId);
 
-      console.log(`Referrer ${referral.referredBy} paid_referral_count increased to ${referrerReferral.paidReferralCount + 1}`);
-    }
+    console.log(`Referral conversion recorded: referrer=${referral.referredBy}, referred=${userId}, memory=${memoryId}`);
   } catch (error) {
     console.error('Error handling referral payment:', error);
   }
