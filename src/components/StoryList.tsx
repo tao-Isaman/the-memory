@@ -146,7 +146,18 @@ export default function StoryList({
           {/* Edit Button */}
           <button
             onClick={() => onEdit(story)}
-            className="flex-shrink-0 w-8 h-8 rounded bg-blue-100 text-blue-500 hover:bg-blue-200 flex items-center justify-center transition-colors"
+            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
+            style={{
+              borderColor: themeColors.primary,
+              color: themeColors.dark,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeColors.accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
             title="แก้ไขเรื่องราว"
           >
             <Pencil size={16} />
@@ -155,7 +166,18 @@ export default function StoryList({
           {/* Delete Button */}
           <button
             onClick={() => onDelete(story.id)}
-            className="flex-shrink-0 w-8 h-8 rounded bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center transition-colors"
+            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
+            style={{
+              borderColor: themeColors.dark,
+              color: themeColors.dark,
+              backgroundColor: 'transparent',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = `${themeColors.dark}20`;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
             title="ลบเรื่องราว"
           >
             <X size={18} />
