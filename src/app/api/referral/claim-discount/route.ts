@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseServiceClient();
 
-    // Verify user has pending discounts
+    // Verify user has pending discounts (calculate dynamically)
     const referral = await getUserReferral(supabase, userId);
 
     if (!referral) {
@@ -44,7 +44,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (referral.pendingDiscountClaims <= 0) {
+    // Calculate pending claims dynamically: paid referred users - claimed conversions
+    // Get referred users who have paid
+    const { data: referredUsers } = await supabase
+      .from('user_referrals')
+      .select('user_id')
+      .eq('referred_by', userId);
+
+    let paidCount = 0;
+    if (referredUsers && referredUsers.length > 0) {
+      const userIds = referredUsers.map(u => u.user_id);
+      const { data: paidMemories } = await supabase
+        .from('memories')
+        .select('user_id')
+        .in('user_id', userIds)
+        .eq('status', 'active');
+
+      if (paidMemories) {
+        const uniquePaidUsers = new Set(paidMemories.map(m => m.user_id));
+        paidCount = uniquePaidUsers.size;
+      }
+    }
+
+    // Count already claimed
+    const { count: claimedCount } = await supabase
+      .from('referral_claims')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId);
+
+    const pendingClaims = Math.max(0, paidCount - (claimedCount || 0));
+
+    if (pendingClaims <= 0) {
       return NextResponse.json(
         { success: false, error: 'ไม่มีสิทธิ์รับเงินที่รอดำเนินการ', remainingClaims: 0 },
         { status: 400 }
@@ -87,29 +117,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update user_referrals counts
-    const { error: updateError } = await supabase
-      .from('user_referrals')
-      .update({
-        pending_discount_claims: referral.pendingDiscountClaims - 1,
-        total_discounts_claimed: referral.totalDiscountsClaimed + 1,
-      })
-      .eq('user_id', userId);
-
-    if (updateError) {
-      console.error('Error updating referral counts:', updateError);
-    }
-
-    // Mark one conversion as claimed
-    await supabase
-      .from('referral_conversions')
-      .update({
-        discount_claimed: true,
-        claimed_at: new Date().toISOString(),
-      })
-      .eq('referrer_id', userId)
-      .eq('discount_claimed', false)
-      .limit(1);
+    // Remaining claims after this one
+    const remainingClaims = pendingClaims - 1;
 
     return NextResponse.json({
       success: true,
@@ -121,7 +130,7 @@ export async function POST(request: NextRequest) {
         paymentMethod: claim.payment_method,
         createdAt: claim.created_at,
       },
-      remainingClaims: referral.pendingDiscountClaims - 1,
+      remainingClaims,
     });
   } catch (error) {
     console.error('Claim discount error:', error);

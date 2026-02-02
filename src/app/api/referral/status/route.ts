@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
       .eq('referred_by', userId);
 
     let paidCount = 0;
+    let paidUserIds: string[] = [];
     if (referredUsers && referredUsers.length > 0) {
       const userIds = referredUsers.map(u => u.user_id);
 
@@ -56,27 +57,21 @@ export async function GET(request: NextRequest) {
       if (paidMemories) {
         const uniquePaidUsers = new Set(paidMemories.map(m => m.user_id));
         paidCount = uniquePaidUsers.size;
+        paidUserIds = Array.from(uniquePaidUsers);
       }
     }
 
-    // Calculate pending discounts dynamically:
-    // Count unclaimed conversions (paid referrals that haven't been claimed yet)
-    const { count: unclaimedCount } = await supabase
-      .from('referral_conversions')
-      .select('*', { count: 'exact', head: true })
-      .eq('referrer_id', userId)
-      .eq('discount_claimed', false);
-
-    const pendingDiscounts = unclaimedCount || 0;
-
-    // Count claimed conversions
+    // Count claims from referral_claims table
     const { count: claimedCount } = await supabase
-      .from('referral_conversions')
+      .from('referral_claims')
       .select('*', { count: 'exact', head: true })
-      .eq('referrer_id', userId)
-      .eq('discount_claimed', true);
+      .eq('user_id', userId);
 
     const claimedDiscounts = claimedCount || 0;
+
+    // Calculate pending discounts: paid users minus claims submitted
+    // This works even if conversion records don't exist yet
+    const pendingDiscounts = Math.max(0, paidCount - claimedDiscounts);
 
     // Build referral link
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thememory.app';
