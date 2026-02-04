@@ -1,4 +1,4 @@
-export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube';
+export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
 
 export interface BaseStory {
   id: string;
@@ -33,7 +33,12 @@ export interface YouTubeStory extends BaseStory {
   content: { youtubeUrl: string };
 }
 
-export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory;
+export interface ScratchStory extends BaseStory {
+  type: 'scratch';
+  content: { imageUrl: string; caption?: string };
+}
+
+export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory;
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 

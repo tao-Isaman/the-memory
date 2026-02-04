@@ -29,6 +29,7 @@ Users build a memory presentation by creating and arranging **stories**. Each st
 | **Text** | Multi-line text message | `{ text: "..." }` |
 | **Text + Image** | Combined text and image | `{ text: "...", imageUrl: "..." }` |
 | **YouTube** | Embedded video (supports multiple URL formats) | `{ youtubeUrl: "..." }` |
+| **Scratch** | Scratch-to-reveal hidden image (ความลับของเรา) | `{ imageUrl: "...", caption?: "..." }` |
 
 ### YouTube URL Formats Supported
 - `youtube.com/watch?v=ID`
@@ -100,6 +101,7 @@ src/
 │   ├── StoryEditor.tsx         # Multi-type form for adding/editing
 │   ├── StoryList.tsx           # Reorderable story list
 │   ├── StoryViewer.tsx         # Display story content
+│   ├── ScratchCard.tsx         # Canvas-based scratch-to-reveal component
 │   ├── PasswordGate.tsx        # 6-digit PIN input (mobile numpad)
 │   ├── ShareModal.tsx          # URL/QR code sharing
 │   ├── PaymentButton.tsx       # Stripe checkout initiator
@@ -166,7 +168,7 @@ src/
 |--------|------|-------------|
 | id | uuid | Primary key |
 | memory_id | uuid | Parent memory (references memories) |
-| type | text | 'password', 'image', 'text', 'text-image', 'youtube' |
+| type | text | 'password', 'image', 'text', 'text-image', 'youtube', 'scratch' |
 | priority | integer | Display order |
 | title | text | Optional story title |
 | content | jsonb | Story content (varies by type) |
@@ -185,7 +187,7 @@ src/
 ## TypeScript Interfaces
 
 ```typescript
-type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube';
+type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
 type MemoryStatus = 'pending' | 'active' | 'failed';
 
 interface BaseStory {
@@ -221,7 +223,12 @@ interface YouTubeStory extends BaseStory {
   content: { youtubeUrl: string };
 }
 
-type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory;
+interface ScratchStory extends BaseStory {
+  type: 'scratch';
+  content: { imageUrl: string; caption?: string };
+}
+
+type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory;
 
 interface Memory {
   id: string;
@@ -241,6 +248,7 @@ interface Memory {
 - **StoryEditor** - Dynamic form based on story type, image preview, PIN numpad
 - **StoryList** - Reorderable list with up/down, edit/delete buttons
 - **StoryViewer** - Type-specific rendering with HeartIcon decorations
+- **ScratchCard** - Canvas-based scratch-to-reveal with touch/mouse support, cloud overlay, auto-reveal at 50%
 
 ### PIN/Password
 - **PasswordGate** - 6-digit input with:
@@ -315,7 +323,7 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 - [x] Memory CRUD operations
 - [x] Story editor with add/edit/delete
 - [x] Story reordering (up/down buttons)
-- [x] 5 story types: password, image, text, text+image, youtube
+- [x] 6 story types: password, image, text, text+image, youtube, scratch
 - [x] Image upload with WebP conversion
 - [x] Preview mode for unpaid memories (owner only)
 
@@ -360,6 +368,7 @@ Located in `supabase/migrations/`:
 2. `supabase-migration-001-add-node-title.sql` - Add title to nodes
 3. `002-add-payment-status.sql` - Add payment columns to memories
 4. `003-rename-nodes-to-stories.sql` - Rename nodes table to stories
+5. `009-add-scratch-story-type.sql` - Add scratch type to stories constraint
 
 ## Development
 
@@ -387,4 +396,4 @@ npm start
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-02*
+*Last updated: 2026-02-04*
