@@ -5,7 +5,7 @@ import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
-import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, LucideIcon } from 'lucide-react';
+import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, Sparkles, LucideIcon } from 'lucide-react';
 
 interface StoryEditorProps {
   onSave: (story: MemoryStory) => void;
@@ -30,6 +30,7 @@ export const storyTypeLabels: Record<StoryType, string> = {
   image: 'รูปภาพ',
   'text-image': 'ข้อความ + รูปภาพ',
   youtube: 'วิดีโอ YouTube',
+  scratch: 'ความลับของเรา',
 };
 
 const storyTypeDescriptions: Record<StoryType, string> = {
@@ -38,6 +39,7 @@ const storyTypeDescriptions: Record<StoryType, string> = {
   image: 'เพิ่มรูปภาพพิเศษ',
   'text-image': 'รวมข้อความกับรูปภาพ',
   youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
+  scratch: 'ซ่อนรูปภาพไว้ในเมฆให้คนพิเศษขูดเปิดดู',
 };
 
 export const storyTypeIcons: Record<StoryType, LucideIcon> = {
@@ -46,6 +48,7 @@ export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   image: Camera,
   'text-image': ImagePlus,
   youtube: Music,
+  scratch: Sparkles,
 };
 
 export default function StoryEditor({
@@ -76,12 +79,14 @@ export default function StoryEditor({
     if (!editingStory) return '';
     if (editingStory.type === 'image') return editingStory.content.imageUrl;
     if (editingStory.type === 'text-image') return editingStory.content.imageUrl;
+    if (editingStory.type === 'scratch') return editingStory.content.imageUrl;
     return '';
   };
 
   const getInitialCaption = (): string => {
     if (!editingStory) return '';
     if (editingStory.type === 'image') return editingStory.content.caption || '';
+    if (editingStory.type === 'scratch') return editingStory.content.caption || '';
     return '';
   };
 
@@ -148,7 +153,7 @@ export default function StoryEditor({
     let uploadedImageUrl = imageUrl;
 
     // Upload image if there's a file
-    if ((type === 'image' || type === 'text-image') && imageFile) {
+    if ((type === 'image' || type === 'text-image' || type === 'scratch') && imageFile) {
       try {
         setUploading(true);
         uploadedImageUrl = await uploadImage(imageFile);
@@ -192,6 +197,14 @@ export default function StoryEditor({
       case 'youtube':
         if (!youtubeUrl.trim()) return;
         story = { ...baseStory, type: 'youtube', content: { youtubeUrl: youtubeUrl.trim() } };
+        break;
+      case 'scratch':
+        if (!uploadedImageUrl.trim()) return;
+        story = {
+          ...baseStory,
+          type: 'scratch',
+          content: { imageUrl: uploadedImageUrl.trim(), caption: caption.trim() || undefined },
+        };
         break;
       default:
         return;
@@ -407,7 +420,7 @@ export default function StoryEditor({
           </div>
         )}
 
-        {(type === 'image' || type === 'text-image') && (
+        {(type === 'image' || type === 'text-image' || type === 'scratch') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {imageUrl && !imageFile ? 'เปลี่ยนรูปภาพ (ไม่จำเป็น)' : 'อัพโหลดรูปภาพ'}
@@ -432,7 +445,7 @@ export default function StoryEditor({
           </div>
         )}
 
-        {type === 'image' && (
+        {(type === 'image' || type === 'scratch') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               คำบรรยาย (ไม่จำเป็น)

@@ -6,6 +6,7 @@ import { ThemeColors } from '@/lib/themes';
 import YouTubeEmbed from './YouTubeEmbed';
 import HeartIcon from './HeartIcon';
 import ImageWithLoader from './ImageWithLoader';
+import ScratchCard from './ScratchCard';
 
 interface StoryViewerProps {
   story: MemoryStory;
@@ -83,6 +84,22 @@ function StoryViewer({ story, themeColors = defaultColors }: StoryViewerProps) {
         <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
           <TitleHeader title={story.title} />
           <YouTubeEmbed url={story.content.youtubeUrl} />
+        </div>
+      );
+
+    case 'scratch':
+      return (
+        <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
+          <TitleHeader title={story.title} />
+          <ScratchCard
+            imageUrl={story.content.imageUrl}
+            themeColors={themeColors}
+          />
+          {story.content.caption && (
+            <p className="mt-4 text-center text-gray-600 italic">
+              {story.content.caption}
+            </p>
+          )}
         </div>
       );
 
