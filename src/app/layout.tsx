@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import FloatingHearts from "@/components/FloatingHearts";
 import ClientProviders from "@/components/ClientProviders";
+import { Analytics } from "@vercel/analytics/next";
 
 const itim = Itim({
   weight: "400",
@@ -179,6 +180,7 @@ export default function RootLayout({
           <FloatingHearts />
           {children}
         </ClientProviders>
+        <Analytics />
       </body>
     </html>
   );
