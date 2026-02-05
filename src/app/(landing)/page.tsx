@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import HeartIcon from '@/components/HeartIcon';
 import {
@@ -32,9 +32,80 @@ interface SiteStats {
   stories: number;
 }
 
+// Animated counter hook
+function useCountUp(end: number, duration: number = 2000, start: boolean = true) {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(0);
+  const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!start || end === 0) {
+      setCount(end);
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      if (!startTimeRef.current) startTimeRef.current = timestamp;
+      const progress = timestamp - startTimeRef.current;
+      const percentage = Math.min(progress / duration, 1);
+
+      // Easing function for smooth animation
+      const easeOut = 1 - Math.pow(1 - percentage, 3);
+      const currentCount = Math.floor(easeOut * end);
+
+      if (currentCount !== countRef.current) {
+        countRef.current = currentCount;
+        setCount(currentCount);
+      }
+
+      if (percentage < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    requestAnimationFrame(animate);
+
+    return () => {
+      startTimeRef.current = null;
+    };
+  }, [end, duration, start]);
+
+  return count;
+}
+
+// Animated stat component
+function AnimatedStat({
+  value,
+  label,
+  icon: Icon,
+  startAnimation
+}: {
+  value: number;
+  label: string;
+  icon: React.ElementType;
+  startAnimation: boolean;
+}) {
+  const count = useCountUp(value, 2000, startAnimation);
+
+  return (
+    <div className="text-center">
+      <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-2">
+        <Icon size={24} className="text-white" />
+      </div>
+      <p className="text-3xl md:text-4xl font-bold text-white">
+        {count.toLocaleString()}+
+      </p>
+      <p className="text-white/80 text-sm mt-1">{label}</p>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState<SiteStats | null>(null);
+  const [startCountAnimation, setStartCountAnimation] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -45,6 +116,8 @@ export default function LandingPage() {
       .then((data) => {
         if (data.users !== undefined) {
           setStats(data);
+          // Delay animation start for better effect
+          setTimeout(() => setStartCountAnimation(true), 500);
         }
       })
       .catch((err) => console.error('Failed to fetch stats:', err));
@@ -147,60 +220,35 @@ export default function LandingPage() {
             <p className="mt-8 text-sm text-gray-500">
               ✓ ฟรี ✓ ไม่ต้องติดตั้งแอป ✓ ใช้งานง่าย ✓ ส่งลิงก์ได้ทันที
             </p>
-          </div>
 
-          {/* Hero Image/Preview */}
-          <div
-            className={`mt-16 transition-all duration-1000 delay-300 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
-          >
-
+            {/* Stats in Hero */}
+            {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
+              <div className="mt-12 bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] rounded-2xl p-6 shadow-xl">
+                <div className="grid grid-cols-3 gap-4 md:gap-8">
+                  <AnimatedStat
+                    value={stats.users}
+                    label="ผู้ใช้งาน"
+                    icon={Users}
+                    startAnimation={startCountAnimation}
+                  />
+                  <AnimatedStat
+                    value={stats.memories}
+                    label="ความทรงจำ"
+                    icon={BookHeart}
+                    startAnimation={startCountAnimation}
+                  />
+                  <AnimatedStat
+                    value={stats.stories}
+                    label="เรื่องราว"
+                    icon={Layers}
+                    startAnimation={startCountAnimation}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
-
-      {/* Stats Section */}
-      {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
-        <section className="py-16 bg-white border-b border-pink-100">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="grid grid-cols-3 gap-8">
-              {/* Users */}
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
-                  <Users size={28} className="text-[#E63946]" />
-                </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
-                  {stats.users.toLocaleString()}+
-                </p>
-                <p className="text-gray-500 text-sm mt-1">ผู้ใช้งาน</p>
-              </div>
-
-              {/* Memories */}
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
-                  <BookHeart size={28} className="text-[#E63946]" />
-                </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
-                  {stats.memories.toLocaleString()}+
-                </p>
-                <p className="text-gray-500 text-sm mt-1">ความทรงจำ</p>
-              </div>
-
-              {/* Stories */}
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
-                  <Layers size={28} className="text-[#E63946]" />
-                </div>
-                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
-                  {stats.stories.toLocaleString()}+
-                </p>
-                <p className="text-gray-500 text-sm mt-1">เรื่องราว</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Features Section */}
       <section className="py-24 bg-white" id="features">
