@@ -17,6 +17,8 @@ A romantic gift web application (Thai-targeted) where users create memory presen
 - **Icons**: Lucide React 0.563.0
 - **Analytics**: Google Analytics GA4 (G-MZKHDF94QX)
 - **Hosting**: Vercel
+- **Cron Jobs**: Vercel Cron (daily stats update)
+- **Blob Storage**: Vercel Blob (stats caching)
 
 ## Core Concept
 Users build a memory presentation by creating and arranging **stories**. Each story represents a step in the memory experience. The sequence is determined by story priority. Memories require payment to activate and share.
@@ -80,12 +82,32 @@ src/
 ├── app/
 │   ├── (landing)/              # Marketing landing page
 │   │   ├── layout.tsx          # Metadata + FloatingHearts
-│   │   └── page.tsx            # Features, testimonials, FAQ
+│   │   └── page.tsx            # Features, testimonials, FAQ, animated stats
+│   ├── admin/                  # Admin dashboard (email-protected)
+│   │   ├── layout.tsx          # Auth guard, admin navigation
+│   │   ├── page.tsx            # Admin dashboard with stats
+│   │   ├── users/
+│   │   │   ├── page.tsx        # Users list with filters & pagination
+│   │   │   └── [userId]/
+│   │   │       └── memories/
+│   │   │           └── page.tsx # User's memories list
+│   │   └── memories/
+│   │       └── [memoryId]/
+│   │           └── page.tsx    # Memory details with all stories
 │   ├── api/
+│   │   ├── admin/              # Admin API routes
+│   │   │   ├── users/          # GET: All users with memory counts
+│   │   │   │   └── [userId]/
+│   │   │   │       └── memories/ # GET: User's memories
+│   │   │   └── memories/
+│   │   │       └── [memoryId]/ # GET: Memory with stories
 │   │   ├── checkout/           # POST: Create Stripe session
+│   │   ├── cron/
+│   │   │   └── update-stats/   # GET: Vercel Cron job (daily)
 │   │   ├── payment/
 │   │   │   ├── status/         # GET: Check payment status
 │   │   │   └── verify/         # POST: Verify and activate
+│   │   ├── stats/              # GET: Cached site statistics
 │   │   └── webhook/stripe/     # POST: Handle Stripe events
 │   ├── auth/callback/          # GET: OAuth callback
 │   ├── create/                 # Create/Edit memory page
@@ -145,6 +167,19 @@ src/
 - `checkout.session.completed` - Activates memory (Card payments)
 - `checkout.session.async_payment_succeeded` - Activates memory (PromptPay)
 - `checkout.session.async_payment_failed` - Sets status to "failed"
+
+### Site Stats & Cron
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/stats` | GET | Returns cached site statistics from Vercel Blob |
+| `/api/cron/update-stats` | GET | Updates stats (Vercel Cron, daily at midnight) |
+
+### Admin API (Email-protected)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/admin/users` | GET | All users with memory counts |
+| `/api/admin/users/[userId]/memories` | GET | User's memories with story counts |
+| `/api/admin/memories/[memoryId]` | GET | Memory details with all stories |
 
 ## Database Schema
 
@@ -314,6 +349,12 @@ STRIPE_PRICE_ID=price_xxx
 
 # App
 NEXT_PUBLIC_APP_URL=https://yourdomain.com
+
+# Admin
+NEXT_PUBLIC_ADMIN_EMAIL=admin@example.com
+
+# Vercel Cron
+CRON_SECRET=xxx
 ```
 
 ## Features Implemented
@@ -367,6 +408,36 @@ NEXT_PUBLIC_APP_URL=https://yourdomain.com
 - [x] JSON-LD structured data
 - [x] Google Analytics GA4
 - [x] Google Search Console
+
+### Site Stats
+- [x] Animated counter on landing page hero section
+- [x] Vercel Cron job (daily at midnight)
+- [x] Vercel Blob caching for zero DB queries on page load
+- [x] Stats: users, memories, stories, active memories
+
+### Admin System
+- [x] Email-protected access (`NEXT_PUBLIC_ADMIN_EMAIL`)
+- [x] Admin dashboard with overview stats
+- [x] Users list with search and filters (memories, paid, referral)
+- [x] Client-side pagination (20 users per page)
+- [x] View user's memories with story counts
+- [x] View memory details with all stories (all types supported)
+- [x] Uses Supabase Auth admin API for accurate user data
+
+## Vercel Configuration
+
+**`vercel.json`** - Cron job schedule:
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/update-stats",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
+```
+Note: Vercel Hobby plan allows only once-daily cron execution.
 
 ## Migrations
 
@@ -468,4 +539,4 @@ const pendingDiscounts = Math.max(0, paidCount - (claimedCount || 0));
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-04*
+*Last updated: 2026-02-05*
