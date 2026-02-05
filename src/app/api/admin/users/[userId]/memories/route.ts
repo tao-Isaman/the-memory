@@ -9,16 +9,32 @@ export async function GET(
     const { userId } = await params;
     const supabase = getSupabaseServiceClient();
 
-    // Get user info
-    const { data: user, error: userError } = await supabase
+    // Get user info from Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+
+    if (authError || !authData.user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    const authUser = authData.user;
+
+    // Get referral info if exists
+    const { data: referral } = await supabase
       .from('user_referrals')
-      .select('*')
+      .select('referral_code, referred_by')
       .eq('user_id', userId)
       .single();
 
-    if (userError) {
-      throw userError;
-    }
+    const user = {
+      user_id: authUser.id,
+      user_email: authUser.email || 'No email',
+      referral_code: referral?.referral_code || null,
+      referred_by: referral?.referred_by || null,
+      created_at: authUser.created_at,
+    };
 
     // Get all memories for this user with story count
     const { data: memories, error: memoriesError } = await supabase

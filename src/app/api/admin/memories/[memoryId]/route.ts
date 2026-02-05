@@ -20,12 +20,26 @@ export async function GET(
       throw memoryError;
     }
 
-    // Get user info
-    const { data: user } = await supabase
-      .from('user_referrals')
-      .select('*')
-      .eq('user_id', memory.user_id)
-      .single();
+    // Get user info from Supabase Auth
+    let user = null;
+    if (memory.user_id) {
+      const { data: authData } = await supabase.auth.admin.getUserById(memory.user_id);
+
+      if (authData?.user) {
+        // Get referral info if exists
+        const { data: referral } = await supabase
+          .from('user_referrals')
+          .select('referral_code')
+          .eq('user_id', memory.user_id)
+          .single();
+
+        user = {
+          user_id: authData.user.id,
+          user_email: authData.user.email || 'No email',
+          referral_code: referral?.referral_code || null,
+        };
+      }
+    }
 
     // Get all stories for this memory
     const { data: stories, error: storiesError } = await supabase
