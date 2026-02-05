@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { list } from '@vercel/blob';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 
-// Cache duration: 1 hour (stats update every 12 hours, so 1 hour cache is fine)
+// Cache duration: 1 hour (stats update daily, so 1 hour cache is fine)
 const CACHE_MAX_AGE = 3600; // 1 hour in seconds
 const CACHE_STALE_WHILE_REVALIDATE = 7200; // 2 hours
 
@@ -10,15 +10,21 @@ const CACHE_STALE_WHILE_REVALIDATE = 7200; // 2 hours
 async function getStatsFromDatabase() {
   const supabase = getSupabaseServiceClient();
 
-  const [users, memories, stories, activeMemories] = await Promise.all([
-    supabase.from('user_referrals').select('*', { count: 'exact', head: true }),
+  // Get user count from Supabase Auth
+  const { data: allUsers } = await supabase.auth.admin.listUsers({
+    perPage: 1000,
+  });
+  const userCount = allUsers?.users?.length || 0;
+
+  // Get other stats
+  const [memories, stories, activeMemories] = await Promise.all([
     supabase.from('memories').select('*', { count: 'exact', head: true }),
     supabase.from('stories').select('*', { count: 'exact', head: true }),
     supabase.from('memories').select('*', { count: 'exact', head: true }).eq('status', 'active'),
   ]);
 
   return {
-    users: users.count || 0,
+    users: userCount,
     memories: memories.count || 0,
     stories: stories.count || 0,
     activeMemories: activeMemories.count || 0,

@@ -24,16 +24,21 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseServiceClient();
 
-    // Count all stats in parallel
-    const [users, memories, stories, activeMemories] = await Promise.all([
-      supabase.from('user_referrals').select('*', { count: 'exact', head: true }),
+    // Get user count from Supabase Auth (real users)
+    const { data: allUsers } = await supabase.auth.admin.listUsers({
+      perPage: 1000,
+    });
+    const userCount = allUsers?.users?.length || 0;
+
+    // Count other stats in parallel
+    const [memories, stories, activeMemories] = await Promise.all([
       supabase.from('memories').select('*', { count: 'exact', head: true }),
       supabase.from('stories').select('*', { count: 'exact', head: true }),
       supabase.from('memories').select('*', { count: 'exact', head: true }).eq('status', 'active'),
     ]);
 
     const stats = {
-      users: users.count || 0,
+      users: userCount,
       memories: memories.count || 0,
       stories: stories.count || 0,
       activeMemories: activeMemories.count || 0,

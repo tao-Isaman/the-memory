@@ -9,11 +9,13 @@ interface User {
   id: string;
   user_id: string;
   user_email: string;
-  referral_code: string;
+  referral_code: string | null;
   referred_by: string | null;
   created_at: string;
+  last_sign_in_at: string | null;
   memoryCount: number;
   paidMemoryCount: number;
+  hasReferralCode: boolean;
 }
 
 type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'user_email';
@@ -27,6 +29,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMemories, setFilterMemories] = useState<'all' | 'with' | 'without'>('all');
   const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all');
+  const [filterReferral, setFilterReferral] = useState<'all' | 'with' | 'without'>('all');
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -52,7 +55,7 @@ export default function AdminUsersPage() {
       result = result.filter(
         (user) =>
           user.user_email.toLowerCase().includes(query) ||
-          user.referral_code.toLowerCase().includes(query)
+          (user.referral_code && user.referral_code.toLowerCase().includes(query))
       );
     }
 
@@ -68,6 +71,13 @@ export default function AdminUsersPage() {
       result = result.filter((user) => user.paidMemoryCount > 0);
     } else if (filterPaid === 'unpaid') {
       result = result.filter((user) => user.paidMemoryCount === 0);
+    }
+
+    // Referral filter
+    if (filterReferral === 'with') {
+      result = result.filter((user) => user.hasReferralCode);
+    } else if (filterReferral === 'without') {
+      result = result.filter((user) => !user.hasReferralCode);
     }
 
     // Sort
@@ -91,7 +101,7 @@ export default function AdminUsersPage() {
     });
 
     return result;
-  }, [users, searchQuery, filterMemories, filterPaid, sortField, sortOrder]);
+  }, [users, searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -157,6 +167,17 @@ export default function AdminUsersPage() {
             <option value="unpaid">Never Paid</option>
           </select>
 
+          {/* Referral Filter */}
+          <select
+            value={filterReferral}
+            onChange={(e) => setFilterReferral(e.target.value as 'all' | 'with' | 'without')}
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+          >
+            <option value="all">All Referral</option>
+            <option value="with">Has Code</option>
+            <option value="without">No Code</option>
+          </select>
+
           {/* Sort */}
           <select
             value={sortField}
@@ -220,9 +241,13 @@ export default function AdminUsersPage() {
                   <div className="text-xs text-gray-400">{user.user_id.slice(0, 8)}...</div>
                 </td>
                 <td className="px-6 py-4">
-                  <code className="bg-gray-100 px-2 py-1 rounded text-sm text-pink-600">
-                    {user.referral_code}
-                  </code>
+                  {user.referral_code ? (
+                    <code className="bg-gray-100 px-2 py-1 rounded text-sm text-pink-600">
+                      {user.referral_code}
+                    </code>
+                  ) : (
+                    <span className="text-gray-400 text-sm">-</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center gap-1">
