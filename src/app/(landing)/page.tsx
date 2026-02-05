@@ -91,13 +91,11 @@ function AnimatedStat({
 
   return (
     <div className="text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 bg-white/20 rounded-full mb-2">
-        <Icon size={24} className="text-white" />
-      </div>
-      <p className="text-3xl md:text-4xl font-bold text-white">
+      <Icon size={20} className="text-[#E63946] mx-auto mb-1" />
+      <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
         {count.toLocaleString()}+
       </p>
-      <p className="text-white/80 text-sm mt-1">{label}</p>
+      <p className="text-gray-500 text-xs mt-0.5">{label}</p>
     </div>
   );
 }
@@ -192,6 +190,32 @@ export default function LandingPage() {
               <span className="text-[#4A1942]">สร้างของขวัญที่หัวใจละลาย</span>
             </h1>
 
+            {/* Stats below headline */}
+            {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
+              <div className="inline-flex items-center justify-center gap-6 md:gap-10 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl px-8 py-4">
+                <AnimatedStat
+                  value={stats.users}
+                  label="ผู้ใช้งาน"
+                  icon={Users}
+                  startAnimation={startCountAnimation}
+                />
+                <div className="h-12 w-px bg-pink-200" />
+                <AnimatedStat
+                  value={stats.memories}
+                  label="ความทรงจำ"
+                  icon={BookHeart}
+                  startAnimation={startCountAnimation}
+                />
+                <div className="h-12 w-px bg-pink-200" />
+                <AnimatedStat
+                  value={stats.stories}
+                  label="เรื่องราว"
+                  icon={Layers}
+                  startAnimation={startCountAnimation}
+                />
+              </div>
+            )}
+
             {/* Subheadline */}
             <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
               สร้างของขวัญออนไลน์สุดโรแมนติก รวมรูปภาพ ข้อความ และเพลงที่มีความหมาย
@@ -220,32 +244,6 @@ export default function LandingPage() {
             <p className="mt-8 text-sm text-gray-500">
               ✓ ฟรี ✓ ไม่ต้องติดตั้งแอป ✓ ใช้งานง่าย ✓ ส่งลิงก์ได้ทันที
             </p>
-
-            {/* Stats in Hero */}
-            {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
-              <div className="mt-12 bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] rounded-2xl p-6 shadow-xl">
-                <div className="grid grid-cols-3 gap-4 md:gap-8">
-                  <AnimatedStat
-                    value={stats.users}
-                    label="ผู้ใช้งาน"
-                    icon={Users}
-                    startAnimation={startCountAnimation}
-                  />
-                  <AnimatedStat
-                    value={stats.memories}
-                    label="ความทรงจำ"
-                    icon={BookHeart}
-                    startAnimation={startCountAnimation}
-                  />
-                  <AnimatedStat
-                    value={stats.stories}
-                    label="เรื่องราว"
-                    icon={Layers}
-                    startAnimation={startCountAnimation}
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </section>
