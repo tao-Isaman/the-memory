@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { list } from '@vercel/blob';
 
 // Cache duration: 1 hour (stats update every 12 hours, so 1 hour cache is fine)
 const CACHE_MAX_AGE = 3600; // 1 hour in seconds
@@ -7,30 +7,26 @@ const CACHE_STALE_WHILE_REVALIDATE = 7200; // 2 hours
 
 export async function GET() {
   try {
-    const supabase = getSupabaseServiceClient();
+    // Find the stats blob file
+    const { blobs } = await list({ prefix: 'site-stats' });
+    const statsBlob = blobs.find(b => b.pathname === 'site-stats.json');
 
-    // Using 'any' until types are regenerated after migration
-    const { data, error } = await (supabase as any)
-      .from('site_stats')
-      .select('*')
-      .eq('id', 1)
-      .single();
-
-    if (error) {
-      console.error('Error fetching site_stats:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch stats' },
-        { status: 500 }
-      );
+    if (!statsBlob) {
+      // Return empty stats if blob doesn't exist yet
+      return NextResponse.json({
+        users: 0,
+        memories: 0,
+        stories: 0,
+        activeMemories: 0,
+        updatedAt: null,
+      });
     }
 
-    const response = NextResponse.json({
-      users: data?.total_users || 0,
-      memories: data?.total_memories || 0,
-      stories: data?.total_stories || 0,
-      activeMemories: data?.active_memories || 0,
-      updatedAt: data?.updated_at || null,
-    });
+    // Fetch the JSON from blob URL
+    const statsResponse = await fetch(statsBlob.url);
+    const stats = await statsResponse.json();
+
+    const response = NextResponse.json(stats);
 
     // Add cache headers for CDN and browser caching
     response.headers.set(

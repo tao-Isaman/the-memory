@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+
+// Public blob file name for stats
+const STATS_BLOB_NAME = 'site-stats.json';
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,34 +37,22 @@ export async function GET(request: NextRequest) {
       memories: memories.count || 0,
       stories: stories.count || 0,
       activeMemories: activeMemories.count || 0,
+      updatedAt: new Date().toISOString(),
     };
 
-    // Update stats table (using 'any' until types are regenerated after migration)
-    const { error: updateError } = await (supabase as any)
-      .from('site_stats')
-      .update({
-        total_users: stats.users,
-        total_memories: stats.memories,
-        total_stories: stats.stories,
-        active_memories: stats.activeMemories,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', 1);
+    // Save stats to Vercel Blob (public JSON file)
+    const blob = await put(STATS_BLOB_NAME, JSON.stringify(stats), {
+      access: 'public',
+      addRandomSuffix: false, // Keep consistent filename
+      contentType: 'application/json',
+    });
 
-    if (updateError) {
-      console.error('Error updating site_stats:', updateError);
-      return NextResponse.json(
-        { error: 'Failed to update stats' },
-        { status: 500 }
-      );
-    }
-
-    console.log('Site stats updated:', stats);
+    console.log('Site stats saved to blob:', blob.url);
 
     return NextResponse.json({
       success: true,
       stats,
-      updatedAt: new Date().toISOString(),
+      blobUrl: blob.url,
     });
   } catch (error) {
     console.error('Cron update-stats error:', error);
