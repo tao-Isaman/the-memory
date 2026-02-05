@@ -1,13 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const perPage = parseInt(searchParams.get('perPage') || '20');
+
     const supabase = getSupabaseServiceClient();
 
     // Get all users from Supabase Auth (auth.users table)
+    // Note: Supabase auth.admin.listUsers supports pagination
     const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
-      perPage: 1000,
+      page,
+      perPage,
     });
 
     if (authError) {
@@ -15,6 +21,12 @@ export async function GET() {
     }
 
     const authUsers = authData?.users || [];
+
+    // Get total count by fetching with high perPage (Supabase doesn't provide total in listUsers)
+    const { data: allUsersData } = await supabase.auth.admin.listUsers({
+      perPage: 10000,
+    });
+    const totalUsers = allUsersData?.users?.length || 0;
 
     // Get referral data for users who have it
     const { data: referrals } = await supabase
@@ -25,7 +37,7 @@ export async function GET() {
       (referrals || []).map((r) => [r.user_id, r])
     );
 
-    // Get memory counts for each user
+    // Get memory counts for each user on current page
     const usersWithCounts = await Promise.all(
       authUsers.map(async (user) => {
         const { count: memoryCount } = await supabase
@@ -61,7 +73,15 @@ export async function GET() {
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 
-    return NextResponse.json(usersWithCounts);
+    return NextResponse.json({
+      users: usersWithCounts,
+      pagination: {
+        page,
+        perPage,
+        total: totalUsers,
+        totalPages: Math.ceil(totalUsers / perPage),
+      },
+    });
   } catch (error) {
     console.error('Admin users error:', error);
     return NextResponse.json(

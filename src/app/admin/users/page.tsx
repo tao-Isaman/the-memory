@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Eye, BookHeart, CreditCard, Search, Filter, SortAsc, SortDesc } from 'lucide-react';
+import { Eye, BookHeart, CreditCard, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface User {
@@ -18,14 +18,27 @@ interface User {
   hasReferralCode: boolean;
 }
 
+interface Pagination {
+  page: number;
+  perPage: number;
+  total: number;
+  totalPages: number;
+}
+
 type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'user_email';
 type SortOrder = 'asc' | 'desc';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    perPage: 20,
+    total: 0,
+    totalPages: 0,
+  });
   const [loading, setLoading] = useState(true);
 
-  // Filters
+  // Filters (client-side for current page)
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMemories, setFilterMemories] = useState<'all' | 'with' | 'without'>('all');
   const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -33,18 +46,28 @@ export default function AdminUsersPage() {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
+  const fetchUsers = async (page: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users?page=${page}&perPage=${pagination.perPage}`);
+      const data = await res.json();
+      setUsers(data.users || []);
+      setPagination(data.pagination || pagination);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    fetch('/api/admin/users')
-      .then((res) => res.json())
-      .then((data) => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch users:', err);
-        setLoading(false);
-      });
+    fetchUsers(1);
   }, []);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchUsers(newPage);
+    }
+  };
 
   const filteredUsers = useMemo(() => {
     let result = [...users];
@@ -112,7 +135,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (loading) {
+  if (loading && users.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <HeartLoader message="กำลังโหลด..." size="md" />
@@ -124,7 +147,9 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Users</h1>
-        <p className="text-gray-500">{filteredUsers.length} of {users.length} users</p>
+        <p className="text-gray-500">
+          {filteredUsers.length} shown / {pagination.total} total users
+        </p>
       </div>
 
       {/* Filters */}
@@ -202,6 +227,11 @@ export default function AdminUsersPage() {
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {loading && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+            <HeartLoader message="กำลังโหลด..." size="sm" />
+          </div>
+        )}
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -288,6 +318,65 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-gray-500">
+            Page {pagination.page} of {pagination.totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(pagination.page - 1)}
+              disabled={pagination.page === 1 || loading}
+              className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={16} />
+              Previous
+            </button>
+
+            {/* Page numbers */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                let pageNum;
+                if (pagination.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (pagination.page <= 3) {
+                  pageNum = i + 1;
+                } else if (pagination.page >= pagination.totalPages - 2) {
+                  pageNum = pagination.totalPages - 4 + i;
+                } else {
+                  pageNum = pagination.page - 2 + i;
+                }
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    disabled={loading}
+                    className={`px-3 py-2 rounded-lg ${
+                      pagination.page === pageNum
+                        ? 'bg-pink-500 text-white'
+                        : 'border border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => handlePageChange(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages || loading}
+              className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
