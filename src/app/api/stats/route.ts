@@ -17,17 +17,15 @@ async function getStatsFromDatabase() {
   const userCount = allUsers?.users?.length || 0;
 
   // Get other stats
-  const [memories, stories, activeMemories] = await Promise.all([
+  const [memories, stories] = await Promise.all([
     supabase.from('memories').select('*', { count: 'exact', head: true }),
     supabase.from('stories').select('*', { count: 'exact', head: true }),
-    supabase.from('memories').select('*', { count: 'exact', head: true }).eq('status', 'active'),
   ]);
 
   return {
     users: userCount,
     memories: memories.count || 0,
     stories: stories.count || 0,
-    activeMemories: activeMemories.count || 0,
     updatedAt: new Date().toISOString(),
   };
 }

@@ -413,7 +413,7 @@ CRON_SECRET=xxx
 - [x] Animated counter on landing page hero section
 - [x] Vercel Cron job (daily at midnight)
 - [x] Vercel Blob caching for zero DB queries on page load
-- [x] Stats: users, memories, stories, active memories
+- [x] Stats: users, memories, stories
 
 ### Admin System
 - [x] Email-protected access (`NEXT_PUBLIC_ADMIN_EMAIL`)
