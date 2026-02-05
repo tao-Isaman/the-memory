@@ -18,27 +18,17 @@ interface User {
   hasReferralCode: boolean;
 }
 
-interface Pagination {
-  page: number;
-  perPage: number;
-  total: number;
-  totalPages: number;
-}
-
 type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'user_email';
 type SortOrder = 'asc' | 'desc';
 
-export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    perPage: 20,
-    total: 0,
-    totalPages: 0,
-  });
-  const [loading, setLoading] = useState(true);
+const ITEMS_PER_PAGE = 20;
 
-  // Filters (client-side for current page)
+export default function AdminUsersPage() {
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMemories, setFilterMemories] = useState<'all' | 'with' | 'without'>('all');
   const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all');
@@ -46,31 +36,27 @@ export default function AdminUsersPage() {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  const fetchUsers = async (page: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/users?page=${page}&perPage=${pagination.perPage}`);
-      const data = await res.json();
-      setUsers(data.users || []);
-      setPagination(data.pagination || pagination);
-    } catch (err) {
-      console.error('Failed to fetch users:', err);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
-    fetchUsers(1);
+    fetch('/api/admin/users')
+      .then((res) => res.json())
+      .then((data) => {
+        setAllUsers(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch users:', err);
+        setLoading(false);
+      });
   }, []);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= pagination.totalPages) {
-      fetchUsers(newPage);
-    }
-  };
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
 
+  // Filter and sort all users
   const filteredUsers = useMemo(() => {
-    let result = [...users];
+    let result = [...allUsers];
 
     // Search filter
     if (searchQuery) {
@@ -124,7 +110,14 @@ export default function AdminUsersPage() {
     });
 
     return result;
-  }, [users, searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
+  }, [allUsers, searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredUsers, currentPage]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -135,7 +128,13 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (loading && users.length === 0) {
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <HeartLoader message="กำลังโหลด..." size="md" />
@@ -148,7 +147,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Users</h1>
         <p className="text-gray-500">
-          {filteredUsers.length} shown / {pagination.total} total users
+          {filteredUsers.length} filtered / {allUsers.length} total users
         </p>
       </div>
 
@@ -227,11 +226,6 @@ export default function AdminUsersPage() {
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading && (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
-            <HeartLoader message="กำลังโหลด..." size="sm" />
-          </div>
-        )}
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -264,7 +258,7 @@ export default function AdminUsersPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filteredUsers.map((user) => (
+            {paginatedUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-800">{user.user_email}</div>
@@ -312,23 +306,23 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
 
-        {filteredUsers.length === 0 && (
+        {paginatedUsers.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            {users.length === 0 ? 'No users found' : 'No users match your filters'}
+            {allUsers.length === 0 ? 'No users found' : 'No users match your filters'}
           </div>
         )}
       </div>
 
       {/* Pagination */}
-      {pagination.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
           <p className="text-sm text-gray-500">
-            Page {pagination.page} of {pagination.totalPages}
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)} of {filteredUsers.length}
           </p>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page === 1 || loading}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
               className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={16} />
@@ -337,25 +331,24 @@ export default function AdminUsersPage() {
 
             {/* Page numbers */}
             <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
-                if (pagination.totalPages <= 5) {
+                if (totalPages <= 5) {
                   pageNum = i + 1;
-                } else if (pagination.page <= 3) {
+                } else if (currentPage <= 3) {
                   pageNum = i + 1;
-                } else if (pagination.page >= pagination.totalPages - 2) {
-                  pageNum = pagination.totalPages - 4 + i;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
                 } else {
-                  pageNum = pagination.page - 2 + i;
+                  pageNum = currentPage - 2 + i;
                 }
 
                 return (
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    disabled={loading}
                     className={`px-3 py-2 rounded-lg ${
-                      pagination.page === pageNum
+                      currentPage === pageNum
                         ? 'bg-pink-500 text-white'
                         : 'border border-gray-200 hover:bg-gray-50'
                     }`}
@@ -367,8 +360,8 @@ export default function AdminUsersPage() {
             </div>
 
             <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page === pagination.totalPages || loading}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
               className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
