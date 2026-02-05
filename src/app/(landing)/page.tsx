@@ -21,13 +21,33 @@ import {
   Plane,
   Flower2,
   Star,
+  Users,
+  BookHeart,
+  Layers,
 } from 'lucide-react';
+
+interface SiteStats {
+  users: number;
+  memories: number;
+  stories: number;
+}
 
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [stats, setStats] = useState<SiteStats | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
+
+    // Fetch site stats
+    fetch('/api/stats')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.users !== undefined) {
+          setStats(data);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch stats:', err));
   }, []);
 
   return (
@@ -139,6 +159,48 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Stats Section */}
+      {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
+        <section className="py-16 bg-white border-b border-pink-100">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="grid grid-cols-3 gap-8">
+              {/* Users */}
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
+                  <Users size={28} className="text-[#E63946]" />
+                </div>
+                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
+                  {stats.users.toLocaleString()}+
+                </p>
+                <p className="text-gray-500 text-sm mt-1">ผู้ใช้งาน</p>
+              </div>
+
+              {/* Memories */}
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
+                  <BookHeart size={28} className="text-[#E63946]" />
+                </div>
+                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
+                  {stats.memories.toLocaleString()}+
+                </p>
+                <p className="text-gray-500 text-sm mt-1">ความทรงจำ</p>
+              </div>
+
+              {/* Stories */}
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full mb-4">
+                  <Layers size={28} className="text-[#E63946]" />
+                </div>
+                <p className="text-3xl md:text-4xl font-bold text-[#E63946]">
+                  {stats.stories.toLocaleString()}+
+                </p>
+                <p className="text-gray-500 text-sm mt-1">เรื่องราว</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features Section */}
       <section className="py-24 bg-white" id="features">
