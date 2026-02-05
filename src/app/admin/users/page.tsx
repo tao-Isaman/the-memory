@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Eye, BookHeart, CreditCard } from 'lucide-react';
+import { Eye, BookHeart, CreditCard, Search, Filter, SortAsc, SortDesc } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface User {
@@ -16,9 +16,19 @@ interface User {
   paidMemoryCount: number;
 }
 
+type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'user_email';
+type SortOrder = 'asc' | 'desc';
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterMemories, setFilterMemories] = useState<'all' | 'with' | 'without'>('all');
+  const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all');
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   useEffect(() => {
     fetch('/api/admin/users')
@@ -33,6 +43,65 @@ export default function AdminUsersPage() {
       });
   }, []);
 
+  const filteredUsers = useMemo(() => {
+    let result = [...users];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (user) =>
+          user.user_email.toLowerCase().includes(query) ||
+          user.referral_code.toLowerCase().includes(query)
+      );
+    }
+
+    // Memory filter
+    if (filterMemories === 'with') {
+      result = result.filter((user) => user.memoryCount > 0);
+    } else if (filterMemories === 'without') {
+      result = result.filter((user) => user.memoryCount === 0);
+    }
+
+    // Paid filter
+    if (filterPaid === 'paid') {
+      result = result.filter((user) => user.paidMemoryCount > 0);
+    } else if (filterPaid === 'unpaid') {
+      result = result.filter((user) => user.paidMemoryCount === 0);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'created_at':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'memoryCount':
+          comparison = a.memoryCount - b.memoryCount;
+          break;
+        case 'paidMemoryCount':
+          comparison = a.paidMemoryCount - b.paidMemoryCount;
+          break;
+        case 'user_email':
+          comparison = a.user_email.localeCompare(b.user_email);
+          break;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return result;
+  }, [users, searchQuery, filterMemories, filterPaid, sortField, sortOrder]);
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -43,9 +112,71 @@ export default function AdminUsersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Users</h1>
-        <p className="text-gray-500">{users.length} users</p>
+        <p className="text-gray-500">{filteredUsers.length} of {users.length} users</p>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by email or referral code..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Memory Filter */}
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-gray-500" />
+            <select
+              value={filterMemories}
+              onChange={(e) => setFilterMemories(e.target.value as 'all' | 'with' | 'without')}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+            >
+              <option value="all">All Memories</option>
+              <option value="with">Has Memories</option>
+              <option value="without">No Memories</option>
+            </select>
+          </div>
+
+          {/* Paid Filter */}
+          <select
+            value={filterPaid}
+            onChange={(e) => setFilterPaid(e.target.value as 'all' | 'paid' | 'unpaid')}
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+          >
+            <option value="all">All Status</option>
+            <option value="paid">Has Paid</option>
+            <option value="unpaid">Never Paid</option>
+          </select>
+
+          {/* Sort */}
+          <select
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value as SortField)}
+            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+          >
+            <option value="created_at">Sort by Date</option>
+            <option value="user_email">Sort by Email</option>
+            <option value="memoryCount">Sort by Memories</option>
+            <option value="paidMemoryCount">Sort by Paid</option>
+          </select>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50"
+            title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+          >
+            {sortOrder === 'asc' ? <SortAsc size={18} /> : <SortDesc size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Users Table */}
@@ -53,16 +184,36 @@ export default function AdminUsersPage() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Email</th>
+              <th
+                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('user_email')}
+              >
+                Email {sortField === 'user_email' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
               <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Referral Code</th>
-              <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Memories</th>
-              <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Paid</th>
-              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Joined</th>
+              <th
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('memoryCount')}
+              >
+                Memories {sortField === 'memoryCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('paidMemoryCount')}
+              >
+                Paid {sortField === 'paidMemoryCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
+                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('created_at')}
+              >
+                Joined {sortField === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
               <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-800">{user.user_email}</div>
@@ -106,9 +257,9 @@ export default function AdminUsersPage() {
           </tbody>
         </table>
 
-        {users.length === 0 && (
+        {filteredUsers.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No users found
+            {users.length === 0 ? 'No users found' : 'No users match your filters'}
           </div>
         )}
       </div>

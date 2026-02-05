@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Eye, Layers, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { ArrowLeft, Eye, Layers, CheckCircle, Clock, XCircle, Search, Filter } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface Memory {
@@ -30,6 +30,10 @@ export default function UserMemoriesPage() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'active' | 'failed'>('all');
+
   useEffect(() => {
     fetch(`/api/admin/users/${userId}/memories`)
       .then((res) => res.json())
@@ -43,6 +47,25 @@ export default function UserMemoriesPage() {
         setLoading(false);
       });
   }, [userId]);
+
+  const filteredMemories = useMemo(() => {
+    let result = [...memories];
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((memory) =>
+        memory.title.toLowerCase().includes(query)
+      );
+    }
+
+    // Status filter
+    if (filterStatus !== 'all') {
+      result = result.filter((memory) => memory.status === filterStatus);
+    }
+
+    return result;
+  }, [memories, searchQuery, filterStatus]);
 
   if (loading) {
     return (
@@ -80,6 +103,14 @@ export default function UserMemoriesPage() {
     }
   };
 
+  // Count by status
+  const statusCounts = {
+    all: memories.length,
+    pending: memories.filter((m) => m.status === 'pending').length,
+    active: memories.filter((m) => m.status === 'active').length,
+    failed: memories.filter((m) => m.status === 'failed').length,
+  };
+
   return (
     <div>
       {/* Back button and header */}
@@ -91,14 +122,46 @@ export default function UserMemoriesPage() {
         Back to Users
       </Link>
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{user?.user_email}</h1>
           <p className="text-gray-500 mt-1">
             Referral Code: <code className="bg-gray-100 px-2 py-0.5 rounded text-pink-600">{user?.referral_code}</code>
           </p>
         </div>
-        <p className="text-gray-500">{memories.length} memories</p>
+        <p className="text-gray-500">{filteredMemories.length} of {memories.length} memories</p>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className="flex flex-wrap gap-4 items-center">
+          {/* Search */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-gray-500" />
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'pending' | 'active' | 'failed')}
+              className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+            >
+              <option value="all">All Status ({statusCounts.all})</option>
+              <option value="active">Paid ({statusCounts.active})</option>
+              <option value="pending">Pending ({statusCounts.pending})</option>
+              <option value="failed">Failed ({statusCounts.failed})</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {/* Memories Table */}
@@ -115,7 +178,7 @@ export default function UserMemoriesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {memories.map((memory) => (
+            {filteredMemories.map((memory) => (
               <tr key={memory.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="font-medium text-gray-800">{memory.title}</div>
@@ -160,9 +223,9 @@ export default function UserMemoriesPage() {
           </tbody>
         </table>
 
-        {memories.length === 0 && (
+        {filteredMemories.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            No memories found
+            {memories.length === 0 ? 'No memories found' : 'No memories match your filters'}
           </div>
         )}
       </div>

@@ -3,13 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface Story {
   id: string;
-  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube';
+  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
   priority: number;
   title: string | null;
   content: Record<string, unknown>;
@@ -113,6 +112,8 @@ export default function MemoryDetailsPage() {
         return <Layers size={18} className="text-purple-500" />;
       case 'youtube':
         return <Music size={18} className="text-red-500" />;
+      case 'scratch':
+        return <Sparkles size={18} className="text-amber-500" />;
       default:
         return null;
     }
@@ -133,12 +134,10 @@ export default function MemoryDetailsPage() {
         return (
           <div>
             {content.imageUrl && (
-              <Image
+              <img
                 src={content.imageUrl}
                 alt={content.caption || 'Image'}
-                width={400}
-                height={300}
-                className="rounded-lg max-h-64 object-cover"
+                className="rounded-lg max-h-96 w-auto object-contain bg-gray-100"
               />
             )}
             {content.caption && (
@@ -156,12 +155,10 @@ export default function MemoryDetailsPage() {
         return (
           <div>
             {content.imageUrl && (
-              <Image
+              <img
                 src={content.imageUrl}
                 alt="Image"
-                width={400}
-                height={300}
-                className="rounded-lg max-h-64 object-cover mb-3"
+                className="rounded-lg max-h-96 w-auto object-contain bg-gray-100 mb-3"
               />
             )}
             <div className="bg-gray-50 p-4 rounded-lg">
@@ -181,6 +178,22 @@ export default function MemoryDetailsPage() {
             >
               {content.youtubeUrl}
             </a>
+          </div>
+        );
+      case 'scratch':
+        return (
+          <div>
+            <p className="text-sm text-amber-600 mb-2">Scratch Card Image:</p>
+            {content.imageUrl && (
+              <img
+                src={content.imageUrl}
+                alt={content.caption || 'Scratch image'}
+                className="rounded-lg max-h-96 w-auto object-contain bg-gray-100"
+              />
+            )}
+            {content.caption && (
+              <p className="text-gray-600 mt-2">{content.caption}</p>
+            )}
           </div>
         );
       default:
