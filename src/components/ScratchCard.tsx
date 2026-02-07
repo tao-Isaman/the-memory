@@ -8,6 +8,7 @@ interface ScratchCardProps {
     themeColors?: ThemeColors;
     onComplete?: () => void;
     revealThreshold?: number;
+    initialRevealed?: boolean;
 }
 
 const defaultColors: ThemeColors = {
@@ -22,10 +23,11 @@ export default function ScratchCard({
     themeColors = defaultColors,
     onComplete,
     revealThreshold = 50,
+    initialRevealed = false,
 }: ScratchCardProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isRevealed, setIsRevealed] = useState(false);
+    const [isRevealed, setIsRevealed] = useState(initialRevealed);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isScratching, setIsScratching] = useState(false);
     const lastPointRef = useRef<{ x: number; y: number } | null>(null);

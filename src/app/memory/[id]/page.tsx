@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import Link from 'next/link';
 import { Memory, MemoryStory } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
-import { getThemeColors, ThemeColors } from '@/lib/themes';
+import { getThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
@@ -25,6 +25,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPasswordLocked, setIsPasswordLocked] = useState(false);
   const [autoAdvance, setAutoAdvance] = useState(false);
+  const [revealedStories, setRevealedStories] = useState<Set<string>>(new Set());
 
   // Memoize sorted memory
   const sortedMemory = useMemo(() => {
@@ -229,7 +230,13 @@ export default function MemoryViewerPage({ params }: PageProps) {
               themeColors={themeColors}
             />
           ) : currentStory ? (
-            <StoryViewer story={currentStory} themeColors={themeColors} />
+            <StoryViewer
+              key={currentStory.id}
+              story={currentStory}
+              themeColors={themeColors}
+              isRevealed={revealedStories.has(currentStory.id)}
+              onReveal={() => setRevealedStories(prev => new Set(prev).add(currentStory.id))}
+            />
           ) : null}
         </div>
       </div>

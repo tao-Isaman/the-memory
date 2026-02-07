@@ -11,6 +11,8 @@ import ScratchCard from './ScratchCard';
 interface StoryViewerProps {
   story: MemoryStory;
   themeColors?: ThemeColors;
+  isRevealed?: boolean;
+  onReveal?: () => void;
 }
 
 const defaultColors: ThemeColors = {
@@ -20,7 +22,7 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-function StoryViewer({ story, themeColors = defaultColors }: StoryViewerProps) {
+function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal }: StoryViewerProps) {
   const TitleHeader = ({ title }: { title?: string }) => (
     <div className="flex items-center gap-2 mb-4">
       <HeartIcon size={20} style={{ color: themeColors.primary }} />
@@ -94,6 +96,8 @@ function StoryViewer({ story, themeColors = defaultColors }: StoryViewerProps) {
           <ScratchCard
             imageUrl={story.content.imageUrl}
             themeColors={themeColors}
+            initialRevealed={isRevealed}
+            onComplete={onReveal}
           />
           {story.content.caption && (
             <p className="mt-4 text-center text-gray-600 italic">
