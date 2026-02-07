@@ -8,13 +8,15 @@ import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import ReferralSetupModal from '@/components/ReferralSetupModal';
 import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
-import { ArrowLeft, Users } from 'lucide-react';
+import LinkReferralCodeModal from '@/components/LinkReferralCodeModal';
+import { ArrowLeft, Users, UserPlus } from 'lucide-react';
 import { ReferralStats } from '@/types/referral';
 
 interface ReferralStatusResponse {
   hasReferral: boolean;
   referralCode: string | null;
   referralLink: string | null;
+  referredBy: string | null;
   stats: ReferralStats;
 }
 
@@ -22,6 +24,7 @@ export default function ReferralPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [showReferralSetup, setShowReferralSetup] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [referralStatus, setReferralStatus] = useState<ReferralStatusResponse | null>(null);
   const [referralLoading, setReferralLoading] = useState(true);
 
@@ -155,11 +158,24 @@ export default function ReferralPage() {
             <HeartLoader message="กำลังโหลดข้อมูล..." size="md" />
           </div>
         ) : referralStatus?.referralCode ? (
-          <ReferralCodeDisplay
-            code={referralStatus.referralCode}
-            stats={referralStatus.stats}
-            userId={user.id}
-          />
+          <>
+            <ReferralCodeDisplay
+              code={referralStatus.referralCode}
+              stats={referralStatus.stats}
+              userId={user.id}
+            />
+
+            {/* Link referral code button - only show if user hasn't linked one */}
+            {referralStatus.hasReferral && !referralStatus.referredBy && (
+              <button
+                onClick={() => setShowLinkModal(true)}
+                className="mt-4 w-full py-3 px-4 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-xl text-[#E63946] font-medium hover:from-pink-100 hover:to-red-100 transition-all flex items-center justify-center gap-2"
+              >
+                <UserPlus size={18} />
+                มีโค้ดแนะนำจากเพื่อน?
+              </button>
+            )}
+          </>
         ) : (
           <div className="memory-card p-6 text-center">
             <HeartIcon size={48} className="mx-auto mb-4 opacity-50" />
@@ -179,6 +195,17 @@ export default function ReferralPage() {
         isOpen={showReferralSetup}
         onSubmit={handleReferralSetup}
         onSkip={() => setShowReferralSetup(false)}
+      />
+
+      {/* Link Referral Code Modal */}
+      <LinkReferralCodeModal
+        isOpen={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        onSuccess={() => {
+          setShowLinkModal(false);
+          checkReferralStatus();
+        }}
+        userId={user.id}
       />
     </main>
   );

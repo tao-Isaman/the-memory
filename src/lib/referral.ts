@@ -282,6 +282,26 @@ export async function isEligibleForReferralDiscount(
   return { eligible: true, discountAmount: 50 }; // 50 THB discount
 }
 
+// Link a referral code for a user who skipped during initial setup
+export async function linkReferralCode(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  referrerUserId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('user_referrals')
+    .update({ referred_by: referrerUserId })
+    .eq('user_id', userId)
+    .is('referred_by', null);
+
+  if (error) {
+    console.error('Error linking referral code:', error);
+    return false;
+  }
+
+  return true;
+}
+
 // Mark referral discount as used after successful payment
 export async function markReferralDiscountUsed(
   supabase: SupabaseClient<Database>,
