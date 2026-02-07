@@ -393,6 +393,7 @@ CRON_SECRET=xxx
 - [x] Referrer money claim (50 THB per paid referral)
 - [x] Claim via PromptPay or Bank Transfer
 - [x] Admin claim processing
+- [x] Link referral code for users who skipped initial setup
 
 ### UI/UX
 - [x] Responsive design (mobile-first)
@@ -412,7 +413,7 @@ CRON_SECRET=xxx
 ### Site Stats
 - [x] Animated counter on landing page hero section
 - [x] Vercel Cron job (daily at midnight)
-- [x] Vercel Blob caching for zero DB queries on page load
+- [x] Vercel Blob caching for zero DB queries on page load (with `allowOverwrite`)
 - [x] Stats: users, memories, stories
 
 ### Admin System
@@ -523,11 +524,13 @@ const pendingDiscounts = Math.max(0, paidCount - (claimedCount || 0));
 | `/api/referral/claim-discount` | GET | Get claim history |
 | `/api/referral/check-discount` | GET | Check new user discount eligibility |
 | `/api/referral/referred-users` | GET | List users who used referrer's code |
+| `/api/referral/link-code` | POST | Link referral code for users who skipped |
 
 ### Components
 - `ReferralCodeDisplay.tsx`: Shows code, stats, claim button, referred users list
 - `ClaimMoneyModal.tsx`: Form for PromptPay/Bank Transfer claim
 - `ClaimHistorySection.tsx`: Shows claim status (pending/completed/rejected)
+- `LinkReferralCodeModal.tsx`: Modal for users who skipped to enter a referral code later
 
 ## Performance Optimizations
 
@@ -539,4 +542,4 @@ const pendingDiscounts = Math.max(0, paidCount - (claimedCount || 0));
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-05*
+*Last updated: 2026-02-07*
