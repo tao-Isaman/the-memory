@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const blob = await put(STATS_BLOB_NAME, JSON.stringify(stats), {
       access: 'public',
       addRandomSuffix: false, // Keep consistent filename
+      allowOverwrite: true,
       contentType: 'application/json',
     });
 
