@@ -32,6 +32,7 @@ Users build a memory presentation by creating and arranging **stories**. Each st
 | **Text + Image** | Combined text and image | `{ text: "...", imageUrl: "..." }` |
 | **YouTube** | Embedded video (supports multiple URL formats) | `{ youtubeUrl: "..." }` |
 | **Scratch** | Scratch-to-reveal hidden image (ความลับของเรา) | `{ imageUrl: "...", caption?: "..." }` |
+| **Question** | Quiz with 4 choices - wrong answer shows warning with sound (คำถาม) | `{ question: "...", choices: [...], correctIndex: 0 }` |
 
 ### YouTube URL Formats Supported
 - `youtube.com/watch?v=ID`
@@ -124,6 +125,7 @@ src/
 │   ├── StoryList.tsx           # Reorderable story list
 │   ├── StoryViewer.tsx         # Display story content
 │   ├── ScratchCard.tsx         # Canvas-based scratch-to-reveal component
+│   ├── QuestionGate.tsx        # Quiz question with 4 choices and sound feedback
 │   ├── PasswordGate.tsx        # 6-digit PIN input (mobile numpad)
 │   ├── ShareModal.tsx          # URL/QR code sharing
 │   ├── PaymentButton.tsx       # Stripe checkout initiator
@@ -203,7 +205,7 @@ src/
 |--------|------|-------------|
 | id | uuid | Primary key |
 | memory_id | uuid | Parent memory (references memories) |
-| type | text | 'password', 'image', 'text', 'text-image', 'youtube', 'scratch' |
+| type | text | 'password', 'image', 'text', 'text-image', 'youtube', 'scratch', 'question' |
 | priority | integer | Display order |
 | title | text | Optional story title |
 | content | jsonb | Story content (varies by type) |
@@ -222,7 +224,7 @@ src/
 ## TypeScript Interfaces
 
 ```typescript
-type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
+type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question';
 type MemoryStatus = 'pending' | 'active' | 'failed';
 
 interface BaseStory {
@@ -263,7 +265,12 @@ interface ScratchStory extends BaseStory {
   content: { imageUrl: string; caption?: string };
 }
 
-type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory;
+interface QuestionStory extends BaseStory {
+  type: 'question';
+  content: { question: string; choices: string[]; correctIndex: number };
+}
+
+type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory | QuestionStory;
 
 interface Memory {
   id: string;
@@ -364,7 +371,7 @@ CRON_SECRET=xxx
 - [x] Memory CRUD operations
 - [x] Story editor with add/edit/delete
 - [x] Story reordering (up/down buttons)
-- [x] 6 story types: password, image, text, text+image, youtube, scratch
+- [x] 7 story types: password, image, text, text+image, youtube, scratch, question
 - [x] Image upload with WebP conversion
 - [x] Preview mode for unpaid memories (owner only)
 
@@ -448,6 +455,7 @@ Located in `supabase/migrations/`:
 3. `002-add-payment-status.sql` - Add payment columns to memories
 4. `003-rename-nodes-to-stories.sql` - Rename nodes table to stories
 5. `009-add-scratch-story-type.sql` - Add scratch type to stories constraint
+6. `010-add-question-story-type.sql` - Add question type to stories constraint
 
 ## Development
 

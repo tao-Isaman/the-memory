@@ -1,4 +1,4 @@
-export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
+export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question';
 
 export interface BaseStory {
   id: string;
@@ -38,7 +38,16 @@ export interface ScratchStory extends BaseStory {
   content: { imageUrl: string; caption?: string };
 }
 
-export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory;
+export interface QuestionStory extends BaseStory {
+  type: 'question';
+  content: {
+    question: string;      // The question text
+    choices: string[];     // Array of 4 choice strings
+    correctIndex: number;  // Index of correct answer (0-3)
+  };
+}
+
+export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory | QuestionStory;
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 

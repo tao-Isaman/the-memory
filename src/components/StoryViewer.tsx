@@ -7,6 +7,7 @@ import YouTubeEmbed from './YouTubeEmbed';
 import HeartIcon from './HeartIcon';
 import ImageWithLoader from './ImageWithLoader';
 import ScratchCard from './ScratchCard';
+import QuestionGate from './QuestionGate';
 
 interface StoryViewerProps {
   story: MemoryStory;
@@ -105,6 +106,18 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
             </p>
           )}
         </div>
+      );
+
+    case 'question':
+      return (
+        <QuestionGate
+          question={story.content.question}
+          choices={story.content.choices}
+          correctIndex={story.content.correctIndex}
+          title={story.title}
+          onUnlock={() => onReveal?.()}
+          themeColors={themeColors}
+        />
       );
 
     default:
