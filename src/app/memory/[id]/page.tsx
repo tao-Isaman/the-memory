@@ -24,6 +24,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPasswordLocked, setIsPasswordLocked] = useState(false);
+  const [isQuestionLocked, setIsQuestionLocked] = useState(false);
   const [autoAdvance, setAutoAdvance] = useState(false);
   const [revealedStories, setRevealedStories] = useState<Set<string>>(new Set());
 
@@ -40,10 +41,13 @@ export default function MemoryViewerPage({ params }: PageProps) {
       const foundMemory = await getMemoryById(id);
       if (foundMemory) {
         setMemory(foundMemory);
-        // Check if first story is a password
+        // Check if first story is a password or question
         const sortedStories = [...foundMemory.stories].sort((a, b) => a.priority - b.priority);
         if (sortedStories.length > 0 && sortedStories[0].type === 'password') {
           setIsPasswordLocked(true);
+        }
+        if (sortedStories.length > 0 && sortedStories[0].type === 'question') {
+          setIsQuestionLocked(true);
         }
       }
       setLoading(false);
@@ -63,6 +67,9 @@ export default function MemoryViewerPage({ params }: PageProps) {
     if (nextStory.type === 'password') {
       setIsPasswordLocked(true);
     }
+    if (nextStory.type === 'question') {
+      setIsQuestionLocked(true);
+    }
     setCurrentIndex(nextIndex);
   }, [sortedMemory, currentIndex]);
 
@@ -71,7 +78,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
     if (!autoAdvance || !sortedMemory || isPasswordLocked) return;
 
     const currentStory = sortedMemory.stories[currentIndex];
-    if (!currentStory || currentStory.type === 'password' || currentStory.type === 'youtube') return;
+    if (!currentStory || currentStory.type === 'password' || currentStory.type === 'youtube' || currentStory.type === 'question') return;
 
     const timer = setTimeout(() => {
       if (currentIndex < sortedMemory.stories.length - 1) {
@@ -97,6 +104,13 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
   const handlePasswordUnlock = useCallback(() => {
     setIsPasswordLocked(false);
+    if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
+  }, [sortedMemory, currentIndex]);
+
+  const handleQuestionUnlock = useCallback(() => {
+    setIsQuestionLocked(false);
     if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
       setCurrentIndex(currentIndex + 1);
     }
@@ -235,7 +249,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
               story={currentStory}
               themeColors={themeColors}
               isRevealed={revealedStories.has(currentStory.id)}
-              onReveal={() => setRevealedStories(prev => new Set(prev).add(currentStory.id))}
+              onReveal={currentStory.type === 'question' ? handleQuestionUnlock : () => setRevealedStories(prev => new Set(prev).add(currentStory.id))}
             />
           ) : null}
         </div>
@@ -247,9 +261,8 @@ export default function MemoryViewerPage({ params }: PageProps) {
           <button
             onClick={handlePrevious}
             disabled={isFirstStory}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all ${
-              isFirstStory ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'
-            }`}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all ${isFirstStory ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'
+              }`}
             style={{
               backgroundColor: themeColors.accent,
               color: themeColors.dark,
@@ -269,14 +282,14 @@ export default function MemoryViewerPage({ params }: PageProps) {
                     index === currentIndex
                       ? themeColors.dark
                       : index < currentIndex
-                      ? themeColors.primary
-                      : themeColors.accent,
+                        ? themeColors.primary
+                        : themeColors.accent,
                 }}
               />
             ))}
           </div>
 
-          {isLastStory && !isPasswordLocked ? (
+          {isLastStory && !isPasswordLocked && !isQuestionLocked ? (
             <Link
               href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
               className="flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-white transition-all hover:opacity-90 hover:-translate-y-0.5"
@@ -291,10 +304,9 @@ export default function MemoryViewerPage({ params }: PageProps) {
           ) : (
             <button
               onClick={handleNext}
-              disabled={isPasswordLocked}
-              className={`px-6 py-2.5 rounded-full font-semibold text-white transition-all ${
-                isPasswordLocked ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 hover:-translate-y-0.5'
-              }`}
+              disabled={isPasswordLocked || isQuestionLocked}
+              className={`px-6 py-2.5 rounded-full font-semibold text-white transition-all ${(isPasswordLocked || isQuestionLocked) ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 hover:-translate-y-0.5'
+                }`}
               style={{
                 background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
                 boxShadow: `0 4px 15px ${themeColors.dark}4D`,

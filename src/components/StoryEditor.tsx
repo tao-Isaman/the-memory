@@ -5,7 +5,7 @@ import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
-import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, Sparkles, LucideIcon } from 'lucide-react';
+import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, Sparkles, HelpCircle, LucideIcon } from 'lucide-react';
 
 interface StoryEditorProps {
   onSave: (story: MemoryStory) => void;
@@ -31,6 +31,7 @@ export const storyTypeLabels: Record<StoryType, string> = {
   'text-image': 'ข้อความ + รูปภาพ',
   youtube: 'วิดีโอ YouTube',
   scratch: 'ความลับของเรา',
+  question: 'คำถาม',
 };
 
 const storyTypeDescriptions: Record<StoryType, string> = {
@@ -40,6 +41,7 @@ const storyTypeDescriptions: Record<StoryType, string> = {
   'text-image': 'รวมข้อความกับรูปภาพ',
   youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
   scratch: 'ซ่อนรูปภาพไว้ในเมฆให้คนพิเศษขูดเปิดดู',
+  question: 'สร้างคำถามให้คนพิเศษตอบ พร้อม 4 ตัวเลือก',
 };
 
 export const storyTypeIcons: Record<StoryType, LucideIcon> = {
@@ -49,6 +51,7 @@ export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   'text-image': ImagePlus,
   youtube: Music,
   scratch: Sparkles,
+  question: HelpCircle,
 };
 
 export default function StoryEditor({
@@ -102,6 +105,18 @@ export default function StoryEditor({
     return '';
   };
 
+  const getInitialQuestion = () => {
+    if (!editingStory) return { question: '', choices: ['', '', '', ''], correctIndex: 0 };
+    if (editingStory.type === 'question') {
+      return {
+        question: editingStory.content.question,
+        choices: editingStory.content.choices,
+        correctIndex: editingStory.content.correctIndex,
+      };
+    }
+    return { question: '', choices: ['', '', '', ''], correctIndex: 0 };
+  };
+
   const [type, setType] = useState<StoryType>(getInitialType());
   const [title, setTitle] = useState(editingStory?.title || '');
   const [text, setText] = useState(getInitialText());
@@ -112,6 +127,10 @@ export default function StoryEditor({
   const [password, setPassword] = useState(getInitialPassword());
   const [youtubeUrl, setYoutubeUrl] = useState(getInitialYoutubeUrl());
   const [uploading, setUploading] = useState(false);
+  // Question story state
+  const [questionText, setQuestionText] = useState(getInitialQuestion().question);
+  const [choices, setChoices] = useState(getInitialQuestion().choices);
+  const [correctIndex, setCorrectIndex] = useState(getInitialQuestion().correctIndex);
 
   // Track Object URL for cleanup to prevent memory leaks
   const objectUrlRef = useRef<string | null>(null);
@@ -204,6 +223,25 @@ export default function StoryEditor({
           ...baseStory,
           type: 'scratch',
           content: { imageUrl: uploadedImageUrl.trim(), caption: caption.trim() || undefined },
+        };
+        break;
+      case 'question':
+        if (!questionText.trim()) {
+          alert('กรุณาใส่คำถาม');
+          return;
+        }
+        if (choices.some(c => !c.trim())) {
+          alert('กรุณาใส่ตัวเลือกทั้ง 4 ข้อ');
+          return;
+        }
+        story = {
+          ...baseStory,
+          type: 'question',
+          content: {
+            question: questionText.trim(),
+            choices: choices.map(c => c.trim()),
+            correctIndex,
+          },
         };
         break;
       default:
@@ -476,6 +514,82 @@ export default function StoryEditor({
             <p className="text-xs text-gray-500 mt-1">
               วางลิงก์ YouTube เพื่อแชร์เพลงหรือวิดีโอที่มีความหมาย
             </p>
+          </div>
+        )}
+
+        {type === 'question' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                คำถาม
+              </label>
+              <input
+                type="text"
+                value={questionText}
+                onChange={(e) => setQuestionText(e.target.value)}
+                placeholder="เช่น: เราเจอกันครั้งแรกที่ไหน?"
+                className="input-valentine"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                ตัวเลือก (4 ข้อ)
+              </label>
+              <div className="space-y-2">
+                {[0, 1, 2, 3].map((index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+                      }}
+                    >
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                    <input
+                      type="text"
+                      value={choices[index] || ''}
+                      onChange={(e) => {
+                        const newChoices = [...choices];
+                        newChoices[index] = e.target.value;
+                        setChoices(newChoices);
+                      }}
+                      placeholder={`ตัวเลือก ${String.fromCharCode(65 + index)}`}
+                      className="input-valentine flex-1"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                คำตอบที่ถูกต้อง
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[0, 1, 2, 3].map((index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setCorrectIndex(index)}
+                    className="px-4 py-2 rounded-full font-semibold transition-all"
+                    style={{
+                      backgroundColor: correctIndex === index ? themeColors.primary : themeColors.background,
+                      color: correctIndex === index ? 'white' : themeColors.dark,
+                      border: `2px solid ${themeColors.primary}`,
+                    }}
+                  >
+                    {String.fromCharCode(65 + index)}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                เลือกตัวเลือกที่เป็นคำตอบที่ถูกต้อง
+              </p>
+            </div>
           </div>
         )}
 
