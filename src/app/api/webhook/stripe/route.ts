@@ -65,6 +65,12 @@ export async function POST(request: NextRequest) {
         }
         break;
       }
+
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        await activateMemoryByPaymentIntent(supabase, paymentIntent.id);
+        break;
+      }
     }
 
     return NextResponse.json({ received: true });
@@ -110,6 +116,82 @@ async function activateMemory(
   console.log(`Memory ${memoryId} activated via webhook`);
 
   // Handle referral payment if user used a referral discount
+  if (userId && hasReferralDiscount) {
+    await handleReferralPayment(supabase, userId, memoryId);
+  }
+}
+
+async function activateMemoryByPaymentIntent(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+  paymentIntentId: string
+) {
+  // First check if we already have an active memory with this payment intent (already processed)
+  const { data: existingMemory } = await supabase
+    .from('memories')
+    .select('id, status')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .single();
+
+  if (existingMemory?.status === 'active') {
+    console.log(`Memory ${existingMemory.id} already active for payment intent ${paymentIntentId}`);
+    return;
+  }
+
+  // Look up the checkout session from Stripe to get memory_id from metadata
+  const sessions = await stripe.checkout.sessions.list({
+    payment_intent: paymentIntentId,
+    limit: 1,
+  });
+
+  const session = sessions.data[0];
+  if (!session) {
+    console.error(`No checkout session found for payment intent ${paymentIntentId}`);
+    return;
+  }
+
+  const memoryId = session.metadata?.memory_id;
+  if (!memoryId) {
+    console.error(`No memory_id in checkout session metadata for payment intent ${paymentIntentId}`);
+    return;
+  }
+
+  // Check current memory status
+  const { data: memory } = await supabase
+    .from('memories')
+    .select('id, status')
+    .eq('id', memoryId)
+    .single();
+
+  if (!memory) {
+    console.error(`Memory ${memoryId} not found`);
+    return;
+  }
+
+  if (memory.status === 'active') {
+    console.log(`Memory ${memoryId} already active, skipping`);
+    return;
+  }
+
+  // Activate the memory
+  const { error } = await supabase
+    .from('memories')
+    .update({
+      status: 'active',
+      stripe_payment_intent_id: paymentIntentId,
+      paid_at: new Date().toISOString(),
+    })
+    .eq('id', memoryId);
+
+  if (error) {
+    console.error('Error activating memory via payment_intent.succeeded:', error);
+    throw error;
+  }
+
+  console.log(`Memory ${memoryId} activated via payment_intent.succeeded webhook`);
+
+  // Handle referral if applicable
+  const userId = session.metadata?.user_id;
+  const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
   if (userId && hasReferralDiscount) {
     await handleReferralPayment(supabase, userId, memoryId);
   }
