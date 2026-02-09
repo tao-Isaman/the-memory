@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import HeartLoader from '@/components/HeartLoader';
 import { Users, BookHeart, LayoutDashboard, LogOut, ShieldAlert } from 'lucide-react';
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? '';
 
 export default function AdminLayout({
   children,
@@ -23,7 +23,7 @@ export default function AdminLayout({
     if (!loading) {
       if (!user) {
         router.push('/login');
-      } else if (user.email !== ADMIN_EMAIL) {
+      } else if (!ADMIN_EMAIL?.split(',').map((email) => email.trim()).includes(user.email || '')) {
         setIsAuthorized(false);
       } else {
         setIsAuthorized(true);
@@ -96,11 +96,10 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-pink-50 text-pink-600'
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                  ? 'bg-pink-50 text-pink-600'
+                  : 'text-gray-600 hover:bg-gray-50'
+                  }`}
               >
                 <Icon size={20} />
                 <span className="font-medium">{item.label}</span>
