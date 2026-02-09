@@ -66,13 +66,13 @@ export const patchNotes: PatchNote[] = [
   {
     version: '1.2.0',
     date: '2026-02-05',
-    title: 'ระบบแนะนำเพื่อน & Admin Dashboard',
+    title: 'ระบบแนะนำเพื่อน',
     summary: 'แชร์โค้ดให้เพื่อน รับส่วนลด 50 บาท',
     items: [
       { type: 'feature', text: 'ระบบโค้ดแนะนำเพื่อน — แชร์โค้ดให้เพื่อนรับส่วนลด 50 บาท' },
       { type: 'feature', text: 'ขอรับเงินค่าแนะนำผ่าน PromptPay หรือบัญชีธนาคาร' },
-      { type: 'feature', text: 'หน้า Admin สำหรับจัดการผู้ใช้และ Memory' },
-      { type: 'improvement', text: 'ปรับปรุง Pagination และ Filter ในหน้า Admin' },
+      // { type: 'feature', text: 'หน้า Admin สำหรับจัดการผู้ใช้และ Memory' },
+      // { type: 'improvement', text: 'ปรับปรุง Pagination และ Filter ในหน้า Admin' },
     ],
   },
   {
