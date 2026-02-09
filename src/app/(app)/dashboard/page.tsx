@@ -14,7 +14,7 @@ import PaymentButton from '@/components/PaymentButton';
 import { Plus, Share2, Pencil, Trash2, Eye, Users } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,52 +76,20 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen relative z-10">
-      {/* Header */}
-      <header className="py-12 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <HeartIcon size={40} className="animate-pulse-heart" />
-          <Link href="/">
-            <h1 className="font-leckerli text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-              The Memory
-            </h1>
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-12">
+        {/* Action Buttons */}
+        <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link href="/create" className="btn-primary inline-flex items-center gap-2">
+            <Plus size={20} />
+            สร้างความทรงจำใหม่
           </Link>
-          <HeartIcon size={40} className="animate-pulse-heart" />
-        </div>
-        <p className="text-gray-600 max-w-md mx-auto px-4">
-          สร้างความทรงจำสวยๆ ให้คนที่คุณรัก
-        </p>
-        {/* User Info */}
-        <div className="mt-4 flex items-center justify-center gap-4">
-          <span className="text-sm text-gray-500">
-            {user.email}
-          </span>
-          <button
-            onClick={signOut}
-            className="text-sm text-[#E63946] hover:underline"
-          >
-            ออกจากระบบ
-          </button>
-        </div>
-
-        {/* Referral Link */}
-        <div className="mt-4">
           <Link
             href="/dashboard/referral"
             className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full text-sm text-[#E63946] hover:from-pink-100 hover:to-red-100 transition-colors"
           >
             <Users size={16} />
             <span>ลิงก์แนะนำ &amp; รับเงิน 50 บาท</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-2 pb-12">
-        {/* Create New Button */}
-        <div className="mb-8 text-center">
-          <Link href="/create" className="btn-primary inline-flex items-center gap-2">
-            <Plus size={20} />
-            สร้างความทรงจำใหม่
           </Link>
         </div>
 

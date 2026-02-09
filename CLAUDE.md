@@ -84,6 +84,14 @@ src/
 │   ├── (landing)/              # Marketing landing page
 │   │   ├── layout.tsx          # Metadata + FloatingHearts
 │   │   └── page.tsx            # Features, testimonials, FAQ, animated stats
+│   ├── (app)/                  # Authenticated app pages (shared AppBar layout)
+│   │   ├── layout.tsx          # AppBar wrapper layout
+│   │   ├── create/page.tsx     # Create/Edit memory page
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx        # User's memories list
+│   │   │   └── referral/page.tsx # Referral code management
+│   │   ├── profile/page.tsx    # User profile page
+│   │   └── updates/page.tsx    # Patch notes / "What's new" page
 │   ├── admin/                  # Admin dashboard (email-protected)
 │   │   ├── layout.tsx          # Auth guard, admin navigation
 │   │   ├── page.tsx            # Admin dashboard with stats
@@ -111,8 +119,6 @@ src/
 │   │   ├── stats/              # GET: Cached site statistics
 │   │   └── webhook/stripe/     # POST: Handle Stripe events
 │   ├── auth/callback/          # GET: OAuth callback
-│   ├── create/                 # Create/Edit memory page
-│   ├── dashboard/              # User's memories list
 │   ├── login/                  # Google login page
 │   ├── memory/[id]/            # Memory viewer
 │   ├── payment/
@@ -136,9 +142,12 @@ src/
 │   ├── FloatingHearts.tsx      # Background decoration (15 hearts)
 │   ├── YouTubeEmbed.tsx        # YouTube player (16:9)
 │   ├── ImageWithLoader.tsx     # Image with loading/error states
+│   ├── AppBar.tsx              # Sticky top bar: logo, notification bell, avatar dropdown
 │   └── ClientProviders.tsx     # AuthProvider + HeartFirework
 ├── contexts/
 │   └── AuthContext.tsx         # Authentication state management
+├── data/
+│   └── patch-notes.ts          # Patch notes data (types, versions, items)
 ├── hooks/
 │   └── useAuth.ts              # Auth hook
 ├── lib/
@@ -146,7 +155,8 @@ src/
 │   ├── supabase.ts             # Browser client
 │   ├── supabase-server.ts      # Server client (service role)
 │   ├── stripe.ts               # Stripe instance
-│   └── upload.ts               # Image processing & upload
+│   ├── upload.ts               # Image processing & upload
+│   └── patch-notes.ts          # localStorage-based "last seen version" tracking
 └── types/
     ├── memory.ts               # Memory & Story interfaces
     └── database.ts             # Supabase generated types
@@ -307,6 +317,18 @@ interface Memory {
   - QR code download as PNG
   - Native Web Share API support
 
+### Navigation
+- **AppBar** - Sticky top bar with:
+  - Logo linking to dashboard
+  - Notification bell with unseen-update red dot
+  - Avatar dropdown (profile, sign out)
+  - Click-outside to close menu
+
+### Patch Notes System
+- **`src/data/patch-notes.ts`** - Versioned patch notes data (newest first)
+- **`src/lib/patch-notes.ts`** - localStorage tracking of last-seen version
+- **Updates page** (`/updates`) - Timeline view with type badges (feature/improvement/fix/announcement)
+
 ### Animations
 - **HeartFirework** - Click-triggered particle effects (8-12 hearts per click)
 - **FloatingHearts** - 15 background hearts with deterministic positioning
@@ -401,6 +423,13 @@ CRON_SECRET=xxx
 - [x] Claim via PromptPay or Bank Transfer
 - [x] Admin claim processing
 - [x] Link referral code for users who skipped initial setup
+
+### Navigation & Profile
+- [x] AppBar with logo, notification bell, and avatar dropdown menu
+- [x] Profile page (avatar, name, email, member since)
+- [x] "What's new" / Patch notes page with version timeline
+- [x] Unseen update notification badge (localStorage-based)
+- [x] Route group `(app)` for shared AppBar layout
 
 ### UI/UX
 - [x] Responsive design (mobile-first)
@@ -550,4 +579,4 @@ const pendingDiscounts = Math.max(0, paidCount - (claimedCount || 0));
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-07*
+*Last updated: 2026-02-09*

@@ -98,21 +98,8 @@ export default function ReferralPage() {
 
   return (
     <main className="min-h-screen relative z-10">
-      {/* Header */}
-      <header className="py-8 text-center">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <HeartIcon size={32} className="animate-pulse-heart" />
-          <Link href="/">
-            <h1 className="font-leckerli text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-              The Memory
-            </h1>
-          </Link>
-          <HeartIcon size={32} className="animate-pulse-heart" />
-        </div>
-      </header>
-
       {/* Main Content */}
-      <div className="max-w-lg mx-auto px-4 pb-12">
+      <div className="max-w-lg mx-auto px-4 pt-6 pb-12">
         {/* Back Button */}
         <Link
           href="/dashboard"
