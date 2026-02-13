@@ -25,9 +25,7 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     // Get user count from Supabase Auth (real users)
-    const { data: allUsers } = await supabase.auth.admin.listUsers({
-      perPage: 1000,
-    });
+    const { data: allUsers } = await supabase.auth.admin.listUsers();
     const userCount = allUsers?.users?.length || 0;
 
     // Count other stats in parallel
