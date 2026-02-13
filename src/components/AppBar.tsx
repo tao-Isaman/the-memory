@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from './HeartIcon';
-import { Bell, User, LogOut } from 'lucide-react';
+import { Bell, User, LogOut, Coins } from 'lucide-react';
 import { getLatestVersion } from '@/data/patch-notes';
 import { hasUnseenUpdate, setLastSeenVersion } from '@/lib/patch-notes';
+import { useCreditBalance } from '@/hooks/useCreditBalance';
 
 export default function AppBar() {
   const { user, signOut } = useAuth();
+  const { balance: creditBalance } = useCreditBalance();
   const router = useRouter();
   const [hasNewUpdate, setHasNewUpdate] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -69,6 +71,16 @@ export default function AppBar() {
 
         {/* Right: Notification + Avatar */}
         <div className="flex items-center gap-2">
+          {/* Credit Balance */}
+          <button
+            onClick={() => router.push('/credits')}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 hover:from-pink-100 hover:to-red-100 transition-colors"
+            aria-label="เครดิต"
+          >
+            <Coins size={14} className="text-[#E63946]" />
+            <span className="text-xs font-bold text-[#E63946]">{creditBalance}</span>
+          </button>
+
           {/* Notification Bell */}
           <button
             onClick={handleBellClick}

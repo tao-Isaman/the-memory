@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { getUserReferral, markReferralDiscountUsed, recordReferralConversion } from '@/lib/referral';
+import { addCredits } from '@/lib/credits';
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
@@ -43,25 +44,37 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.payment_status === 'paid') {
-          await activateMemory(supabase, session);
+          if (session.metadata?.type === 'credits') {
+            await handleCreditPurchase(supabase, session);
+          } else {
+            await activateMemory(supabase, session);
+          }
         }
         break;
       }
 
       case 'checkout.session.async_payment_succeeded': {
         const session = event.data.object as Stripe.Checkout.Session;
-        await activateMemory(supabase, session);
+        if (session.metadata?.type === 'credits') {
+          await handleCreditPurchase(supabase, session);
+        } else {
+          await activateMemory(supabase, session);
+        }
         break;
       }
 
       case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const memoryId = session.metadata?.memory_id;
-        if (memoryId) {
-          await supabase
-            .from('memories')
-            .update({ status: 'failed' })
-            .eq('id', memoryId);
+        if (session.metadata?.type === 'credits') {
+          console.log('Credit purchase async payment failed for session:', session.id);
+        } else {
+          const memoryId = session.metadata?.memory_id;
+          if (memoryId) {
+            await supabase
+              .from('memories')
+              .update({ status: 'failed' })
+              .eq('id', memoryId);
+          }
         }
         break;
       }
@@ -194,6 +207,43 @@ async function activateMemoryByPaymentIntent(
   const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
   if (userId && hasReferralDiscount) {
     await handleReferralPayment(supabase, userId, memoryId);
+  }
+}
+
+async function handleCreditPurchase(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+  session: Stripe.Checkout.Session
+) {
+  const packageId = session.metadata?.package_id;
+  const creditsStr = session.metadata?.credits;
+  const userId = session.metadata?.user_id;
+
+  if (!packageId || !creditsStr || !userId) {
+    console.error('Missing credits metadata in session');
+    return;
+  }
+
+  const credits = parseInt(creditsStr, 10);
+  const paymentIntentId = typeof session.payment_intent === 'string'
+    ? session.payment_intent
+    : session.payment_intent?.id;
+
+  const result = await addCredits(
+    supabase, userId, credits, packageId,
+    session.id, paymentIntentId || null
+  );
+
+  if (!result.success) {
+    console.error(`Failed to add credits for session ${session.id}`);
+    return;
+  }
+
+  console.log(`Credits added via webhook: ${credits} credits for user ${userId}`);
+
+  // Handle referral
+  const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
+  if (hasReferralDiscount) {
+    await handleReferralPayment(supabase, userId, 'credits_purchase');
   }
 }
 

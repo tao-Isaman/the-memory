@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CreditBalanceProvider } from '@/contexts/CreditBalanceContext';
 import HeartFirework from './HeartFirework';
 
 interface ClientProvidersProps {
@@ -11,8 +12,10 @@ interface ClientProvidersProps {
 export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <AuthProvider>
-      <HeartFirework enabled />
-      {children}
+      <CreditBalanceProvider>
+        <HeartFirework enabled />
+        {children}
+      </CreditBalanceProvider>
     </AuthProvider>
   );
 }

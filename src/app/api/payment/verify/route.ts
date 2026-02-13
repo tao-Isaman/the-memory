@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { getUserReferral, markReferralDiscountUsed, recordReferralConversion } from '@/lib/referral';
+import { addCredits } from '@/lib/credits';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +25,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const memoryId = session.metadata?.memory_id;
     const userId = session.metadata?.user_id;
     const hasReferralDiscount = session.metadata?.has_referral_discount === 'true';
+
+    // Check payment status
+    if (session.payment_status !== 'paid') {
+      return NextResponse.json({
+        status: 'pending',
+        message: 'Payment is still processing',
+      });
+    }
+
+    const supabase = getSupabaseServiceClient();
+    const paymentIntentId = typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : session.payment_intent?.id;
+
+    // Handle credit package purchase
+    if (session.metadata?.type === 'credits') {
+      const packageId = session.metadata.package_id;
+      const credits = parseInt(session.metadata.credits, 10);
+
+      if (!packageId || !credits || !userId) {
+        return NextResponse.json(
+          { error: 'Invalid credits metadata' },
+          { status: 400 }
+        );
+      }
+
+      const result = await addCredits(
+        supabase, userId, credits, packageId,
+        session.id, paymentIntentId || null
+      );
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: 'Failed to add credits' },
+          { status: 500 }
+        );
+      }
+
+      // Handle referral if applicable
+      if (userId && hasReferralDiscount) {
+        await handleReferralPayment(supabase, userId, 'credits_purchase');
+      }
+
+      return NextResponse.json({
+        status: 'active',
+        type: 'credits',
+        credits,
+        newBalance: result.newBalance,
+      });
+    }
+
+    // Handle regular memory payment
+    const memoryId = session.metadata?.memory_id;
 
     if (!memoryId) {
       return NextResponse.json(
@@ -35,21 +88,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check payment status
-    if (session.payment_status !== 'paid') {
-      return NextResponse.json({
-        memoryId,
-        status: 'pending',
-        message: 'Payment is still processing',
-      });
-    }
-
     // Payment is complete - update database
-    const supabase = getSupabaseServiceClient();
-    const paymentIntentId = typeof session.payment_intent === 'string'
-      ? session.payment_intent
-      : session.payment_intent?.id;
-
     const { error } = await supabase
       .from('memories')
       .update({

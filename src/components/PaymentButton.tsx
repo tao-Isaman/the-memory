@@ -34,10 +34,6 @@ export default function PaymentButton({
   useEffect(() => {
     const checkDiscount = async () => {
       try {
-        // Use dedicated endpoint that checks:
-        // 1. User was referred
-        // 2. User hasn't used discount yet
-        // 3. User hasn't made any payment yet
         const response = await fetch(`/api/referral/check-discount?userId=${userId}`);
         const data = await response.json();
 

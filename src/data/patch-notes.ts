@@ -39,6 +39,17 @@ export interface PatchNote {
  */
 export const patchNotes: PatchNote[] = [
   {
+    version: '1.5.0',
+    date: '2026-02-13',
+    title: 'ระบบเครดิต',
+    summary: 'ซื้อเครดิตเป็นแพ็กเกจ ประหยัดกว่า เปิดใช้งานความทรงจำได้ทันที',
+    items: [
+      { type: 'feature', text: 'ระบบเครดิต — ซื้อแพ็กเกจเครดิตพร้อมส่วนลดเมื่อซื้อเยอะ' },
+      { type: 'feature', text: 'แสดงยอดเครดิตบน AppBar พร้อมหน้าจัดการเครดิตและประวัติ' },
+      { type: 'feature', text: '3 แพ็กเกจให้เลือก: 100, 300 และ 500 เครดิต' },
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-02-09',
     title: 'AppBar, โปรไฟล์ & หน้าอัปเดต',

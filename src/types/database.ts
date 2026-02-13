@@ -186,6 +186,146 @@ export interface Database {
           }
         ]
       }
+      credit_packages: {
+        Row: {
+          id: string
+          name: string
+          credits: number
+          price_thb: number
+          price_satang: number
+          discount_percent: number
+          is_popular: boolean
+          is_active: boolean
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          credits: number
+          price_thb: number
+          price_satang: number
+          discount_percent?: number
+          is_popular?: boolean
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          credits?: number
+          price_thb?: number
+          price_satang?: number
+          discount_percent?: number
+          is_popular?: boolean
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          id: string
+          user_id: string
+          balance: number
+          total_purchased: number
+          total_used: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          balance?: number
+          total_purchased?: number
+          total_used?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          balance?: number
+          total_purchased?: number
+          total_used?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_credits_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      credit_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          amount: number
+          balance_after: number
+          package_id: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          memory_id: string | null
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          amount: number
+          balance_after: number
+          package_id?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          memory_id?: string | null
+          description?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          amount?: number
+          balance_after?: number
+          package_id?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          memory_id?: string | null
+          description?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_package_id_fkey"
+            columns: ["package_id"]
+            referencedRelation: "credit_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_memory_id_fkey"
+            columns: ["memory_id"]
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       referral_claims: {
         Row: {
           id: string

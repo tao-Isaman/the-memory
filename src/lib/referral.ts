@@ -242,6 +242,7 @@ export async function hasUserPaidBefore(
   userId: string,
   excludeMemoryId?: string
 ): Promise<boolean> {
+  // Check active memories
   let query = supabase
     .from('memories')
     .select('id', { count: 'exact', head: true })
@@ -252,13 +253,20 @@ export async function hasUserPaidBefore(
     query = query.neq('id', excludeMemoryId);
   }
 
-  const { count, error } = await query;
+  const { count: memoryCount, error: memoryError } = await query;
 
-  if (error) {
-    return false;
+  if (!memoryError && (memoryCount || 0) > 0) {
+    return true;
   }
 
-  return (count || 0) > 0;
+  // Also check credit purchase transactions
+  const { count: creditCount } = await supabase
+    .from('credit_transactions')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('type', 'purchase');
+
+  return (creditCount || 0) > 0;
 }
 
 // Check if user is eligible for referral discount (new user who applied a code)

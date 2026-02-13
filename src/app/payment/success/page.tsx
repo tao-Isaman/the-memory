@@ -6,20 +6,24 @@ import Link from 'next/link';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Coins } from 'lucide-react';
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const memoryId = searchParams.get('memory_id');
   const sessionId = searchParams.get('session_id');
   const isFree = searchParams.get('free') === 'true';
+  const type = searchParams.get('type');
+
+  const isCredits = type === 'credits';
 
   const [status, setStatus] = useState<'loading' | 'success' | 'pending' | 'error'>('loading');
+  const [creditsAdded, setCreditsAdded] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     async function verifyPayment() {
-      // If this is a free memory activation, skip payment verification
+      // If this is a free memory activation (credit use), skip verification
       if (isFree && memoryId) {
         setStatus('success');
         return;
@@ -40,6 +44,9 @@ function PaymentSuccessContent() {
         const data = await response.json();
 
         if (data.status === 'active') {
+          if (data.type === 'credits') {
+            setCreditsAdded(data.credits || 0);
+          }
           setStatus('success');
         } else if (data.status === 'pending') {
           setStatus('pending');
@@ -59,6 +66,44 @@ function PaymentSuccessContent() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <HeartLoader message="กำลังตรวจสอบการชำระเงิน..." size="lg" />
+      </main>
+    );
+  }
+
+  // Credits purchase success view
+  if (isCredits && status === 'success') {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <div className="memory-card p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-pink-50 rounded-full flex items-center justify-center">
+            <Coins size={40} className="text-[#E63946]" />
+          </div>
+
+          <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+            ซื้อเครดิตสำเร็จ!
+          </h1>
+
+          <p className="text-gray-600 mb-6">
+            คุณได้รับ <span className="font-bold text-[#E63946]">{creditsAdded} เครดิต</span> พร้อมใช้เปิดความทรงจำของคุณ
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/credits"
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              <Coins size={16} />
+              ไปหน้าเครดิต
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="btn-secondary w-full text-center"
+            >
+              กลับไปหน้าหลัก
+            </Link>
+          </div>
+        </div>
       </main>
     );
   }
