@@ -135,19 +135,29 @@ export async function saveCartoonGeneration(
 export async function getUserCartoonGenerations(
   supabase: SupabaseClient<Database>,
   userId: string,
-  limit: number = 20
-): Promise<CartoonGeneration[]> {
+  limit: number = 9,
+  offset: number = 0
+): Promise<{ generations: CartoonGeneration[]; total: number }> {
+  const { count } = await supabase
+    .from('cartoon_generations')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'completed');
+
   const { data, error } = await supabase
     .from('cartoon_generations')
     .select('*')
     .eq('user_id', userId)
     .eq('status', 'completed')
     .order('created_at', { ascending: false })
-    .limit(limit);
+    .range(offset, offset + limit - 1);
 
   if (error || !data) {
-    return [];
+    return { generations: [], total: 0 };
   }
 
-  return data.map(toCartoonGeneration);
+  return {
+    generations: data.map(toCartoonGeneration),
+    total: count || 0,
+  };
 }

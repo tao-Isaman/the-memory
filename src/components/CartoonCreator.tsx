@@ -4,9 +4,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
 import HeartIcon from './HeartIcon';
 import HeartLoader from './HeartLoader';
-import { Upload, X, Download, ImageIcon, Coins, RefreshCw } from 'lucide-react';
+import { Upload, X, Download, ImageIcon, Coins, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { CARTOON_CREDIT_COST } from '@/lib/constants';
 import { CartoonGeneration } from '@/types/cartoon';
+
+const PAGE_SIZE = 9;
 
 interface CartoonCreatorProps {
   userId: string;
@@ -23,14 +25,22 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [gallery, setGallery] = useState<CartoonGeneration[]>([]);
+  const [galleryTotal, setGalleryTotal] = useState(0);
+  const [galleryPage, setGalleryPage] = useState(0);
   const [loadingGallery, setLoadingGallery] = useState(false);
 
-  const fetchGallery = useCallback(async () => {
+  const totalPages = Math.ceil(galleryTotal / PAGE_SIZE);
+
+  const fetchGallery = useCallback(async (page: number = 0) => {
     setLoadingGallery(true);
     try {
-      const response = await fetch(`/api/cartoon/history?userId=${userId}`);
+      const offset = page * PAGE_SIZE;
+      const response = await fetch(
+        `/api/cartoon/history?userId=${userId}&limit=${PAGE_SIZE}&offset=${offset}`
+      );
       const data = await response.json();
       setGallery(data.generations || []);
+      setGalleryTotal(data.total || 0);
     } catch {
       console.error('Error fetching gallery');
     } finally {
@@ -39,8 +49,8 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   }, [userId]);
 
   useEffect(() => {
-    fetchGallery();
-  }, [fetchGallery]);
+    fetchGallery(galleryPage);
+  }, [fetchGallery, galleryPage]);
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -103,29 +113,13 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
 
       setResultUrl(data.cartoonUrl);
       refreshBalance();
-      fetchGallery();
+      setGalleryPage(0);
+      fetchGallery(0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
       refreshBalance();
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const handleDownload = async (url: string, filename: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(url, '_blank');
     }
   };
 
@@ -240,15 +234,16 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
             className="w-full rounded-xl mb-4"
           />
 
-          <button
-            onClick={() =>
-              handleDownload(resultUrl, `cartoon-${Date.now()}.png`)
-            }
+          <a
+            href={resultUrl}
+            download={`cartoon-${Date.now()}.png`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-kanit font-medium text-[#E63946] bg-white border-2 border-[#FF6B9D] hover:bg-pink-50 transition-all"
           >
             <Download size={16} />
             ดาวน์โหลดรูป
-          </button>
+          </a>
         </div>
       )}
 
@@ -258,9 +253,12 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
           <h2 className="font-kanit text-lg font-bold text-gray-700 flex items-center gap-2">
             <ImageIcon size={20} className="text-[#E63946]" />
             รูปการ์ตูนของคุณ
+            {galleryTotal > 0 && (
+              <span className="text-sm font-normal text-gray-400">({galleryTotal})</span>
+            )}
           </h2>
           <button
-            onClick={fetchGallery}
+            onClick={() => fetchGallery(galleryPage)}
             className="text-gray-400 hover:text-[#E63946] transition-colors"
           >
             <RefreshCw size={16} />
@@ -276,36 +274,69 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
             ยังไม่มีรูปการ์ตูน — สร้างรูปแรกของคุณเลย!
           </p>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {gallery.map((gen) => (
-              <div key={gen.id} className="relative group">
-                <img
-                  src={gen.cartoonImageUrl || ''}
-                  alt="Cartoon"
-                  className="w-full aspect-square object-cover rounded-xl"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl transition-all flex items-center justify-center">
-                  <button
-                    onClick={() =>
-                      handleDownload(
-                        gen.cartoonImageUrl || '',
-                        `cartoon-${gen.id}.png`
-                      )
-                    }
-                    className="opacity-0 group-hover:opacity-100 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md transition-all"
-                  >
-                    <Download size={16} className="text-gray-700" />
-                  </button>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {gallery.map((gen) => (
+                <div key={gen.id} className="relative group">
+                  <img
+                    src={gen.cartoonImageUrl || ''}
+                    alt="Cartoon"
+                    className="w-full aspect-square object-cover rounded-xl"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl transition-all flex items-center justify-center">
+                    <a
+                      href={gen.cartoonImageUrl || ''}
+                      download={`cartoon-${gen.id}.png`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-0 group-hover:opacity-100 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md transition-all"
+                    >
+                      <Download size={16} className="text-gray-700" />
+                    </a>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1 text-center">
+                    {new Date(gen.createdAt).toLocaleDateString('th-TH', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}
+                  </p>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 text-center">
-                  {new Date(gen.createdAt).toLocaleDateString('th-TH', {
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </p>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 mt-6">
+                <button
+                  onClick={() => setGalleryPage((p) => Math.max(0, p - 1))}
+                  disabled={galleryPage === 0}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+                    galleryPage === 0
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#E63946] hover:bg-pink-50'
+                  }`}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <span className="text-sm text-gray-500 font-kanit">
+                  {galleryPage + 1} / {totalPages}
+                </span>
+
+                <button
+                  onClick={() => setGalleryPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={galleryPage >= totalPages - 1}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+                    galleryPage >= totalPages - 1
+                      ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-[#E63946] hover:bg-pink-50'
+                  }`}
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>

@@ -6,6 +6,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
+    const limit = parseInt(searchParams.get('limit') || '9', 10);
+    const offset = parseInt(searchParams.get('offset') || '0', 10);
 
     if (!userId) {
       return NextResponse.json(
@@ -15,9 +17,9 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseServiceClient();
-    const generations = await getUserCartoonGenerations(supabase, userId);
+    const { generations, total } = await getUserCartoonGenerations(supabase, userId, limit, offset);
 
-    return NextResponse.json({ generations });
+    return NextResponse.json({ generations, total });
   } catch (error) {
     console.error('Cartoon history error:', error);
     return NextResponse.json(

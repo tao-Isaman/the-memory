@@ -34,6 +34,7 @@ export default function HeartFirework({ enabled = true, themeColors }: HeartFire
 
   const [particles, setParticles] = useState<Particle[]>([]);
   const particlesRef = useRef<Particle[]>([]);
+  const nextIdRef = useRef(0);
 
   const createParticles = useCallback((x: number, y: number) => {
     const newParticles: Particle[] = [];
@@ -44,7 +45,7 @@ export default function HeartFirework({ enabled = true, themeColors }: HeartFire
       const speed = 3 + Math.random() * 4;
 
       newParticles.push({
-        id: Date.now() + i,
+        id: nextIdRef.current++,
         x,
         y,
         vx: Math.cos(angle) * speed,
