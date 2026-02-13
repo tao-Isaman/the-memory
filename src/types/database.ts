@@ -326,6 +326,46 @@ export interface Database {
           }
         ]
       }
+      cartoon_generations: {
+        Row: {
+          id: string
+          user_id: string
+          original_image_url: string | null
+          cartoon_image_url: string | null
+          credits_used: number
+          prompt: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          original_image_url?: string | null
+          cartoon_image_url?: string | null
+          credits_used?: number
+          prompt?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          original_image_url?: string | null
+          cartoon_image_url?: string | null
+          credits_used?: number
+          prompt?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cartoon_generations_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       referral_claims: {
         Row: {
           id: string

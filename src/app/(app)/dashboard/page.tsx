@@ -11,7 +11,8 @@ import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
-import { Plus, Share2, Pencil, Trash2, Eye, Users } from 'lucide-react';
+import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon } from 'lucide-react';
+import CartoonCreator from '@/components/CartoonCreator';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -20,6 +21,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [activeTab, setActiveTab] = useState<'memories' | 'cartoon'>('memories');
 
   const handleShare = (memory: Memory) => {
     setSelectedMemory(memory);
@@ -78,109 +80,143 @@ export default function DashboardPage() {
     <main className="min-h-screen relative z-10">
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 pt-6 pb-12">
-        {/* Action Buttons */}
-        <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Link href="/create" className="btn-primary inline-flex items-center gap-2">
-            <Plus size={20} />
-            สร้างความทรงจำใหม่
-          </Link>
-          <Link
-            href="/dashboard/referral"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full text-sm text-[#E63946] hover:from-pink-100 hover:to-red-100 transition-colors"
-          >
-            <Users size={16} />
-            <span>ลิงก์แนะนำ &amp; รับเงิน 50 บาท</span>
-          </Link>
+        {/* Tab Bar */}
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex bg-pink-50 rounded-full p-1">
+            <button
+              onClick={() => setActiveTab('memories')}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+                activeTab === 'memories'
+                  ? 'bg-white text-[#E63946] shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <HeartIcon size={16} filled={activeTab === 'memories'} />
+              ความทรงจำ
+            </button>
+            <button
+              onClick={() => setActiveTab('cartoon')}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+                activeTab === 'cartoon'
+                  ? 'bg-white text-[#E63946] shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ImageIcon size={16} />
+              สร้างรูปการ์ตูน
+            </button>
+          </div>
         </div>
 
-        {/* Memories List */}
-        {loading ? (
-          <div className="text-center py-12">
-            <HeartLoader message="กำลังโหลดความทรงจำของคุณ..." size="md" />
-          </div>
-        ) : memories.length === 0 ? (
-          <div className="memory-card p-12 text-center">
-            <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
-            <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">
-              ยังไม่มีความทรงจำ
-            </h2>
-            <p className="text-gray-500 mb-6">
-              เริ่มสร้างความทรงจำสวยๆ เพื่อแชร์กับคนพิเศษของคุณเลย!
-            </p>
-            <Link href="/create" className="btn-primary inline-block">
-              สร้างความทรงจำแรกของคุณ
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {memories.map((memory) => (
-              <div key={memory.id} className="memory-card p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="font-kanit text-xl font-bold text-[#E63946] truncate grow">
-                    {memory.title}
-                  </h2>
-                  <PaymentStatus status={memory.status} size="sm" />
-                </div>
-                <p className="text-sm text-gray-500 mb-4">
-                  {memory.stories.length} เรื่องราว &bull; สร้างเมื่อ {formatDate(memory.createdAt)}
+        {activeTab === 'memories' ? (
+          <>
+            {/* Action Buttons */}
+            <div className="mb-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link href="/create" className="btn-primary inline-flex items-center gap-2">
+                <Plus size={20} />
+                สร้างความทรงจำใหม่
+              </Link>
+              <Link
+                href="/dashboard/referral"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full text-sm text-[#E63946] hover:from-pink-100 hover:to-red-100 transition-colors"
+              >
+                <Users size={16} />
+                <span>ลิงก์แนะนำ &amp; รับเงิน 50 บาท</span>
+              </Link>
+            </div>
+
+            {/* Memories List */}
+            {loading ? (
+              <div className="text-center py-12">
+                <HeartLoader message="กำลังโหลดความทรงจำของคุณ..." size="md" />
+              </div>
+            ) : memories.length === 0 ? (
+              <div className="memory-card p-12 text-center">
+                <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+                <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">
+                  ยังไม่มีความทรงจำ
+                </h2>
+                <p className="text-gray-500 mb-6">
+                  เริ่มสร้างความทรงจำสวยๆ เพื่อแชร์กับคนพิเศษของคุณเลย!
                 </p>
-                <div className="flex gap-2 flex-wrap">
-                  {memory.status === 'active' ? (
-                    <>
+                <Link href="/create" className="btn-primary inline-block">
+                  สร้างความทรงจำแรกของคุณ
+                </Link>
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {memories.map((memory) => (
+                  <div key={memory.id} className="memory-card p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h2 className="font-kanit text-xl font-bold text-[#E63946] truncate grow">
+                        {memory.title}
+                      </h2>
+                      <PaymentStatus status={memory.status} size="sm" />
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                      {memory.stories.length} เรื่องราว &bull; สร้างเมื่อ {formatDate(memory.createdAt)}
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      {memory.status === 'active' ? (
+                        <>
+                          <Link
+                            href={`/memory/${memory.id}`}
+                            className="btn-primary text-sm py-2 px-3 flex-1 text-center flex items-center justify-center gap-1"
+                            title="ดูความทรงจำ"
+                          >
+                            <span>ดูความทรงจำ</span>
+                          </Link>
+                          <button
+                            onClick={() => handleShare(memory)}
+                            className="px-3 py-2 text-sm rounded-full bg-pink-100 text-[#E63946] hover:bg-pink-200 transition-colors flex items-center justify-center gap-1"
+                            title="แชร์"
+                          >
+                            <Share2 size={16} />
+                            <span className="hidden sm:inline">แชร์</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href={`/memory/${memory.id}`}
+                            className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
+                            title="ดูตัวอย่าง"
+                          >
+                            <Eye size={16} />
+                            <span className="hidden sm:inline">ดูตัวอย่าง</span>
+                          </Link>
+                          <PaymentButton
+                            memoryId={memory.id}
+                            memoryTitle={memory.title}
+                            userId={user.id}
+                            className="flex-1 text-sm py-2"
+                          />
+                        </>
+                      )}
                       <Link
-                        href={`/memory/${memory.id}`}
-                        className="btn-primary text-sm py-2 px-3 flex-1 text-center flex items-center justify-center gap-1"
-                        title="ดูความทรงจำ"
+                        href={`/create?edit=${memory.id}`}
+                        className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
+                        title="แก้ไข"
                       >
-                        <span>ดูความทรงจำ</span>
+                        <Pencil size={16} />
+                        <span className="hidden sm:inline">แก้ไข</span>
                       </Link>
                       <button
-                        onClick={() => handleShare(memory)}
-                        className="px-3 py-2 text-sm rounded-full bg-pink-100 text-[#E63946] hover:bg-pink-200 transition-colors flex items-center justify-center gap-1"
-                        title="แชร์"
+                        onClick={() => handleDelete(memory.id)}
+                        className="px-3 py-2 text-sm rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+                        title="ลบ"
                       >
-                        <Share2 size={16} />
-                        <span className="hidden sm:inline">แชร์</span>
+                        <Trash2 size={16} />
+                        <span className="hidden sm:inline">ลบ</span>
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        href={`/memory/${memory.id}`}
-                        className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
-                        title="ดูตัวอย่าง"
-                      >
-                        <Eye size={16} />
-                        <span className="hidden sm:inline">ดูตัวอย่าง</span>
-                      </Link>
-                      <PaymentButton
-                        memoryId={memory.id}
-                        memoryTitle={memory.title}
-                        userId={user.id}
-                        className="flex-1 text-sm py-2"
-                      />
-                    </>
-                  )}
-                  <Link
-                    href={`/create?edit=${memory.id}`}
-                    className="btn-secondary text-sm py-2 px-3 flex items-center justify-center gap-1"
-                    title="แก้ไข"
-                  >
-                    <Pencil size={16} />
-                    <span className="hidden sm:inline">แก้ไข</span>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(memory.id)}
-                    className="px-3 py-2 text-sm rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
-                    title="ลบ"
-                  >
-                    <Trash2 size={16} />
-                    <span className="hidden sm:inline">ลบ</span>
-                  </button>
-                </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
+        ) : (
+          <CartoonCreator userId={user.id} />
         )}
       </div>
 
