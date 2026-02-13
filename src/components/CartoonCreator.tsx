@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
 import HeartIcon from './HeartIcon';
 import HeartLoader from './HeartLoader';
-import { Upload, X, Download, ImageIcon, Coins, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, X, Download, ImageIcon, Coins, RefreshCw, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { CARTOON_CREDIT_COST } from '@/lib/constants';
 import { CartoonGeneration } from '@/types/cartoon';
 
@@ -28,6 +28,10 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const [galleryTotal, setGalleryTotal] = useState(0);
   const [galleryPage, setGalleryPage] = useState(0);
   const [loadingGallery, setLoadingGallery] = useState(false);
+
+  // Selected image for action modal
+  const [selectedGen, setSelectedGen] = useState<CartoonGeneration | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const totalPages = Math.ceil(galleryTotal / PAGE_SIZE);
 
@@ -120,6 +124,29 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       refreshBalance();
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleDelete = async (gen: CartoonGeneration) => {
+    setDeleting(true);
+    try {
+      const response = await fetch('/api/cartoon/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ generationId: gen.id, userId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'ลบไม่สำเร็จ');
+      }
+
+      setSelectedGen(null);
+      fetchGallery(galleryPage);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -277,23 +304,18 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {gallery.map((gen) => (
-                <div key={gen.id} className="relative group">
-                  <img
-                    src={gen.cartoonImageUrl || ''}
-                    alt="Cartoon"
-                    className="w-full aspect-square object-cover rounded-xl"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 rounded-xl transition-all flex items-center justify-center">
-                    <a
-                      href={gen.cartoonImageUrl || ''}
-                      download={`cartoon-${gen.id}.png`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="opacity-0 group-hover:opacity-100 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md transition-all"
-                    >
-                      <Download size={16} className="text-gray-700" />
-                    </a>
-                  </div>
+                <div key={gen.id} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGen(gen)}
+                    className="w-full text-left"
+                  >
+                    <img
+                      src={gen.cartoonImageUrl || ''}
+                      alt="Cartoon"
+                      className="w-full aspect-square object-cover rounded-xl active:scale-95 transition-transform"
+                    />
+                  </button>
                   <p className="text-xs text-gray-400 mt-1 text-center">
                     {new Date(gen.createdAt).toLocaleDateString('th-TH', {
                       day: 'numeric',
@@ -339,6 +361,77 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
           </>
         )}
       </div>
+
+      {/* Image Action Modal */}
+      {selectedGen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50"
+          onClick={() => !deleting && setSelectedGen(null)}
+        >
+          <div
+            className="w-full sm:max-w-md bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden animate-fade-in-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Preview */}
+            <div className="p-4">
+              <img
+                src={selectedGen.cartoonImageUrl || ''}
+                alt="Cartoon"
+                className="w-full rounded-xl"
+              />
+              <p className="text-xs text-gray-400 text-center mt-2">
+                {new Date(selectedGen.createdAt).toLocaleDateString('th-TH', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="border-t border-gray-100 p-4 space-y-2">
+              <a
+                href={selectedGen.cartoonImageUrl || ''}
+                download={`cartoon-${selectedGen.id}.png`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-kanit font-medium text-white bg-gradient-to-r from-[#FF6B9D] to-[#E63946] shadow-md"
+              >
+                <Download size={18} />
+                ดาวน์โหลดรูป
+              </a>
+
+              <button
+                onClick={() => handleDelete(selectedGen)}
+                disabled={deleting}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-kanit font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+              >
+                {deleting ? (
+                  <>
+                    <HeartIcon size={16} className="animate-pulse-heart" />
+                    กำลังลบ...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={18} />
+                    ลบรูปนี้
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => setSelectedGen(null)}
+                disabled={deleting}
+                className="w-full py-3 text-center font-kanit text-gray-400 text-sm"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
