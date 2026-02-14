@@ -18,6 +18,7 @@ import {
   Loader,
 } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import UserGrowthChart from '@/components/admin/UserGrowthChart';
 
 interface CreditStats {
   totalSold: number;
@@ -50,6 +51,7 @@ interface AdminStats {
   creditStats: CreditStats;
   cartoonStats: CartoonStats;
   recentActivity: RecentActivity[];
+  userGrowth: { date: string; count: number }[];
 }
 
 export default function AdminDashboard() {
@@ -232,6 +234,11 @@ export default function AdminDashboard() {
             <div key={card.label}>{content}</div>
           );
         })}
+      </div>
+
+      {/* User Growth Chart */}
+      <div className="mb-8">
+        {stats?.userGrowth && <UserGrowthChart data={stats.userGrowth} />}
       </div>
 
       {/* Detailed Stats Row */}

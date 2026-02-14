@@ -132,6 +132,34 @@ export async function GET() {
     activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     const recentActivity = activities.slice(0, 10);
 
+    // Calculate user growth (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Initialize map with all dates in last 30 days
+    const dateMap = new Map<string, number>();
+    for (let i = 0; i < 30; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateString = date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+      dateMap.set(dateString, 0);
+    }
+
+    allUsers?.users?.forEach((user) => {
+      const createdAt = new Date(user.created_at);
+      if (createdAt >= thirtyDaysAgo) {
+        const dateString = createdAt.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+        if (dateMap.has(dateString)) {
+          dateMap.set(dateString, (dateMap.get(dateString) || 0) + 1);
+        }
+      }
+    });
+
+    // Convert map to array and reverse (oldest to newest)
+    const userGrowth = Array.from(dateMap.entries())
+      .map(([date, count]) => ({ date, count }))
+      .reverse();
+
     return NextResponse.json({
       totalUsers,
       totalMemories: memories.count || 0,
@@ -152,6 +180,7 @@ export async function GET() {
         pending: pendingCartoons,
       },
       recentActivity,
+      userGrowth,
     });
   } catch (error) {
     console.error('Admin stats error:', error);

@@ -17,9 +17,10 @@ interface User {
   paidMemoryCount: number;
   creditBalance: number;
   hasReferralCode: boolean;
+  isProfileComplete: boolean;
 }
 
-type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'creditBalance' | 'user_email';
+type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'creditBalance' | 'user_email' | 'profile';
 type SortOrder = 'asc' | 'desc';
 
 const ITEMS_PER_PAGE = 20;
@@ -105,6 +106,9 @@ export default function AdminUsersPage() {
           break;
         case 'creditBalance':
           comparison = a.creditBalance - b.creditBalance;
+          break;
+        case 'profile':
+          comparison = (a.isProfileComplete ? 1 : 0) - (b.isProfileComplete ? 1 : 0);
           break;
         case 'user_email':
           comparison = a.user_email.localeCompare(b.user_email);
@@ -217,6 +221,7 @@ export default function AdminUsersPage() {
             <option value="memoryCount">Sort by Memories</option>
             <option value="paidMemoryCount">Sort by Paid</option>
             <option value="creditBalance">Sort by Credits</option>
+            <option value="profile">Sort by Profile</option>
           </select>
 
           <button
@@ -260,6 +265,12 @@ export default function AdminUsersPage() {
                 Credits {sortField === 'creditBalance' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('profile')}
+              >
+                Profile {sortField === 'profile' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
                 className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
                 onClick={() => toggleSort('created_at')}
               >
@@ -301,6 +312,14 @@ export default function AdminUsersPage() {
                     <Coins size={16} className="text-yellow-500" />
                     <span className="font-medium text-gray-800">{user.creditBalance}</span>
                   </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${user.isProfileComplete ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                      }`}
+                  >
+                    {user.isProfileComplete ? 'Complete' : 'Incomplete'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {new Date(user.created_at).toLocaleDateString('th-TH', {
@@ -364,11 +383,10 @@ export default function AdminUsersPage() {
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-2 rounded-lg ${
-                      currentPage === pageNum
-                        ? 'bg-pink-500 text-white'
-                        : 'border border-gray-200 hover:bg-gray-50'
-                    }`}
+                    className={`px-3 py-2 rounded-lg ${currentPage === pageNum
+                      ? 'bg-pink-500 text-white'
+                      : 'border border-gray-200 hover:bg-gray-50'
+                      }`}
                   >
                     {pageNum}
                   </button>
