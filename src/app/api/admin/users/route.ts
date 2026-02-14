@@ -16,45 +16,46 @@ export async function GET() {
 
     const authUsers = authData?.users || [];
 
-    // Get referral data for users who have it
-    const { data: referrals } = await supabase
-      .from('user_referrals')
-      .select('user_id, referral_code, referred_by');
+    // Batch: get referrals and all memories in parallel (3 queries instead of 2N+2)
+    const [{ data: referrals }, { data: memories }] = await Promise.all([
+      supabase
+        .from('user_referrals')
+        .select('user_id, referral_code, referred_by'),
+      supabase
+        .from('memories')
+        .select('user_id, status'),
+    ]);
 
     const referralMap = new Map(
       (referrals || []).map((r) => [r.user_id, r])
     );
 
-    // Get memory counts for each user
-    const usersWithCounts = await Promise.all(
-      authUsers.map(async (user) => {
-        const { count: memoryCount } = await supabase
-          .from('memories')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id);
+    // Aggregate memory counts in JS instead of per-user DB queries
+    const memoryCounts = new Map<string, { total: number; paid: number }>();
+    for (const memory of memories || []) {
+      const entry = memoryCounts.get(memory.user_id) || { total: 0, paid: 0 };
+      entry.total++;
+      if (memory.status === 'active') entry.paid++;
+      memoryCounts.set(memory.user_id, entry);
+    }
 
-        const { count: paidCount } = await supabase
-          .from('memories')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+    const usersWithCounts = authUsers.map((user) => {
+      const referral = referralMap.get(user.id);
+      const counts = memoryCounts.get(user.id) || { total: 0, paid: 0 };
 
-        const referral = referralMap.get(user.id);
-
-        return {
-          id: user.id,
-          user_id: user.id,
-          user_email: user.email || 'No email',
-          referral_code: referral?.referral_code || null,
-          referred_by: referral?.referred_by || null,
-          created_at: user.created_at,
-          last_sign_in_at: user.last_sign_in_at,
-          memoryCount: memoryCount || 0,
-          paidMemoryCount: paidCount || 0,
-          hasReferralCode: !!referral,
-        };
-      })
-    );
+      return {
+        id: user.id,
+        user_id: user.id,
+        user_email: user.email || 'No email',
+        referral_code: referral?.referral_code || null,
+        referred_by: referral?.referred_by || null,
+        created_at: user.created_at,
+        last_sign_in_at: user.last_sign_in_at,
+        memoryCount: counts.total,
+        paidMemoryCount: counts.paid,
+        hasReferralCode: !!referral,
+      };
+    });
 
     // Sort by created_at descending
     usersWithCounts.sort((a, b) =>
