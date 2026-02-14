@@ -53,21 +53,6 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
-    version: '1.7.0',
-    date: '2026-02-14',
-    title: 'Admin Dashboard ครบวงจร',
-    summary: 'เพิ่มหน้า Admin สำหรับติดตามรายได้ เครดิต การ์ตูน และ Referral',
-    items: [
-      { type: 'feature', text: 'Dashboard Admin — สถิติรายได้ เครดิต การ์ตูน กิจกรรมล่าสุด' },
-      { type: 'feature', text: 'หน้าจัดการ Referral Claims — อนุมัติ/ปฏิเสธคำขอรับเงินแนะนำ' },
-      { type: 'feature', text: 'หน้า Credit Overview — ยอดขายแพ็กเกจ ธุรกรรม ผู้ใช้เครดิตสูงสุด' },
-      { type: 'feature', text: 'หน้า Cartoon Monitor — สถิติการสร้างรูป อัตราสำเร็จ/ล้มเหลว' },
-      { type: 'improvement', text: 'เพิ่มคอลัมน์ยอดเครดิตในรายชื่อผู้ใช้ Admin' },
-      { type: 'improvement', text: 'เพิ่มประสิทธิภาพ API Admin/Users — ลดจาก 2N+2 เหลือ 3 queries' },
-      { type: 'fix', text: 'แก้ไข Question story type แสดงผลเป็น JSON ในหน้า Admin' },
-    ],
-  },
-  {
     version: '1.6.0',
     date: '2026-02-13',
     title: 'สร้างรูปการ์ตูนจากรูปจริง',
