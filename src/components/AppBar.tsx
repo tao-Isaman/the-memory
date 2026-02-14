@@ -60,7 +60,7 @@ export default function AppBar() {
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Left: Logo */}
         <Link
-          href="/dashboard"
+          href="/"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <HeartIcon size={22} className="animate-pulse-heart" />
