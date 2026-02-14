@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState<'' | 'male' | 'female' | 'other'>('');
   const [job, setJob] = useState('');
+  const [customJob, setCustomJob] = useState('');
   const [relationshipStatus, setRelationshipStatus] = useState<'' | 'single' | 'dating' | 'married' | 'other'>('');
   const [occasionType, setOccasionType] = useState<'' | 'valentine' | 'anniversary' | 'birthday' | 'other'>('');
 
@@ -59,7 +60,17 @@ export default function ProfilePage() {
         setPhone(data.profile.phone || '');
         setBirthday(data.profile.birthday || '');
         setGender((data.profile.gender as '' | 'male' | 'female' | 'other') || '');
-        setJob(data.profile.job || '');
+
+        // Handle Job logic
+        const loadedJob = data.profile.job || '';
+        if (loadedJob && !JOB_OPTIONS.includes(loadedJob)) {
+          setJob('อื่นๆ');
+          setCustomJob(loadedJob);
+        } else {
+          setJob(loadedJob);
+          setCustomJob('');
+        }
+
         setRelationshipStatus((data.profile.relationshipStatus as '' | 'single' | 'dating' | 'married' | 'other') || '');
         setOccasionType((data.profile.occasionType as '' | 'valentine' | 'anniversary' | 'birthday' | 'other') || '');
       }
@@ -77,7 +88,9 @@ export default function ProfilePage() {
     if (!user) return;
 
     // Check validation
-    if (!phone || !birthday || !gender || !job || !relationshipStatus || !occasionType) {
+    const finalJob = job === 'อื่นๆ' ? customJob.trim() : job;
+
+    if (!phone || !birthday || !gender || !finalJob || !relationshipStatus || !occasionType) {
       showToast('กรุณากรอกข้อมูลให้ครบทุกช่องเพื่อรับเครดิตฟรี', 'error');
       return;
     }
@@ -92,7 +105,7 @@ export default function ProfilePage() {
           phone,
           birthday,
           gender: gender || null,
-          job,
+          job: finalJob,
           relationshipStatus: relationshipStatus || null,
           occasionType: occasionType || null,
         }),
@@ -331,6 +344,15 @@ export default function ProfilePage() {
                 </option>
               ))}
             </select>
+            {job === 'อื่นๆ' && (
+              <input
+                type="text"
+                value={customJob}
+                onChange={(e) => setCustomJob(e.target.value)}
+                placeholder="ระบุอาชีพของคุณ..."
+                className="w-full mt-2 px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all animate-fade-in-up"
+              />
+            )}
           </div>
 
           {/* Relationship Status */}

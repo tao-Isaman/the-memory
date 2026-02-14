@@ -729,6 +729,8 @@ CRON_SECRET=xxx
 - [x] User profile data collection (phone, birthday, gender, job, relationship status, occasion type)
 - [x] Onboarding page for new users (skippable, redirected after first login)
 - [x] Editable profile page with save functionality
+- [x] Job Dropdown with Thai options (Student, Business Owner, etc.)
+- [x] Client-side validation alerts for missing profile fields
 - [x] 10 free credits reward for completing profile (idempotent, optimistic lock)
 - [x] Profile completion modal on dashboard (dismissible, localStorage)
 - [x] Auth callback redirects new users to onboarding, existing to dashboard
