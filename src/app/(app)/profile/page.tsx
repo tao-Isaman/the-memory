@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import HeartLoader from '@/components/HeartLoader';
 import { ArrowLeft, Mail, Calendar, User, Phone, Cake, Briefcase, Heart, Gift } from 'lucide-react';
 import { UserProfile } from '@/types/profile';
+import { JOB_OPTIONS } from '@/lib/constants';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -74,6 +75,12 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!user) return;
+
+    // Check validation
+    if (!phone || !birthday || !gender || !job || !relationshipStatus || !occasionType) {
+      showToast('กรุณากรอกข้อมูลให้ครบทุกช่องเพื่อรับเครดิตฟรี', 'error');
+      return;
+    }
 
     try {
       setSaving(true);
@@ -312,13 +319,18 @@ export default function ProfilePage() {
               <Briefcase size={16} className="text-pink-400" />
               อาชีพ
             </label>
-            <input
-              type="text"
+            <select
               value={job}
               onChange={(e) => setJob(e.target.value)}
-              placeholder="เช่น นักเรียน, พนักงานบริษัท"
               className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-            />
+            >
+              <option value="">เลือกอาชีพ...</option>
+              {JOB_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Relationship Status */}
