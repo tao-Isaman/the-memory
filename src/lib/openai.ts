@@ -1,14 +1,17 @@
 import OpenAI from 'openai';
 import { toFile } from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function generateCartoonImage(
   templateBuffer: Buffer,
   userImageBuffer: Buffer
 ): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not set');
+  }
+
+  const openai = new OpenAI({ apiKey });
+
   const templateFile = await toFile(templateBuffer, 'template.png', {
     type: 'image/png',
   });
