@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { Eye, BookHeart, CreditCard, Coins, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import SortModal, { SortConfig, SortField, SortOrder, FilterConfig } from '@/components/admin/SortModal';
 
 interface User {
   id: string;
@@ -20,23 +21,24 @@ interface User {
   isProfileComplete: boolean;
 }
 
-type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'creditBalance' | 'user_email' | 'profile';
-type SortOrder = 'asc' | 'desc';
-
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminUsersPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isSortModalOpen, setIsSortModalOpen] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMemories, setFilterMemories] = useState<'all' | 'with' | 'without'>('all');
   const [filterPaid, setFilterPaid] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [filterReferral, setFilterReferral] = useState<'all' | 'with' | 'without'>('all');
-  const [sortField, setSortField] = useState<SortField>('created_at');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
+  // Multi-sort state
+  const [sortConfig, setSortConfig] = useState<SortConfig[]>([
+    { field: 'created_at', order: 'desc' },
+  ]);
 
   useEffect(() => {
     fetch('/api/admin/users')
@@ -54,7 +56,7 @@ export default function AdminUsersPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
+  }, [searchQuery, filterMemories, filterPaid, filterReferral, sortConfig]);
 
   // Filter and sort all users
   const filteredUsers = useMemo(() => {
@@ -93,32 +95,39 @@ export default function AdminUsersPage() {
 
     // Sort
     result.sort((a, b) => {
-      let comparison = 0;
-      switch (sortField) {
-        case 'created_at':
-          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-          break;
-        case 'memoryCount':
-          comparison = a.memoryCount - b.memoryCount;
-          break;
-        case 'paidMemoryCount':
-          comparison = a.paidMemoryCount - b.paidMemoryCount;
-          break;
-        case 'creditBalance':
-          comparison = a.creditBalance - b.creditBalance;
-          break;
-        case 'profile':
-          comparison = (a.isProfileComplete ? 1 : 0) - (b.isProfileComplete ? 1 : 0);
-          break;
-        case 'user_email':
-          comparison = a.user_email.localeCompare(b.user_email);
-          break;
+      for (const { field, order } of sortConfig) {
+        let comparison = 0;
+
+        switch (field) {
+          case 'created_at':
+            comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+            break;
+          case 'memoryCount':
+            comparison = a.memoryCount - b.memoryCount;
+            break;
+          case 'paidMemoryCount':
+            comparison = a.paidMemoryCount - b.paidMemoryCount;
+            break;
+          case 'creditBalance':
+            comparison = a.creditBalance - b.creditBalance;
+            break;
+          case 'profile':
+            comparison = (a.isProfileComplete ? 1 : 0) - (b.isProfileComplete ? 1 : 0);
+            break;
+          case 'user_email':
+            comparison = a.user_email.localeCompare(b.user_email);
+            break;
+        }
+
+        if (comparison !== 0) {
+          return order === 'asc' ? comparison : -comparison;
+        }
       }
-      return sortOrder === 'asc' ? comparison : -comparison;
+      return 0;
     });
 
     return result;
-  }, [allUsers, searchQuery, filterMemories, filterPaid, filterReferral, sortField, sortOrder]);
+  }, [allUsers, searchQuery, filterMemories, filterPaid, filterReferral, sortConfig]);
 
   // Pagination
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
@@ -127,13 +136,50 @@ export default function AdminUsersPage() {
     return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredUsers, currentPage]);
 
-  const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('desc');
-    }
+  const toggleSort = (field: SortField, multi: boolean) => {
+    setSortConfig((prevConfig) => {
+      // If multi-sort (Shift key pressed)
+      if (multi) {
+        const existingIndex = prevConfig.findIndex((item) => item.field === field);
+
+        if (existingIndex !== -1) {
+          // Field already exists, toggle order
+          const newConfig = [...prevConfig];
+          newConfig[existingIndex] = {
+            ...newConfig[existingIndex],
+            order: newConfig[existingIndex].order === 'asc' ? 'desc' : 'asc',
+          };
+          return newConfig;
+        } else {
+          // Add new field to end of sort config
+          return [...prevConfig, { field, order: 'desc' }];
+        }
+      }
+
+      // Single sort (regular click)
+      // If clicking the primary sort field, toggle its order
+      if (prevConfig.length > 0 && prevConfig[0].field === field) {
+        return [{ field, order: prevConfig[0].order === 'asc' ? 'desc' : 'asc' }];
+      }
+
+      // Otherwise replace with single new sort
+      return [{ field, order: 'desc' }];
+    });
+  };
+
+  const getSortIcon = (field: SortField) => {
+    const index = sortConfig.findIndex((item) => item.field === field);
+    if (index === -1) return null;
+
+    const { order } = sortConfig[index];
+    const priority = sortConfig.length > 1 ? <span className="text-xs ml-0.5">{index + 1}</span> : null;
+
+    return (
+      <span className="inline-flex items-center ml-1">
+        {order === 'asc' ? '↑' : '↓'}
+        {priority}
+      </span>
+    );
   };
 
   const handlePageChange = (newPage: number) => {
@@ -174,65 +220,38 @@ export default function AdminUsersPage() {
             />
           </div>
 
-          {/* Memory Filter */}
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-gray-500" />
-            <select
-              value={filterMemories}
-              onChange={(e) => setFilterMemories(e.target.value as 'all' | 'with' | 'without')}
-              className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-            >
-              <option value="all">All Memories</option>
-              <option value="with">Has Memories</option>
-              <option value="without">No Memories</option>
-            </select>
-          </div>
-
-          {/* Paid Filter */}
-          <select
-            value={filterPaid}
-            onChange={(e) => setFilterPaid(e.target.value as 'all' | 'paid' | 'unpaid')}
-            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-          >
-            <option value="all">All Status</option>
-            <option value="paid">Has Paid</option>
-            <option value="unpaid">Never Paid</option>
-          </select>
-
-          {/* Referral Filter */}
-          <select
-            value={filterReferral}
-            onChange={(e) => setFilterReferral(e.target.value as 'all' | 'with' | 'without')}
-            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-          >
-            <option value="all">All Referral</option>
-            <option value="with">Has Code</option>
-            <option value="without">No Code</option>
-          </select>
-
-          {/* Sort */}
-          <select
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value as SortField)}
-            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-          >
-            <option value="created_at">Sort by Date</option>
-            <option value="user_email">Sort by Email</option>
-            <option value="memoryCount">Sort by Memories</option>
-            <option value="paidMemoryCount">Sort by Paid</option>
-            <option value="creditBalance">Sort by Credits</option>
-            <option value="profile">Sort by Profile</option>
-          </select>
-
+          {/* Sort & Filter Button */}
           <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50"
-            title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+            onClick={() => setIsSortModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-lg border border-pink-100 hover:bg-pink-100 transition-colors font-medium"
           >
-            {sortOrder === 'asc' ? <SortAsc size={18} /> : <SortDesc size={18} />}
+            <Filter size={18} />
+            ตัวกรอง / จัดเรียง
+            {(sortConfig.length > 0 || filterMemories !== 'all' || filterPaid !== 'all' || filterReferral !== 'all') && (
+              <span className="bg-pink-200 text-pink-700 text-xs px-1.5 py-0.5 rounded-full">
+                {sortConfig.length + (filterMemories !== 'all' ? 1 : 0) + (filterPaid !== 'all' ? 1 : 0) + (filterReferral !== 'all' ? 1 : 0)}
+              </span>
+            )}
           </button>
         </div>
       </div>
+
+      <SortModal
+        isOpen={isSortModalOpen}
+        onClose={() => setIsSortModalOpen(false)}
+        currentConfig={sortConfig}
+        currentFilters={{
+          memories: filterMemories,
+          paid: filterPaid,
+          referral: filterReferral,
+        }}
+        onApply={(newSort, newFilters) => {
+          setSortConfig(newSort);
+          setFilterMemories(newFilters.memories);
+          setFilterPaid(newFilters.paid);
+          setFilterReferral(newFilters.referral);
+        }}
+      />
 
       {/* Users Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -240,41 +259,47 @@ export default function AdminUsersPage() {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th
-                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('user_email')}
+                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('user_email', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Email {sortField === 'user_email' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Email {getSortIcon('user_email')}
               </th>
               <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Referral Code</th>
               <th
-                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('memoryCount')}
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('memoryCount', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Memories {sortField === 'memoryCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Memories {getSortIcon('memoryCount')}
               </th>
               <th
-                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('paidMemoryCount')}
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('paidMemoryCount', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Paid {sortField === 'paidMemoryCount' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Paid {getSortIcon('paidMemoryCount')}
               </th>
               <th
-                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('creditBalance')}
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('creditBalance', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Credits {sortField === 'creditBalance' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Credits {getSortIcon('creditBalance')}
               </th>
               <th
-                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('profile')}
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('profile', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Profile {sortField === 'profile' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Profile {getSortIcon('profile')}
               </th>
               <th
-                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleSort('created_at')}
+                className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100 select-none"
+                onClick={(e) => toggleSort('created_at', e.shiftKey)}
+                title="Shift+Click to multi-sort"
               >
-                Joined {sortField === 'created_at' && (sortOrder === 'asc' ? '↑' : '↓')}
+                Joined {getSortIcon('created_at')}
               </th>
               <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
             </tr>
