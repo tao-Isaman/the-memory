@@ -112,23 +112,35 @@ src/
 │   │   ├── profile/page.tsx    # User profile page
 │   │   └── updates/page.tsx    # Patch notes / "What's new" page
 │   ├── admin/                  # Admin dashboard (email-protected)
-│   │   ├── layout.tsx          # Auth guard, admin navigation
-│   │   ├── page.tsx            # Admin dashboard with stats
+│   │   ├── layout.tsx          # Auth guard, admin navigation (Users, Referral Claims, Credits, Cartoons)
+│   │   ├── page.tsx            # Admin dashboard with comprehensive stats + recent activity
 │   │   ├── users/
-│   │   │   ├── page.tsx        # Users list with filters & pagination
+│   │   │   ├── page.tsx        # Users list with filters, pagination & credit balance
 │   │   │   └── [userId]/
 │   │   │       └── memories/
 │   │   │           └── page.tsx # User's memories list
+│   │   ├── referral-claims/
+│   │   │   └── page.tsx        # Referral claims management (approve/reject)
+│   │   ├── credits/
+│   │   │   └── page.tsx        # Credit system overview (packages, transactions, top users)
+│   │   ├── cartoons/
+│   │   │   └── page.tsx        # Cartoon generation monitor (stats, history, thumbnails)
 │   │   └── memories/
 │   │       └── [memoryId]/
-│   │           └── page.tsx    # Memory details with all stories
+│   │           └── page.tsx    # Memory details with all stories (incl. question type)
 │   ├── api/
 │   │   ├── admin/              # Admin API routes
-│   │   │   ├── users/          # GET: All users with memory counts
+│   │   │   ├── stats/          # GET: Comprehensive admin stats (revenue, credits, cartoons, activity)
+│   │   │   ├── users/          # GET: All users with memory counts + credit balance
 │   │   │   │   └── [userId]/
 │   │   │   │       └── memories/ # GET: User's memories
-│   │   │   └── memories/
-│   │   │       └── [memoryId]/ # GET: Memory with stories
+│   │   │   ├── memories/
+│   │   │   │   └── [memoryId]/ # GET: Memory with stories
+│   │   │   ├── referral-claims/ # GET: All referral claims (filterable by status)
+│   │   │   │   └── [claimId]/ # PATCH: Approve/reject claim
+│   │   │   ├── referral-stats/ # GET: Referral analytics + top referrers
+│   │   │   ├── credits/       # GET: Credit packages performance, transactions, top users
+│   │   │   └── cartoons/      # GET: Cartoon generation stats + recent history
 │   │   ├── cartoon/
 │   │   │   ├── generate/       # POST: Generate cartoon image (OpenAI)
 │   │   │   ├── history/        # GET: User's cartoon gallery (paginated)
@@ -237,9 +249,15 @@ src/
 ### Admin API (Email-protected)
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/admin/users` | GET | All users with memory counts |
+| `/api/admin/stats` | GET | Comprehensive stats: revenue, credits, cartoons, recent activity |
+| `/api/admin/users` | GET | All users with memory counts + credit balance (batch optimized) |
 | `/api/admin/users/[userId]/memories` | GET | User's memories with story counts |
 | `/api/admin/memories/[memoryId]` | GET | Memory details with all stories |
+| `/api/admin/referral-claims` | GET | All referral claims (filter by ?status=pending\|completed\|rejected) |
+| `/api/admin/referral-claims/[claimId]` | PATCH | Approve/reject claim with admin note |
+| `/api/admin/referral-stats` | GET | Referral analytics: codes, conversions, top referrers |
+| `/api/admin/credits` | GET | Credit packages performance, transactions, top users, summary |
+| `/api/admin/cartoons` | GET | Cartoon generation stats + recent 50 generations with user emails |
 
 ## Database Schema
 
@@ -676,12 +694,20 @@ CRON_SECRET=xxx
 
 ### Admin System
 - [x] Email-protected access (`NEXT_PUBLIC_ADMIN_EMAIL`)
-- [x] Admin dashboard with overview stats
-- [x] Users list with search and filters (memories, paid, referral)
+- [x] Admin dashboard with comprehensive stats (revenue, credits, cartoons, recent activity)
+- [x] Admin navigation: Users, Referral Claims, Credits, Cartoons
+- [x] Users list with search, filters (memories, paid, referral), credit balance column, sorting
 - [x] Client-side pagination (20 users per page)
 - [x] View user's memories with story counts
-- [x] View memory details with all stories (all types supported)
+- [x] View memory details with all stories (all 7 types rendered including question)
 - [x] Uses Supabase Auth admin API for accurate user data
+- [x] Batch-optimized API queries (3 queries instead of 2N+2 for users endpoint)
+- [x] Referral claims management (view/approve/reject with admin notes)
+- [x] Referral analytics (top referrers, conversion rates, claimed amounts)
+- [x] Credit system overview (package performance, transactions, top users by balance)
+- [x] Cartoon generation monitor (success/failure rates, recent generations with thumbnails)
+- [x] Revenue tracking (memory payments + credit purchases in THB)
+- [x] Failed payment visibility
 
 ## Vercel Configuration
 
@@ -808,4 +834,4 @@ The `hasUserPaidBefore` function in `src/lib/referral.ts` checks **both** active
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-13*
+*Last updated: 2026-02-14*

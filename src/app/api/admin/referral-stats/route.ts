@@ -105,9 +105,11 @@ export async function GET() {
         .map((entry) => entry[0]);
 
       if (topUserIds.length > 0) {
-        const { data: authUsers } = await supabase.auth.admin.listUsers();
+        const { data: authUsers } = await supabase.auth.admin.listUsers({
+          perPage: 10000,
+        });
         const userEmailMap = new Map(
-          authUsers.users.map((u) => [u.id, u.email || 'Unknown'])
+          (authUsers?.users || []).map((u) => [u.id, u.email || 'Unknown'])
         );
 
         topReferrers = Array.from(referrerMap.entries())
