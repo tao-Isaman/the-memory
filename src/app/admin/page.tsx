@@ -4,21 +4,28 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Users,
-  BookHeart,
-  Layers,
   CreditCard,
+  TrendingUp,
+  Activity,
+  ChevronRight,
+  UserPlus,
+  ArrowUpRight,
+  ArrowDownRight,
   DollarSign,
-  AlertCircle,
-  Clock,
-  Coins,
   TrendingDown,
   Image,
   CheckCircle,
   XCircle,
   Loader,
+  BookHeart,
+  Layers,
+  AlertCircle,
+  Clock,
+  Coins,
 } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 import UserGrowthChart from '@/components/admin/UserGrowthChart';
+import RevenueChart from '@/components/admin/RevenueChart';
 
 interface CreditStats {
   totalSold: number;
@@ -55,26 +62,33 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/admin/stats')
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/admin/stats');
+        const data = await response.json();
         setStats(data);
+        setChartData(data.registrationData || []);
+        setRevenueData(data.revenueData || []);
+      } catch (error) {
+        console.error('Failed to fetch admin stats:', error);
+      } finally {
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch admin stats:', err);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchStats();
   }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <HeartLoader message="กำลังโหลด..." size="md" />
+      <div className="flex items-center justify-center min-h-screen">
+        <HeartLoader size="lg" message="Loading Dashboard..." />
       </div>
     );
   }
@@ -241,6 +255,11 @@ export default function AdminDashboard() {
         {stats?.userGrowth && <UserGrowthChart data={stats.userGrowth} />}
       </div>
 
+      {/* Revenue Chart */}
+      <div className="mb-8">
+        <RevenueChart data={revenueData || []} />
+      </div>
+
       {/* Detailed Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Credit Details */}
@@ -354,7 +373,7 @@ export default function AdminDashboard() {
         </h2>
         {stats?.recentActivity && stats.recentActivity.length > 0 ? (
           <div className="space-y-3">
-            {stats.recentActivity.map((activity, index) => {
+            {stats.recentActivity.map((activity: RecentActivity, index: number) => {
               const Icon = getActivityIcon(activity.type);
               return (
                 <div

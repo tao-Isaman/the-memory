@@ -28,6 +28,23 @@ export async function GET() {
       }
     });
 
+    // Helper to get date string in UTC+7 (Asia/Bangkok)
+    const getThaiDateString = (dateString: string | Date) => {
+      const date = new Date(dateString);
+      // Add 7 hours to convert UTC to Thai time for grouping
+      const thaiDate = new Date(date.getTime() + (7 * 60 * 60 * 1000));
+      return thaiDate.toLocaleDateString('th-TH', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: 'UTC' // Treat as UTC since we manually adjusted offset
+      });
+    };
+
+    // Calculate start date (30 days ago)
+    const now = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+
     // Fetch all stats in parallel
     const [
       memories,
@@ -41,6 +58,8 @@ export async function GET() {
       recentMemories,
       recentCredits,
       recentCartoons,
+      dailyPaidMemories,
+      dailyCreditTransactions
     ] = await Promise.all([
       supabase.from('memories').select('*', { count: 'exact', head: true }),
       supabase.from('stories').select('*', { count: 'exact', head: true }),
@@ -54,18 +73,35 @@ export async function GET() {
       supabase.from('memories').select('user_id, title, created_at').order('created_at', { ascending: false }).limit(10),
       supabase.from('credit_transactions').select('user_id, amount, description, created_at').eq('type', 'purchase').order('created_at', { ascending: false }).limit(10),
       supabase.from('cartoon_generations').select('user_id, status, created_at').order('created_at', { ascending: false }).limit(10),
+      // Daily stats data
+      supabase.from('memories')
+        .select('paid_at')
+        .eq('status', 'active')
+        .not('stripe_payment_intent_id', 'is', null)
+        .gte('paid_at', thirtyDaysAgo.toISOString()),
+      supabase.from('credit_transactions')
+        .select(`
+          created_at,
+          package_id,
+          credit_packages (
+            price_thb
+          )
+        `)
+        .eq('type', 'purchase')
+        .gte('created_at', thirtyDaysAgo.toISOString())
     ]);
 
     // Calculate total revenue
+    // 1. Memory Revenue
     const memoryRevenue = (paidMemories.count || 0) * MEMORY_PRICE_THB;
 
-    // Calculate credit revenue from packages
-    let creditRevenue = 0;
+    // 2. Credit Revenue
     const packageMap = new Map<string, number>();
     creditPackages.data?.forEach((pkg) => {
       packageMap.set(pkg.id, pkg.price_thb);
     });
 
+    let creditRevenue = 0;
     creditTransactions.data?.forEach((tx) => {
       if (tx.package_id) {
         const price = packageMap.get(tx.package_id);
@@ -132,33 +168,64 @@ export async function GET() {
     activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     const recentActivity = activities.slice(0, 10);
 
-    // Calculate user growth (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    // Initialize map with all dates in last 30 days
+    // Initialize Date Map (Last 30 Days in UTC+7)
     const dateMap = new Map<string, number>();
-    for (let i = 0; i < 30; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateString = date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-      dateMap.set(dateString, 0);
+    for (let i = 29; i >= 0; i--) {
+      // Calculate date in UTC-based logic first to avoid local server time confusion
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateKey = getThaiDateString(d);
+      dateMap.set(dateKey, 0);
     }
 
+    // 1. User Growth Data
+    const userGrowthMap = new Map(dateMap);
     allUsers?.users?.forEach((user) => {
       const createdAt = new Date(user.created_at);
       if (createdAt >= thirtyDaysAgo) {
-        const dateString = createdAt.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-        if (dateMap.has(dateString)) {
-          dateMap.set(dateString, (dateMap.get(dateString) || 0) + 1);
+        const dateString = getThaiDateString(createdAt);
+        if (userGrowthMap.has(dateString)) {
+          userGrowthMap.set(dateString, userGrowthMap.get(dateString)! + 1);
         }
       }
     });
 
-    // Convert map to array and reverse (oldest to newest)
-    const userGrowth = Array.from(dateMap.entries())
-      .map(([date, count]) => ({ date, count }))
-      .reverse();
+    const userGrowth = Array.from(userGrowthMap.entries())
+      .map(([date, count]) => ({ date, count }));
+
+
+    // 2. Revenue Data
+    const revenueMap = new Map(dateMap);
+
+    // 2.1 Credit Packages Revenue
+    if (dailyCreditTransactions.data) {
+      dailyCreditTransactions.data.forEach((tx) => {
+        const dateString = getThaiDateString(tx.created_at);
+        // @ts-ignore
+        const price = tx.credit_packages?.price_thb || 0;
+        if (revenueMap.has(dateString)) {
+          revenueMap.set(dateString, revenueMap.get(dateString)! + price);
+        }
+      });
+    }
+
+    // 2.2 Direct Memory Purchase Revenue
+    if (dailyPaidMemories.data) {
+      dailyPaidMemories.data.forEach((mem) => {
+        if (mem.paid_at) {
+          const dateString = getThaiDateString(mem.paid_at);
+          if (revenueMap.has(dateString)) {
+            revenueMap.set(dateString, revenueMap.get(dateString)! + MEMORY_PRICE_THB);
+          }
+        }
+      });
+    }
+
+    const revenueData = Array.from(revenueMap.entries())
+      .map(([date, amount]) => ({
+        date,
+        amount,
+      }));
 
     return NextResponse.json({
       totalUsers,
@@ -181,6 +248,7 @@ export async function GET() {
       },
       recentActivity,
       userGrowth,
+      revenueData,
     });
   } catch (error) {
     console.error('Admin stats error:', error);

@@ -761,9 +761,10 @@ CRON_SECRET=xxx
 - [x] Referral analytics (top referrers, conversion rates, claimed amounts)
 - [x] Credit system overview (package performance, transactions, top users by balance)
 - [x] Cartoon generation monitor (success/failure rates, recent generations with thumbnails)
-- [x] Revenue tracking (memory payments + credit purchases in THB)
+- [x] Revenue tracking (memory payments + credit purchases in THB) - UTC+7 Daily Chart
 - [x] Failed payment visibility
 - [x] View user gender, age, and occupation in memories page
+- [x] Dashboard Data localized to Thai Time (UTC+7)
 
 ## Vercel Configuration
 
