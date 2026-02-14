@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles, HelpCircle } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface Story {
   id: string;
-  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch';
+  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question';
   priority: number;
   title: string | null;
   content: Record<string, unknown>;
@@ -114,6 +114,8 @@ export default function MemoryDetailsPage() {
         return <Music size={18} className="text-red-500" />;
       case 'scratch':
         return <Sparkles size={18} className="text-amber-500" />;
+      case 'question':
+        return <HelpCircle size={18} className="text-indigo-500" />;
       default:
         return null;
     }
@@ -194,6 +196,41 @@ export default function MemoryDetailsPage() {
             {content.caption && (
               <p className="text-gray-600 mt-2">{content.caption}</p>
             )}
+          </div>
+        );
+      case 'question':
+        return (
+          <div className="bg-indigo-50 p-6 rounded-lg">
+            <div className="mb-4">
+              <p className="text-sm text-indigo-600 font-medium mb-2">Question:</p>
+              <p className="text-lg font-medium text-gray-800">{content.question}</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-indigo-600 font-medium mb-3">Choices:</p>
+              {Array.isArray(content.choices) && content.choices.map((choice, index) => {
+                const isCorrect = Number(content.correctIndex) === index;
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-center gap-3 p-3 rounded-lg ${
+                      isCorrect
+                        ? 'bg-green-100 border-2 border-green-500'
+                        : 'bg-white border border-gray-200'
+                    }`}
+                  >
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-sm font-medium">
+                      {index + 1}
+                    </span>
+                    <span className={`flex-1 ${isCorrect ? 'font-medium text-green-800' : 'text-gray-700'}`}>
+                      {String(choice)}
+                    </span>
+                    {isCorrect && (
+                      <CheckCircle size={20} className="text-green-600" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       default:

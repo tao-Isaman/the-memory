@@ -16,18 +16,25 @@ export async function GET() {
 
     const authUsers = authData?.users || [];
 
-    // Batch: get referrals and all memories in parallel (3 queries instead of 2N+2)
-    const [{ data: referrals }, { data: memories }] = await Promise.all([
+    // Batch: get referrals, memories, and credits in parallel
+    const [{ data: referrals }, { data: memories }, { data: userCredits }] = await Promise.all([
       supabase
         .from('user_referrals')
         .select('user_id, referral_code, referred_by'),
       supabase
         .from('memories')
         .select('user_id, status'),
+      supabase
+        .from('user_credits')
+        .select('user_id, balance'),
     ]);
 
     const referralMap = new Map(
       (referrals || []).map((r) => [r.user_id, r])
+    );
+
+    const creditsMap = new Map(
+      (userCredits || []).map((c) => [c.user_id, c.balance])
     );
 
     // Aggregate memory counts in JS instead of per-user DB queries
@@ -42,6 +49,7 @@ export async function GET() {
     const usersWithCounts = authUsers.map((user) => {
       const referral = referralMap.get(user.id);
       const counts = memoryCounts.get(user.id) || { total: 0, paid: 0 };
+      const creditBalance = creditsMap.get(user.id) || 0;
 
       return {
         id: user.id,
@@ -53,6 +61,7 @@ export async function GET() {
         last_sign_in_at: user.last_sign_in_at,
         memoryCount: counts.total,
         paidMemoryCount: counts.paid,
+        creditBalance,
         hasReferralCode: !!referral,
       };
     });

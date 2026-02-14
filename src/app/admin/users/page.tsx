@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Eye, BookHeart, CreditCard, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Eye, BookHeart, CreditCard, Coins, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface User {
@@ -15,10 +15,11 @@ interface User {
   last_sign_in_at: string | null;
   memoryCount: number;
   paidMemoryCount: number;
+  creditBalance: number;
   hasReferralCode: boolean;
 }
 
-type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'user_email';
+type SortField = 'created_at' | 'memoryCount' | 'paidMemoryCount' | 'creditBalance' | 'user_email';
 type SortOrder = 'asc' | 'desc';
 
 const ITEMS_PER_PAGE = 20;
@@ -101,6 +102,9 @@ export default function AdminUsersPage() {
           break;
         case 'paidMemoryCount':
           comparison = a.paidMemoryCount - b.paidMemoryCount;
+          break;
+        case 'creditBalance':
+          comparison = a.creditBalance - b.creditBalance;
           break;
         case 'user_email':
           comparison = a.user_email.localeCompare(b.user_email);
@@ -212,6 +216,7 @@ export default function AdminUsersPage() {
             <option value="user_email">Sort by Email</option>
             <option value="memoryCount">Sort by Memories</option>
             <option value="paidMemoryCount">Sort by Paid</option>
+            <option value="creditBalance">Sort by Credits</option>
           </select>
 
           <button
@@ -249,6 +254,12 @@ export default function AdminUsersPage() {
                 Paid {sortField === 'paidMemoryCount' && (sortOrder === 'asc' ? '↑' : '↓')}
               </th>
               <th
+                className="text-center px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
+                onClick={() => toggleSort('creditBalance')}
+              >
+                Credits {sortField === 'creditBalance' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th
                 className="text-left px-6 py-4 text-sm font-semibold text-gray-600 cursor-pointer hover:bg-gray-100"
                 onClick={() => toggleSort('created_at')}
               >
@@ -283,6 +294,12 @@ export default function AdminUsersPage() {
                   <div className="flex items-center justify-center gap-1">
                     <CreditCard size={16} className="text-green-500" />
                     <span className="font-medium text-green-600">{user.paidMemoryCount}</span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    <Coins size={16} className="text-yellow-500" />
+                    <span className="font-medium text-gray-800">{user.creditBalance}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500">
