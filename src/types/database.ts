@@ -418,6 +418,55 @@ export interface Database {
           }
         ]
       }
+      user_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          phone: string | null
+          birthday: string | null
+          gender: string | null
+          job: string | null
+          relationship_status: string | null
+          occasion_type: string | null
+          profile_credits_claimed: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          phone?: string | null
+          birthday?: string | null
+          gender?: string | null
+          job?: string | null
+          relationship_status?: string | null
+          occasion_type?: string | null
+          profile_credits_claimed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          phone?: string | null
+          birthday?: string | null
+          gender?: string | null
+          job?: string | null
+          relationship_status?: string | null
+          occasion_type?: string | null
+          profile_credits_claimed?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

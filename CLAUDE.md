@@ -109,7 +109,8 @@ src/
 │   │   ├── dashboard/
 │   │   │   ├── page.tsx        # Tabbed: memories list + cartoon creator
 │   │   │   └── referral/page.tsx # Referral code management
-│   │   ├── profile/page.tsx    # User profile page
+│   │   ├── onboarding/page.tsx  # New user onboarding form (profile data collection)
+│   │   ├── profile/page.tsx    # User profile page (editable with credit reward)
 │   │   └── updates/page.tsx    # Patch notes / "What's new" page
 │   ├── admin/                  # Admin dashboard (email-protected)
 │   │   ├── layout.tsx          # Auth guard, admin navigation (Users, Referral Claims, Credits, Cartoons)
@@ -156,6 +157,8 @@ src/
 │   │   ├── payment/
 │   │   │   ├── status/         # GET: Check payment status
 │   │   │   └── verify/         # POST: Verify and activate (memory or credits)
+│   │   ├── profile/            # GET/POST: User profile data
+│   │   │   └── claim-credits/  # POST: Claim 10 credits for profile completion
 │   │   ├── stats/              # GET: Cached site statistics
 │   │   └── webhook/stripe/     # POST: Handle Stripe events (memory + credits)
 │   ├── auth/callback/          # GET: OAuth callback
@@ -173,6 +176,8 @@ src/
 │   ├── ScratchCard.tsx         # Canvas-based scratch-to-reveal component
 │   ├── QuestionGate.tsx        # Quiz question with 4 choices and sound feedback
 │   ├── PasswordGate.tsx        # 6-digit PIN input (mobile numpad)
+│   ├── ProfileCompletionBanner.tsx # Profile completion modal (10 credits reward)
+│   ├── Toast.tsx               # Toast notification component (success/error/info)
 │   ├── CartoonCreator.tsx      # Cartoon generation: upload, generate, gallery
 │   ├── ShareModal.tsx          # URL/QR code sharing
 │   ├── PaymentButton.tsx       # Stripe checkout initiator
@@ -187,15 +192,17 @@ src/
 │   └── ClientProviders.tsx     # AuthProvider + CreditBalanceProvider + HeartFirework
 ├── contexts/
 │   ├── AuthContext.tsx         # Authentication state management
-│   └── CreditBalanceContext.tsx # Global credit balance state
+│   ├── CreditBalanceContext.tsx # Global credit balance state
+│   └── ToastContext.tsx        # Toast notification provider
 ├── data/
 │   └── patch-notes.ts          # Patch notes data (types, versions, items)
 ├── hooks/
 │   ├── useAuth.ts              # Auth hook
-│   └── useCreditBalance.ts     # Credit balance context hook
+│   ├── useCreditBalance.ts     # Credit balance context hook
+│   └── useToast.ts             # Toast notification hook
 ├── lib/
 │   ├── cartoon.ts              # Cartoon generation CRUD + credit deduction/refund
-│   ├── constants.ts            # App constants (CARTOON_CREDIT_COST = 10)
+│   ├── constants.ts            # App constants (CARTOON_CREDIT_COST = 10, PROFILE_COMPLETION_CREDITS = 10)
 │   ├── credits.ts              # Credit packages, balance, transactions CRUD
 │   ├── openai.ts               # OpenAI GPT Image 1.5 integration
 │   ├── storage.ts              # Memory/Story CRUD operations
@@ -203,11 +210,13 @@ src/
 │   ├── supabase-server.ts      # Server client (service role)
 │   ├── stripe.ts               # Stripe instance
 │   ├── upload.ts               # Image processing & upload
+│   ├── profile.ts              # User profile CRUD, completion check, credit grant
 │   └── patch-notes.ts          # localStorage-based "last seen version" tracking
 └── types/
     ├── cartoon.ts              # CartoonGeneration interface
     ├── credits.ts              # CreditPackage, UserCredits, CreditTransaction
     ├── memory.ts               # Memory & Story interfaces
+    ├── profile.ts              # UserProfile, Gender, RelationshipStatus, OccasionType
     └── database.ts             # Supabase generated types
 ```
 
@@ -234,6 +243,13 @@ src/
 | `/api/cartoon/generate` | POST | Generate cartoon image (deducts 10 credits) |
 | `/api/cartoon/history` | GET | User's cartoon gallery (paginated) |
 | `/api/cartoon/delete` | POST | Delete cartoon generation + storage files |
+
+### User Profile API
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/profile` | GET | Get user profile + completion status (?userId=xxx) |
+| `/api/profile` | POST | Create/update user profile (upsert) |
+| `/api/profile/claim-credits` | POST | Claim 10 free credits for profile completion |
 
 ### Webhook Events Handled
 - `checkout.session.completed` - Activates memory OR adds credits (checks `metadata.type`)
@@ -333,6 +349,21 @@ src/
 | description | text | Human-readable description |
 | created_at | timestamptz | Transaction timestamp |
 
+#### `user_profiles`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | uuid | Primary key |
+| user_id | uuid | References auth.users (UNIQUE) |
+| phone | text | Phone number (nullable) |
+| birthday | date | Date of birth (nullable) |
+| gender | text | 'male', 'female', 'other' (nullable) |
+| job | text | Occupation (nullable) |
+| relationship_status | text | 'single', 'dating', 'married', 'other' (nullable) |
+| occasion_type | text | 'valentine', 'anniversary', 'birthday', 'other' (nullable) |
+| profile_credits_claimed | boolean | Whether 10 free credits were claimed (default: false) |
+| created_at | timestamptz | Creation timestamp |
+| updated_at | timestamptz | Auto-updated via trigger |
+
 #### `cartoon_generations`
 | Column | Type | Description |
 |--------|------|-------------|
@@ -354,6 +385,7 @@ src/
 - `credit_transactions(stripe_checkout_session_id)` - Idempotency checks
 - `cartoon_generations(user_id)` - Fast user lookup
 - `cartoon_generations(user_id, created_at)` - Sorted gallery
+- `user_profiles(user_id)` - Fast user lookup
 
 ### Row Level Security (RLS)
 - **Memories**: Viewable by anyone (public sharing). CRUD by owner only.
@@ -362,6 +394,7 @@ src/
 - **User credits**: Viewable/editable by owner only.
 - **Credit transactions**: Viewable/insertable by owner only.
 - **Cartoon generations**: Viewable by owner only. Full access via service role.
+- **User profiles**: Viewable/editable by owner only. Full access via service role.
 - Service role key bypasses RLS for payment verification and API operations.
 
 ### Supabase Storage Buckets
@@ -692,6 +725,22 @@ CRON_SECRET=xxx
 - [x] Paginated cartoon gallery with download/delete
 - [x] Dashboard tab navigation (memories / cartoon)
 
+### User Profile & Onboarding
+- [x] User profile data collection (phone, birthday, gender, job, relationship status, occasion type)
+- [x] Onboarding page for new users (skippable, redirected after first login)
+- [x] Editable profile page with save functionality
+- [x] 10 free credits reward for completing profile (idempotent, optimistic lock)
+- [x] Profile completion modal on dashboard (dismissible, localStorage)
+- [x] Auth callback redirects new users to onboarding, existing to dashboard
+- [x] `user_profiles` table with RLS and CHECK constraints
+
+### Toast Notifications
+- [x] Custom Toast component replacing all JavaScript alert() calls
+- [x] Three types: success (green), error (red), info (pink)
+- [x] Auto-dismiss after 3 seconds, manual close
+- [x] ToastProvider context with `useToast()` hook
+- [x] Stacking support for multiple toasts
+
 ### Admin System
 - [x] Email-protected access (`NEXT_PUBLIC_ADMIN_EMAIL`)
 - [x] Admin dashboard with comprehensive stats (revenue, credits, cartoons, recent activity)
@@ -735,6 +784,7 @@ Located in `supabase/migrations/`:
 6. `010-add-question-story-type.sql` - Add question type to stories constraint
 7. `011-add-credits-system.sql` - Credit packages, user_credits, credit_transactions tables
 8. `012-add-cartoon-generations.sql` - Cartoon generations table + cartoon-images storage bucket
+9. `013-add-user-profiles.sql` - User profiles table with RLS, CHECK constraints, auto-update trigger
 
 ## Development
 

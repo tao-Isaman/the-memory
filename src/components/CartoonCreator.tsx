@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
+import { useToast } from '@/hooks/useToast';
 import HeartIcon from './HeartIcon';
 import HeartLoader from './HeartLoader';
 import { Upload, X, Download, ImageIcon, Coins, RefreshCw, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
@@ -16,6 +17,7 @@ interface CartoonCreatorProps {
 
 export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const { balance, refresh: refreshBalance } = useCreditBalance();
+  const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -144,7 +146,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       setSelectedGen(null);
       fetchGallery(galleryPage);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
+      showToast(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด', 'error');
     } finally {
       setDeleting(false);
     }

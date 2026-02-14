@@ -7,6 +7,7 @@ import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import StoryEditor from '@/components/StoryEditor';
@@ -21,6 +22,7 @@ function CreatePageContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
   const { user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
 
   const [title, setTitle] = useState('');
   const [theme, setTheme] = useState<MemoryTheme>('love');
@@ -105,12 +107,12 @@ function CreatePageContent() {
     if (!user) return;
 
     if (!title.trim()) {
-      alert('กรุณาใส่ชื่อความทรงจำ');
+      showToast('กรุณาใส่ชื่อความทรงจำ', 'error');
       return;
     }
 
     if (stories.length === 0) {
-      alert('กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว');
+      showToast('กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว', 'error');
       return;
     }
 

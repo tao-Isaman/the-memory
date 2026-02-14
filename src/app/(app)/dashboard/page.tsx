@@ -11,6 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
+import ProfileCompletionBanner from '@/components/ProfileCompletionBanner';
 import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon } from 'lucide-react';
 import CartoonCreator from '@/components/CartoonCreator';
 
@@ -80,6 +81,9 @@ export default function DashboardPage() {
     <main className="min-h-screen relative z-10">
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 pt-6 pb-12">
+        {/* Profile Completion Banner */}
+        {user && <ProfileCompletionBanner userId={user.id} />}
+
         {/* Tab Bar */}
         <div className="flex justify-center mb-6">
           <div className="inline-flex bg-pink-50 rounded-full p-1">

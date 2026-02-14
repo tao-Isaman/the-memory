@@ -39,6 +39,35 @@ export interface PatchNote {
  */
 export const patchNotes: PatchNote[] = [
   {
+    version: '1.8.0',
+    date: '2026-02-14',
+    title: 'ระบบโปรไฟล์ผู้ใช้ & Toast',
+    summary: 'กรอกข้อมูลโปรไฟล์รับ 10 เครดิตฟรี พร้อมระบบแจ้งเตือนใหม่',
+    items: [
+      { type: 'feature', text: 'ระบบโปรไฟล์ผู้ใช้ — กรอกข้อมูลเพิ่มเติม (เบอร์โทร, วันเกิด, เพศ, อาชีพ, สถานะ, โอกาส)' },
+      { type: 'feature', text: 'หน้า Onboarding — ต้อนรับผู้ใช้ใหม่พร้อมแบบฟอร์มกรอกโปรไฟล์' },
+      { type: 'feature', text: 'รับ 10 เครดิตฟรีเมื่อกรอกโปรไฟล์ครบ!' },
+      { type: 'feature', text: 'Modal แจ้งเตือนบน Dashboard เชิญกรอกโปรไฟล์' },
+      { type: 'improvement', text: 'หน้าโปรไฟล์แก้ไขได้ — เพิ่มฟอร์มแก้ไขข้อมูลส่วนตัว' },
+      { type: 'improvement', text: 'ระบบ Toast แจ้งเตือน — แทนที่ alert ด้วยการแจ้งเตือนสวยงาม' },
+    ],
+  },
+  {
+    version: '1.7.0',
+    date: '2026-02-14',
+    title: 'Admin Dashboard ครบวงจร',
+    summary: 'เพิ่มหน้า Admin สำหรับติดตามรายได้ เครดิต การ์ตูน และ Referral',
+    items: [
+      { type: 'feature', text: 'Dashboard Admin — สถิติรายได้ เครดิต การ์ตูน กิจกรรมล่าสุด' },
+      { type: 'feature', text: 'หน้าจัดการ Referral Claims — อนุมัติ/ปฏิเสธคำขอรับเงินแนะนำ' },
+      { type: 'feature', text: 'หน้า Credit Overview — ยอดขายแพ็กเกจ ธุรกรรม ผู้ใช้เครดิตสูงสุด' },
+      { type: 'feature', text: 'หน้า Cartoon Monitor — สถิติการสร้างรูป อัตราสำเร็จ/ล้มเหลว' },
+      { type: 'improvement', text: 'เพิ่มคอลัมน์ยอดเครดิตในรายชื่อผู้ใช้ Admin' },
+      { type: 'improvement', text: 'เพิ่มประสิทธิภาพ API Admin/Users — ลดจาก 2N+2 เหลือ 3 queries' },
+      { type: 'fix', text: 'แก้ไข Question story type แสดงผลเป็น JSON ในหน้า Admin' },
+    ],
+  },
+  {
     version: '1.6.0',
     date: '2026-02-13',
     title: 'สร้างรูปการ์ตูนจากรูปจริง',

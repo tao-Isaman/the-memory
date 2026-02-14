@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CreditBalanceProvider } from '@/contexts/CreditBalanceContext';
+import { ToastProvider } from '@/contexts/ToastContext';
 import HeartFirework from './HeartFirework';
 
 interface ClientProvidersProps {
@@ -11,11 +12,13 @@ interface ClientProvidersProps {
 
 export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
-    <AuthProvider>
-      <CreditBalanceProvider>
-        <HeartFirework enabled />
-        {children}
-      </CreditBalanceProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <CreditBalanceProvider>
+          <HeartFirework enabled />
+          {children}
+        </CreditBalanceProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

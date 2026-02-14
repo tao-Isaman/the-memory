@@ -5,6 +5,7 @@ import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
+import { useToast } from '@/hooks/useToast';
 import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, Sparkles, HelpCircle, LucideIcon } from 'lucide-react';
 
 interface StoryEditorProps {
@@ -62,6 +63,7 @@ export default function StoryEditor({
   noCard,
   themeColors = defaultColors,
 }: StoryEditorProps) {
+  const { showToast } = useToast();
   const isEditing = !!editingStory;
 
   // Initialize state from editing story if provided
@@ -177,7 +179,7 @@ export default function StoryEditor({
         setUploading(true);
         uploadedImageUrl = await uploadImage(imageFile);
       } catch (error) {
-        alert('อัพโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+        showToast('อัพโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
         setUploading(false);
         return;
       } finally {
@@ -188,7 +190,7 @@ export default function StoryEditor({
     switch (type) {
       case 'password':
         if (password.length !== 6 || !/^\d{6}$/.test(password)) {
-          alert('กรุณาใส่รหัส PIN 6 หลัก');
+          showToast('กรุณาใส่รหัส PIN 6 หลัก', 'error');
           return;
         }
         story = { ...baseStory, type: 'password', content: { password: password } };
@@ -227,11 +229,11 @@ export default function StoryEditor({
         break;
       case 'question':
         if (!questionText.trim()) {
-          alert('กรุณาใส่คำถาม');
+          showToast('กรุณาใส่คำถาม', 'error');
           return;
         }
         if (choices.some(c => !c.trim())) {
-          alert('กรุณาใส่ตัวเลือกทั้ง 4 ข้อ');
+          showToast('กรุณาใส่ตัวเลือกทั้ง 4 ข้อ', 'error');
           return;
         }
         story = {

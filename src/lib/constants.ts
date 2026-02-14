@@ -1,1 +1,2 @@
 export const CARTOON_CREDIT_COST = 10;
+export const PROFILE_COMPLETION_CREDITS = 10;

@@ -15,6 +15,7 @@ import {
   Coins,
 } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { useToast } from '@/hooks/useToast';
 
 interface ReferralClaim {
   id: string;
@@ -50,6 +51,7 @@ type StatusFilter = 'all' | 'pending' | 'completed' | 'rejected';
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminReferralClaimsPage() {
+  const { showToast } = useToast();
   const [allClaims, setAllClaims] = useState<ReferralClaim[]>([]);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,7 +165,7 @@ export default function AdminReferralClaimsPage() {
         .catch(console.error);
     } catch (error) {
       console.error('Error processing claim:', error);
-      alert('Failed to process claim. Please try again.');
+      showToast('Failed to process claim. Please try again.', 'error');
     } finally {
       setProcessingId(null);
     }

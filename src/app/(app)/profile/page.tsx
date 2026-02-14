@@ -1,15 +1,37 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useCreditBalance } from '@/hooks/useCreditBalance';
+import { useToast } from '@/hooks/useToast';
 import HeartLoader from '@/components/HeartLoader';
-import { ArrowLeft, Mail, Calendar, User } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, User, Phone, Cake, Briefcase, Heart, Gift } from 'lucide-react';
+import { UserProfile } from '@/types/profile';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
+  const { refresh } = useCreditBalance();
+  const { showToast } = useToast();
   const router = useRouter();
+
+  // Profile state
+  const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState<'' | 'male' | 'female' | 'other'>('');
+  const [job, setJob] = useState('');
+  const [relationshipStatus, setRelationshipStatus] = useState<'' | 'single' | 'dating' | 'married' | 'other'>('');
+  const [occasionType, setOccasionType] = useState<'' | 'valentine' | 'anniversary' | 'birthday' | 'other'>('');
+
+  // UI state
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [justClaimed, setJustClaimed] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const [creditsClaimed, setCreditsClaimed] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -17,7 +39,111 @@ export default function ProfilePage() {
     }
   }, [authLoading, user, router]);
 
-  if (authLoading) {
+  // Fetch profile data
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    try {
+      setProfileLoading(true);
+      const response = await fetch(`/api/profile?userId=${user.id}`);
+      const data = await response.json();
+
+      if (data.profile) {
+        setPhone(data.profile.phone || '');
+        setBirthday(data.profile.birthday || '');
+        setGender((data.profile.gender as '' | 'male' | 'female' | 'other') || '');
+        setJob(data.profile.job || '');
+        setRelationshipStatus((data.profile.relationshipStatus as '' | 'single' | 'dating' | 'married' | 'other') || '');
+        setOccasionType((data.profile.occasionType as '' | 'valentine' | 'anniversary' | 'birthday' | 'other') || '');
+      }
+
+      setIsComplete(data.isComplete);
+      setCreditsClaimed(data.creditsClaimed);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          phone,
+          birthday,
+          gender: gender || null,
+          job,
+          relationshipStatus: relationshipStatus || null,
+          occasionType: occasionType || null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+
+      // Re-fetch profile to update isComplete/creditsClaimed
+      await fetchProfile();
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleClaimCredits = async () => {
+    if (!user || claiming) return;
+
+    try {
+      setClaiming(true);
+      const response = await fetch('/api/profile/claim-credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to claim credits');
+      }
+
+      setJustClaimed(true);
+      setCreditsClaimed(true);
+
+      // Clear profile banner dismissal from localStorage
+      localStorage.removeItem('profile_banner_dismissed');
+
+      // Refresh credit balance in AppBar
+      refresh();
+
+      setTimeout(() => setJustClaimed(false), 5000);
+    } catch (error) {
+      console.error('Error claiming credits:', error);
+      showToast('เกิดข้อผิดพลาดในการรับเครดิต', 'error');
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  if (authLoading || profileLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <HeartLoader message="กำลังเชื่อมต่อ..." size="lg" />
@@ -101,6 +227,154 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Credit Reward Banner */}
+        {isComplete && !creditsClaimed && (
+          <div className="mt-4 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-xl p-4 flex items-center gap-3">
+            <Gift className="text-[#E63946] flex-shrink-0" size={24} />
+            <div className="flex-1">
+              <p className="font-kanit font-medium text-[#E63946]">โปรไฟล์ครบแล้ว!</p>
+              <p className="text-sm text-gray-500">กดรับ 10 เครดิตฟรีได้เลย</p>
+            </div>
+            <button
+              onClick={handleClaimCredits}
+              disabled={claiming}
+              className="px-4 py-2 bg-[#E63946] text-white rounded-lg font-kanit text-sm hover:bg-red-600 disabled:opacity-50 transition-colors"
+            >
+              {claiming ? 'กำลังรับ...' : 'รับเครดิต'}
+            </button>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {justClaimed && (
+          <div className="mt-4 bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+            <p className="font-kanit font-medium text-green-600">🎉 ได้รับ 10 เครดิตแล้ว!</p>
+          </div>
+        )}
+
+        {/* Editable Profile Section */}
+        <h3 className="font-kanit text-lg font-semibold text-gray-800 mt-8 mb-4">
+          ข้อมูลเพิ่มเติม
+        </h3>
+
+        <div className="bg-white rounded-2xl shadow-md border border-pink-100 p-5 space-y-4">
+          {/* Phone */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <Phone size={16} className="text-pink-400" />
+              เบอร์โทรศัพท์
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="08X-XXX-XXXX"
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          {/* Birthday */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <Cake size={16} className="text-pink-400" />
+              วันเกิด
+            </label>
+            <input
+              type="date"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          {/* Gender */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <User size={16} className="text-pink-400" />
+              เพศ
+            </label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value as '' | 'male' | 'female' | 'other')}
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            >
+              <option value="">เลือก...</option>
+              <option value="male">ชาย</option>
+              <option value="female">หญิง</option>
+              <option value="other">อื่นๆ</option>
+            </select>
+          </div>
+
+          {/* Job */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <Briefcase size={16} className="text-pink-400" />
+              อาชีพ
+            </label>
+            <input
+              type="text"
+              value={job}
+              onChange={(e) => setJob(e.target.value)}
+              placeholder="เช่น นักเรียน, พนักงานบริษัท"
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            />
+          </div>
+
+          {/* Relationship Status */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <Heart size={16} className="text-pink-400" />
+              สถานะความสัมพันธ์
+            </label>
+            <select
+              value={relationshipStatus}
+              onChange={(e) => setRelationshipStatus(e.target.value as '' | 'single' | 'dating' | 'married' | 'other')}
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            >
+              <option value="">เลือก...</option>
+              <option value="single">โสด</option>
+              <option value="dating">คบหาดูใจ</option>
+              <option value="married">แต่งงาน</option>
+              <option value="other">อื่นๆ</option>
+            </select>
+          </div>
+
+          {/* Occasion Type */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1 font-kanit">
+              <Gift size={16} className="text-pink-400" />
+              โอกาสที่ต้องการสร้าง
+            </label>
+            <select
+              value={occasionType}
+              onChange={(e) => setOccasionType(e.target.value as '' | 'valentine' | 'anniversary' | 'birthday' | 'other')}
+              className="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            >
+              <option value="">เลือก...</option>
+              <option value="valentine">วาเลนไทน์</option>
+              <option value="anniversary">วันครบรอบ</option>
+              <option value="birthday">วันเกิด</option>
+              <option value="other">อื่นๆ</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#E63946] to-[#FF6B6B] text-white font-kanit font-semibold hover:shadow-lg transition-all disabled:opacity-50"
+        >
+          {saving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+        </button>
+
+        {/* Save Success Message */}
+        {saved && (
+          <p className="text-center text-green-500 text-sm mt-2 font-kanit">
+            บันทึกสำเร็จ!
+          </p>
+        )}
       </div>
     </main>
   );
