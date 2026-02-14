@@ -20,6 +20,7 @@ export default function OnboardingPage() {
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState('');
   const [job, setJob] = useState('');
+  const [customJob, setCustomJob] = useState('');
   const [relationshipStatus, setRelationshipStatus] = useState('');
   const [occasionType, setOccasionType] = useState('');
   const [saving, setSaving] = useState(false);
@@ -82,7 +83,9 @@ export default function OnboardingPage() {
     if (!user) return;
 
     // Validation
-    if (!phone || !birthday || !gender || !job || !relationshipStatus || !occasionType) {
+    const finalJob = job === 'อื่นๆ' ? customJob.trim() : job;
+
+    if (!phone || !birthday || !gender || !finalJob || !relationshipStatus || !occasionType) {
       showToast('กรุณากรอกข้อมูลให้ครบทุกช่องเพื่อรับเครดิตฟรี', 'error');
       return;
     }
@@ -99,7 +102,7 @@ export default function OnboardingPage() {
           phone,
           birthday,
           gender,
-          job,
+          job: finalJob,
           relationshipStatus,
           occasionType,
         }),
@@ -114,7 +117,7 @@ export default function OnboardingPage() {
         phone.trim() !== '' &&
         birthday.trim() !== '' &&
         gender !== '' &&
-        job.trim() !== '' &&
+        finalJob !== '' &&
         relationshipStatus !== '' &&
         occasionType !== '';
 
@@ -255,6 +258,15 @@ export default function OnboardingPage() {
                 </option>
               ))}
             </select>
+            {job === 'อื่นๆ' && (
+              <input
+                type="text"
+                value={customJob}
+                onChange={(e) => setCustomJob(e.target.value)}
+                placeholder="ระบุอาชีพของคุณ..."
+                className="w-full mt-2 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all animate-fade-in-up"
+              />
+            )}
           </div>
 
           {/* Relationship Status */}
