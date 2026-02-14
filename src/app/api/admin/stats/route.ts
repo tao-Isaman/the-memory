@@ -13,7 +13,7 @@ export async function GET() {
 
     // Get total user count - we need to fetch all to count
     const { data: allUsers } = await supabase.auth.admin.listUsers({
-      perPage: 1000,
+      perPage: 10000,
     });
     const totalUsers = allUsers?.users?.length || 0;
 
