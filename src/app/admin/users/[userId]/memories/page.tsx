@@ -21,6 +21,9 @@ interface User {
   user_email: string;
   referral_code: string;
   created_at: string;
+  age: number | null;
+  job: string | null;
+  gender: string | null;
 }
 
 export default function UserMemoriesPage() {
@@ -125,9 +128,26 @@ export default function UserMemoriesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{user?.user_email}</h1>
-          <p className="text-gray-500 mt-1">
-            Referral Code: <code className="bg-gray-100 px-2 py-0.5 rounded text-pink-600">{user?.referral_code}</code>
-          </p>
+          <div className="flex flex-wrap items-center gap-4 mt-2">
+            <p className="text-gray-500 text-sm">
+              Referral: <code className="bg-gray-100 px-2 py-0.5 rounded text-pink-600 font-medium">{user?.referral_code}</code>
+            </p>
+            {user?.age !== null && user?.age !== undefined && (
+              <p className="text-gray-500 text-sm">
+                Age: <span className="font-medium text-gray-800">{user.age}</span>
+              </p>
+            )}
+            {user?.gender && (
+              <p className="text-gray-500 text-sm">
+                Gender: <span className="font-medium text-gray-800 capitalize">{user.gender}</span>
+              </p>
+            )}
+            {user?.job && (
+              <p className="text-gray-500 text-sm">
+                Job: <span className="font-medium text-gray-800">{user.job}</span>
+              </p>
+            )}
+          </div>
         </div>
         <p className="text-gray-500">{filteredMemories.length} of {memories.length} memories</p>
       </div>
@@ -203,10 +223,10 @@ export default function UserMemoriesPage() {
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {memory.paid_at
                     ? new Date(memory.paid_at).toLocaleDateString('th-TH', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })
                     : '-'}
                 </td>
                 <td className="px-6 py-4 text-center">

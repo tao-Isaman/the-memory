@@ -757,6 +757,7 @@ CRON_SECRET=xxx
 - [x] Cartoon generation monitor (success/failure rates, recent generations with thumbnails)
 - [x] Revenue tracking (memory payments + credit purchases in THB)
 - [x] Failed payment visibility
+- [x] View user gender, age, and occupation in memories page
 
 ## Vercel Configuration
 
@@ -785,6 +786,7 @@ Located in `supabase/migrations/`:
 7. `011-add-credits-system.sql` - Credit packages, user_credits, credit_transactions tables
 8. `012-add-cartoon-generations.sql` - Cartoon generations table + cartoon-images storage bucket
 9. `013-add-user-profiles.sql` - User profiles table with RLS, CHECK constraints, auto-update trigger
+10. `014-add-age-function.sql` - Calculate age from birthday helper function
 
 ## Development
 

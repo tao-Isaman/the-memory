@@ -28,12 +28,35 @@ export async function GET(
       .eq('user_id', userId)
       .single();
 
+    // Get user profile for birthday
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('birthday, job, gender')
+      .eq('user_id', userId)
+      .single();
+
+    let age: number | null = null;
+    if (profile?.birthday) {
+      const birthDate = new Date(profile.birthday);
+      const today = new Date();
+      // Calculate age manually if needed, or rely on DB function if we called it
+      // Here we do it in JS for simplicity on the API side since we fetched the date
+      age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+    }
+
     const user = {
       user_id: authUser.id,
       user_email: authUser.email || 'No email',
       referral_code: referral?.referral_code || null,
       referred_by: referral?.referred_by || null,
       created_at: authUser.created_at,
+      age: age,
+      job: profile?.job || null,
+      gender: profile?.gender || null,
     };
 
     // Get all memories for this user with story count
