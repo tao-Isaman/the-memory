@@ -16,6 +16,7 @@ A romantic gift web application (Thai-targeted) where users create memory presen
 - **Image Upload**: Supabase Storage (WebP conversion, 0.85 quality)
 - **QR Code**: react-qrcode-logo
 - **Icons**: Lucide React 0.563.0
+- **Charts**: Recharts 2.15.0
 - **Analytics**: Google Analytics GA4 (G-MZKHDF94QX)
 - **Hosting**: Vercel
 - **Cron Jobs**: Vercel Cron (daily stats update)
@@ -730,6 +731,7 @@ CRON_SECRET=xxx
 - [x] Onboarding page for new users (skippable, redirected after first login)
 - [x] Editable profile page with save functionality
 - [x] Job Dropdown with Thai options (Student, Business Owner, etc.)
+- [x] Custom Job Input for "Other" option
 - [x] Client-side validation alerts for missing profile fields
 - [x] 10 free credits reward for completing profile (idempotent, optimistic lock)
 - [x] Profile completion modal on dashboard (dismissible, localStorage)
@@ -747,7 +749,9 @@ CRON_SECRET=xxx
 - [x] Email-protected access (`NEXT_PUBLIC_ADMIN_EMAIL`)
 - [x] Admin dashboard with comprehensive stats (revenue, credits, cartoons, recent activity)
 - [x] Admin navigation: Users, Referral Claims, Credits, Cartoons
+- [x] User Growth Chart (daily registrations, last 30 days) - Thai localized
 - [x] Users list with search, filters (memories, paid, referral), credit balance column, sorting
+- [x] Profile completion status column in Users list
 - [x] Client-side pagination (20 users per page)
 - [x] View user's memories with story counts
 - [x] View memory details with all stories (all 7 types rendered including question)
