@@ -1,7 +1,7 @@
 # The Memory
 
 ## Project Overview
-A romantic gift web application (Thai-targeted) where users create memory presentations using a **story-based workflow system** to share with loved ones. Users combine text, images, YouTube videos, and PIN protection to create unique experiences for Valentine's Day, anniversaries, and special occasions.
+A **Digital Memory & Emotion Platform** (Thai-targeted) where users create memory presentations using a **story-based workflow system** to share with loved ones. Users combine text, images, YouTube videos, and PIN protection to create unique experiences for all occasions — surprises, anniversaries, birthdays, apologies, long-distance relationships, and family. Positioned year-round with "ของขวัญเซอร์ไพรส์แฟน" as the primary SEO keyword.
 
 ## Tech Stack
 - **Framework**: Next.js 16.1.6 (App Router)
@@ -45,9 +45,9 @@ Users build a memory presentation by creating and arranging **stories**. Each st
 ## User Flows
 
 ### Creator Flow
-1. Sign in with Google → `/login` → OAuth callback
+1. Sign in with Google → `/login` → OAuth callback (optionally from `/use-case/[slug]` with `?usecase` param)
 2. Dashboard → View all memories + Create new
-3. Create/Edit page:
+3. Create/Edit page (theme auto-set if arriving from use case page):
    - Set memory title
    - Add stories (type selection, content input)
    - Reorder via up/down buttons
@@ -102,7 +102,10 @@ src/
 ├── app/
 │   ├── (landing)/              # Marketing landing page
 │   │   ├── layout.tsx          # Metadata + FloatingHearts
-│   │   └── page.tsx            # Features, testimonials, FAQ, animated stats
+│   │   ├── page.tsx            # Hero, features, social proof, use case navigator, FAQ, CTA
+│   │   └── use-case/[slug]/
+│   │       ├── page.tsx        # SSG use case page (generateStaticParams for 6 slugs)
+│   │       └── UseCasePageClient.tsx # Client component: hero, features, prompts, FAQ
 │   ├── (app)/                  # Authenticated app pages (shared AppBar layout)
 │   │   ├── layout.tsx          # AppBar wrapper layout
 │   │   ├── create/page.tsx     # Create/Edit memory page
@@ -185,8 +188,9 @@ src/
 │   ├── PaymentStatus.tsx       # Status badge component
 │   ├── HeartIcon.tsx           # Custom SVG heart
 │   ├── HeartLoader.tsx         # Animated loading spinner
-│   ├── HeartFirework.tsx       # Click-triggered particle animation
-│   ├── FloatingHearts.tsx      # Background decoration (15 hearts)
+│   ├── ThemeSelector.tsx        # 7-theme grid with color dots + mood descriptions
+│   ├── HeartFirework.tsx       # Click-triggered particle animation (5-7 muted hearts)
+│   ├── FloatingHearts.tsx      # Background decoration (10 hearts, 15% opacity)
 │   ├── YouTubeEmbed.tsx        # YouTube player (16:9)
 │   ├── ImageWithLoader.tsx     # Image with loading/error states
 │   ├── AppBar.tsx              # Sticky top bar: logo, credit balance, notification, avatar
@@ -196,12 +200,14 @@ src/
 │   ├── CreditBalanceContext.tsx # Global credit balance state
 │   └── ToastContext.tsx        # Toast notification provider
 ├── data/
-│   └── patch-notes.ts          # Patch notes data (types, versions, items)
+│   ├── patch-notes.ts          # Patch notes data (types, versions, items)
+│   └── use-cases.ts            # 6 use case definitions (slug, theme, copy, SEO, FAQ, prompts)
 ├── hooks/
 │   ├── useAuth.ts              # Auth hook
 │   ├── useCreditBalance.ts     # Credit balance context hook
 │   └── useToast.ts             # Toast notification hook
 ├── lib/
+│   ├── analytics.ts            # GA4 event tracking wrapper (trackEvent, 12 event types)
 │   ├── cartoon.ts              # Cartoon generation CRUD + credit deduction/refund
 │   ├── constants.ts            # App constants (CARTOON_CREDIT_COST = 10, PROFILE_COMPLETION_CREDITS = 10)
 │   ├── credits.ts              # Credit packages, balance, transactions CRUD
@@ -210,6 +216,7 @@ src/
 │   ├── supabase.ts             # Browser client
 │   ├── supabase-server.ts      # Server client (service role)
 │   ├── stripe.ts               # Stripe instance
+│   ├── themes.ts               # 7 theme color palettes + THEME_INFO with moodThai
 │   ├── upload.ts               # Image processing & upload
 │   ├── profile.ts              # User profile CRUD, completion check, credit grant
 │   └── patch-notes.ts          # localStorage-based "last seen version" tracking
@@ -582,8 +589,8 @@ interface CartoonGeneration {
 - **Updates page** (`/updates`) - Timeline view with type badges (feature/improvement/fix/announcement)
 
 ### Animations
-- **HeartFirework** - Click-triggered particle effects (8-12 hearts per click)
-- **FloatingHearts** - 15 background hearts with deterministic positioning
+- **HeartFirework** - Click-triggered particle effects (5-7 hearts per click, muted warm colors)
+- **FloatingHearts** - 10 background hearts with deterministic positioning (opacity 15%)
 - **HeartLoader** - 3-layer orbiting hearts spinner
 - **ImageWithLoader** - Shimmer effect during load, error fallback
 
@@ -607,12 +614,91 @@ interface CartoonGeneration {
 | `spin-slow` | Slow rotation variants |
 | `shake` | Error feedback |
 
+## Theme System
+
+7 memory themes with mood-appropriate color palettes (`src/lib/themes.ts`):
+
+| Theme | Primary Color | Emoji | Mood (Thai) |
+|-------|--------------|-------|-------------|
+| `love` | #E63946 (Red) | `💕` | โรแมนติก อบอุ่น |
+| `friend` | #457B9D (Blue) | `👫` | สดใส เฮฮา |
+| `family` | #2D6A4F (Green) | `👨‍👩‍👧‍👦` | อบอุ่น ผูกพัน |
+| `anniversary` | #C9A96E (Gold) | `💍` | หรูหรา คลาสสิก |
+| `birthday` | #FF8C42 (Orange) | `🎂` | สนุกสนาน สดใส |
+| `apology` | #9B8EC4 (Purple) | `🙏` | อ่อนโยน จริงใจ |
+| `longdistance` | #5BA4CF (Sky Blue) | `✈️` | คิดถึง ห่วงใย |
+
+Type: `MemoryTheme = 'love' | 'friend' | 'family' | 'anniversary' | 'birthday' | 'apology' | 'longdistance'` (in `src/types/memory.ts`)
+
+`getThemeColors(theme)` returns theme colors with fallback to `love` theme.
+
+## Use Case System
+
+6 SEO-optimized use case pages at `/use-case/[slug]` (`src/data/use-cases.ts`):
+
+| Slug | Theme | Thai Title |
+|------|-------|-----------|
+| `surprise-gift` | love | ของขวัญเซอร์ไพรส์แฟน |
+| `anniversary` | anniversary | ของขวัญวันครบรอบ |
+| `birthday` | birthday | อวยพรวันเกิด |
+| `apology` | apology | ขอโทษคนรัก |
+| `long-distance` | longdistance | คิดถึง Long Distance |
+| `family` | family | ขอบคุณครอบครัว |
+
+Each use case has: SEO metadata, sample prompts, FAQ items, CTA text. Pages are statically generated via `generateStaticParams()`.
+
+### Use Case → Create Flow
+1. User clicks use case tile on landing page or visits `/use-case/[slug]`
+2. CTA links to `/login?usecase=[slug]`
+3. Login page stores `usecase` in `sessionStorage` (wrapped in `<Suspense>`)
+4. After OAuth redirect, create page reads `sessionStorage.getItem('pending_usecase')`
+5. Theme auto-set from use case mapping, sessionStorage cleared
+
+## Analytics System
+
+Type-safe GA4 event tracking (`src/lib/analytics.ts`):
+
+```typescript
+trackEvent(event: EventName, params?: Record<string, string>)
+```
+
+| Event | Where | Trigger |
+|-------|-------|---------|
+| `view_home` | Landing page | Mount |
+| `click_usecase_tile` | Landing page | Tile click |
+| `view_usecase_page` | Use case page | Mount |
+| `start_create` | Create page | Mount (new memory) |
+| `complete_create` | Create page | Save success |
+| `view_preview` | Memory viewer | Mount (preview mode) |
+| `start_checkout` | PaymentButton | Before fetch |
+| `payment_success` | Payment success page | Verification |
+| `payment_fail` | Payment cancel page | Mount |
+| `share_link_click` | ShareModal | Share button |
+| `copy_link` | ShareModal | Copy button |
+| `returning_user_session` | Dashboard | Mount (has memories) |
+
+## Color System (globals.css)
+
+Warm neutral palette (rebrand from pink-dominant):
+
+| Variable | Value | Usage |
+|----------|-------|-------|
+| `--background` | `#FFFBF7` | Page backgrounds |
+| `--cream` | `#FFF8F0` | Card backgrounds, badges |
+| `--warm-beige` | `#F5EDE4` | Borders, dividers |
+| `--warm-gray` | `#6B5E57` | Body text |
+| `--warm-white` | `#FFFBF7` | Scrollbar track |
+| `--muted-pink` | `#E8A0B5` | Scrollbar thumb, accents |
+
+Primary button gradient (pink→red) kept as accent. Card shadows use neutral gray instead of pink-tinted.
+
 ## SEO & Structured Data
 
 - Open Graph & Twitter Card meta tags
 - JSON-LD schemas: WebApplication + FAQPage
 - Google Search Console verification
-- Thai keyword targeting for romantic occasions
+- Thai keyword targeting for all occasions (romantic, anniversary, birthday, apology, family)
+- Per-use-case SEO metadata on `/use-case/[slug]` pages
 
 ## Environment Variables
 
@@ -686,20 +772,35 @@ CRON_SECRET=xxx
 - [x] Unseen update notification badge (localStorage-based)
 - [x] Route group `(app)` for shared AppBar layout
 
+### Rebranding (v2.0)
+- [x] Warm neutral color palette (cream/beige instead of pink-dominant)
+- [x] 7 memory themes: love, friend, family, anniversary, birthday, apology, longdistance
+- [x] Theme selector with 7 options + mood descriptions in create page
+- [x] 6 SEO-optimized use case pages (`/use-case/[slug]`) with static generation
+- [x] Use case navigator on landing page (replaces static occasions grid)
+- [x] Use case → login → create flow (sessionStorage through OAuth redirect)
+- [x] Social proof section on landing page (3 testimonials)
+- [x] FAQ accordion on landing page (expandable, includes pricing/security)
+- [x] Trust badges (Shield, Clock icons) on landing page
+- [x] GA4 analytics instrumentation across full conversion funnel (12 events)
+- [x] Softer heart effects (muted colors, fewer particles, lower opacity)
+- [x] Enhanced payment modal copy (clear pricing, urgency messaging)
+
 ### UI/UX
 - [x] Responsive design (mobile-first)
-- [x] Valentine/romantic theme
-- [x] Click-triggered heart fireworks
-- [x] Floating hearts background
+- [x] Warm neutral theme with pink/red accents
+- [x] Click-triggered heart fireworks (muted)
+- [x] Floating hearts background (subtle)
 - [x] Image loading states with shimmer
 - [x] Mobile-optimized PIN numpad
 
 ### SEO & Analytics
 - [x] Custom favicon (heart icon)
 - [x] Open Graph / Twitter Card meta tags
-- [x] JSON-LD structured data
-- [x] Google Analytics GA4
+- [x] JSON-LD structured data (WebApplication + FAQPage)
+- [x] Google Analytics GA4 with custom event tracking
 - [x] Google Search Console
+- [x] Per-use-case SEO metadata and static generation
 
 ### Site Stats
 - [x] Animated counter on landing page hero section
@@ -794,6 +895,7 @@ Located in `supabase/migrations/`:
 8. `012-add-cartoon-generations.sql` - Cartoon generations table + cartoon-images storage bucket
 9. `013-add-user-profiles.sql` - User profiles table with RLS, CHECK constraints, auto-update trigger
 10. `014-add-age-function.sql` - Calculate age from birthday helper function
+11. `015-expand-theme-types.sql` - Expand memories.theme CHECK constraint for 7 themes
 
 ## Development
 
@@ -893,4 +995,4 @@ The `hasUserPaidBefore` function in `src/lib/referral.ts` checks **both** active
 
 ---
 *Project started: 2026-02-01*
-*Last updated: 2026-02-14*
+*Last updated: 2026-02-16*
