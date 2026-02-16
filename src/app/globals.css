@@ -1,12 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFF0F5;
+  --background: #FFFBF7;
   --foreground: #4A1942;
   --primary: #FF6B9D;
   --primary-dark: #E63946;
   --soft-pink: #FFF0F5;
   --rose: #FFB6C1;
+  --cream: #FFF8F0;
+  --warm-beige: #F5EDE4;
+  --warm-gray: #6B5E57;
+  --warm-white: #FFFBF7;
+  --muted-pink: #E8A0B5;
+  --accent-coral: #E8846B;
 }
 
 @theme inline {
@@ -16,6 +22,11 @@
   --color-primary-dark: var(--primary-dark);
   --color-soft-pink: var(--soft-pink);
   --color-rose: var(--rose);
+  --color-cream: var(--cream);
+  --color-warm-beige: var(--warm-beige);
+  --color-warm-gray: var(--warm-gray);
+  --color-warm-white: var(--warm-white);
+  --color-muted-pink: var(--muted-pink);
   /* Font stack: Itim (body), Kanit (headings/UI), Leckerli One (display) */
   --font-sans: var(--font-itim), "Itim", ui-sans-serif, sans-serif;
   --font-mono: var(--font-itim), "Itim", ui-monospace, monospace;
@@ -124,11 +135,11 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #FFF0F5;
+  background: var(--warm-white);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FF6B9D;
+  background: var(--muted-pink);
   border-radius: 4px;
 }
 
@@ -163,7 +174,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background: #FFF0F5;
+  background: #FFF8F0;
   transform: translateY(-2px);
 }
 
@@ -171,14 +182,14 @@ body {
 .memory-card {
   background: white;
   border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(255, 107, 157, 0.15);
-  border: 1px solid rgba(255, 182, 193, 0.5);
+  box-shadow: 0 4px 20px rgba(107, 94, 87, 0.08);
+  border: 1px solid rgba(245, 237, 228, 0.8);
   transition: all 0.3s ease;
 }
 
 .memory-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 30px rgba(255, 107, 157, 0.25);
+  box-shadow: 0 8px 30px rgba(107, 94, 87, 0.12);
 }
 
 /* Input styles - uses CSS variables for theming */

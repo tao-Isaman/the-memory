@@ -21,7 +21,7 @@ interface HeartFireworkProps {
   themeColors?: ThemeColors;
 }
 
-const DEFAULT_COLORS = ['#FF6B9D', '#E63946', '#FFB6C1', '#FF1493', '#FF69B4'];
+const DEFAULT_COLORS = ['#E8A0B5', '#D4888F', '#C9A96E', '#B8A090', '#E8846B'];
 
 export default function HeartFirework({ enabled = true, themeColors }: HeartFireworkProps) {
   // Memoize colors to prevent recreation on every render
@@ -38,7 +38,7 @@ export default function HeartFirework({ enabled = true, themeColors }: HeartFire
 
   const createParticles = useCallback((x: number, y: number) => {
     const newParticles: Particle[] = [];
-    const count = 8 + Math.floor(Math.random() * 5); // 8-12 hearts
+    const count = 5 + Math.floor(Math.random() * 3); // 5-7 hearts
 
     for (let i = 0; i < count; i++) {
       const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;

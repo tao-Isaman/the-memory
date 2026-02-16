@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Tag } from 'lucide-react';
 import HeartIcon from './HeartIcon';
+import { trackEvent } from '@/lib/analytics';
 
 interface PaymentButtonProps {
   memoryId: string;
@@ -55,6 +56,7 @@ export default function PaymentButton({
   const handlePayment = async () => {
     setLoading(true);
     onPaymentStart?.();
+    trackEvent('start_checkout', { memory_id: memoryId });
 
     try {
       const response = await fetch('/api/checkout', {

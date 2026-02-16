@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
@@ -9,6 +9,14 @@ import HeartLoader from '@/components/HeartLoader';
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const useCaseSlug = searchParams.get('usecase');
+    if (useCaseSlug) {
+      sessionStorage.setItem('pending_usecase', useCaseSlug);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!loading && user) {

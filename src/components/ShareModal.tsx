@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { QRCode } from 'react-qrcode-logo';
 import HeartIcon from './HeartIcon';
+import { trackEvent } from '@/lib/analytics';
 import { X, Download, Share2, Copy, Check } from 'lucide-react';
 
 interface ShareModalProps {
@@ -28,6 +29,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
+      trackEvent('copy_link', { memory_id: memoryId });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
@@ -37,6 +39,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
   const handleShare = async () => {
     if (navigator.share) {
       try {
+        trackEvent('share_link_click', { memory_id: memoryId });
         await navigator.share({
           title: memoryTitle,
           text: `ดูความทรงจำ "${memoryTitle}" ที่ฉันสร้างให้คุณ`,

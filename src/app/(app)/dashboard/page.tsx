@@ -14,6 +14,7 @@ import PaymentButton from '@/components/PaymentButton';
 import ProfileCompletionBanner from '@/components/ProfileCompletionBanner';
 import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon } from 'lucide-react';
 import CartoonCreator from '@/components/CartoonCreator';
+import { trackEvent } from '@/lib/analytics';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -35,6 +36,11 @@ export default function DashboardPage() {
     const data = await getMemories(user.id);
     setMemories(data);
     setLoading(false);
+
+    // Track returning user session if they have existing memories
+    if (data.length > 0) {
+      trackEvent('returning_user_session');
+    }
   }, [user]);
 
   useEffect(() => {

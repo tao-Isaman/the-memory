@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import HeartIcon from '@/components/HeartIcon';
@@ -8,11 +8,16 @@ import HeartLoader from '@/components/HeartLoader';
 import PaymentButton from '@/components/PaymentButton';
 import { useAuth } from '@/hooks/useAuth';
 import { XCircle } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 function PaymentCancelContent() {
   const searchParams = useSearchParams();
   const memoryId = searchParams.get('memory_id');
   const { user } = useAuth();
+
+  useEffect(() => {
+    trackEvent('payment_fail');
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">

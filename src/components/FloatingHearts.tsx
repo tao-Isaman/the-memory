@@ -27,7 +27,7 @@ export default function FloatingHearts() {
   // Generate hearts with deterministic values using useMemo
   const hearts = useMemo(() => {
     const generatedHearts: Heart[] = [];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 10; i++) {
       generatedHearts.push({
         id: i,
         left: seededRandom(i * 1) * 100,
@@ -49,7 +49,7 @@ export default function FloatingHearts() {
       {hearts.map((heart) => (
         <div
           key={heart.id}
-          className="absolute text-pink-200 opacity-30"
+          className="absolute text-pink-200 opacity-15"
           style={{
             left: `${heart.left}%`,
             top: `${heart.top}%`,

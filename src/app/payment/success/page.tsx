@@ -7,6 +7,7 @@ import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
 import { CheckCircle, Coins } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -48,6 +49,7 @@ function PaymentSuccessContent() {
             setCreditsAdded(data.credits || 0);
           }
           setStatus('success');
+          trackEvent('payment_success');
         } else if (data.status === 'pending') {
           setStatus('pending');
         } else {

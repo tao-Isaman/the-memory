@@ -8,7 +8,7 @@ interface ThemeSelectorProps {
   onChange: (theme: MemoryTheme) => void;
 }
 
-const themeOptions: MemoryTheme[] = ['love', 'friend', 'family'];
+const themeOptions: MemoryTheme[] = ['love', 'anniversary', 'birthday', 'apology', 'family', 'friend', 'longdistance'];
 
 export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps) {
   return (
@@ -16,7 +16,7 @@ export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps
       <label className="block text-sm font-medium text-gray-700">
         เลือกธีมสี
       </label>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {themeOptions.map((theme) => {
           const colors = THEMES[theme];
           const info = THEME_INFO[theme];
@@ -60,6 +60,9 @@ export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps
                   style={{ color: isSelected ? colors.dark : '#374151' }}
                 >
                   {info.nameThai}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {info.moodThai}
                 </p>
               </div>
 

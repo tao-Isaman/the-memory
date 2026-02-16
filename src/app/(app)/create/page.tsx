@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
+import { getUseCaseBySlug } from '@/data/use-cases';
+import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import HeartIcon from '@/components/HeartIcon';
@@ -60,6 +62,19 @@ function CreatePageContent() {
           setIsEditMode(true);
           setOriginalCreatedAt(existingMemory.createdAt);
           setSavedMemoryStatus(existingMemory.status);
+        }
+      } else {
+        // Check for use case from sessionStorage (set by login page)
+        const pendingUseCase = sessionStorage.getItem('pending_usecase');
+        if (pendingUseCase) {
+          sessionStorage.removeItem('pending_usecase');
+          const useCase = getUseCaseBySlug(pendingUseCase);
+          if (useCase) {
+            setTheme(useCase.theme);
+            trackEvent('start_create', { use_case: pendingUseCase, theme: useCase.theme });
+          }
+        } else {
+          trackEvent('start_create');
         }
       }
       setInitialLoading(false);
@@ -134,6 +149,7 @@ function CreatePageContent() {
     await saveMemory(memory, user.id);
     setSaving(false);
     setSavedMemoryId(memoryId);
+    trackEvent('complete_create', { memory_id: memoryId, theme });
 
     // Show payment prompt for new/pending memories, share modal for active ones
     if (currentStatus === 'active') {
@@ -322,13 +338,19 @@ function CreatePageContent() {
           >
             <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" color={themeColors.primary} />
             <h2
-              className="font-kanit text-2xl font-bold mb-4"
+              className="font-kanit text-2xl font-bold mb-2"
               style={{ color: themeColors.dark }}
             >
-              บันทึกสำเร็จ!
+              คุณทำใกล้เสร็จแล้ว!
             </h2>
-            <p className="text-gray-600 mb-6">
-              ความทรงจำของคุณถูกบันทึกแล้ว ชำระเงินเพื่อเปิดใช้งานและแชร์ให้คนพิเศษของคุณได้เลย
+            <p className="text-gray-600 mb-2">
+              เหลืออีกขั้นเดียวเพื่อส่งให้คนพิเศษของคุณ
+            </p>
+            <p className="text-sm text-gray-500 mb-2">
+              ลิงก์นี้จะเป็นของขวัญที่เขาเปิดดูได้ตลอด
+            </p>
+            <p className="text-sm font-medium text-[#E63946] mb-6">
+              เพียง 99 บาท — เก็บได้ตลอด ส่งกี่ครั้งก็ได้
             </p>
             <div className="flex flex-col gap-3">
               <PaymentButton

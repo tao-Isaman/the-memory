@@ -51,7 +51,7 @@ export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStor
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 
-export type MemoryTheme = 'love' | 'friend' | 'family';
+export type MemoryTheme = 'love' | 'friend' | 'family' | 'anniversary' | 'birthday' | 'apology' | 'longdistance';
 
 export interface Memory {
   id: string;

@@ -12,6 +12,7 @@ import StoryViewer from '@/components/StoryViewer';
 import PasswordGate from '@/components/PasswordGate';
 import PaymentButton from '@/components/PaymentButton';
 import { Eye } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -49,11 +50,16 @@ export default function MemoryViewerPage({ params }: PageProps) {
         if (sortedStories.length > 0 && sortedStories[0].type === 'question') {
           setIsQuestionLocked(true);
         }
+
+        // Track preview mode for unpaid memories
+        if (foundMemory.status !== 'active' && user && foundMemory.userId === user.id) {
+          trackEvent('view_preview', { memory_id: id });
+        }
       }
       setLoading(false);
     }
     loadMemory();
-  }, [id]);
+  }, [id, user]);
 
   const handleNext = useCallback(() => {
     if (!sortedMemory) return;
@@ -217,10 +223,15 @@ export default function MemoryViewerPage({ params }: PageProps) {
       {isPreviewMode && (
         <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-3">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-yellow-800">
-              <Eye size={18} />
-              <span className="text-sm font-medium">
-                โหมดตัวอย่าง - ชำระเงินเพื่อแชร์ให้คนพิเศษของคุณ
+            <div className="flex flex-col gap-1 text-yellow-800">
+              <div className="flex items-center gap-2">
+                <Eye size={18} />
+                <span className="text-sm font-medium">
+                  นี่คือตัวอย่างที่คนพิเศษของคุณจะเห็น
+                </span>
+              </div>
+              <span className="text-xs">
+                เปิดใช้งานเพียง 99 บาท เพื่อส่งลิงก์ให้เขาได้เลย
               </span>
             </div>
             <PaymentButton

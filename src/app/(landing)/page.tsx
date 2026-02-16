@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import HeartIcon from '@/components/HeartIcon';
+import { trackEvent } from '@/lib/analytics';
+import { USE_CASES } from '@/data/use-cases';
 import {
   Camera,
   MessageCircleHeart,
@@ -13,17 +15,14 @@ import {
   Sparkles,
   Gift,
   PartyPopper,
-  Heart,
-  Cake,
-  Gem,
-  GraduationCap,
-  Baby,
-  Plane,
-  Flower2,
-  Star,
   Users,
   BookHeart,
   Layers,
+  Puzzle,
+  MousePointerClick,
+  Shield,
+  Clock,
+  ChevronDown,
 } from 'lucide-react';
 
 interface SiteStats {
@@ -104,9 +103,11 @@ export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState<SiteStats | null>(null);
   const [startCountAnimation, setStartCountAnimation] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     setIsVisible(true);
+    trackEvent('view_home');
 
     // Fetch site stats
     fetch('/api/stats')
@@ -114,7 +115,6 @@ export default function LandingPage() {
       .then((data) => {
         if (data.users !== undefined) {
           setStats(data);
-          // Delay animation start for better effect
           setTimeout(() => setStartCountAnimation(true), 500);
         }
       })
@@ -122,9 +122,9 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFF0F5] via-white to-[#FFF0F5]">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFFBF7] via-white to-[#FFF8F0]">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFBF7]/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <HeartIcon size={28} className="animate-pulse-heart" />
@@ -153,10 +153,10 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
         {/* Animated Background Hearts */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(12)].map((_, i) => (
             <div
               key={i}
-              className="absolute animate-float opacity-10"
+              className="absolute animate-float opacity-[0.06]"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -164,7 +164,7 @@ export default function LandingPage() {
                 animationDuration: `${4 + Math.random() * 4}s`,
               }}
             >
-              <HeartIcon size={20 + Math.random() * 40} color="#FF6B9D" />
+              <HeartIcon size={20 + Math.random() * 40} color="#E8A0B5" />
             </div>
           ))}
         </div>
@@ -176,7 +176,7 @@ export default function LandingPage() {
             }`}
           >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-100 rounded-full text-sm text-[#E63946] mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8F0] border border-[#F5EDE4] rounded-full text-sm text-[#E63946] mb-6">
               <HeartIcon size={16} filled />
               <span>เว็บเซอร์ไพรส์แฟน อันดับ 1 ในไทย</span>
             </div>
@@ -184,29 +184,31 @@ export default function LandingPage() {
             {/* Main Headline */}
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               <span className="bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] bg-clip-text text-transparent">
-                เว็บเซอร์ไพรส์แฟน
+                ของขวัญเซอร์ไพรส์แฟน
               </span>
               <br />
-              <span className="text-[#4A1942]">สร้างของขวัญที่หัวใจละลาย</span>
+              <span className="text-[#4A1942] text-3xl md:text-5xl">
+                ส่งความรู้สึกผ่านความทรงจำที่สร้างเอง
+              </span>
             </h1>
 
             {/* Stats below headline */}
             {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
-              <div className="inline-flex items-center justify-center gap-6 md:gap-10 mb-8 bg-white/50 backdrop-blur-sm rounded-2xl px-8 py-4">
+              <div className="inline-flex items-center justify-center gap-6 md:gap-10 mb-8 bg-white/60 backdrop-blur-sm rounded-2xl px-8 py-4 border border-gray-100">
                 <AnimatedStat
                   value={stats.users}
                   label="ผู้ใช้งาน"
                   icon={Users}
                   startAnimation={startCountAnimation}
                 />
-                <div className="h-12 w-px bg-pink-200" />
+                <div className="h-12 w-px bg-gray-200" />
                 <AnimatedStat
                   value={stats.memories}
                   label="ความทรงจำ"
                   icon={BookHeart}
                   startAnimation={startCountAnimation}
                 />
-                <div className="h-12 w-px bg-pink-200" />
+                <div className="h-12 w-px bg-gray-200" />
                 <AnimatedStat
                   value={stats.stories}
                   label="เรื่องราว"
@@ -217,17 +219,18 @@ export default function LandingPage() {
             )}
 
             {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              สร้างของขวัญออนไลน์สุดโรแมนติก รวมรูปภาพ ข้อความ และเพลงที่มีความหมาย
-              <br className="hidden md:block" />
-              เหมาะสำหรับ<strong>วันวาเลนไทน์ วันครบรอบ วันเกิดแฟน</strong>
+            <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-2xl mx-auto leading-relaxed">
+              รวมรูปภาพ ข้อความ และเพลงที่มีความหมาย ไว้ในลิงก์เดียว
+            </p>
+            <p className="text-lg text-[#6B5E57] mb-10">
+              เหมาะกับทุกโอกาส: <strong>วันครบรอบ วันเกิด ขอโทษ คิดถึง ครอบครัว</strong>
             </p>
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/login"
-                className="btn-primary text-lg py-4 px-10 flex items-center gap-3 shadow-2xl shadow-pink-500/30"
+                className="btn-primary text-lg py-4 px-10 flex items-center gap-3 shadow-2xl shadow-pink-500/20"
               >
                 <span>เริ่มสร้างฟรี</span>
                 <HeartIcon size={20} filled />
@@ -240,9 +243,20 @@ export default function LandingPage() {
               </a>
             </div>
 
-            {/* Trust Badge */}
-            <p className="mt-8 text-sm text-gray-500">
-              ✓ ฟรี ✓ ไม่ต้องติดตั้งแอป ✓ ใช้งานง่าย ✓ ส่งลิงก์ได้ทันที
+            {/* Trust Badges */}
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-[#6B5E57]">
+              <span className="flex items-center gap-1"><Shield size={14} className="text-green-500" /> ปลอดภัย 100%</span>
+              <span>&#183;</span>
+              <span>ไม่ต้องติดตั้งแอป</span>
+              <span>&#183;</span>
+              <span>ใช้งานง่าย</span>
+              <span>&#183;</span>
+              <span className="flex items-center gap-1"><Clock size={14} className="text-[#E63946]" /> เก็บไว้ดูได้ตลอด</span>
+            </div>
+
+            {/* Pricing hint */}
+            <p className="mt-4 text-sm text-gray-400">
+              สร้างฟรี | เปิดใช้งานเพียง <span className="font-bold text-[#E63946]">99 บาท</span>
             </p>
           </div>
         </div>
@@ -253,38 +267,37 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              ฟีเจอร์เว็บเซอร์ไพรส์แฟนของเรา
+              สร้างของขวัญได้หลากหลาย
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              สร้างของขวัญให้แฟนได้หลากหลายรูปแบบ เลือกรูปแบบที่คุณต้องการ และจัดเรียงตามลำดับที่คุณอยากให้เห็น
+              เลือกรูปแบบที่คุณต้องการ และจัดเรียงตามลำดับที่คุณอยากให้เห็น
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature Cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 icon: Camera,
                 title: 'รูปภาพ',
-                description: 'อัพโหลดรูปความทรงจำพิเศษ พร้อมคำบรรยายน่ารักๆ',
+                description: 'อัพโหลดรูปความทรงจำพิเศษ พร้อมคำบรรยาย',
                 color: 'from-pink-500 to-rose-500',
               },
               {
                 icon: MessageCircleHeart,
                 title: 'ข้อความจากใจ',
-                description: 'เขียนข้อความที่อยากบอก ให้คนพิเศษได้อ่าน',
+                description: 'เขียนข้อความที่อยากบอกให้คนพิเศษได้อ่าน',
                 color: 'from-rose-500 to-red-500',
               },
               {
                 icon: Music,
                 title: 'เพลงประกอบ',
-                description: 'เพิ่มเพลงจาก YouTube ที่มีความหมายพิเศษ',
+                description: 'เพิ่มเพลงจาก YouTube ที่มีความหมาย',
                 color: 'from-red-500 to-pink-500',
               },
               {
                 icon: Lock,
                 title: 'รหัสลับ',
-                description: 'ใส่รหัสผ่านเพื่อสร้างความตื่นเต้นก่อนเปิดดู',
+                description: 'ใส่รหัส PIN สร้างความตื่นเต้นก่อนเปิดดู',
                 color: 'from-pink-500 to-purple-500',
               },
               {
@@ -294,25 +307,37 @@ export default function LandingPage() {
                 color: 'from-purple-500 to-pink-500',
               },
               {
+                icon: MousePointerClick,
+                title: 'สแครชการ์ด',
+                description: 'ขูดเพื่อเปิดรูปลับ สร้างเซอร์ไพรส์สุดพิเศษ',
+                color: 'from-amber-500 to-orange-500',
+              },
+              {
+                icon: Puzzle,
+                title: 'คำถามทายใจ',
+                description: 'ตั้งคำถามให้ตอบถูกก่อนดูเนื้อหาถัดไป',
+                color: 'from-violet-500 to-purple-500',
+              },
+              {
                 icon: Share2,
                 title: 'แชร์ได้ทันที',
                 description: 'ส่งลิงก์หรือ QR Code ให้คนพิเศษได้เลย',
-                color: 'from-pink-500 to-rose-500',
+                color: 'from-sky-500 to-blue-500',
               },
             ].map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div
                   key={index}
-                  className="group relative bg-white rounded-2xl p-8 shadow-lg shadow-pink-100 hover:shadow-xl hover:shadow-pink-200 transition-all duration-300 hover:-translate-y-2 border border-pink-50"
+                  className="group relative bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 hover:shadow-lg hover:shadow-gray-200 transition-all duration-300 hover:-translate-y-1 border border-gray-100"
                 >
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                    <IconComponent size={32} className="text-white" />
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <IconComponent size={28} className="text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-[#4A1942] mb-3">
+                  <h3 className="text-lg font-bold text-[#4A1942] mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-500 text-sm">
                     {feature.description}
                   </p>
                 </div>
@@ -322,15 +347,51 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Social Proof Section */}
+      <section className="py-20 bg-[#FFFBF7]">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#4A1942] mb-4 text-center">
+            คนใช้จริง พูดจริง
+          </h2>
+          <p className="text-gray-500 text-center mb-12">
+            เสียงจากผู้ใช้ที่สร้างความทรงจำให้คนสำคัญ
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: 'แฟนเปิดดูแล้วร้องไห้เลย ดีใจมากที่ลงมือทำเอง',
+                occasion: 'วันวาเลนไทน์',
+                color: 'border-pink-200',
+              },
+              {
+                quote: 'ใช้เวลาไม่ถึง 10 นาทีก็เสร็จ ผลลัพธ์ออกมาน่ารักมาก',
+                occasion: 'วันครบรอบ',
+                color: 'border-amber-200',
+              },
+              {
+                quote: 'ส่งให้แม่ตอนวันเกิด แม่ดีใจมากเลย บอกว่าเก็บไว้ดูตลอด',
+                occasion: 'วันเกิดแม่',
+                color: 'border-blue-200',
+              },
+            ].map((testimonial, index) => (
+              <div key={index} className={`bg-white p-6 rounded-2xl shadow-sm border ${testimonial.color}`}>
+                <p className="text-gray-600 mb-4 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
+                <div className="text-sm text-gray-400">{testimonial.occasion}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-gradient-to-b from-[#FFF0F5] to-white">
+      <section id="how-it-works" className="py-24 bg-gradient-to-b from-white to-[#FFF8F0]">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              วิธีใช้เว็บเซอร์ไพรส์แฟน
+              3 ขั้นตอนง่ายๆ
             </h2>
             <p className="text-gray-600 text-lg">
-              สร้างของขวัญให้แฟนได้ง่ายๆ ภายใน 3 ขั้นตอน ไม่กี่นาทีก็เสร็จ
+              สร้างของขวัญได้ง่ายๆ ไม่กี่นาทีก็เสร็จ
             </p>
           </div>
 
@@ -339,13 +400,13 @@ export default function LandingPage() {
               {
                 step: '1',
                 title: 'สร้างความทรงจำใหม่',
-                description: 'ตั้งชื่อและเริ่มเพิ่มเนื้อหาที่คุณต้องการ',
+                description: 'ตั้งชื่อ เลือกธีม และเริ่มเพิ่มเนื้อหาที่คุณต้องการ',
                 icon: Sparkles,
               },
               {
                 step: '2',
                 title: 'เพิ่มเรื่องราวความทรงจำ',
-                description: 'ใส่รูปภาพ ข้อความ เพลง และรหัสผ่านตามที่ต้องการ',
+                description: 'ใส่รูปภาพ ข้อความ เพลง รหัสลับ ตามที่ต้องการ',
                 icon: Gift,
               },
               {
@@ -360,13 +421,13 @@ export default function LandingPage() {
                 <div key={index} className="relative text-center">
                   {/* Connector Line */}
                   {index < 2 && (
-                    <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#FF6B9D] to-[#E63946] opacity-30" />
+                    <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#FF6B9D] to-[#E63946] opacity-20" />
                   )}
 
                   {/* Step Number */}
                   <div className="relative inline-flex items-center justify-center w-32 h-32 mb-6">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B9D] to-[#E63946] rounded-full opacity-10 animate-pulse" />
-                    <div className="relative w-24 h-24 bg-white rounded-full shadow-lg shadow-pink-200 flex items-center justify-center">
+                    <div className="relative w-24 h-24 bg-white rounded-full shadow-md shadow-gray-200 flex items-center justify-center">
                       <IconComponent size={48} className="text-[#E63946]" />
                     </div>
                     <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-[#FF6B9D] to-[#E63946] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
@@ -384,89 +445,104 @@ export default function LandingPage() {
               );
             })}
           </div>
+
+          {/* Pricing mention */}
+          <p className="mt-12 text-center text-gray-500">
+            สร้างฟรี ดูตัวอย่างฟรี | เปิดใช้งานเพียง <span className="font-bold text-[#E63946]">99 บาท</span> — เก็บได้ตลอด ส่งกี่ครั้งก็ได้
+          </p>
         </div>
       </section>
 
-      {/* Use Cases Section */}
-      <section className="py-24 bg-white" id="occasions">
+      {/* Use Case Navigator */}
+      <section className="py-24 bg-white" id="use-cases">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              โอกาสที่เหมาะกับการเซอร์ไพรส์แฟน
+              สร้างความทรงจำสำหรับโอกาสไหน?
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              ไม่ว่าจะเป็นของขวัญวันวาเลนไทน์ ของขวัญวันครบรอบ หรือของขวัญวันเกิดแฟน เว็บเซอร์ไพรส์แฟนของเราเหมาะกับทุกโอกาส
+              เลือกโอกาสที่ตรงกับคุณ แล้วเริ่มสร้างของขวัญได้เลย
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Heart, text: 'วันวาเลนไทน์', color: 'text-rose-500' },
-              { icon: Cake, text: 'วันเกิด', color: 'text-pink-500' },
-              { icon: Gem, text: 'วันครบรอบ', color: 'text-purple-500' },
-              { icon: GraduationCap, text: 'วันรับปริญญา', color: 'text-indigo-500' },
-              { icon: Baby, text: 'ต้อนรับสมาชิกใหม่', color: 'text-pink-400' },
-              { icon: Plane, text: 'ก่อนเดินทางไกล', color: 'text-sky-500' },
-              { icon: Flower2, text: 'ขอบคุณคนพิเศษ', color: 'text-rose-400' },
-              { icon: Star, text: 'หรือวันธรรมดาที่พิเศษ', color: 'text-amber-500' },
-            ].map((item, index) => {
-              const IconComponent = item.icon;
-              return (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-pink-50 to-white border border-pink-100 hover:shadow-lg hover:shadow-pink-100 transition-all"
-                >
-                  <IconComponent size={28} className={item.color} />
-                  <span className="text-[#4A1942] font-medium">{item.text}</span>
-                </div>
-              );
-            })}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {USE_CASES.map((useCase) => (
+              <Link
+                key={useCase.slug}
+                href={`/use-case/${useCase.slug}`}
+                onClick={() => trackEvent('click_usecase_tile', { use_case: useCase.slug })}
+                className="group p-6 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300"
+              >
+                <span className="text-4xl mb-4 block">{useCase.emoji}</span>
+                <h3 className="text-xl font-bold text-[#4A1942] mb-2 group-hover:text-[#E63946] transition-colors">
+                  {useCase.titleThai}
+                </h3>
+                <p className="text-gray-500 text-sm">{useCase.subtitleThai}</p>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-[#FFF0F5]" id="faq">
+      <section className="py-24 bg-gradient-to-b from-white to-[#FFF8F0]" id="faq">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
               คำถามที่พบบ่อย
             </h2>
             <p className="text-gray-600 text-lg">
-              เกี่ยวกับเว็บเซอร์ไพรส์แฟน The Memory
+              เกี่ยวกับ The Memory
             </p>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {[
               {
-                q: "เว็บเซอร์ไพรส์แฟน The Memory คืออะไร?",
-                a: "The Memory คือเว็บไซต์สำหรับสร้างของขวัญออนไลน์ให้แฟน คุณสามารถรวมรูปภาพ ข้อความ เพลง และรหัสลับ ไว้ในที่เดียว แล้วส่งลิงก์หรือ QR Code ให้คนพิเศษของคุณได้เลย เหมาะสำหรับวันวาเลนไทน์ วันครบรอบ วันเกิด หรือโอกาสพิเศษอื่นๆ"
+                q: "The Memory คืออะไร?",
+                a: "The Memory คือแพลตฟอร์มสำหรับสร้างความทรงจำออนไลน์ส่งให้คนสำคัญ คุณสามารถรวมรูปภาพ ข้อความ เพลง และรหัสลับ ไว้ในลิงก์เดียว แล้วส่งให้คนที่คุณรักได้ทันที เหมาะกับทุกโอกาส ไม่ว่าจะเป็นเซอร์ไพรส์แฟน วันครบรอบ วันเกิด ขอโทษ หรือบอกรักครอบครัว"
               },
               {
-                q: "ใช้งานเว็บเซอร์ไพรส์แฟนยากไหม?",
-                a: "ไม่ยากเลย! แค่ 3 ขั้นตอนง่ายๆ คือ 1) สร้างความทรงจำใหม่ 2) เพิ่มรูปภาพ ข้อความ หรือเพลง 3) แชร์ลิงก์ให้แฟน ไม่ต้องติดตั้งแอป ใช้งานผ่านเว็บบราวเซอร์ได้เลย"
+                q: "ใช้งานยากไหม? ใช้เวลานานไหม?",
+                a: "ไม่ยากเลย! แค่ 3 ขั้นตอนง่ายๆ: 1) สร้างความทรงจำใหม่ 2) เพิ่มรูปภาพ ข้อความ หรือเพลง 3) แชร์ลิงก์ ไม่ต้องติดตั้งแอป ใช้เวลาไม่ถึง 5 นาทีก็เสร็จ"
               },
               {
-                q: "เว็บเซอร์ไพรส์แฟนนี้ฟรีไหม?",
-                a: "คุณสามารถสร้างความทรงจำได้ฟรี และดูตัวอย่างก่อนได้ เมื่อพอใจแล้วค่อยชำระเงินเพื่อเปิดใช้งานและแชร์ให้คนพิเศษของคุณ"
+                q: "ราคาเท่าไร? สร้างฟรีได้ไหม?",
+                a: "คุณสามารถสร้างความทรงจำได้ฟรี และดูตัวอย่างก่อนได้ เมื่อพอใจแล้วค่อยชำระเงินเพียง 99 บาท เพื่อเปิดใช้งานและแชร์ให้คนพิเศษของคุณ ลิงก์เก็บไว้ดูได้ตลอด ส่งกี่ครั้งก็ได้"
               },
               {
-                q: "ของขวัญวันวาเลนไทน์แบบไหนที่เหมาะกับเว็บนี้?",
-                a: "เหมาะมากสำหรับคนที่อยากเซอร์ไพรส์แฟนด้วยของขวัญที่มีความหมาย เช่น รวมรูปภาพความทรงจำตั้งแต่วันแรกที่เจอกัน เพิ่มข้อความบอกรัก ใส่เพลงที่เคยฟังด้วยกัน และล็อคด้วยรหัสลับที่มีแค่คุณสองคนรู้"
+                q: "ชำระเงินปลอดภัยไหม?",
+                a: "ปลอดภัย 100% เราใช้ระบบชำระเงิน Stripe ซึ่งเป็นมาตรฐานเดียวกับ Shopify, Amazon และบริษัทระดับโลก รองรับบัตรเครดิต/เดบิต และ PromptPay"
               },
               {
-                q: "สามารถใส่รหัสผ่านล็อคของขวัญได้ไหม?",
-                a: "ได้ครับ! คุณสามารถใส่รหัส PIN 6 หลักเพื่อล็อคเนื้อหา ทำให้แฟนต้องใส่รหัสก่อนถึงจะเห็นเนื้อหาถัดไป สร้างความตื่นเต้นและความพิเศษให้ของขวัญของคุณ"
+                q: "คนที่ได้รับลิงก์ต้องสมัครสมาชิกไหม?",
+                a: "ไม่ต้องเลย! แค่กดลิงก์ก็เปิดดูได้ทันที ใช้ได้ทั้งมือถือและคอมพิวเตอร์ ไม่ต้องติดตั้งแอป ไม่ต้องสมัครสมาชิก"
+              },
+              {
+                q: "ใส่รหัสผ่านล็อคได้ไหม?",
+                a: "ได้ครับ! คุณสามารถใส่รหัส PIN 6 หลักเพื่อล็อคเนื้อหา ทำให้คนพิเศษต้องใส่รหัสก่อนถึงจะเห็นเนื้อหาถัดไป สร้างความตื่นเต้นและความพิเศษ"
               },
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-lg shadow-pink-100 border border-pink-50">
-                <h3 className="text-lg font-bold text-[#4A1942] mb-3">
-                  {faq.q}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {faq.a}
-                </p>
+              <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                  className="w-full p-6 text-left flex items-center justify-between gap-4"
+                >
+                  <h3 className="text-lg font-bold text-[#4A1942]">
+                    {faq.q}
+                  </h3>
+                  <ChevronDown
+                    size={20}
+                    className={`text-gray-400 shrink-0 transition-transform duration-200 ${openFaq === index ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {openFaq === index && (
+                  <div className="px-6 pb-6">
+                    <p className="text-gray-600 leading-relaxed">
+                      {faq.a}
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -477,7 +553,7 @@ export default function LandingPage() {
       <section className="py-24 bg-gradient-to-br from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          {[...Array(30)].map((_, i) => (
+          {[...Array(20)].map((_, i) => (
             <HeartIcon
               key={i}
               size={40 + Math.random() * 60}
@@ -493,16 +569,19 @@ export default function LandingPage() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
           <h2 className="text-4xl md:text-6xl font-bold mb-6">
-            พร้อมเซอร์ไพรส์แฟนหรือยัง?
+            พร้อมส่งความรู้สึกให้คนสำคัญหรือยัง?
           </h2>
-          <p className="text-xl md:text-2xl mb-10 opacity-90">
-            เริ่มสร้างของขวัญให้แฟนได้เลย ฟรี ไม่มีค่าใช้จ่าย
+          <p className="text-xl md:text-2xl mb-4 opacity-90">
+            เริ่มสร้างความทรงจำได้เลย ใช้เวลาไม่ถึง 5 นาที
+          </p>
+          <p className="text-lg mb-10 opacity-75">
+            สร้างฟรี — จ่ายเมื่อพร้อมแชร์
           </p>
           <Link
             href="/login"
-            className="inline-flex items-center gap-3 bg-white text-[#E63946] font-bold text-lg py-4 px-10 rounded-full hover:bg-pink-50 transition-colors shadow-2xl"
+            className="inline-flex items-center gap-3 bg-white text-[#E63946] font-bold text-lg py-4 px-10 rounded-full hover:bg-[#FFF8F0] transition-colors shadow-2xl"
           >
-            <span>เริ่มเซอร์ไพรส์แฟนเลย</span>
+            <span>เริ่มสร้างเลย</span>
             <HeartIcon size={24} color="#E63946" />
           </Link>
         </div>
@@ -517,7 +596,7 @@ export default function LandingPage() {
               <span className="text-xl font-bold">The Memory</span>
             </div>
             <p className="text-pink-200 text-sm">
-              เว็บเซอร์ไพรส์แฟน สร้างของขวัญออนไลน์ด้วย <HeartIcon size={14} color="#FF6B9D" className="inline-block mx-1" />
+              แพลตฟอร์มสร้างความทรงจำออนไลน์ให้คนสำคัญ
             </p>
             <div className="flex items-center gap-6 text-sm text-pink-200">
               <Link href="/login" className="hover:text-white transition-colors">
@@ -526,18 +605,40 @@ export default function LandingPage() {
               <a href="#features" className="hover:text-white transition-colors">
                 ฟีเจอร์
               </a>
-              <a href="#how-it-works" className="hover:text-white transition-colors">
-                วิธีใช้งาน
+              <a href="#use-cases" className="hover:text-white transition-colors">
+                โอกาส
+              </a>
+              <a href="#faq" className="hover:text-white transition-colors">
+                คำถาม
               </a>
             </div>
           </div>
-          {/* SEO Footer Text */}
-          <div className="border-t border-pink-900 pt-8 text-center">
+
+          {/* Use case links */}
+          <div className="border-t border-pink-900/50 pt-6 pb-4">
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-pink-300">
+              {USE_CASES.map((uc) => (
+                <Link
+                  key={uc.slug}
+                  href={`/use-case/${uc.slug}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {uc.titleThai}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Trust & SEO Footer */}
+          <div className="border-t border-pink-900/50 pt-6 text-center">
+            <p className="text-pink-300 text-sm mb-2">
+              ชำระเงินปลอดภัยผ่าน Stripe | สร้างง่าย ส่งลิงก์ได้ทันที | เก็บไว้ดูได้ตลอด
+            </p>
             <p className="text-pink-300 text-sm mb-4">
-              The Memory - เว็บเซอร์ไพรส์แฟน สร้างของขวัญวันวาเลนไทน์ ของขวัญวันครบรอบ ของขวัญวันเกิดแฟน ออนไลน์
+              The Memory - ของขวัญเซอร์ไพรส์แฟน สร้างความทรงจำออนไลน์ เหมาะกับวันครบรอบ วันเกิด ขอโทษ คิดถึง ครอบครัว
             </p>
             <p className="text-pink-400 text-xs">
-              ของขวัญให้แฟน | ของขวัญโรแมนติก | ไอเดียเซอร์ไพรส์แฟน | ของขวัญความทรงจำ | สร้างอัลบั้มออนไลน์
+              ของขวัญเซอร์ไพรส์แฟน | ของขวัญวันครบรอบ | ของขวัญวันเกิด | ง้อแฟน | ของขวัญครอบครัว | ของขวัญโรแมนติก | ไอเดียเซอร์ไพรส์แฟน | ของขวัญความทรงจำ
             </p>
           </div>
         </div>
