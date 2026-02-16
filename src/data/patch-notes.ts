@@ -39,6 +39,24 @@ export interface PatchNote {
  */
 export const patchNotes: PatchNote[] = [
   {
+    version: '2.0.0',
+    date: '2026-02-16',
+    title: 'The Memory 2.0 — แพลตฟอร์มความทรงจำสำหรับทุกโอกาส',
+    summary: 'รีแบรนด์ครั้งใหญ่! เพิ่มธีมสีใหม่ 4 แบบ, หน้า Use Case 6 โอกาส, โทนสีอบอุ่นขึ้น พร้อมระบบ Analytics',
+    items: [
+      { type: 'announcement', text: 'รีแบรนด์เป็น "Digital Memory & Emotion Platform" รองรับทุกโอกาส ไม่ใช่แค่วาเลนไทน์' },
+      { type: 'feature', text: 'ธีมสีใหม่ 4 แบบ — วันครบรอบ (ทอง), วันเกิด (ส้ม), ขอโทษ (ม่วง), คิดถึง (ฟ้า) รวมเป็น 7 ธีม' },
+      { type: 'feature', text: 'หน้า Use Case 6 โอกาส — เซอร์ไพรส์แฟน, วันครบรอบ, วันเกิด, ขอโทษ, คิดถึง, ครอบครัว พร้อม SEO' },
+      { type: 'feature', text: 'ส่วน Social Proof บนหน้าแรก — รีวิวจากผู้ใช้จริง' },
+      { type: 'feature', text: 'ระบบ Analytics — ติดตามพฤติกรรมผู้ใช้ตลอด Funnel' },
+      { type: 'improvement', text: 'หน้าแรกใหม่ทั้งหมด — Use Case Navigator, FAQ แบบ Accordion, Trust Badges' },
+      { type: 'improvement', text: 'โทนสีอบอุ่นขึ้น — เปลี่ยนจากชมพูเข้มเป็น Warm Neutral เหมาะกับทุกเพศทุกวัย' },
+      { type: 'improvement', text: 'ตัวเลือกธีมสี 7 แบบพร้อมคำอธิบายอารมณ์ในหน้าสร้าง' },
+      { type: 'improvement', text: 'ข้อความชำระเงินชัดเจนขึ้น — "เพียง 99 บาท เก็บได้ตลอด ส่งกี่ครั้งก็ได้"' },
+      { type: 'improvement', text: 'เอฟเฟกต์หัวใจนุ่มนวลขึ้น — สีอ่อนลง จำนวนน้อยลง' },
+    ],
+  },
+  {
     version: '1.8.0',
     date: '2026-02-14',
     title: 'ระบบโปรไฟล์ผู้ใช้ & Toast',
