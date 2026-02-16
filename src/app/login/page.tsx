@@ -1,14 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 
-export default function LoginPage() {
-  const { user, loading, signInWithGoogle } = useAuth();
-  const router = useRouter();
+function UseCaseCapture() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -17,6 +15,13 @@ export default function LoginPage() {
       sessionStorage.setItem('pending_usecase', useCaseSlug);
     }
   }, [searchParams]);
+
+  return null;
+}
+
+export default function LoginPage() {
+  const { user, loading, signInWithGoogle } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (!loading && user) {
@@ -38,6 +43,9 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center relative z-10">
+      <Suspense fallback={null}>
+        <UseCaseCapture />
+      </Suspense>
       <div className="memory-card p-12 text-center max-w-md w-full mx-4">
         <div className="flex items-center justify-center gap-3 mb-6">
           <HeartIcon size={40} className="animate-pulse-heart" />
