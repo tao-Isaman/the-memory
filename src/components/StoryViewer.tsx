@@ -36,7 +36,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
   switch (story.type) {
     case 'text':
       return (
-        <div className="memory-card p-8 max-w-2xl mx-auto animate-fade-in-up">
+        <div className="viewer-card p-8 max-w-2xl mx-auto">
           <TitleHeader title={story.title} />
           <p className="text-xl text-gray-700 leading-relaxed whitespace-pre-wrap">
             {story.content.text}
@@ -46,7 +46,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
 
     case 'image':
       return (
-        <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
+        <div className="viewer-card p-6 max-w-2xl mx-auto">
           <TitleHeader title={story.title} />
           <ImageWithLoader
             src={story.content.imageUrl}
@@ -65,7 +65,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
 
     case 'text-image':
       return (
-        <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
+        <div className="viewer-card p-6 max-w-2xl mx-auto">
           <TitleHeader title={story.title} />
           <div className="mb-4">
             <ImageWithLoader
@@ -84,7 +84,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
 
     case 'youtube':
       return (
-        <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
+        <div className="viewer-card p-6 max-w-2xl mx-auto">
           <TitleHeader title={story.title} />
           <YouTubeEmbed url={story.content.youtubeUrl} />
         </div>
@@ -92,7 +92,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
 
     case 'scratch':
       return (
-        <div className="memory-card p-6 max-w-2xl mx-auto animate-fade-in-up">
+        <div className="viewer-card p-6 max-w-2xl mx-auto">
           <TitleHeader title={story.title} />
           <ScratchCard
             imageUrl={story.content.imageUrl}

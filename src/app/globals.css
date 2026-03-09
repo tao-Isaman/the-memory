@@ -84,6 +84,41 @@ body {
   animation: fade-in-up 0.5s ease-out forwards;
 }
 
+/* Story slide transitions */
+@keyframes slide-out-left {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(-30px) scale(0.97); }
+}
+
+@keyframes slide-in-from-right {
+  from { opacity: 0; transform: translateX(30px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes slide-out-right {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(30px) scale(0.97); }
+}
+
+@keyframes slide-in-from-left {
+  from { opacity: 0; transform: translateX(-30px) scale(0.97); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Auto-advance timer fill */
+@keyframes auto-advance-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Viewer card - refined without hover lift */
+.viewer-card {
+  background: white;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(245, 237, 228, 0.8);
+  box-shadow: 0 8px 32px rgba(107, 94, 87, 0.06);
+}
+
 /* Shimmer animation for loading */
 @keyframes shimmer {
   0% {
