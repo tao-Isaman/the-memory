@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo, use, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Memory, MemoryStory } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
@@ -11,7 +12,7 @@ import HeartLoader from '@/components/HeartLoader';
 import StoryViewer from '@/components/StoryViewer';
 import PasswordGate from '@/components/PasswordGate';
 import PaymentButton from '@/components/PaymentButton';
-import { Eye } from 'lucide-react';
+import { Eye, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 
 interface PageProps {
@@ -42,12 +43,12 @@ function getStoryAnimation(state: AnimState): string {
 export default function MemoryViewerPage({ params }: PageProps) {
   const { id } = use(params);
   const { user } = useAuth();
+  const router = useRouter();
   const [memory, setMemory] = useState<Memory | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPasswordLocked, setIsPasswordLocked] = useState(false);
   const [isQuestionLocked, setIsQuestionLocked] = useState(false);
-  const [autoAdvance, setAutoAdvance] = useState(false);
   const [revealedStories, setRevealedStories] = useState<Set<string>>(new Set());
   const [animState, setAnimState] = useState<AnimState>('idle');
   const isNavigating = useRef(false);
@@ -110,20 +111,6 @@ export default function MemoryViewerPage({ params }: PageProps) {
     navigateWithTransition(currentIndex - 1, 'prev');
   }, [sortedMemory, currentIndex, navigateWithTransition]);
 
-  useEffect(() => {
-    if (!autoAdvance || !sortedMemory || isPasswordLocked || isQuestionLocked) return;
-
-    const currentStory = sortedMemory.stories[currentIndex];
-    if (!currentStory || currentStory.type === 'password' || currentStory.type === 'youtube' || currentStory.type === 'question') return;
-    if (currentIndex >= sortedMemory.stories.length - 1) return;
-
-    const timer = setTimeout(() => {
-      handleNext();
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [autoAdvance, currentIndex, sortedMemory, isPasswordLocked, isQuestionLocked, handleNext]);
-
   const handlePasswordUnlock = useCallback(() => {
     if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
       navigateWithTransition(currentIndex + 1, 'next');
@@ -139,6 +126,72 @@ export default function MemoryViewerPage({ params }: PageProps) {
       setIsQuestionLocked(false);
     }
   }, [sortedMemory, currentIndex, navigateWithTransition]);
+
+  // Derived: should this story auto-advance?
+  const currentStory: MemoryStory | undefined = sortedMemory?.stories[currentIndex];
+  const isLastStory = sortedMemory ? currentIndex >= sortedMemory.stories.length - 1 : false;
+
+  const shouldAutoAdvance = !!currentStory &&
+    !isPasswordLocked && !isQuestionLocked && !isLastStory &&
+    currentStory.type !== 'password' && currentStory.type !== 'question' &&
+    currentStory.type !== 'youtube' &&
+    !(currentStory.type === 'scratch' && !revealedStories.has(currentStory.id));
+
+  // Auto-advance (always on for applicable stories)
+  useEffect(() => {
+    if (!shouldAutoAdvance || !sortedMemory) return;
+
+    const timer = setTimeout(() => {
+      handleNext();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [shouldAutoAdvance, currentIndex, sortedMemory, handleNext]);
+
+  // Tap to navigate
+  const handleContentTap = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isNavigating.current) return;
+    if (isPasswordLocked || isQuestionLocked) return;
+
+    // Don't intercept clicks on interactive elements
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, input, select, textarea, iframe, canvas, video, [data-interactive]')) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeX = (e.clientX - rect.left) / rect.width;
+
+    if (relativeX < 0.3) {
+      handlePrevious();
+    } else if (isLastStory && sortedMemory) {
+      const isOwner = user && sortedMemory.userId === user.id;
+      const isPreview = sortedMemory.status !== 'active' && isOwner;
+      router.push(isPreview ? `/create?edit=${sortedMemory.id}` : '/');
+    } else {
+      handleNext();
+    }
+  }, [isPasswordLocked, isQuestionLocked, handlePrevious, handleNext, isLastStory, sortedMemory, user, router]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isPasswordLocked || isQuestionLocked || isNavigating.current) return;
+
+      if (e.key === 'ArrowLeft') {
+        handlePrevious();
+      } else if (e.key === 'ArrowRight') {
+        if (isLastStory && sortedMemory) {
+          const isOwner = user && sortedMemory.userId === user.id;
+          const isPreview = sortedMemory.status !== 'active' && isOwner;
+          router.push(isPreview ? `/create?edit=${sortedMemory.id}` : '/');
+        } else {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrevious, handleNext, isPasswordLocked, isQuestionLocked, isLastStory, sortedMemory, user, router]);
 
   if (loading) {
     return (
@@ -181,18 +234,14 @@ export default function MemoryViewerPage({ params }: PageProps) {
     );
   }
 
-  const currentStory: MemoryStory | undefined = sortedMemory.stories[currentIndex];
-  const isLastStory = currentIndex >= sortedMemory.stories.length - 1;
-  const isFirstStory = currentIndex === 0;
-  const progress = ((currentIndex + 1) / sortedMemory.stories.length) * 100;
   const themeColors = getThemeColors(sortedMemory.theme);
-
-  const showAutoAdvanceTimer = autoAdvance && !isPasswordLocked && !isQuestionLocked
-    && currentStory?.type !== 'youtube' && currentStory?.type !== 'password'
-    && currentStory?.type !== 'question' && !isLastStory;
+  const closeHref = isPreviewMode ? `/create?edit=${sortedMemory.id}` : '/';
 
   return (
-    <main className="min-h-screen relative flex flex-col overflow-hidden" style={{ backgroundColor: themeColors.background }}>
+    <main
+      className="h-dvh relative flex flex-col overflow-hidden select-none"
+      style={{ backgroundColor: themeColors.background }}
+    >
       {/* Atmospheric background gradient orbs */}
       <div className="fixed inset-0 pointer-events-none" style={{
         background: `
@@ -219,101 +268,100 @@ export default function MemoryViewerPage({ params }: PageProps) {
         ))}
       </div>
 
-      {/* Header */}
-      <header className="relative z-20 py-5 px-4 border-b bg-white/70 backdrop-blur-md" style={{ borderColor: `${themeColors.accent}80` }}>
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link
-            href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
-            className="hover:opacity-80 transition-opacity flex items-center gap-2"
-            style={{ color: themeColors.dark }}
-          >
-            <span>&larr;</span>
-            <span>{isPreviewMode ? 'กลับไปแก้ไข' : 'ออก'}</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <HeartIcon size={20} className="animate-pulse-heart" style={{ color: themeColors.primary }} />
-            <span className="font-kanit font-semibold truncate max-w-[200px]" style={{ color: themeColors.dark }}>
+      {/* ── Instagram-style top bar ── */}
+      <div
+        className="relative z-40 flex-shrink-0"
+        style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+      >
+        {/* Segmented progress bars */}
+        <div className="flex gap-1 px-3 pb-1">
+          {sortedMemory.stories.map((_, i) => (
+            <div
+              key={i}
+              className="h-[3px] flex-1 rounded-full overflow-hidden"
+              style={{ backgroundColor: `${themeColors.dark}18` }}
+            >
+              {i < currentIndex ? (
+                <div
+                  className="w-full h-full rounded-full"
+                  style={{ backgroundColor: themeColors.primary }}
+                />
+              ) : i === currentIndex ? (
+                <div
+                  key={`seg-${currentIndex}`}
+                  className="h-full rounded-full"
+                  style={{
+                    backgroundColor: themeColors.primary,
+                    transformOrigin: 'left',
+                    animation: shouldAutoAdvance
+                      ? 'auto-advance-fill 5s linear forwards'
+                      : 'none',
+                    transform: shouldAutoAdvance ? undefined : 'scaleX(0)',
+                  }}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+
+        {/* Title + close button */}
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <HeartIcon size={18} className="flex-shrink-0 animate-pulse-heart" style={{ color: themeColors.primary }} />
+            <span
+              className="font-kanit text-sm font-semibold truncate"
+              style={{ color: themeColors.dark }}
+            >
               {sortedMemory.title}
             </span>
           </div>
-          <button
-            onClick={() => setAutoAdvance(!autoAdvance)}
-            className="text-sm px-3 py-1.5 rounded-full transition-all duration-300"
+          <Link
+            href={closeHref}
+            className="flex-shrink-0 p-1.5 rounded-full transition-colors hover:bg-black/5"
+            aria-label="Close"
+          >
+            <X size={22} style={{ color: themeColors.dark }} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Preview Mode Banner (floating) */}
+      {isPreviewMode && (
+        <div className="relative z-40 mx-3 mb-2">
+          <div
+            className="rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2"
             style={{
-              backgroundColor: autoAdvance ? themeColors.primary : themeColors.accent,
-              color: autoAdvance ? 'white' : themeColors.dark,
-              boxShadow: autoAdvance ? `0 2px 8px ${themeColors.primary}40` : 'none',
+              backgroundColor: 'rgba(254, 243, 199, 0.9)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(253, 224, 71, 0.5)',
             }}
           >
-            อัตโนมัติ: {autoAdvance ? 'เปิด' : 'ปิด'}
-          </button>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="max-w-4xl mx-auto mt-4">
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `${themeColors.accent}60` }}>
-            <div
-              className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{
-                width: `${progress}%`,
-                background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.dark})`,
-                boxShadow: `0 0 8px ${themeColors.primary}50`,
-              }}
-            />
-          </div>
-
-          {/* Auto-advance timer */}
-          {showAutoAdvanceTimer && (
-            <div className="mt-1.5">
-              <div className="h-0.5 rounded-full overflow-hidden" style={{ backgroundColor: `${themeColors.accent}30` }}>
-                <div
-                  key={`timer-${currentIndex}`}
-                  className="h-full rounded-full"
-                  style={{
-                    backgroundColor: `${themeColors.primary}60`,
-                    transformOrigin: 'left',
-                    animation: 'auto-advance-fill 5s linear forwards',
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
-          <p className="text-xs mt-1.5 text-center" style={{ color: `${themeColors.dark}80` }}>
-            {currentIndex + 1} จาก {sortedMemory.stories.length}
-          </p>
-        </div>
-      </header>
-
-      {/* Preview Mode Banner */}
-      {isPreviewMode && (
-        <div className="relative z-20 bg-yellow-50 border-b border-yellow-200 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex flex-col gap-1 text-yellow-800">
-              <div className="flex items-center gap-2">
-                <Eye size={18} />
-                <span className="text-sm font-medium">
-                  นี่คือตัวอย่างที่คนพิเศษของคุณจะเห็น
-                </span>
-              </div>
-              <span className="text-xs">
-                เปิดใช้งานเพียง 99 บาท เพื่อส่งลิงก์ให้เขาได้เลย
-              </span>
+            <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <Eye size={16} />
+              <span>ตัวอย่าง — เปิดใช้งาน 99 บาท</span>
             </div>
             <PaymentButton
               memoryId={sortedMemory.id}
               memoryTitle={sortedMemory.title}
               userId={user!.id}
-              className="text-sm py-1.5 px-4"
+              className="text-xs py-1 px-3"
             />
           </div>
         </div>
       )}
 
-      {/* Story Content with slide transitions */}
-      <div className="grow relative z-10 flex items-center justify-center p-4">
+      {/* ── Story content area (tappable) ── */}
+      <div
+        className="grow relative z-10 flex items-center justify-center p-4 cursor-pointer"
+        onClick={handleContentTap}
+      >
+        {/* Tap zone hints (visible briefly on first load) */}
+        <div className="absolute left-0 top-0 w-[30%] h-full z-20 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-[70%] h-full z-20 pointer-events-none" />
+
+        {/* Story content with slide animation */}
         <div
-          className="w-full max-w-2xl"
+          className="w-full max-w-2xl relative z-10"
           style={{ animation: getStoryAnimation(animState) }}
         >
           {isPasswordLocked && currentStory?.type === 'password' ? (
@@ -335,73 +383,22 @@ export default function MemoryViewerPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Navigation */}
-      <footer className="relative z-20 py-5 px-4 border-t bg-white/70 backdrop-blur-md" style={{ borderColor: `${themeColors.accent}80` }}>
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={isFirstStory}
-            className={`px-5 py-2.5 rounded-full font-medium transition-all duration-300 ${isFirstStory ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-80 active:scale-95'
-              }`}
+      {/* ── Floating completion button (last story) ── */}
+      {isLastStory && !isPasswordLocked && !isQuestionLocked && (
+        <div className="absolute bottom-8 left-0 right-0 z-40 flex justify-center animate-fade-in-up">
+          <Link
+            href={closeHref}
+            className="flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
             style={{
-              backgroundColor: themeColors.accent,
-              color: themeColors.dark,
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+              boxShadow: `0 8px 25px ${themeColors.dark}50`,
             }}
           >
-            &larr; ก่อนหน้า
-          </button>
-
-          {/* Enhanced dots indicator */}
-          <div className="flex items-center gap-1.5">
-            {sortedMemory.stories.map((_, index) => (
-              <div
-                key={index}
-                className="rounded-full transition-all duration-500 ease-out"
-                style={{
-                  width: index === currentIndex ? '12px' : '8px',
-                  height: index === currentIndex ? '12px' : '8px',
-                  backgroundColor:
-                    index === currentIndex
-                      ? themeColors.dark
-                      : index < currentIndex
-                        ? themeColors.primary
-                        : themeColors.accent,
-                  boxShadow: index === currentIndex
-                    ? `0 0 10px ${themeColors.primary}60`
-                    : 'none',
-                }}
-              />
-            ))}
-          </div>
-
-          {isLastStory && !isPasswordLocked && !isQuestionLocked ? (
-            <Link
-              href={isPreviewMode ? `/create?edit=${sortedMemory.id}` : "/"}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-white transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5 active:scale-95"
-              style={{
-                background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
-                boxShadow: `0 4px 20px ${themeColors.dark}40`,
-              }}
-            >
-              {isPreviewMode ? 'แก้ไขต่อ' : 'เสร็จสิ้น'}
-              <HeartIcon size={16} filled color="white" />
-            </Link>
-          ) : (
-            <button
-              onClick={handleNext}
-              disabled={isPasswordLocked || isQuestionLocked}
-              className={`px-5 py-2.5 rounded-full font-semibold text-white transition-all duration-300 ${(isPasswordLocked || isQuestionLocked) ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-90 hover:-translate-y-0.5 active:scale-95'
-                }`}
-              style={{
-                background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
-                boxShadow: `0 4px 20px ${themeColors.dark}40`,
-              }}
-            >
-              ถัดไป &rarr;
-            </button>
-          )}
+            {isPreviewMode ? 'แก้ไขต่อ' : 'เสร็จสิ้น'}
+            <HeartIcon size={18} filled color="white" />
+          </Link>
         </div>
-      </footer>
+      )}
     </main>
   );
 }
