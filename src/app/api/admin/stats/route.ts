@@ -1,7 +1,33 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 const MEMORY_PRICE_THB = 99; // Price per memory activation
+const FETCH_PAGE_SIZE = 1000;
+
+/**
+ * Paginate through ALL rows to bypass Supabase's server-side max-rows limit.
+ */
+async function fetchAllRows(
+  supabase: SupabaseClient,
+  table: string,
+  select: string,
+): Promise<Record<string, unknown>[]> {
+  const allData: Record<string, unknown>[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from(table)
+      .select(select)
+      .range(from, from + FETCH_PAGE_SIZE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    allData.push(...(data as unknown as Record<string, unknown>[]));
+    if (data.length < FETCH_PAGE_SIZE) break;
+    from += FETCH_PAGE_SIZE;
+  }
+  return allData;
+}
 
 interface RecentActivity {
   type: 'memory' | 'credit' | 'cartoon';
@@ -88,8 +114,17 @@ export async function GET() {
           )
         `)
         .eq('type', 'purchase')
-        .gte('created_at', thirtyDaysAgo.toISOString())
+        .gte('created_at', thirtyDaysAgo.toISOString()),
     ]);
+
+    // Demographics: paginate through all user_profiles (bypasses 1000-row server limit)
+    const userProfiles = {
+      data: await fetchAllRows(
+        supabase,
+        'user_profiles',
+        'gender, birthday, job, relationship_status, occasion_type, profile_credits_claimed',
+      ),
+    };
 
     // Calculate total revenue
     // 1. Memory Revenue
@@ -227,6 +262,126 @@ export async function GET() {
         amount,
       }));
 
+    // Aggregate demographics from user_profiles
+    const profiles = userProfiles.data || [];
+
+    // Helper: count by field value, returns a map of value -> count
+    const countByField = (field: string) => {
+      const map = new Map<string, number>();
+      profiles.forEach((p) => {
+        const val = (p as Record<string, unknown>)[field] as string | null | undefined;
+        const key = val ?? '__null__';
+        map.set(key, (map.get(key) || 0) + 1);
+      });
+      return map;
+    };
+
+    // Gender
+    const genderMap = countByField('gender');
+    const genderFilledCount =
+      (genderMap.get('male') || 0) +
+      (genderMap.get('female') || 0) +
+      (genderMap.get('other') || 0);
+    const genderUnspecified = totalUsers - genderFilledCount;
+    const genderRaw = [
+      { name: 'ชาย', value: genderMap.get('male') || 0 },
+      { name: 'หญิง', value: genderMap.get('female') || 0 },
+      { name: 'อื่นๆ', value: genderMap.get('other') || 0 },
+    ].filter((item) => item.value > 0);
+    genderRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, genderUnspecified) });
+
+    // Relationship status
+    const relMap = countByField('relationship_status');
+    const relFilledCount =
+      (relMap.get('single') || 0) +
+      (relMap.get('dating') || 0) +
+      (relMap.get('married') || 0) +
+      (relMap.get('other') || 0);
+    const relUnspecified = totalUsers - relFilledCount;
+    const relationshipStatusRaw = [
+      { name: 'โสด', value: relMap.get('single') || 0 },
+      { name: 'มีแฟน', value: relMap.get('dating') || 0 },
+      { name: 'แต่งงาน', value: relMap.get('married') || 0 },
+      { name: 'อื่นๆ', value: relMap.get('other') || 0 },
+    ].filter((item) => item.value > 0);
+    relationshipStatusRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, relUnspecified) });
+
+    // Occasion type
+    const occMap = countByField('occasion_type');
+    const occFilledCount =
+      (occMap.get('valentine') || 0) +
+      (occMap.get('anniversary') || 0) +
+      (occMap.get('birthday') || 0) +
+      (occMap.get('other') || 0);
+    const occUnspecified = totalUsers - occFilledCount;
+    const occasionTypeRaw = [
+      { name: 'วาเลนไทน์', value: occMap.get('valentine') || 0 },
+      { name: 'วันครบรอบ', value: occMap.get('anniversary') || 0 },
+      { name: 'วันเกิด', value: occMap.get('birthday') || 0 },
+      { name: 'อื่นๆ', value: occMap.get('other') || 0 },
+    ].filter((item) => item.value > 0);
+    occasionTypeRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, occUnspecified) });
+
+    // Age groups from birthday
+    const ageGroupMap = new Map<string, number>([
+      ['<18', 0],
+      ['18-24', 0],
+      ['25-34', 0],
+      ['35-44', 0],
+      ['45+', 0],
+    ]);
+    let ageFilledCount = 0;
+    const today = new Date();
+    profiles.forEach((p) => {
+      if (!p.birthday) return;
+      const birth = new Date(p.birthday as string);
+      if (isNaN(birth.getTime())) return;
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age -= 1;
+      }
+      ageFilledCount += 1;
+      if (age < 18) ageGroupMap.set('<18', (ageGroupMap.get('<18') || 0) + 1);
+      else if (age <= 24) ageGroupMap.set('18-24', (ageGroupMap.get('18-24') || 0) + 1);
+      else if (age <= 34) ageGroupMap.set('25-34', (ageGroupMap.get('25-34') || 0) + 1);
+      else if (age <= 44) ageGroupMap.set('35-44', (ageGroupMap.get('35-44') || 0) + 1);
+      else ageGroupMap.set('45+', (ageGroupMap.get('45+') || 0) + 1);
+    });
+    const ageGroups = [
+      ...Array.from(ageGroupMap.entries()).map(([name, value]) => ({ name, value })),
+      { name: 'ไม่ระบุ', value: Math.max(0, totalUsers - ageFilledCount) },
+    ];
+
+    // Top jobs (max 8)
+    const jobMap = new Map<string, number>();
+    profiles.forEach((p) => {
+      const job = (p.job as string | null | undefined)?.trim();
+      if (!job) return;
+      jobMap.set(job, (jobMap.get(job) || 0) + 1);
+    });
+    const topJobs = Array.from(jobMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, value]) => ({ name, value }));
+
+    // Profile completion: profile_credits_claimed = true means completed
+    const completedProfiles = profiles.filter((p) => p.profile_credits_claimed === true).length;
+    const profileCompletion = {
+      total: totalUsers,
+      completed: completedProfiles,
+      rate: totalUsers > 0 ? Math.round((completedProfiles / totalUsers) * 100) : 0,
+    };
+
+    const demographics = {
+      gender: genderRaw,
+      relationshipStatus: relationshipStatusRaw,
+      occasionType: occasionTypeRaw,
+      ageGroups,
+      topJobs,
+      profileCompletion,
+    };
+
     return NextResponse.json({
       totalUsers,
       totalMemories: memories.count || 0,
@@ -249,6 +404,7 @@ export async function GET() {
       recentActivity,
       userGrowth,
       revenueData,
+      demographics,
     });
   } catch (error) {
     console.error('Admin stats error:', error);

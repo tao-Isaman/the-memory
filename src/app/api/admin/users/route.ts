@@ -1,5 +1,36 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+const PAGE_SIZE = 1000;
+
+/**
+ * Paginate through ALL rows of a table to bypass Supabase's
+ * server-side max-rows limit (default 1000).
+ */
+async function fetchAllRows(
+  supabase: SupabaseClient,
+  table: string,
+  select: string,
+): Promise<Record<string, unknown>[]> {
+  const allData: Record<string, unknown>[] = [];
+  let from = 0;
+
+  while (true) {
+    const { data, error } = await supabase
+      .from(table)
+      .select(select)
+      .range(from, from + PAGE_SIZE - 1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    allData.push(...(data as unknown as Record<string, unknown>[]));
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  return allData;
+}
 
 export async function GET() {
   try {
@@ -16,46 +47,34 @@ export async function GET() {
 
     const authUsers = authData?.users || [];
 
-    // Batch: get referrals, memories, credits, and profiles in parallel
-    // Note: Supabase default limit is 1000 rows — use .range() to fetch all
-    const [{ data: referrals }, { data: memories }, { data: userCredits }, { data: profiles }] = await Promise.all([
-      supabase
-        .from('user_referrals')
-        .select('user_id, referral_code, referred_by')
-        .range(0, 99999),
-      supabase
-        .from('memories')
-        .select('user_id, status')
-        .range(0, 99999),
-      supabase
-        .from('user_credits')
-        .select('user_id, balance')
-        .range(0, 99999),
-      supabase
-        .from('user_profiles')
-        .select('user_id, profile_credits_claimed')
-        .range(0, 99999),
+    // Fetch all rows from each table in parallel (paginated to bypass 1000-row limit)
+    const [referrals, memories, userCredits, profiles] = await Promise.all([
+      fetchAllRows(supabase, 'user_referrals', 'user_id, referral_code, referred_by'),
+      fetchAllRows(supabase, 'memories', 'user_id, status'),
+      fetchAllRows(supabase, 'user_credits', 'user_id, balance'),
+      fetchAllRows(supabase, 'user_profiles', 'user_id, profile_credits_claimed'),
     ]);
 
     const referralMap = new Map(
-      (referrals || []).map((r) => [r.user_id, r])
+      referrals.map((r) => [r.user_id as string, r])
     );
 
     const creditsMap = new Map(
-      (userCredits || []).map((c) => [c.user_id, c.balance])
+      userCredits.map((c) => [c.user_id as string, c.balance as number])
     );
 
     const profileMap = new Map(
-      (profiles || []).map((p) => [p.user_id, p.profile_credits_claimed])
+      profiles.map((p) => [p.user_id as string, p.profile_credits_claimed as boolean])
     );
 
     // Aggregate memory counts in JS instead of per-user DB queries
     const memoryCounts = new Map<string, { total: number; paid: number }>();
-    for (const memory of memories || []) {
-      const entry = memoryCounts.get(memory.user_id) || { total: 0, paid: 0 };
+    for (const memory of memories) {
+      const userId = memory.user_id as string;
+      const entry = memoryCounts.get(userId) || { total: 0, paid: 0 };
       entry.total++;
       if (memory.status === 'active') entry.paid++;
-      memoryCounts.set(memory.user_id, entry);
+      memoryCounts.set(userId, entry);
     }
 
     const usersWithCounts = authUsers.map((user) => {
@@ -68,8 +87,8 @@ export async function GET() {
         id: user.id,
         user_id: user.id,
         user_email: user.email || 'No email',
-        referral_code: referral?.referral_code || null,
-        referred_by: referral?.referred_by || null,
+        referral_code: (referral?.referral_code as string) || null,
+        referred_by: (referral?.referred_by as string) || null,
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
         memoryCount: counts.total,

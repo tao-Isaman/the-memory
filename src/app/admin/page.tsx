@@ -26,6 +26,7 @@ import {
 import HeartLoader from '@/components/HeartLoader';
 import UserGrowthChart from '@/components/admin/UserGrowthChart';
 import RevenueChart from '@/components/admin/RevenueChart';
+import DemographyCharts from '@/components/admin/DemographyCharts';
 
 interface CreditStats {
   totalSold: number;
@@ -47,6 +48,20 @@ interface RecentActivity {
   createdAt: string;
 }
 
+interface DemographicsDataItem {
+  name: string;
+  value: number;
+}
+
+interface DemographicsData {
+  gender: DemographicsDataItem[];
+  relationshipStatus: DemographicsDataItem[];
+  occasionType: DemographicsDataItem[];
+  ageGroups: DemographicsDataItem[];
+  topJobs: DemographicsDataItem[];
+  profileCompletion: { total: number; completed: number; rate: number };
+}
+
 interface AdminStats {
   totalUsers: number;
   totalMemories: number;
@@ -59,6 +74,7 @@ interface AdminStats {
   cartoonStats: CartoonStats;
   recentActivity: RecentActivity[];
   userGrowth: { date: string; count: number }[];
+  demographics: DemographicsData;
 }
 
 export default function AdminDashboard() {
@@ -259,6 +275,13 @@ export default function AdminDashboard() {
       <div className="mb-8">
         <RevenueChart data={revenueData || []} />
       </div>
+
+      {/* Demographics */}
+      {stats?.demographics && (
+        <div className="mb-8">
+          <DemographyCharts data={stats.demographics} />
+        </div>
+      )}
 
       {/* Detailed Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
