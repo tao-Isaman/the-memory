@@ -278,49 +278,29 @@ export async function GET() {
 
     // Gender
     const genderMap = countByField('gender');
-    const genderFilledCount =
-      (genderMap.get('male') || 0) +
-      (genderMap.get('female') || 0) +
-      (genderMap.get('other') || 0);
-    const genderUnspecified = totalUsers - genderFilledCount;
     const genderRaw = [
       { name: 'ชาย', value: genderMap.get('male') || 0 },
       { name: 'หญิง', value: genderMap.get('female') || 0 },
       { name: 'อื่นๆ', value: genderMap.get('other') || 0 },
     ].filter((item) => item.value > 0);
-    genderRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, genderUnspecified) });
 
     // Relationship status
     const relMap = countByField('relationship_status');
-    const relFilledCount =
-      (relMap.get('single') || 0) +
-      (relMap.get('dating') || 0) +
-      (relMap.get('married') || 0) +
-      (relMap.get('other') || 0);
-    const relUnspecified = totalUsers - relFilledCount;
     const relationshipStatusRaw = [
       { name: 'โสด', value: relMap.get('single') || 0 },
       { name: 'มีแฟน', value: relMap.get('dating') || 0 },
       { name: 'แต่งงาน', value: relMap.get('married') || 0 },
       { name: 'อื่นๆ', value: relMap.get('other') || 0 },
     ].filter((item) => item.value > 0);
-    relationshipStatusRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, relUnspecified) });
 
     // Occasion type
     const occMap = countByField('occasion_type');
-    const occFilledCount =
-      (occMap.get('valentine') || 0) +
-      (occMap.get('anniversary') || 0) +
-      (occMap.get('birthday') || 0) +
-      (occMap.get('other') || 0);
-    const occUnspecified = totalUsers - occFilledCount;
     const occasionTypeRaw = [
       { name: 'วาเลนไทน์', value: occMap.get('valentine') || 0 },
       { name: 'วันครบรอบ', value: occMap.get('anniversary') || 0 },
       { name: 'วันเกิด', value: occMap.get('birthday') || 0 },
       { name: 'อื่นๆ', value: occMap.get('other') || 0 },
     ].filter((item) => item.value > 0);
-    occasionTypeRaw.push({ name: 'ไม่ระบุ', value: Math.max(0, occUnspecified) });
 
     // Age groups from birthday
     const ageGroupMap = new Map<string, number>([
@@ -330,7 +310,6 @@ export async function GET() {
       ['35-44', 0],
       ['45+', 0],
     ]);
-    let ageFilledCount = 0;
     const today = new Date();
     profiles.forEach((p) => {
       if (!p.birthday) return;
@@ -341,17 +320,15 @@ export async function GET() {
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
         age -= 1;
       }
-      ageFilledCount += 1;
       if (age < 18) ageGroupMap.set('<18', (ageGroupMap.get('<18') || 0) + 1);
       else if (age <= 24) ageGroupMap.set('18-24', (ageGroupMap.get('18-24') || 0) + 1);
       else if (age <= 34) ageGroupMap.set('25-34', (ageGroupMap.get('25-34') || 0) + 1);
       else if (age <= 44) ageGroupMap.set('35-44', (ageGroupMap.get('35-44') || 0) + 1);
       else ageGroupMap.set('45+', (ageGroupMap.get('45+') || 0) + 1);
     });
-    const ageGroups = [
-      ...Array.from(ageGroupMap.entries()).map(([name, value]) => ({ name, value })),
-      { name: 'ไม่ระบุ', value: Math.max(0, totalUsers - ageFilledCount) },
-    ];
+    const ageGroups = Array.from(ageGroupMap.entries())
+      .map(([name, value]) => ({ name, value }))
+      .filter((item) => item.value > 0);
 
     // Top jobs (max 8)
     const jobMap = new Map<string, number>();

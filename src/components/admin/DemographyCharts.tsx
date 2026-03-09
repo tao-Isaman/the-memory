@@ -178,7 +178,7 @@ export default function DemographyCharts({ data }: DemographyChartsProps) {
     data.ageGroups.some((d) => d.name !== 'ไม่ระบุ' && d.value > 0) ||
     data.topJobs.length > 0;
 
-  const ageBarData = data.ageGroups.filter((d) => d.name !== 'ไม่ระบุ' || d.value > 0);
+  const ageBarData = data.ageGroups.filter((d) => d.name !== 'ไม่ระบุ' && d.value > 0);
 
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
