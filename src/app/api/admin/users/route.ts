@@ -17,19 +17,24 @@ export async function GET() {
     const authUsers = authData?.users || [];
 
     // Batch: get referrals, memories, credits, and profiles in parallel
+    // Note: Supabase default limit is 1000 rows — use .range() to fetch all
     const [{ data: referrals }, { data: memories }, { data: userCredits }, { data: profiles }] = await Promise.all([
       supabase
         .from('user_referrals')
-        .select('user_id, referral_code, referred_by'),
+        .select('user_id, referral_code, referred_by')
+        .range(0, 99999),
       supabase
         .from('memories')
-        .select('user_id, status'),
+        .select('user_id, status')
+        .range(0, 99999),
       supabase
         .from('user_credits')
-        .select('user_id, balance'),
+        .select('user_id, balance')
+        .range(0, 99999),
       supabase
         .from('user_profiles')
-        .select('user_id, profile_credits_claimed'),
+        .select('user_id, profile_credits_claimed')
+        .range(0, 99999),
     ]);
 
     const referralMap = new Map(
