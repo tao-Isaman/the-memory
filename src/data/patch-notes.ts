@@ -39,6 +39,20 @@ export interface PatchNote {
  */
 export const patchNotes: PatchNote[] = [
   {
+    version: '2.2.0',
+    date: '2026-04-22',
+    title: 'หน้า Landing ใหม่สำหรับทุกโอกาส',
+    summary: 'เพิ่มหน้า Landing 6 หน้าใหม่ ปรับเนื้อหาเฉพาะแต่ละโอกาส เพื่อให้ค้นหาเจอง่ายขึ้น',
+    items: [
+      { type: 'feature', text: 'หน้า /anniversary — วันครบรอบ พร้อมเนื้อหาและตัวอย่างข้อความเฉพาะ' },
+      { type: 'feature', text: 'หน้า /birthday — วันเกิดแฟน พร้อมไอเดียคำอวยพร' },
+      { type: 'feature', text: 'หน้า /valentine — วาเลนไทน์ ของขวัญวันแห่งความรัก' },
+      { type: 'feature', text: 'หน้า /reconcile — ง้อแฟน พร้อมตัวอย่างข้อความขอโทษ' },
+      { type: 'feature', text: 'หน้า /family — บอกรักครอบครัว พ่อแม่ พี่น้อง' },
+      { type: 'feature', text: 'หน้า /missyou — ส่งความคิดถึงคนสำคัญ' },
+    ],
+  },
+  {
     version: '2.1.1',
     date: '2026-04-22',
     title: 'เลื่อนดูข้อความยาวได้แล้ว',
