@@ -7,6 +7,7 @@ import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
 import { getUseCaseBySlug } from '@/data/use-cases';
+import { getSeoLandingBySlug } from '@/data/seo-landings';
 import { trackEvent } from '@/lib/analytics';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
@@ -68,7 +69,7 @@ function CreatePageContent() {
         const pendingUseCase = sessionStorage.getItem('pending_usecase');
         if (pendingUseCase) {
           sessionStorage.removeItem('pending_usecase');
-          const useCase = getUseCaseBySlug(pendingUseCase);
+          const useCase = getUseCaseBySlug(pendingUseCase) ?? getSeoLandingBySlug(pendingUseCase);
           if (useCase) {
             setTheme(useCase.theme);
             trackEvent('start_create', { use_case: pendingUseCase, theme: useCase.theme });
