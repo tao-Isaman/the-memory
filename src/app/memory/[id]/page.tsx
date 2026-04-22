@@ -361,7 +361,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
         {/* Story content with slide animation */}
         <div
-          className="w-full max-w-2xl relative z-10"
+          className="w-full max-w-2xl relative z-10 h-full flex flex-col justify-center"
           style={{ animation: getStoryAnimation(animState) }}
         >
           {isPasswordLocked && currentStory?.type === 'password' ? (

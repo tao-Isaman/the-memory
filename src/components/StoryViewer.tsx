@@ -25,7 +25,7 @@ const defaultColors: ThemeColors = {
 
 function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal }: StoryViewerProps) {
   const TitleHeader = ({ title }: { title?: string }) => (
-    <div className="flex items-center gap-2 mb-4">
+    <div className="flex items-center gap-2 mb-4 flex-shrink-0">
       <HeartIcon size={20} style={{ color: themeColors.primary }} />
       <span className="font-kanit text-sm font-medium" style={{ color: themeColors.primary }}>
         {title}
@@ -36,11 +36,13 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
   switch (story.type) {
     case 'text':
       return (
-        <div className="viewer-card p-8 max-w-2xl mx-auto">
+        <div className="viewer-card p-8 max-w-2xl mx-auto flex flex-col max-h-full">
           <TitleHeader title={story.title} />
-          <p className="text-xl text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {story.content.text}
-          </p>
+          <div className="min-h-0 overflow-y-auto">
+            <p className="text-xl text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {story.content.text}
+            </p>
+          </div>
         </div>
       );
 
@@ -65,20 +67,22 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
 
     case 'text-image':
       return (
-        <div className="viewer-card p-6 max-w-2xl mx-auto">
+        <div className="viewer-card p-6 max-w-2xl mx-auto flex flex-col max-h-full">
           <TitleHeader title={story.title} />
-          <div className="mb-4">
-            <ImageWithLoader
-              src={story.content.imageUrl}
-              alt="ความทรงจำ"
-              className="w-full rounded-lg shadow-md"
-              style={{ maxHeight: '400px', objectFit: 'contain' }}
-              themeColors={themeColors}
-            />
+          <div className="min-h-0 overflow-y-auto">
+            <div className="mb-4">
+              <ImageWithLoader
+                src={story.content.imageUrl}
+                alt="ความทรงจำ"
+                className="w-full rounded-lg shadow-md"
+                style={{ maxHeight: '400px', objectFit: 'contain' }}
+                themeColors={themeColors}
+              />
+            </div>
+            <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {story.content.text}
+            </p>
           </div>
-          <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-            {story.content.text}
-          </p>
         </div>
       );
 
