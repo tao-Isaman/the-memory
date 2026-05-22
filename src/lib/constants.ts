@@ -31,3 +31,14 @@ export const JOB_OPTIONS = [
 
 export const PROFILE_COMPLETION_CREDITS = 10;
 export const CARTOON_CREDIT_COST = 10;
+
+// Character limits for text inputs in stories.
+// Tuned for how each field renders in the viewer (mobile-first, ~40 Thai chars/line).
+export const STORY_TEXT_LIMITS = {
+    title: 100,        // Optional story label shown in the list
+    text: 2000,       // 'text' story — full heartfelt message, highest allowance
+    textImage: 200,   // 'text-image' story — short caption beside the image (~3-4 lines)
+    caption: 100,      // 'image' / 'scratch' caption (~1-2 lines)
+    question: 2000,    // 'question' prompt (~1-3 lines)
+    choice: 100,       // 'question' answer choice (~1 line)
+} as const;

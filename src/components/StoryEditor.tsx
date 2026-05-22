@@ -6,6 +6,7 @@ import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage } from '@/lib/upload';
 import { useToast } from '@/hooks/useToast';
+import { STORY_TEXT_LIMITS } from '@/lib/constants';
 import { Lock, MessageCircleHeart, Camera, ImagePlus, Music, Sparkles, HelpCircle, LucideIcon } from 'lucide-react';
 
 interface StoryEditorProps {
@@ -253,6 +254,19 @@ export default function StoryEditor({
     onSave(story);
   };
 
+  // The shared text field serves both 'text' (long message) and 'text-image' (short caption)
+  const textMaxLength = type === 'text-image' ? STORY_TEXT_LIMITS.textImage : STORY_TEXT_LIMITS.text;
+
+  // Small right-aligned counter shown beneath a text field; turns red as the limit is reached
+  const CharCount = ({ value, max }: { value: string; max: number }) => (
+    <p
+      className="text-xs mt-1 text-right"
+      style={{ color: value.length >= max ? '#dc2626' : '#9ca3af' }}
+    >
+      {value.length}/{max}
+    </p>
+  );
+
   // CSS variables for themed inputs
   const cssVariables = {
     '--theme-primary': themeColors.primary,
@@ -330,10 +344,14 @@ export default function StoryEditor({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="ตั้งชื่อให้จดจำง่าย เช่น 'วันแรกที่เจอกัน'"
             className="input-valentine"
+            maxLength={STORY_TEXT_LIMITS.title}
           />
-          <p className="text-xs text-gray-500 mt-1">
-            ชื่อนี้จะแสดงแทนประเภทเรื่องราวในรายการ
-          </p>
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs text-gray-500 mt-1">
+              ชื่อนี้จะแสดงแทนประเภทเรื่องราวในรายการ
+            </p>
+            <CharCount value={title} max={STORY_TEXT_LIMITS.title} />
+          </div>
         </div>
 
         {/* Dynamic Fields based on type */}
@@ -455,8 +473,15 @@ export default function StoryEditor({
               onChange={(e) => setText(e.target.value)}
               placeholder="เขียนอะไรบางอย่างจากใจ..."
               className="input-valentine min-h-[120px] resize-y"
+              maxLength={textMaxLength}
               required
             />
+            {type === 'text-image' && (
+              <p className="text-xs text-gray-500 mt-1">
+                ข้อความสั้นๆ ประกอบรูปภาพ (ประมาณ 3-4 บรรทัด)
+              </p>
+            )}
+            <CharCount value={text} max={textMaxLength} />
           </div>
         )}
 
@@ -496,7 +521,9 @@ export default function StoryEditor({
               onChange={(e) => setCaption(e.target.value)}
               placeholder="เพิ่มคำบรรยายน่ารักๆ..."
               className="input-valentine"
+              maxLength={STORY_TEXT_LIMITS.caption}
             />
+            <CharCount value={caption} max={STORY_TEXT_LIMITS.caption} />
           </div>
         )}
 
@@ -531,8 +558,10 @@ export default function StoryEditor({
                 onChange={(e) => setQuestionText(e.target.value)}
                 placeholder="เช่น: เราเจอกันครั้งแรกที่ไหน?"
                 className="input-valentine"
+                maxLength={STORY_TEXT_LIMITS.question}
                 required
               />
+              <CharCount value={questionText} max={STORY_TEXT_LIMITS.question} />
             </div>
 
             <div>
@@ -560,6 +589,7 @@ export default function StoryEditor({
                       }}
                       placeholder={`ตัวเลือก ${String.fromCharCode(65 + index)}`}
                       className="input-valentine flex-1"
+                      maxLength={STORY_TEXT_LIMITS.choice}
                       required
                     />
                   </div>
