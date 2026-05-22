@@ -22,6 +22,9 @@ import {
   AlertCircle,
   Clock,
   Coins,
+  Smartphone,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 import UserGrowthChart from '@/components/admin/UserGrowthChart';
@@ -230,6 +233,13 @@ export default function AdminDashboard() {
       color: 'bg-indigo-500',
       href: '/admin/cartoons',
     },
+    {
+      label: 'ติดตั้ง PWA (ใช้งานอยู่/ทั้งหมด)',
+      value: `${stats?.pwaStats?.activeInstalls || 0} / ${stats?.pwaStats?.totalInstalls || 0}`,
+      icon: Smartphone,
+      color: 'bg-rose-500',
+      href: null,
+    },
   ];
 
   return (
@@ -384,6 +394,56 @@ export default function AdminDashboard() {
             >
               ดูรูปการ์ตูน
             </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* PWA Install Stats */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+        <h3 className="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
+          <Smartphone className="text-rose-500" size={20} />
+          สถิติการติดตั้งแอป (PWA)
+        </h3>
+        <p className="text-xs text-gray-400 mb-4">
+          ยอดติดตั้งนับได้แม่นยำ ส่วน &quot;คาดว่าถอนการติดตั้ง&quot; เป็นค่าประมาณ
+          (เครื่องที่ติดตั้งแล้วแต่ไม่ได้เปิดแอปแบบ standalone เกิน 30 วัน)
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="rounded-lg bg-rose-50 p-4">
+            <div className="flex items-center gap-2 text-rose-600 mb-1">
+              <Download size={16} />
+              <span className="text-xs font-medium">ติดตั้งทั้งหมด</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
+              {(stats?.pwaStats?.totalInstalls || 0).toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-lg bg-green-50 p-4">
+            <div className="flex items-center gap-2 text-green-600 mb-1">
+              <Activity size={16} />
+              <span className="text-xs font-medium">ใช้งานอยู่ (30 วัน)</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
+              {(stats?.pwaStats?.activeInstalls || 0).toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-lg bg-gray-100 p-4">
+            <div className="flex items-center gap-2 text-gray-500 mb-1">
+              <Trash2 size={16} />
+              <span className="text-xs font-medium">คาดว่าถอนการติดตั้ง</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
+              {(stats?.pwaStats?.estimatedUninstalls || 0).toLocaleString()}
+            </p>
+          </div>
+          <div className="rounded-lg bg-blue-50 p-4">
+            <div className="flex items-center gap-2 text-blue-600 mb-1">
+              <TrendingUp size={16} />
+              <span className="text-xs font-medium">ติดตั้งใหม่ (30 วัน)</span>
+            </div>
+            <p className="text-2xl font-bold text-gray-800">
+              {(stats?.pwaStats?.installs30d || 0).toLocaleString()}
+            </p>
           </div>
         </div>
       </div>

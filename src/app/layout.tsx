@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Itim, Kanit, Leckerli_One } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -70,6 +70,22 @@ export const metadata: Metadata = {
   verification: {
     google: "rmJ1lfrMVRg7O8BWKQPV7wc1YAmrQ8gzsbFXUfCS-68",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "The Memory",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E63946",
 };
 
 export default function RootLayout({

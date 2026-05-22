@@ -418,6 +418,43 @@ export interface Database {
           }
         ]
       }
+      pwa_installs: {
+        Row: {
+          id: string
+          device_id: string
+          user_id: string | null
+          platform: string | null
+          installed_at: string
+          last_seen_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          device_id: string
+          user_id?: string | null
+          platform?: string | null
+          installed_at?: string
+          last_seen_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          device_id?: string
+          user_id?: string | null
+          platform?: string | null
+          installed_at?: string
+          last_seen_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pwa_installs_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       user_profiles: {
         Row: {
           id: string

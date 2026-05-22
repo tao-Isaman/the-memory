@@ -85,7 +85,10 @@ export async function GET() {
       recentCredits,
       recentCartoons,
       dailyPaidMemories,
-      dailyCreditTransactions
+      dailyCreditTransactions,
+      pwaTotalResult,
+      pwaActiveResult,
+      pwaInstalls30dResult
     ] = await Promise.all([
       supabase.from('memories').select('*', { count: 'exact', head: true }),
       supabase.from('stories').select('*', { count: 'exact', head: true }),
@@ -115,7 +118,24 @@ export async function GET() {
         `)
         .eq('type', 'purchase')
         .gte('created_at', thirtyDaysAgo.toISOString()),
+      // PWA install stats. "Active" = opened in standalone within the last 30 days.
+      supabase.from('pwa_installs').select('*', { count: 'exact', head: true }),
+      supabase.from('pwa_installs').select('*', { count: 'exact', head: true })
+        .gte('last_seen_at', thirtyDaysAgo.toISOString()),
+      supabase.from('pwa_installs').select('*', { count: 'exact', head: true })
+        .gte('installed_at', thirtyDaysAgo.toISOString()),
     ]);
+
+    // PWA stats: installs are accurate; uninstalls are ESTIMATED (installed
+    // devices that haven't opened the app in standalone mode for 30+ days).
+    const pwaTotalInstalls = pwaTotalResult.count || 0;
+    const pwaActiveInstalls = pwaActiveResult.count || 0;
+    const pwaStats = {
+      totalInstalls: pwaTotalInstalls,
+      activeInstalls: pwaActiveInstalls,
+      estimatedUninstalls: Math.max(0, pwaTotalInstalls - pwaActiveInstalls),
+      installs30d: pwaInstalls30dResult.count || 0,
+    };
 
     // Demographics: paginate through all user_profiles (bypasses 1000-row server limit)
     const userProfiles = {
@@ -378,6 +398,7 @@ export async function GET() {
         failed: failedCartoons,
         pending: pendingCartoons,
       },
+      pwaStats,
       recentActivity,
       userGrowth,
       revenueData,

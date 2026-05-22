@@ -10,7 +10,12 @@ type EventName =
   | 'payment_fail'
   | 'share_link_click'
   | 'copy_link'
-  | 'returning_user_session';
+  | 'returning_user_session'
+  | 'pwa_prompt_shown'
+  | 'pwa_install_accepted'
+  | 'pwa_install_dismissed'
+  | 'pwa_installed'
+  | 'pwa_launch_standalone';
 
 interface EventParams {
   use_case?: string;
