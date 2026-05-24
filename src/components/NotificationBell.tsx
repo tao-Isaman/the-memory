@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bell, BellRing } from 'lucide-react';
+import { Bell, BellRing, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppNotification } from '@/types/notification';
-import { fetchNotifications, markNotificationsRead } from '@/lib/notifications';
+import { fetchNotifications, markNotificationsRead, dismissNotifications } from '@/lib/notifications';
 import { getPushState, subscribeToPush, unsubscribeFromPush, isPushSupported } from '@/lib/push';
 import { patchNotes, getLatestVersion } from '@/data/patch-notes';
 import { hasUnseenUpdate, setLastSeenVersion } from '@/lib/patch-notes';
@@ -106,6 +106,17 @@ export default function NotificationBell() {
     else router.push(n.url);
   };
 
+  const handleDismiss = async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    if (user) await dismissNotifications(user.id, [id]);
+  };
+
+  const handleClearAll = async () => {
+    const ids = notifications.map((n) => n.id);
+    setNotifications([]);
+    if (user && ids.length > 0) await dismissNotifications(user.id, ids);
+  };
+
   const handlePushToggle = async () => {
     setPushBusy(true);
     if (pushOn) {
@@ -172,6 +183,16 @@ export default function NotificationBell() {
                       : 'เปิดการแจ้งเตือนบนอุปกรณ์นี้'}
                   </button>
                 )}
+                {!loading && notifications.length > 0 && (
+                  <div className="flex justify-end px-3 py-1.5 border-b border-pink-50">
+                    <button
+                      onClick={handleClearAll}
+                      className="text-xs text-gray-400 hover:text-[#E63946] transition-colors"
+                    >
+                      ล้างทั้งหมด
+                    </button>
+                  </div>
+                )}
                 {loading ? (
                   <p className="text-center text-sm text-gray-400 py-8">กำลังโหลด...</p>
                 ) : notifications.length === 0 ? (
@@ -181,20 +202,31 @@ export default function NotificationBell() {
                   </div>
                 ) : (
                   notifications.map((n) => (
-                    <button
+                    <div
                       key={n.id}
-                      onClick={() => handleNotifClick(n)}
-                      className={`w-full text-left px-4 py-3 border-b border-pink-50 hover:bg-pink-50/50 transition-colors ${!n.read ? 'bg-pink-50/30' : ''}`}
+                      className={`flex items-start border-b border-pink-50 hover:bg-pink-50/50 transition-colors ${!n.read ? 'bg-pink-50/30' : ''}`}
                     >
-                      <div className="flex items-start gap-2">
-                        {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[#E63946] flex-shrink-0" />}
-                        <div className={`flex-1 min-w-0 ${n.read ? 'pl-4' : ''}`}>
-                          <p className="text-sm font-semibold text-gray-800 truncate">{n.title}</p>
-                          <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{n.body}</p>
-                          <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
+                      <button
+                        onClick={() => handleNotifClick(n)}
+                        className="flex-1 text-left px-4 py-3 min-w-0"
+                      >
+                        <div className="flex items-start gap-2">
+                          {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-[#E63946] flex-shrink-0" />}
+                          <div className={`flex-1 min-w-0 ${n.read ? 'pl-4' : ''}`}>
+                            <p className="text-sm font-semibold text-gray-800 truncate">{n.title}</p>
+                            <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{n.body}</p>
+                            <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
+                          </div>
                         </div>
-                      </div>
-                    </button>
+                      </button>
+                      <button
+                        onClick={() => handleDismiss(n.id)}
+                        className="p-2 mt-1.5 mr-1 text-gray-300 hover:text-[#E63946] flex-shrink-0"
+                        aria-label="ลบการแจ้งเตือน"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
                   ))
                 )}
               </div>

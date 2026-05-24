@@ -24,6 +24,18 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseServiceClient();
 
+    // Retention: prune notifications older than 90 days so the inbox tables stay bounded.
+    // Cascades to notification_reads (ON DELETE CASCADE). Best-effort — never fails the cron.
+    const NOTIFICATION_RETENTION_DAYS = 90;
+    const notifCutoff = new Date(
+      Date.now() - NOTIFICATION_RETENTION_DAYS * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const { error: pruneError } = await supabase
+      .from('notifications')
+      .delete()
+      .lt('created_at', notifCutoff);
+    if (pruneError) console.error('notification prune error:', pruneError);
+
     // Get user count from Supabase Auth (real users)
     const { data: allUsers } = await supabase.auth.admin.listUsers({ 
       perPage: 10000,

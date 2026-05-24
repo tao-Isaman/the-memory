@@ -544,17 +544,20 @@ export interface Database {
         Row: {
           notification_id: string
           user_id: string
-          read_at: string
+          read_at: string | null
+          dismissed_at: string | null
         }
         Insert: {
           notification_id: string
           user_id: string
-          read_at?: string
+          read_at?: string | null
+          dismissed_at?: string | null
         }
         Update: {
           notification_id?: string
           user_id?: string
-          read_at?: string
+          read_at?: string | null
+          dismissed_at?: string | null
         }
         Relationships: [
           {
