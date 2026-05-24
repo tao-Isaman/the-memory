@@ -153,18 +153,31 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
         {/* Animated Background Hearts */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(12)].map((_, i) => (
+          {[
+            { left: 8, top: 15, delay: 0.2, duration: 5.5, size: 28 },
+            { left: 22, top: 70, delay: 1.4, duration: 6.8, size: 40 },
+            { left: 35, top: 35, delay: 2.1, duration: 4.5, size: 22 },
+            { left: 48, top: 82, delay: 0.8, duration: 7.2, size: 34 },
+            { left: 60, top: 12, delay: 3.0, duration: 5.0, size: 48 },
+            { left: 72, top: 55, delay: 1.1, duration: 6.0, size: 26 },
+            { left: 85, top: 28, delay: 2.6, duration: 7.8, size: 38 },
+            { left: 92, top: 75, delay: 0.5, duration: 4.8, size: 30 },
+            { left: 15, top: 48, delay: 3.4, duration: 6.5, size: 44 },
+            { left: 55, top: 60, delay: 1.8, duration: 5.3, size: 24 },
+            { left: 78, top: 88, delay: 2.3, duration: 7.0, size: 36 },
+            { left: 40, top: 5, delay: 0.9, duration: 6.2, size: 32 },
+          ].map((h, i) => (
             <div
               key={i}
               className="absolute animate-float opacity-[0.06]"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-                animationDuration: `${4 + Math.random() * 4}s`,
+                left: `${h.left}%`,
+                top: `${h.top}%`,
+                animationDelay: `${h.delay}s`,
+                animationDuration: `${h.duration}s`,
               }}
             >
-              <HeartIcon size={20 + Math.random() * 40} color="#E8A0B5" />
+              <HeartIcon size={h.size} color="#E8A0B5" />
             </div>
           ))}
         </div>

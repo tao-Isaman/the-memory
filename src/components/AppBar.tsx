@@ -5,25 +5,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from './HeartIcon';
-import { Bell, User, LogOut, Coins } from 'lucide-react';
-import { getLatestVersion } from '@/data/patch-notes';
-import { hasUnseenUpdate, setLastSeenVersion } from '@/lib/patch-notes';
+import { User, LogOut, Coins } from 'lucide-react';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
+import NotificationBell from './NotificationBell';
 
 export default function AppBar() {
   const { user, signOut } = useAuth();
   const { balance: creditBalance } = useCreditBalance();
   const router = useRouter();
-  const [hasNewUpdate, setHasNewUpdate] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const latestVersion = getLatestVersion();
-    if (hasUnseenUpdate(latestVersion)) {
-      setHasNewUpdate(true);
-    }
-  }, []);
 
   // Close menu on click outside
   useEffect(() => {
@@ -36,12 +27,6 @@ export default function AppBar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
-
-  const handleBellClick = () => {
-    setLastSeenVersion(getLatestVersion());
-    setHasNewUpdate(false);
-    router.push('/updates');
-  };
 
   const handleSignOut = async () => {
     setShowMenu(false);
@@ -82,16 +67,7 @@ export default function AppBar() {
           </button>
 
           {/* Notification Bell */}
-          <button
-            onClick={handleBellClick}
-            className="relative w-9 h-9 rounded-full hover:bg-pink-50 flex items-center justify-center transition-colors"
-            aria-label="อัปเดตใหม่"
-          >
-            <Bell size={20} className="text-gray-500" />
-            {hasNewUpdate && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#E63946] rounded-full border-2 border-white" />
-            )}
-          </button>
+          <NotificationBell />
 
           {/* Profile Avatar + Dropdown */}
           <div className="relative" ref={menuRef}>

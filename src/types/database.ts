@@ -504,6 +504,100 @@ export interface Database {
           }
         ]
       }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string | null
+          title: string
+          body: string
+          url: string | null
+          icon: string | null
+          type: string
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          title: string
+          body: string
+          url?: string | null
+          icon?: string | null
+          type?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          title?: string
+          body?: string
+          url?: string | null
+          icon?: string | null
+          type?: string
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notification_reads: {
+        Row: {
+          notification_id: string
+          user_id: string
+          read_at: string
+        }
+        Insert: {
+          notification_id: string
+          user_id: string
+          read_at?: string
+        }
+        Update: {
+          notification_id?: string
+          user_id?: string
+          read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent: string | null
+          created_at: string
+          last_used_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          user_agent?: string | null
+          created_at?: string
+          last_used_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          user_agent?: string | null
+          created_at?: string
+          last_used_at?: string
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           id: string

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import HeartLoader from '@/components/HeartLoader';
-import { Users, BookHeart, LayoutDashboard, LogOut, ShieldAlert, Sparkles, Coins, HandCoins } from 'lucide-react';
+import { Users, BookHeart, LayoutDashboard, LogOut, ShieldAlert, Sparkles, Coins, HandCoins, Bell } from 'lucide-react';
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? '';
 
@@ -80,6 +80,7 @@ export default function AdminLayout({
     { href: '/admin/referral-claims', label: 'Referral Claims', icon: HandCoins },
     { href: '/admin/credits', label: 'Credits', icon: Coins },
     { href: '/admin/cartoons', label: 'Cartoons', icon: Sparkles },
+    { href: '/admin/notifications', label: 'Notifications', icon: Bell },
   ];
 
   return (
