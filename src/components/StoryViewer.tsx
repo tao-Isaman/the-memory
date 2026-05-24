@@ -87,10 +87,12 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
       );
 
     case 'youtube':
-      // 16:9 is wider than image stories, so give it a wider card (max-w-4xl)
-      // — at full width the video lands ~480px tall, matching the image cap.
+      // The embed sizes via padding-top % (no intrinsic width), so the card
+      // needs an explicit w-full — otherwise mx-auto inside the flex wrapper
+      // collapses it to a tiny box. max-w-4xl keeps the 16:9 video ~480px tall
+      // on desktop, matching the image cap.
       return (
-        <div className="viewer-card p-6 max-w-4xl mx-auto">
+        <div className="viewer-card p-6 w-full max-w-4xl mx-auto">
           <TitleHeader title={story.title} />
           <YouTubeEmbed url={story.content.youtubeUrl} />
         </div>
