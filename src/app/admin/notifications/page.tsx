@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import { Send, Bell, Users, User as UserIcon } from 'lucide-react';
 
@@ -14,6 +14,28 @@ export default function AdminNotificationsPage() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [subs, setSubs] = useState<{
+    totalSubscribers: number;
+    totalDevices: number;
+    subscribers: { userId: string; email: string; devices: number; lastUsed: string }[];
+  } | null>(null);
+
+  useEffect(() => {
+    const loadSubscribers = async () => {
+      try {
+        const client = getSupabaseBrowserClient();
+        const sess = await client?.auth.getSession();
+        const token = sess?.data.session?.access_token;
+        const res = await fetch('/api/admin/notifications/subscribers', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) setSubs(await res.json());
+      } catch {
+        /* best-effort */
+      }
+    };
+    loadSubscribers();
+  }, []);
 
   const handleSend = async () => {
     setError(null);
@@ -163,6 +185,41 @@ export default function AdminNotificationsPage() {
       <p className="text-xs text-gray-400 mt-4">
         การแจ้งเตือนจะแสดงในกระดิ่งของผู้ใช้ทันที · push จะส่งถึงเฉพาะผู้ที่เปิดการแจ้งเตือนบนอุปกรณ์ไว้
       </p>
+
+      {/* Who has enabled push notifications */}
+      {subs && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="text-pink-600" size={20} />
+            <h2 className="text-lg font-bold text-gray-800">ผู้เปิดรับการแจ้งเตือน (push)</h2>
+          </div>
+          <div className="flex gap-6 mb-4">
+            <div>
+              <span className="text-2xl font-bold text-pink-600">{subs.totalSubscribers}</span>{' '}
+              <span className="text-sm text-gray-500">คน</span>
+            </div>
+            <div>
+              <span className="text-2xl font-bold text-gray-700">{subs.totalDevices}</span>{' '}
+              <span className="text-sm text-gray-500">อุปกรณ์</span>
+            </div>
+          </div>
+          {subs.subscribers.length === 0 ? (
+            <p className="text-sm text-gray-400">ยังไม่มีผู้เปิดรับการแจ้งเตือน</p>
+          ) : (
+            <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
+              {subs.subscribers.map((s) => (
+                <div key={s.userId} className="flex items-center justify-between py-2 text-sm">
+                  <span className="text-gray-700 truncate mr-2">{s.email}</span>
+                  <span className="text-gray-400 text-xs flex-shrink-0">
+                    {s.devices} อุปกรณ์ ·{' '}
+                    {new Date(s.lastUsed).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

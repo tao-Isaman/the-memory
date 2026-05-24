@@ -1,6 +1,7 @@
 // Client-side PWA helpers: device identity, platform detection, standalone
 // detection, and install/launch tracking (to our DB + GA4).
 import { trackEvent } from './analytics';
+import { getSupabaseBrowserClient } from './supabase';
 
 const DEVICE_ID_KEY = 'pwa_device_id';
 
@@ -59,11 +60,26 @@ export async function trackLaunch(): Promise<void> {
   await sendToServer('launch');
 }
 
+async function getAccessToken(): Promise<string | null> {
+  try {
+    const client = getSupabaseBrowserClient();
+    const sess = await client?.auth.getSession();
+    return sess?.data.session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function sendToServer(event: 'installed' | 'launch'): Promise<void> {
   try {
+    // Attach the user's token when logged in so the install/launch can be linked to them.
+    const token = await getAccessToken();
     await fetch('/api/pwa/track', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       keepalive: true,
       body: JSON.stringify({
         event,
