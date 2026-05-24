@@ -434,8 +434,10 @@ export default function MemoryViewerPage({ params }: PageProps) {
         <div className="absolute right-0 top-0 w-[70%] h-full z-20 pointer-events-none" />
 
         {/* Story content with slide animation */}
+        {/* YouTube needs a wider frame than other stories so its 16:9 video
+            renders as tall as image stories (see StoryViewer youtube case). */}
         <div
-          className="w-full max-w-2xl relative z-10 h-full flex flex-col justify-center"
+          className={`w-full ${currentStory?.type === 'youtube' ? 'max-w-4xl' : 'max-w-2xl'} relative z-10 h-full flex flex-col justify-center`}
           style={{ animation: getStoryAnimation(animState) }}
         >
           {isPasswordLocked && currentStory?.type === 'password' ? (
