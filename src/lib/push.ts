@@ -43,7 +43,12 @@ export async function getPushState(): Promise<{ permission: PushPermissionState;
   return { permission, subscribed };
 }
 
-export async function subscribeToPush(): Promise<{ ok: boolean; error?: string }> {
+export async function subscribeToPush(): Promise<{
+  ok: boolean;
+  error?: string;
+  creditsGranted?: number;
+  newBalance?: number;
+}> {
   if (!isPushSupported()) return { ok: false, error: 'unsupported' };
   const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   if (!vapid) return { ok: false, error: 'not-configured' };
@@ -72,7 +77,8 @@ export async function subscribeToPush(): Promise<{ ok: boolean; error?: string }
       }),
     });
     if (!res.ok) return { ok: false, error: 'save-failed' };
-    return { ok: true };
+    const data = await res.json().catch(() => ({} as { creditsGranted?: number; newBalance?: number }));
+    return { ok: true, creditsGranted: data.creditsGranted ?? 0, newBalance: data.newBalance };
   } catch {
     return { ok: false, error: 'subscribe-failed' };
   }

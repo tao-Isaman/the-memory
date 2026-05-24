@@ -235,6 +235,7 @@ export interface Database {
           balance: number
           total_purchased: number
           total_used: number
+          push_credits_claimed: boolean
           created_at: string
           updated_at: string
         }
@@ -244,6 +245,7 @@ export interface Database {
           balance?: number
           total_purchased?: number
           total_used?: number
+          push_credits_claimed?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -253,6 +255,7 @@ export interface Database {
           balance?: number
           total_purchased?: number
           total_used?: number
+          push_credits_claimed?: boolean
           created_at?: string
           updated_at?: string
         }

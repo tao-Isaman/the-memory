@@ -12,6 +12,7 @@ import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
 import ProfileCompletionBanner from '@/components/ProfileCompletionBanner';
+import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon } from 'lucide-react';
 import CartoonCreator from '@/components/CartoonCreator';
 import { trackEvent } from '@/lib/analytics';
@@ -89,6 +90,9 @@ export default function DashboardPage() {
       <div className="max-w-4xl mx-auto px-4 pt-6 pb-12">
         {/* Profile Completion Banner */}
         {user && <ProfileCompletionBanner userId={user.id} />}
+
+        {/* Push notification opt-in prompt (one-time credit reward) */}
+        {user && <PushNotificationPrompt />}
 
         {/* Tab Bar */}
         <div className="flex justify-center mb-6">

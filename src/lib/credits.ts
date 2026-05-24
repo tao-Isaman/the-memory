@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 import { CreditPackage, UserCredits, CreditTransaction } from '@/types/credits';
+import { NOTIFICATION_CREDITS } from '@/lib/constants';
 
 // -- Row Converters --
 
@@ -209,6 +210,61 @@ export async function addCredits(
 
   console.log(`Added ${credits} credits for user ${userId}, new balance: ${newBalance}`);
   return { success: true, newBalance };
+}
+
+/**
+ * One-time credit reward for enabling push notifications. Race-safe via an
+ * optimistic lock on push_credits_claimed (balance + flag updated together, so
+ * only one concurrent caller wins). Returns granted=0 if already claimed.
+ */
+export async function grantPushCredits(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<{ granted: number; newBalance: number }> {
+  const userCredits = await ensureUserCreditsRow(supabase, userId);
+
+  const { data: row } = await supabase
+    .from('user_credits')
+    .select('balance, total_purchased, push_credits_claimed')
+    .eq('user_id', userId)
+    .single();
+
+  if (!row || row.push_credits_claimed) {
+    return { granted: 0, newBalance: row?.balance ?? userCredits.balance };
+  }
+
+  const newBalance = row.balance + NOTIFICATION_CREDITS;
+
+  const { data: claimed, error: claimErr } = await supabase
+    .from('user_credits')
+    .update({
+      balance: newBalance,
+      total_purchased: row.total_purchased + NOTIFICATION_CREDITS,
+      push_credits_claimed: true,
+    })
+    .eq('user_id', userId)
+    .eq('push_credits_claimed', false) // optimistic lock
+    .select('balance')
+    .single();
+
+  if (claimErr || !claimed) {
+    // Lost the race (another request just claimed it) — don't double-grant.
+    const balance = await getUserCreditBalance(supabase, userId);
+    return { granted: 0, newBalance: balance };
+  }
+
+  await supabase.from('credit_transactions').insert({
+    user_id: userId,
+    type: 'purchase',
+    amount: NOTIFICATION_CREDITS,
+    balance_after: newBalance,
+    description: `โบนัสเปิดการแจ้งเตือน (${NOTIFICATION_CREDITS} เครดิต)`,
+  });
+
+  console.log(
+    `Granted ${NOTIFICATION_CREDITS} push-notification credits to user ${userId}, new balance: ${newBalance}`,
+  );
+  return { granted: NOTIFICATION_CREDITS, newBalance };
 }
 
 export async function getCreditTransactions(

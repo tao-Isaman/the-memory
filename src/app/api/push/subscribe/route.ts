@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, getBearerUser } from '@/lib/supabase-server';
+import { grantPushCredits } from '@/lib/credits';
 
 export const runtime = 'nodejs';
 
@@ -34,7 +35,10 @@ export async function POST(request: NextRequest) {
     console.error('push subscribe error:', error);
     return NextResponse.json({ error: 'Database error' }, { status: 500 });
   }
-  return NextResponse.json({ ok: true });
+
+  // One-time credit reward for turning on push notifications.
+  const reward = await grantPushCredits(supabase, user.id);
+  return NextResponse.json({ ok: true, creditsGranted: reward.granted, newBalance: reward.newBalance });
 }
 
 /** Remove a Web Push subscription for the authenticated user. */

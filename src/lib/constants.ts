@@ -31,6 +31,7 @@ export const JOB_OPTIONS = [
 
 export const PROFILE_COMPLETION_CREDITS = 10;
 export const CARTOON_CREDIT_COST = 10;
+export const NOTIFICATION_CREDITS = 10; // one-time bonus for enabling push notifications
 
 // Character limits for text inputs in stories.
 // Tuned for how each field renders in the viewer (mobile-first, ~40 Thai chars/line).
