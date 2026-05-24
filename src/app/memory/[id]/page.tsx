@@ -14,6 +14,7 @@ import PasswordGate from '@/components/PasswordGate';
 import PaymentButton from '@/components/PaymentButton';
 import { Eye, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import { useMemoryViewTracking } from '@/hooks/useMemoryViewTracking';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -192,6 +193,26 @@ export default function MemoryViewerPage({ params }: PageProps) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlePrevious, handleNext, isPasswordLocked, isQuestionLocked, isLastStory, sortedMemory, user, router]);
+
+  // ── Phase 0: recipient view tracking (engagement baseline) ──
+  const ownerFlag = !!(user && memory && memory.userId === user.id);
+  const isViewable = !!sortedMemory && (sortedMemory.status === 'active' || ownerFlag);
+  const { reportProgress, markComplete } = useMemoryViewTracking({
+    memoryId: id,
+    enabled: isViewable,
+    isOwner: ownerFlag,
+    storiesTotal: sortedMemory?.stories.length ?? 0,
+  });
+
+  useEffect(() => {
+    reportProgress(currentIndex);
+  }, [currentIndex, reportProgress]);
+
+  useEffect(() => {
+    if (isLastStory && !isPasswordLocked && !isQuestionLocked) {
+      markComplete();
+    }
+  }, [isLastStory, isPasswordLocked, isQuestionLocked, markComplete]);
 
   if (loading) {
     return (

@@ -455,6 +455,55 @@ export interface Database {
           }
         ]
       }
+      memory_views: {
+        Row: {
+          id: string
+          memory_id: string
+          viewer_id: string
+          is_owner: boolean
+          stories_total: number
+          max_story_reached: number
+          completed: boolean
+          duration_seconds: number
+          started_at: string
+          last_event_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          memory_id: string
+          viewer_id: string
+          is_owner?: boolean
+          stories_total?: number
+          max_story_reached?: number
+          completed?: boolean
+          duration_seconds?: number
+          started_at?: string
+          last_event_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          memory_id?: string
+          viewer_id?: string
+          is_owner?: boolean
+          stories_total?: number
+          max_story_reached?: number
+          completed?: boolean
+          duration_seconds?: number
+          started_at?: string
+          last_event_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_views_memory_id_fkey"
+            columns: ["memory_id"]
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       user_profiles: {
         Row: {
           id: string

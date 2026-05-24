@@ -15,7 +15,9 @@ type EventName =
   | 'pwa_install_accepted'
   | 'pwa_install_dismissed'
   | 'pwa_installed'
-  | 'pwa_launch_standalone';
+  | 'pwa_launch_standalone'
+  | 'view_memory'
+  | 'complete_memory';
 
 interface EventParams {
   use_case?: string;
