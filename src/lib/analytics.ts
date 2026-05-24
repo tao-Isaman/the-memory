@@ -17,7 +17,9 @@ type EventName =
   | 'pwa_installed'
   | 'pwa_launch_standalone'
   | 'view_memory'
-  | 'complete_memory';
+  | 'complete_memory'
+  | 'click_create_cta'
+  | 'replay_memory';
 
 interface EventParams {
   use_case?: string;

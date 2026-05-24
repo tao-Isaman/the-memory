@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, use, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Memory, MemoryStory } from '@/types/memory';
+import { Memory, MemoryStory, MemoryTheme } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,6 +12,8 @@ import HeartLoader from '@/components/HeartLoader';
 import StoryViewer from '@/components/StoryViewer';
 import PasswordGate from '@/components/PasswordGate';
 import PaymentButton from '@/components/PaymentButton';
+import CelebrationBurst from '@/components/CelebrationBurst';
+import MemoryEndingScreen from '@/components/MemoryEndingScreen';
 import { Eye, X } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { useMemoryViewTracking } from '@/hooks/useMemoryViewTracking';
@@ -30,6 +32,17 @@ const floatingHearts = [
   { size: 20, pos: { top: '45%', right: '3%' } as React.CSSProperties, delay: '2s', duration: '7.5s' },
   { size: 16, pos: { top: '90%', left: '12%' } as React.CSSProperties, delay: '4s', duration: '8.5s' },
 ];
+
+// Map a memory's theme to the matching use-case slug so the create flow opens
+// pre-themed to what the recipient just experienced (drives view→creator conversion).
+const THEME_TO_USECASE: Partial<Record<MemoryTheme, string>> = {
+  love: 'surprise-gift',
+  anniversary: 'anniversary',
+  birthday: 'birthday',
+  apology: 'apology',
+  longdistance: 'long-distance',
+  family: 'family',
+};
 
 function getStoryAnimation(state: AnimState): string {
   switch (state) {
@@ -52,6 +65,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
   const [isQuestionLocked, setIsQuestionLocked] = useState(false);
   const [revealedStories, setRevealedStories] = useState<Set<string>>(new Set());
   const [animState, setAnimState] = useState<AnimState>('idle');
+  const [showEnding, setShowEnding] = useState(false);
   const isNavigating = useRef(false);
 
   const sortedMemory = useMemo(() => {
@@ -163,27 +177,27 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
     if (relativeX < 0.3) {
       handlePrevious();
-    } else if (isLastStory && sortedMemory) {
-      const isOwner = user && sortedMemory.userId === user.id;
-      const isPreview = sortedMemory.status !== 'active' && isOwner;
-      router.push(isPreview ? `/create?edit=${sortedMemory.id}` : '/');
+    } else if (isLastStory) {
+      setShowEnding(true);
     } else {
       handleNext();
     }
-  }, [isPasswordLocked, isQuestionLocked, handlePrevious, handleNext, isLastStory, sortedMemory, user, router]);
+  }, [isPasswordLocked, isQuestionLocked, handlePrevious, handleNext, isLastStory]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (showEnding) {
+        if (e.key === 'ArrowLeft') setShowEnding(false);
+        return;
+      }
       if (isPasswordLocked || isQuestionLocked || isNavigating.current) return;
 
       if (e.key === 'ArrowLeft') {
         handlePrevious();
       } else if (e.key === 'ArrowRight') {
-        if (isLastStory && sortedMemory) {
-          const isOwner = user && sortedMemory.userId === user.id;
-          const isPreview = sortedMemory.status !== 'active' && isOwner;
-          router.push(isPreview ? `/create?edit=${sortedMemory.id}` : '/');
+        if (isLastStory) {
+          setShowEnding(true);
         } else {
           handleNext();
         }
@@ -192,7 +206,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handlePrevious, handleNext, isPasswordLocked, isQuestionLocked, isLastStory, sortedMemory, user, router]);
+  }, [handlePrevious, handleNext, isPasswordLocked, isQuestionLocked, isLastStory, showEnding]);
 
   // ── Phase 0: recipient view tracking (engagement baseline) ──
   const ownerFlag = !!(user && memory && memory.userId === user.id);
@@ -213,6 +227,29 @@ export default function MemoryViewerPage({ params }: PageProps) {
       markComplete();
     }
   }, [isLastStory, isPasswordLocked, isQuestionLocked, markComplete]);
+
+  const handleReplay = useCallback(() => {
+    setShowEnding(false);
+    setRevealedStories(new Set());
+    setAnimState('idle');
+    isNavigating.current = false;
+    setCurrentIndex(0);
+    const first = sortedMemory?.stories[0];
+    setIsPasswordLocked(first?.type === 'password');
+    setIsQuestionLocked(first?.type === 'question');
+    trackEvent('replay_memory', { memory_id: id });
+  }, [sortedMemory, id]);
+
+  const handleCreateOwn = useCallback(() => {
+    const slug = sortedMemory ? THEME_TO_USECASE[sortedMemory.theme] : undefined;
+    trackEvent('click_create_cta', { memory_id: id, theme: sortedMemory?.theme });
+    if (user) {
+      if (slug) sessionStorage.setItem('pending_usecase', slug);
+      router.push('/create');
+    } else {
+      router.push(slug ? `/login?usecase=${slug}` : '/login');
+    }
+  }, [sortedMemory, id, user, router]);
 
   if (loading) {
     return (
@@ -302,7 +339,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
               className="h-[3px] flex-1 rounded-full overflow-hidden"
               style={{ backgroundColor: `${themeColors.dark}18` }}
             >
-              {i < currentIndex ? (
+              {showEnding || i < currentIndex ? (
                 <div
                   className="w-full h-full rounded-full"
                   style={{ backgroundColor: themeColors.primary }}
@@ -371,7 +408,23 @@ export default function MemoryViewerPage({ params }: PageProps) {
         </div>
       )}
 
+      {/* ── Ending screen (after the last story) ── */}
+      {showEnding && (
+        <>
+          <CelebrationBurst themeColors={themeColors} />
+          <MemoryEndingScreen
+            themeColors={themeColors}
+            isOwner={!!isOwner}
+            isPreviewMode={!!isPreviewMode}
+            editHref={closeHref}
+            onReplay={handleReplay}
+            onCreateOwn={handleCreateOwn}
+          />
+        </>
+      )}
+
       {/* ── Story content area (tappable) ── */}
+      {!showEnding && (
       <div
         className="grow relative z-10 flex items-center justify-center p-4 cursor-pointer"
         onClick={handleContentTap}
@@ -403,21 +456,22 @@ export default function MemoryViewerPage({ params }: PageProps) {
           ) : null}
         </div>
       </div>
+      )}
 
       {/* ── Floating completion button (last story) ── */}
-      {isLastStory && !isPasswordLocked && !isQuestionLocked && (
+      {isLastStory && !isPasswordLocked && !isQuestionLocked && !showEnding && (
         <div className="absolute bottom-8 left-0 right-0 z-40 flex justify-center animate-fade-in-up">
-          <Link
-            href={closeHref}
+          <button
+            onClick={() => setShowEnding(true)}
             className="flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
             style={{
               background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
               boxShadow: `0 8px 25px ${themeColors.dark}50`,
             }}
           >
-            {isPreviewMode ? 'แก้ไขต่อ' : 'เสร็จสิ้น'}
+            เสร็จสิ้น
             <HeartIcon size={18} filled color="white" />
-          </Link>
+          </button>
         </div>
       )}
     </main>
