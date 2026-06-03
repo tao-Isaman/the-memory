@@ -41,6 +41,7 @@ export default function SlideshowViewer({
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const touchStartXRef = useRef<number | null>(null);
     const touchStartYRef = useRef<number | null>(null);
+    const swipeHandledRef = useRef(false);
 
     // Respect the user's motion preference: skip ken-burns + crossfade when reduced.
     const [reducedMotion, setReducedMotion] = useState(false);
@@ -88,15 +89,17 @@ export default function SlideshowViewer({
     // Manual navigation — clamps to ends (no wrap) and locks auto-play permanently.
     const goTo = useCallback((target: number) => {
         const clamped = Math.max(0, Math.min(target, total - 1));
+        if (clamped === index) return; // boundary no-op: don't pause, don't re-set index
         setPaused(true);
         setIndex(clamped);
-    }, [total]);
+    }, [total, index]);   // NOTE: add `index` to deps (it's now read inside)
 
     const prev = useCallback(() => goTo(index - 1), [goTo, index]);
     const next = useCallback(() => goTo(index + 1), [goTo, index]);
 
     // Touch swipe inside the stage — self-contained, never bubbles to story nav.
     const handleTouchStart = (e: React.TouchEvent) => {
+        swipeHandledRef.current = false;
         touchStartXRef.current = e.touches[0].clientX;
         touchStartYRef.current = e.touches[0].clientY;
     };
@@ -109,19 +112,29 @@ export default function SlideshowViewer({
         touchStartYRef.current = null;
         // Ignore mostly-vertical gestures (let the page scroll).
         if (Math.abs(dx) <= SWIPE_THRESHOLD || Math.abs(dx) <= Math.abs(dy)) return;
+        const dir = dx > 0 ? -1 : 1;            // right-swipe -> prev, left-swipe -> next
+        const target = index + dir;
+        const clamped = Math.max(0, Math.min(target, total - 1));
+        if (clamped === index) return;          // boundary: let it bubble, no needless pause, don't mark handled
+        swipeHandledRef.current = true;         // swallow the browser's trailing synthesized click
         e.stopPropagation();
-        if (dx > 0) prev();
-        else next();
+        goTo(clamped);
     };
 
     // Tap zones inside the stage: left 30% prev, right 70% next.
-    // stopPropagation so the page's story-level tap nav never hijacks the album.
     const handleStageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
+        if (swipeHandledRef.current) {
+            swipeHandledRef.current = false; // consume; next real tap proceeds
+            e.stopPropagation();             // swallow the synthesized click after a handled swipe
+            return;
+        }
         const rect = e.currentTarget.getBoundingClientRect();
         const ratio = (e.clientX - rect.left) / rect.width;
-        if (ratio < 0.3) prev();
-        else next();
+        const target = ratio < 0.3 ? index - 1 : index + 1;
+        const clamped = Math.max(0, Math.min(target, total - 1));
+        if (clamped === index) return; // let the tap bubble to the page (next/prev STORY)
+        e.stopPropagation();
+        goTo(clamped);
     };
 
     const isLastSlide = index >= total - 1;
@@ -136,7 +149,7 @@ export default function SlideshowViewer({
             <div
                 data-interactive
                 className="relative w-full aspect-[4/5] max-h-[500px] rounded-2xl overflow-hidden"
-                style={{ background: `${themeColors.background}` }}
+                style={{ background: `${themeColors.background}`, touchAction: 'pan-y' }}
                 onClick={handleStageClick}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
@@ -161,7 +174,7 @@ export default function SlideshowViewer({
                             {i === 0 ? (
                                 // First slide uses the themed heart-loader shimmer.
                                 <ImageWithLoader
-                                    key={isActive ? `kb-${index}` : 'idle'}
+                                    key={`loader-${i}`}
                                     src={url}
                                     alt={`รูปที่ ${i + 1} จาก ${total}`}
                                     className={`w-full h-full object-cover ${isActive ? kbClass : ''}`}

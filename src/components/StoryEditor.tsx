@@ -282,6 +282,32 @@ export default function StoryEditor({
     }
   }, [type]);
 
+  // Reset per-type transient state when the user switches story type (create flow only;
+  // `type` is locked while editing so this is a no-op there). Prevents a HOT MIC: leaving
+  // 'voice' mid-record must release the stream — the unmount cleanup does NOT fire on a switch.
+  useEffect(() => {
+    if (type !== 'voice') {
+      // Detach onstop FIRST so the (async) stop can't re-set recMode='recorded'/audioBlob.
+      const recorder = mediaRecorderRef.current;
+      if (recorder) {
+        recorder.onstop = null;
+        if (recorder.state !== 'inactive') recorder.stop();
+        mediaRecorderRef.current = null;
+      }
+      chunksRef.current = [];
+      teardownRecording();   // stops mic tracks + clears the 200ms interval (idempotent)
+      resetVoice();          // revokes audioObjectUrlRef + clears blob/preview/duration/mime/url
+      setRecMode('idle');
+      setRecSeconds(0);
+    }
+    if (type !== 'slideshow' && slides.length > 0) {
+      slideObjectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+      slideObjectUrlsRef.current.clear();
+      setSlides([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
+
   // Cleanup on unmount: revoke all object URLs, release the mic, clear the rec timer.
   useEffect(() => {
     const slideUrls = slideObjectUrlsRef.current;
@@ -384,6 +410,10 @@ export default function StoryEditor({
         const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
         setRecSeconds(elapsed);
         if (elapsed >= VOICE_MAX_DURATION_SEC) {
+          if (recTimerRef.current) {
+            clearInterval(recTimerRef.current);
+            recTimerRef.current = null;
+          }
           stopRecording();
           showToast('อัดเสียงได้สูงสุด 1 นาที', 'info');
         }
@@ -420,34 +450,33 @@ export default function StoryEditor({
     // Probe duration via a throwaway <audio> element.
     const probeUrl = URL.createObjectURL(file);
     const probe = new Audio(probeUrl);
+    let settled = false;
+    const accept = (durationSec: number) => {
+      if (settled) return; settled = true;
+      clearTimeout(timer);
+      if (audioObjectUrlRef.current) URL.revokeObjectURL(audioObjectUrlRef.current);
+      audioObjectUrlRef.current = probeUrl;
+      setAudioBlob(file); setAudioMime(file.type || ''); setAudioSource('upload');
+      setAudioPreviewUrl(probeUrl); setAudioDuration(durationSec); setRecMode('recorded');
+    };
+    const reject = (msgKey: string) => {
+      if (settled) return; settled = true;
+      clearTimeout(timer); URL.revokeObjectURL(probeUrl); showToast(msgKey, 'error');
+    };
+    const timer = setTimeout(() => {
+      // No metadata after 4s (corrupt/edge/stalled): accept with provisional, but
+      // store 0 so the viewer treats the total as UNKNOWN (see B), never a fake 1:00.
+      accept(0);
+    }, 4000);
     probe.addEventListener('loadedmetadata', () => {
       const d = probe.duration;
       if (Number.isFinite(d) && d > VOICE_MAX_DURATION_SEC + 1) {
-        URL.revokeObjectURL(probeUrl);
-        showToast('เสียงยาวเกิน 1 นาที กรุณาเลือกไฟล์สั้นกว่านี้', 'error');
-        return;
+        reject('เสียงยาวเกิน 1 นาที กรุณาเลือกไฟล์สั้นกว่านี้'); return;
       }
-      // Infinity/NaN (some m4a) → accept with a provisional 60s; the viewer reconciles if finite.
-      const durationSec = Number.isFinite(d) && d > 0
-        ? Math.min(VOICE_MAX_DURATION_SEC, Math.max(1, Math.round(d)))
-        : VOICE_MAX_DURATION_SEC;
-
-      if (audioObjectUrlRef.current) {
-        URL.revokeObjectURL(audioObjectUrlRef.current);
-      }
-      audioObjectUrlRef.current = probeUrl;
-
-      setAudioBlob(file);
-      setAudioMime(file.type || '');
-      setAudioSource('upload');
-      setAudioPreviewUrl(probeUrl);
-      setAudioDuration(durationSec);
-      setRecMode('recorded');
+      // Non-finite (rare malformed/streamed upload) → store 0 = "unknown", NOT 60.
+      accept(Number.isFinite(d) && d > 0 ? Math.min(VOICE_MAX_DURATION_SEC, Math.max(1, Math.round(d))) : 0);
     });
-    probe.addEventListener('error', () => {
-      URL.revokeObjectURL(probeUrl);
-      showToast('ไฟล์นี้ไม่ใช่ไฟล์เสียง', 'error');
-    });
+    probe.addEventListener('error', () => reject('ไฟล์นี้ไม่ใช่ไฟล์เสียง'));
   };
 
   // Discard the current take and return to the record/upload chooser.
@@ -620,7 +649,7 @@ export default function StoryEditor({
         if (audioBlob) {
           try {
             setUploading(true);
-            finalAudioUrl = await uploadAudio(audioBlob, audioMime);
+            finalAudioUrl = await uploadAudio(audioBlob, audioMime, audioBlob instanceof File ? audioBlob.name : undefined);
           } catch {
             showToast('อัปโหลดเสียงไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
             setUploading(false);
@@ -629,7 +658,7 @@ export default function StoryEditor({
             setUploading(false);
           }
         }
-        const durationSec = Math.min(VOICE_MAX_DURATION_SEC, Math.max(1, Math.round(audioDuration)));
+        const durationSec = audioDuration > 0 ? Math.min(VOICE_MAX_DURATION_SEC, Math.round(audioDuration)) : 0;
         story = {
           ...baseStory,
           type: 'voice',

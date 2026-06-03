@@ -72,7 +72,9 @@ export default function VoicePlayer({
 
     const isPlaying = state === 'playing';
     const safeTotal = totalDuration > 0 ? totalDuration : durationSec;
-    const progress = safeTotal > 0 ? Math.min(1, currentTime / safeTotal) : 0;
+    // Unknown total: provisional durationSec<=0 AND no finite element duration yet.
+    const totalKnown = safeTotal > 0;
+    const progress = totalKnown ? Math.min(1, currentTime / safeTotal) : 0;
 
     const bars = useMemo(() => seededWaveform(audioUrl || 'voice'), [audioUrl]);
 
@@ -85,6 +87,16 @@ export default function VoicePlayer({
             setTotalDuration(el.duration);
         }
         setState((prev) => (prev === 'loading' ? 'ready' : prev));
+    }, []);
+
+    // Reconcile total whenever a finite duration becomes available, not just at
+    // loadedmetadata — many webm/m4a files only expose a finite el.duration after
+    // playback/seek begins (durationchange).
+    const handleDurationChange = useCallback(() => {
+        const el = audioRef.current;
+        if (el && Number.isFinite(el.duration) && el.duration > 0) {
+            setTotalDuration(el.duration);
+        }
     }, []);
 
     const handleTimeUpdate = useCallback(() => {
@@ -132,12 +144,16 @@ export default function VoicePlayer({
     const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const el = audioRef.current;
         if (!el) return;
-        const value = parseFloat(e.target.value);
+        let value = parseFloat(e.target.value);
+        // If the element knows its real (finite) duration, clamp so we never seek past the true end.
+        if (Number.isFinite(el.duration) && el.duration > 0) {
+            value = Math.min(value, el.duration);
+        }
         el.currentTime = value;
         setCurrentTime(value);
     }, []);
 
-    const playheadBar = Math.floor(progress * WAVEFORM_BARS);
+    const playheadBar = currentTime > 0 ? Math.floor(progress * WAVEFORM_BARS) : -1;
 
     // Aura ring tint per theme (foundation CSS reads these custom properties;
     // pink fallback applies if unset). Full-opacity start, transparent end.
@@ -177,6 +193,7 @@ export default function VoicePlayer({
                 ref={audioRef}
                 preload="metadata"
                 onLoadedMetadata={handleLoadedMetadata}
+                onDurationChange={handleDurationChange}
                 onTimeUpdate={handleTimeUpdate}
                 onEnded={handleEnded}
                 onError={handleError}
@@ -235,13 +252,13 @@ export default function VoicePlayer({
                 <input
                     type="range"
                     min={0}
-                    max={safeTotal || durationSec || 1}
+                    max={totalKnown ? safeTotal : Math.max(currentTime, 1)}
                     step={0.1}
-                    value={Math.min(currentTime, safeTotal || durationSec || 1)}
+                    value={Math.min(currentTime, totalKnown ? safeTotal : Math.max(currentTime, 1))}
                     onChange={handleSeek}
                     data-interactive
                     aria-label="เลื่อนตำแหน่งเสียง"
-                    className="absolute inset-0 w-full h-full cursor-pointer opacity-0"
+                    className="voice-seek absolute inset-0 w-full h-full cursor-pointer opacity-0 appearance-none [-webkit-appearance:none]"
                     style={{ touchAction: 'none' }}
                 />
             </div>
@@ -252,7 +269,7 @@ export default function VoicePlayer({
                 style={{ color: themeColors.dark }}
             >
                 <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(safeTotal)}</span>
+                <span>{totalKnown ? formatTime(safeTotal) : '—'}</span>
             </div>
 
             {/* Pre-play hint — hidden once playback has started once */}

@@ -153,12 +153,29 @@ body {
   animation: voice-aura 1.8s ease-in-out infinite;
 }
 
+/* Voice seek range - large invisible touch target for reliable drag-to-seek on iOS */
+.voice-seek { -webkit-appearance: none; appearance: none; background: transparent; }
+.voice-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px; height: 44px;   /* large hit target; iOS min recommended ~44px */
+  border-radius: 9999px;
+  background: transparent; border: none;
+}
+.voice-seek::-moz-range-thumb {
+  width: 44px; height: 44px; border-radius: 9999px;
+  background: transparent; border: none;
+}
+.voice-seek::-webkit-slider-runnable-track,
+.voice-seek::-moz-range-track { background: transparent; border: none; }
+
 /* Respect reduced-motion: disable decorative Ken Burns + voice aura */
 @media (prefers-reduced-motion: reduce) {
   .ken-burns-a,
   .ken-burns-b,
   .ken-burns-c,
-  .voice-aura {
+  .voice-aura,
+  .animate-pulse-heart,
+  .animate-float {
     animation: none;
   }
 }

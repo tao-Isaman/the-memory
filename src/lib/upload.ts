@@ -93,7 +93,7 @@ export async function uploadImage(file: File): Promise<string> {
  * Stores the recorded/uploaded container verbatim — NO transcoding, NO image processing.
  * Editor enforces the real 60s/10MB gate; this size check is defense in depth.
  */
-export async function uploadAudio(blob: Blob, mimeType: string): Promise<string> {
+export async function uploadAudio(blob: Blob, mimeType: string, fileName?: string): Promise<string> {
   if (!supabase) {
     throw new Error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.')
   }
@@ -114,16 +114,28 @@ export async function uploadAudio(blob: Blob, mimeType: string): Promise<string>
     'audio/wav': 'wav',
     'audio/x-wav': 'wav',
   }
-  const ext = extByMime[baseMime] || 'webm'
+  const mimeByExt: Record<string, string> = {
+    m4a: 'audio/mp4',
+    aac: 'audio/mp4',
+    mp3: 'audio/mpeg',
+    wav: 'audio/wav',
+    ogg: 'audio/ogg',
+    webm: 'audio/webm',
+  }
+  // Prefer the real MIME; fall back to the source filename's extension (iOS often gives empty file.type).
+  const srcExt = fileName?.toLowerCase().match(/\.(m4a|aac|mp3|wav|ogg|webm)$/)?.[1]
+  const ext = extByMime[baseMime] || srcExt || 'webm'
+
+  const contentType = baseMime || mimeByExt[ext] || 'audio/webm'
 
   // Generate unique filename in the `voices/` folder (matches the bucket INSERT RLS policy)
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`
-  const filePath = `voices/${fileName}`
+  const storedFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`
+  const filePath = `voices/${storedFileName}`
 
   const { error } = await supabase.storage
     .from('audio')
     .upload(filePath, blob, {
-      contentType: baseMime || 'audio/webm',
+      contentType,
       cacheControl: '3600',
     })
 
