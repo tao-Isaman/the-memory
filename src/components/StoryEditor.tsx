@@ -497,11 +497,12 @@ export default function StoryEditor({
   // ===================== SLIDESHOW =====================
 
   const handleSlidesAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = e.target.files;
+    // Snapshot into a real array BEFORE resetting the input — e.target.files is a
+    // LIVE FileList that gets emptied in place the moment value is cleared.
+    const incoming = Array.from(e.target.files ?? []);
     e.target.value = ''; // allow re-picking the same file
-    if (!picked || picked.length === 0) return;
+    if (incoming.length === 0) return;
 
-    const incoming = Array.from(picked);
     const remaining = SLIDESHOW_MAX_IMAGES - slides.length;
     if (incoming.length > remaining) {
       showToast('เลือกรูปได้สูงสุด 5 รูป', 'info');
@@ -510,7 +511,10 @@ export default function StoryEditor({
 
     const accepted: SlideItem[] = [];
     for (const file of toAdd) {
-      if (!file.type.startsWith('image/')) continue;
+      if (!file.type.startsWith('image/')) {
+        showToast('ไฟล์นี้ไม่ใช่รูปภาพ', 'error');
+        continue;
+      }
       if (file.size > SLIDESHOW_IMAGE_MAX_BYTES) {
         showToast('รูปภาพใหญ่เกินไป (สูงสุด 10MB)', 'error');
         continue;
