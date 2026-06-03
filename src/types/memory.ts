@@ -1,4 +1,4 @@
-export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question';
+export type StoryType = 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question' | 'voice' | 'slideshow';
 
 export interface BaseStory {
   id: string;
@@ -47,7 +47,26 @@ export interface QuestionStory extends BaseStory {
   };
 }
 
-export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory | QuestionStory;
+export interface VoiceStory extends BaseStory {
+  type: 'voice';
+  content: {
+    audioUrl: string;            // public URL in the `audio` bucket, voices/ folder (NEVER a blob/objectURL)
+    durationSec: number;         // 1..60 integer, computed editor-side (wall-clock for record, loadedmetadata for upload) — AUTHORITATIVE, sidesteps Chrome webm duration:Infinity
+    mimeType: string;            // ACTUAL recorded/uploaded container, e.g. 'audio/mp4' | 'audio/webm' | 'audio/mpeg' | 'audio/wav' — used for <source type>
+    source: 'record' | 'upload'; // analytics/future affordance; not viewer-critical
+    caption?: string;            // optional one-line caption under the player (<= STORY_TEXT_LIMITS.caption)
+  };
+}
+
+export interface SlideshowStory extends BaseStory {
+  type: 'slideshow';
+  content: {
+    imageUrls: string[];   // 2..5 public WebP URLs in the `images` bucket — array ORDER = display order
+    caption?: string;      // single overall caption shown beneath the stage (<= STORY_TEXT_LIMITS.caption)
+  };
+}
+
+export type MemoryStory = PasswordStory | ImageStory | TextStory | TextImageStory | YouTubeStory | ScratchStory | QuestionStory | VoiceStory | SlideshowStory;
 
 export type MemoryStatus = 'pending' | 'active' | 'failed';
 

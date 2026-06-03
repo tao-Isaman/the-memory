@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles, HelpCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles, HelpCircle, Mic, Images } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface Story {
   id: string;
-  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question';
+  type: 'password' | 'image' | 'text' | 'text-image' | 'youtube' | 'scratch' | 'question' | 'voice' | 'slideshow';
   priority: number;
   title: string | null;
   content: Record<string, unknown>;
@@ -116,6 +116,10 @@ export default function MemoryDetailsPage() {
         return <Sparkles size={18} className="text-amber-500" />;
       case 'question':
         return <HelpCircle size={18} className="text-indigo-500" />;
+      case 'voice':
+        return <Mic size={18} className="text-rose-500" />;
+      case 'slideshow':
+        return <Images size={18} className="text-teal-500" />;
       default:
         return null;
     }
@@ -233,6 +237,47 @@ export default function MemoryDetailsPage() {
             </div>
           </div>
         );
+      case 'voice':
+        return (
+          <div className="bg-rose-50 p-4 rounded-lg">
+            <p className="text-sm text-rose-600 mb-2">
+              Voice message{content.durationSec ? ` (${content.durationSec}s)` : ''}:
+            </p>
+            {content.audioUrl && (
+              <audio
+                src={content.audioUrl}
+                controls
+                className="w-full"
+              />
+            )}
+            {content.caption && (
+              <p className="text-gray-600 mt-2">{content.caption}</p>
+            )}
+          </div>
+        );
+      case 'slideshow': {
+        const imageUrls = Array.isArray(story.content.imageUrls)
+          ? (story.content.imageUrls as string[])
+          : [];
+        return (
+          <div>
+            <p className="text-sm text-teal-600 mb-2">Slideshow ({imageUrls.length} images):</p>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {imageUrls.map((url, index) => (
+                <img
+                  key={index}
+                  src={url}
+                  alt={`Slide ${index + 1}`}
+                  className="rounded-lg w-full aspect-square object-cover bg-gray-100"
+                />
+              ))}
+            </div>
+            {content.caption && (
+              <p className="text-gray-600 mt-2">{content.caption}</p>
+            )}
+          </div>
+        );
+      }
       default:
         return (
           <pre className="bg-gray-50 p-4 rounded-lg text-sm overflow-auto">

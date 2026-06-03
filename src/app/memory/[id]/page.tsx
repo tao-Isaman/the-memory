@@ -149,8 +149,9 @@ export default function MemoryViewerPage({ params }: PageProps) {
   const shouldAutoAdvance = !!currentStory &&
     !isPasswordLocked && !isQuestionLocked && !isLastStory &&
     currentStory.type !== 'password' && currentStory.type !== 'question' &&
-    currentStory.type !== 'youtube' &&
-    !(currentStory.type === 'scratch' && !revealedStories.has(currentStory.id));
+    currentStory.type !== 'youtube' && currentStory.type !== 'voice' &&
+    !(currentStory.type === 'scratch' && !revealedStories.has(currentStory.id)) &&
+    !(currentStory.type === 'slideshow' && !revealedStories.has(currentStory.id));
 
   // Auto-advance (always on for applicable stories)
   useEffect(() => {

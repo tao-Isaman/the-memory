@@ -29,14 +29,19 @@ export default function YouTubeEmbed({ url }: YouTubeEmbedProps) {
   }
 
   return (
-    <div className="relative w-full pt-[56.25%] rounded-xl overflow-hidden shadow-lg">
-      <iframe
-        className="absolute top-0 left-0 w-full h-full"
-        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
-        title="YouTube video"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
+    // Fill the space left under the title and center the video. aspect-video
+    // keeps 16:9; max-h-full lets it shrink to fit short viewports (instead of
+    // pushing the card past the screen and clipping the title above it).
+    <div className="flex-1 min-h-0 w-full flex items-center justify-center">
+      <div className="relative w-full max-h-full aspect-video rounded-xl overflow-hidden shadow-lg">
+        <iframe
+          className="absolute inset-0 w-full h-full"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
     </div>
   );
 }

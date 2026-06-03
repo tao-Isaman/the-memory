@@ -8,6 +8,8 @@ import HeartIcon from './HeartIcon';
 import ImageWithLoader from './ImageWithLoader';
 import ScratchCard from './ScratchCard';
 import QuestionGate from './QuestionGate';
+import VoicePlayer from './VoicePlayer';
+import SlideshowViewer from './SlideshowViewer';
 
 interface StoryViewerProps {
   story: MemoryStory;
@@ -87,12 +89,13 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
       );
 
     case 'youtube':
-      // The embed sizes via padding-top % (no intrinsic width), so the card
-      // needs an explicit w-full — otherwise mx-auto inside the flex wrapper
-      // collapses it to a tiny box. max-w-4xl keeps the 16:9 video ~480px tall
-      // on desktop, matching the image cap.
+      // w-full stops the card collapsing (the embed has no intrinsic width).
+      // flex-col + max-h-full keeps the card within the viewport so the title
+      // (flex-shrink-0) stays pinned at the top instead of being clipped when
+      // the wrapper vertically-centers an over-tall card. max-w-4xl keeps the
+      // 16:9 video ~480px tall on desktop, matching the image cap.
       return (
-        <div className="viewer-card p-6 w-full max-w-4xl mx-auto">
+        <div className="viewer-card p-6 w-full max-w-4xl mx-auto flex flex-col max-h-full min-h-0">
           <TitleHeader title={story.title} />
           <YouTubeEmbed url={story.content.youtubeUrl} />
         </div>
@@ -126,6 +129,35 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
           onUnlock={() => onReveal?.()}
           themeColors={themeColors}
         />
+      );
+
+    case 'voice':
+      return (
+        <div className="viewer-card p-8 max-w-md mx-auto flex flex-col items-center">
+          <TitleHeader title={story.title} />
+          <VoicePlayer
+            audioUrl={story.content.audioUrl}
+            durationSec={story.content.durationSec}
+            mimeType={story.content.mimeType}
+            caption={story.content.caption}
+            themeColors={themeColors}
+            onEnded={onReveal}
+          />
+        </div>
+      );
+
+    case 'slideshow':
+      return (
+        <div className="viewer-card p-3 sm:p-4 max-w-2xl mx-auto flex flex-col max-h-full w-full">
+          <TitleHeader title={story.title} />
+          <SlideshowViewer
+            imageUrls={story.content.imageUrls}
+            themeColors={themeColors}
+            initialRevealed={isRevealed}
+            onComplete={onReveal}
+            caption={story.content.caption}
+          />
+        </div>
       );
 
     default:

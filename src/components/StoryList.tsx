@@ -34,6 +34,10 @@ function getStoryPreview(story: MemoryStory): string {
       return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
     case 'youtube':
       return 'วิดีโอ YouTube';
+    case 'voice':
+      return story.content.caption || 'ข้อความเสียง';
+    case 'slideshow':
+      return story.content.caption || `${story.content.imageUrls.length} รูป`;
     default:
       return '';
   }

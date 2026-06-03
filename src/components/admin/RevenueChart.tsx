@@ -68,7 +68,7 @@ export default function RevenueChart({ data }: RevenueChartProps) {
                                 border: '1px solid #E5E7EB',
                                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                             }}
-                            formatter={(value: number | undefined) => [`฿${(value || 0).toLocaleString()}`, 'รายได้']}
+                            formatter={(value) => [`฿${(Number(value) || 0).toLocaleString()}`, 'รายได้']}
                         />
                         <Area
                             type="monotone"

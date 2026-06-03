@@ -111,6 +111,58 @@ body {
   to { transform: scaleX(1); }
 }
 
+/* Ken Burns slideshow - 3 variants cycled by slide index for visual variety */
+@keyframes ken-burns-a {
+  from { transform: scale(1) translate(0, 0); transform-origin: top left; }
+  to { transform: scale(1.1) translate(-1.5%, -1.5%); transform-origin: top left; }
+}
+
+@keyframes ken-burns-b {
+  from { transform: scale(1) translate(0, 0); transform-origin: center; }
+  to { transform: scale(1.1) translate(1.5%, -1%); transform-origin: center; }
+}
+
+@keyframes ken-burns-c {
+  from { transform: scale(1) translate(0, 0); transform-origin: bottom right; }
+  to { transform: scale(1.1) translate(1.5%, 1.5%); transform-origin: bottom right; }
+}
+
+.ken-burns-a {
+  animation: ken-burns-a 4.6s ease-out forwards;
+}
+
+.ken-burns-b {
+  animation: ken-burns-b 4.6s ease-out forwards;
+}
+
+.ken-burns-c {
+  animation: ken-burns-c 4.6s ease-out forwards;
+}
+
+/* Voice player - pulsing aura ring while playing ('a voice is reaching you') */
+@keyframes voice-aura {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--voice-aura-color, rgba(255, 107, 157, 0.45));
+  }
+  50% {
+    box-shadow: 0 0 0 14px var(--voice-aura-color-fade, rgba(255, 107, 157, 0));
+  }
+}
+
+.voice-aura {
+  animation: voice-aura 1.8s ease-in-out infinite;
+}
+
+/* Respect reduced-motion: disable decorative Ken Burns + voice aura */
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns-a,
+  .ken-burns-b,
+  .ken-burns-c,
+  .voice-aura {
+    animation: none;
+  }
+}
+
 /* Viewer card - refined without hover lift */
 .viewer-card {
   background: white;

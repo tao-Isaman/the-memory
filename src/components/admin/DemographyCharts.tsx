@@ -130,8 +130,8 @@ function DonutChart({ title, data, colorMap }: DonutChartProps) {
                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                     fontSize: '13px',
                   }}
-                  formatter={(value: number | undefined) => [
-                    `${(value ?? 0).toLocaleString()} คน`,
+                  formatter={(value) => [
+                    `${(Number(value) || 0).toLocaleString()} คน`,
                     '',
                   ]}
                 />
@@ -252,7 +252,7 @@ export default function DemographyCharts({ data }: DemographyChartsProps) {
                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
                         fontSize: '13px',
                       }}
-                      formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} คน`, 'จำนวน']}
+                      formatter={(value) => [`${(Number(value) || 0).toLocaleString()} คน`, 'จำนวน']}
                     />
                     <Bar dataKey="value" fill="url(#ageBarGradient)" radius={[4, 4, 0, 0]}>
                       <LabelList
