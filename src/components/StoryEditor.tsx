@@ -5,6 +5,7 @@ import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
 import { uploadImage, uploadAudio } from '@/lib/upload';
+import { ensureIosPlayableAudio } from '@/lib/audio';
 import { useToast } from '@/hooks/useToast';
 import VoicePlayer from './VoicePlayer';
 import {
@@ -101,10 +102,24 @@ type SlideItem = {
   status: 'pending' | 'uploading' | 'done' | 'error';
 };
 
-// MediaRecorder mime preference — iOS Safari yields audio/mp4(AAC), Chrome/Android
-// audio/webm;opus. We still store the ACTUAL blob.type after stop, never this string.
+// MediaRecorder mime preference. CRITICAL ORDERING: request AAC EXPLICITLY first.
+// Bare 'audio/mp4' is a trap — Chrome fills an mp4 container with OPUS (reports
+// 'audio/mp4;codecs=opus'), which iOS/iPadOS WebKit CANNOT decode, producing a file that
+// looks like an iOS-friendly .m4a but is silent on every iPhone/iPad browser. By naming the
+// AAC codec, Chrome/Edge/Safari record real AAC (iOS-native). Anything that still falls
+// through to an Opus container is caught and re-encoded to WAV by ensureIosPlayableAudio()
+// at upload time, so cross-device playback is guaranteed regardless of the recording browser.
+// We still store the ACTUAL blob.type after stop, never this requested string.
 function pickAudioMime(): string {
-  const PREFS = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/mpeg', 'audio/ogg;codecs=opus'];
+  const PREFS = [
+    'audio/mp4;codecs=mp4a.40.2', // AAC-LC in mp4 — plays natively on iOS
+    'audio/mp4;codecs=mp4a',      // alt AAC spelling some builds report
+    'audio/mp4',                  // iOS Safari fallback (AAC); on Chrome-without-AAC this is Opus → transcoded
+    'audio/mpeg',                 // MP3 (rare from MediaRecorder, iOS-safe)
+    'audio/webm;codecs=opus',     // desktop Chrome/Firefox default (Opus → transcoded to WAV)
+    'audio/webm',
+    'audio/ogg;codecs=opus',
+  ];
   for (const t of PREFS) {
     if (MediaRecorder.isTypeSupported?.(t)) return t;
   }
@@ -650,10 +665,23 @@ export default function StoryEditor({
           return;
         }
         let finalAudioUrl = audioUrl;
+        let finalMime = audioMime;
         if (audioBlob) {
           try {
             setUploading(true);
-            finalAudioUrl = await uploadAudio(audioBlob, audioMime, audioBlob instanceof File ? audioBlob.name : undefined);
+            // Guarantee the stored audio plays on iOS/iPadOS (Opus → WAV; AAC/MP3/WAV untouched).
+            // mimeType MUST reflect what we actually upload so the viewer's <source type> matches.
+            const safe = await ensureIosPlayableAudio(
+              audioBlob,
+              audioMime,
+              audioBlob instanceof File ? audioBlob.name : undefined,
+            );
+            finalMime = safe.mimeType;
+            finalAudioUrl = await uploadAudio(
+              safe.blob,
+              safe.mimeType,
+              safe.blob instanceof File ? safe.blob.name : undefined,
+            );
           } catch {
             showToast('อัปโหลดเสียงไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
             setUploading(false);
@@ -669,7 +697,7 @@ export default function StoryEditor({
           content: {
             audioUrl: finalAudioUrl,
             durationSec,
-            mimeType: audioMime,
+            mimeType: finalMime,
             source: audioSource,
             caption: voiceCaption.trim() || undefined,
           },
