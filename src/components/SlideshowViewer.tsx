@@ -92,10 +92,7 @@ export default function SlideshowViewer({
         if (clamped === index) return; // boundary no-op: don't pause, don't re-set index
         setPaused(true);
         setIndex(clamped);
-    }, [total, index]);   // NOTE: add `index` to deps (it's now read inside)
-
-    const prev = useCallback(() => goTo(index - 1), [goTo, index]);
-    const next = useCallback(() => goTo(index + 1), [goTo, index]);
+    }, [total, index]);
 
     // Touch swipe inside the stage — self-contained, never bubbles to story nav.
     const handleTouchStart = (e: React.TouchEvent) => {
