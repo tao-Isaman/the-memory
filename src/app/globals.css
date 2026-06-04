@@ -111,32 +111,15 @@ body {
   to { transform: scaleX(1); }
 }
 
-/* Ken Burns slideshow - 3 variants cycled by slide index for visual variety */
-@keyframes ken-burns-a {
-  from { transform: scale(1) translate(0, 0); transform-origin: top left; }
-  to { transform: scale(1.1) translate(-1.5%, -1.5%); transform-origin: top left; }
+/* Slideshow polaroid pile — each photo drops in and settles at its seeded tilt (--rot).
+   The keyframe ends at rotate(var(--rot)) so it lines up with the card's resting transform. */
+@keyframes polaroid-drop {
+  from { opacity: 0; transform: translateY(-34px) rotate(calc(var(--rot, 0deg) * 0.35)) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) rotate(var(--rot, 0deg)) scale(1); }
 }
 
-@keyframes ken-burns-b {
-  from { transform: scale(1) translate(0, 0); transform-origin: center; }
-  to { transform: scale(1.1) translate(1.5%, -1%); transform-origin: center; }
-}
-
-@keyframes ken-burns-c {
-  from { transform: scale(1) translate(0, 0); transform-origin: bottom right; }
-  to { transform: scale(1.1) translate(1.5%, 1.5%); transform-origin: bottom right; }
-}
-
-.ken-burns-a {
-  animation: ken-burns-a 4.6s ease-out forwards;
-}
-
-.ken-burns-b {
-  animation: ken-burns-b 4.6s ease-out forwards;
-}
-
-.ken-burns-c {
-  animation: ken-burns-c 4.6s ease-out forwards;
+.polaroid-drop {
+  animation: polaroid-drop 0.52s cubic-bezier(0.18, 0.89, 0.32, 1.1) both;
 }
 
 /* Voice player - pulsing aura ring while playing ('a voice is reaching you') */
@@ -170,9 +153,7 @@ body {
 
 /* Respect reduced-motion: disable decorative Ken Burns + voice aura */
 @media (prefers-reduced-motion: reduce) {
-  .ken-burns-a,
-  .ken-burns-b,
-  .ken-burns-c,
+  .polaroid-drop,
   .voice-aura,
   .animate-pulse-heart,
   .animate-float {
