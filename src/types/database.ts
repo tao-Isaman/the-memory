@@ -507,6 +507,43 @@ export interface Database {
           }
         ]
       }
+      memory_reactions: {
+        Row: {
+          id: string
+          memory_id: string
+          viewer_id: string
+          emoji: string
+          message: string | null
+          is_owner: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          memory_id: string
+          viewer_id: string
+          emoji?: string
+          message?: string | null
+          is_owner?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          memory_id?: string
+          viewer_id?: string
+          emoji?: string
+          message?: string | null
+          is_owner?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_reactions_memory_id_fkey"
+            columns: ["memory_id"]
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       notifications: {
         Row: {
           id: string

@@ -415,6 +415,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
           <CelebrationBurst themeColors={themeColors} />
           <MemoryEndingScreen
             themeColors={themeColors}
+            memoryId={sortedMemory.id}
             isOwner={!!isOwner}
             isPreviewMode={!!isPreviewMode}
             editHref={closeHref}
