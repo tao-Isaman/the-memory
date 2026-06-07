@@ -19,7 +19,8 @@ type EventName =
   | 'view_memory'
   | 'complete_memory'
   | 'click_create_cta'
-  | 'replay_memory';
+  | 'replay_memory'
+  | 'send_reaction';
 
 interface EventParams {
   use_case?: string;
