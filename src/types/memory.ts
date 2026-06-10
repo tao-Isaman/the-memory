@@ -82,4 +82,10 @@ export interface Memory {
   status: MemoryStatus;
   paidAt?: string;
   theme: MemoryTheme;
+  /**
+   * Universe (จักรวาล): include this memory's stories in the public feed.
+   * Opt-out — defaults to true; the owner unticks to hide the memory.
+   * Stories at/after a PIN story are never shown regardless of this flag.
+   */
+  shareToUniverse: boolean;
 }

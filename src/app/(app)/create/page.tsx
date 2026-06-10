@@ -18,7 +18,7 @@ import StoryList from '@/components/StoryList';
 import ShareModal from '@/components/ShareModal';
 import ThemeSelector from '@/components/ThemeSelector';
 import PaymentButton from '@/components/PaymentButton';
-import { Plus, ArrowLeft, X } from 'lucide-react';
+import { Plus, ArrowLeft, X, Sparkles } from 'lucide-react';
 
 function CreatePageContent() {
   const router = useRouter();
@@ -29,6 +29,7 @@ function CreatePageContent() {
 
   const [title, setTitle] = useState('');
   const [theme, setTheme] = useState<MemoryTheme>('love');
+  const [shareToUniverse, setShareToUniverse] = useState(true);
   const [stories, setStories] = useState<MemoryStory[]>([]);
   const [showEditor, setShowEditor] = useState(false);
   const [editingStory, setEditingStory] = useState<MemoryStory | null>(null);
@@ -59,6 +60,7 @@ function CreatePageContent() {
         if (existingMemory) {
           setTitle(existingMemory.title);
           setTheme(existingMemory.theme);
+          setShareToUniverse(existingMemory.shareToUniverse);
           setStories(existingMemory.stories);
           setIsEditMode(true);
           setOriginalCreatedAt(existingMemory.createdAt);
@@ -141,6 +143,7 @@ function CreatePageContent() {
       id: memoryId,
       title: title.trim(),
       theme,
+      shareToUniverse,
       stories,
       createdAt: originalCreatedAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -150,7 +153,7 @@ function CreatePageContent() {
     await saveMemory(memory, user.id);
     setSaving(false);
     setSavedMemoryId(memoryId);
-    trackEvent('complete_create', { memory_id: memoryId, theme });
+    trackEvent('complete_create', { memory_id: memoryId, theme, universe: shareToUniverse });
 
     // Show payment prompt for new/pending memories, share modal for active ones
     if (currentStatus === 'active') {
@@ -232,8 +235,41 @@ function CreatePageContent() {
         </div>
 
         {/* Theme Selector */}
-        <div className="mb-8">
+        <div className="mb-6">
           <ThemeSelector selected={theme} onChange={setTheme} />
+        </div>
+
+        {/* Universe Share Toggle */}
+        <div className="memory-card p-4 mb-8 flex items-start gap-3">
+          <Sparkles size={20} className="mt-0.5 flex-shrink-0" style={{ color: themeColors.primary }} />
+          <div className="flex-1 min-w-0">
+            <p className="font-kanit font-semibold" style={{ color: themeColors.dark }}>
+              แชร์ไปจักรวาล
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              ให้เรื่องราว (รูปภาพ/ข้อความ) ปรากฏแบบสุ่มในฟีดจักรวาลของผู้ใช้คนอื่น
+              เรื่องราวที่อยู่หลังรหัส PIN จะไม่ถูกแชร์
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={shareToUniverse}
+            aria-label="แชร์ไปจักรวาล"
+            onClick={() => setShareToUniverse((v) => !v)}
+            className="relative w-12 h-7 rounded-full transition-colors flex-shrink-0"
+            style={{
+              background: shareToUniverse
+                ? `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`
+                : '#D1D5DB',
+            }}
+          >
+            <span
+              className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                shareToUniverse ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
         </div>
 
         {/* Story List */}

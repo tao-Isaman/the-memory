@@ -21,6 +21,7 @@ export interface Database {
           stripe_payment_intent_id: string | null
           paid_at: string | null
           theme: string
+          share_to_universe: boolean
         }
         Insert: {
           id?: string
@@ -33,6 +34,7 @@ export interface Database {
           stripe_payment_intent_id?: string | null
           paid_at?: string | null
           theme?: string
+          share_to_universe?: boolean
         }
         Update: {
           id?: string
@@ -45,6 +47,7 @@ export interface Database {
           stripe_payment_intent_id?: string | null
           paid_at?: string | null
           theme?: string
+          share_to_universe?: boolean
         }
         Relationships: []
       }
@@ -690,12 +693,75 @@ export interface Database {
           }
         ]
       }
+      universe_reactions: {
+        Row: {
+          id: string
+          story_id: string
+          memory_id: string
+          user_id: string
+          emoji: string
+          removed_at: string | null
+          notified_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          story_id: string
+          memory_id: string
+          user_id: string
+          emoji: string
+          removed_at?: string | null
+          notified_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          story_id?: string
+          memory_id?: string
+          user_id?: string
+          emoji?: string
+          removed_at?: string | null
+          notified_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "universe_reactions_memory_id_fkey"
+            columns: ["memory_id"]
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_universe_feed: {
+        Args: {
+          p_seed: string
+          p_limit?: number
+          p_offset?: number
+        }
+        Returns: {
+          story_id: string
+          story_type: string
+          story_title: string | null
+          story_content: Json
+          story_created_at: string
+          memory_id: string
+          memory_title: string
+          memory_theme: string
+          owner_name: string
+          owner_avatar: string | null
+          reaction_counts: Json
+          my_emoji: string | null
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

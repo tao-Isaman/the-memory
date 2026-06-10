@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Memory } from '@/types/memory';
-import { getMemories, deleteMemory } from '@/lib/storage';
+import { getMemories, deleteMemory, setMemoryUniverseShare } from '@/lib/storage';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
@@ -13,8 +13,9 @@ import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
 import ProfileCompletionBanner from '@/components/ProfileCompletionBanner';
 import PushNotificationPrompt from '@/components/PushNotificationPrompt';
-import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon } from 'lucide-react';
+import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon, Sparkles } from 'lucide-react';
 import CartoonCreator from '@/components/CartoonCreator';
+import UniverseFeed from '@/components/UniverseFeed';
 import { trackEvent } from '@/lib/analytics';
 
 export default function DashboardPage() {
@@ -24,7 +25,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
-  const [activeTab, setActiveTab] = useState<'memories' | 'cartoon'>('memories');
+  const [activeTab, setActiveTab] = useState<'memories' | 'universe' | 'cartoon'>('memories');
 
   const handleShare = (memory: Memory) => {
     setSelectedMemory(memory);
@@ -61,6 +62,22 @@ export default function DashboardPage() {
     if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบความทรงจำนี้?')) {
       await deleteMemory(id, user.id);
       loadMemories();
+    }
+  };
+
+  // Universe (จักรวาล) quick toggle — optimistic, reverted if the update fails.
+  const handleUniverseToggle = async (memory: Memory) => {
+    if (!user) return;
+    const next = !memory.shareToUniverse;
+    setMemories((prev) =>
+      prev.map((m) => (m.id === memory.id ? { ...m, shareToUniverse: next } : m))
+    );
+    trackEvent('toggle_universe_share', { memory_id: memory.id, universe: next });
+    const ok = await setMemoryUniverseShare(memory.id, user.id, next);
+    if (!ok) {
+      setMemories((prev) =>
+        prev.map((m) => (m.id === memory.id ? { ...m, shareToUniverse: !next } : m))
+      );
     }
   };
 
@@ -107,6 +124,17 @@ export default function DashboardPage() {
             >
               <HeartIcon size={16} filled={activeTab === 'memories'} />
               ความทรงจำ
+            </button>
+            <button
+              onClick={() => setActiveTab('universe')}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+                activeTab === 'universe'
+                  ? 'bg-white text-[#E63946] shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Sparkles size={16} />
+              จักรวาล
             </button>
             <button
               onClick={() => setActiveTab('cartoon')}
@@ -224,11 +252,37 @@ export default function DashboardPage() {
                         <span className="hidden sm:inline">ลบ</span>
                       </button>
                     </div>
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-pink-50">
+                      <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <Sparkles size={14} className="text-[#E63946]" />
+                        แชร์ไปจักรวาล
+                      </span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={memory.shareToUniverse}
+                        aria-label="แชร์ไปจักรวาล"
+                        onClick={() => handleUniverseToggle(memory)}
+                        className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${
+                          memory.shareToUniverse
+                            ? 'bg-gradient-to-r from-[#FF6B9D] to-[#E63946]'
+                            : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                            memory.shareToUniverse ? 'translate-x-4' : ''
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </>
+        ) : activeTab === 'universe' ? (
+          <UniverseFeed />
         ) : (
           <CartoonCreator userId={user.id} />
         )}

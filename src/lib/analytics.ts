@@ -20,7 +20,10 @@ type EventName =
   | 'complete_memory'
   | 'click_create_cta'
   | 'replay_memory'
-  | 'send_reaction';
+  | 'send_reaction'
+  | 'view_universe_feed'
+  | 'universe_reaction'
+  | 'toggle_universe_share';
 
 interface EventParams {
   use_case?: string;

@@ -26,6 +26,7 @@ function toMemory(dbMemory: DbMemory, dbStories: DbStory[]): Memory {
     status: (dbMemory.status || 'pending') as MemoryStatus,
     paidAt: dbMemory.paid_at || undefined,
     theme: (dbMemory.theme || 'love') as MemoryTheme,
+    shareToUniverse: dbMemory.share_to_universe ?? true,
   };
 }
 
@@ -94,6 +95,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       user_id: userId,
       title: memory.title,
       theme: memory.theme,
+      share_to_universe: memory.shareToUniverse ?? true,
       created_at: memory.createdAt,
       updated_at: now,
       status: memory.status || 'pending',
@@ -146,6 +148,31 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
     updatedAt: now,
     status: memory.status || 'pending',
   };
+}
+
+// Toggle a memory's universe (จักรวาล) sharing flag without touching its stories
+export async function setMemoryUniverseShare(
+  id: string,
+  userId: string,
+  share: boolean
+): Promise<boolean> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return false;
+
+  // Deliberately does NOT bump updated_at: the dashboard sorts by it, and a quick
+  // toggle must not reshuffle the user's memory list.
+  const { error } = await supabase
+    .from('memories')
+    .update({ share_to_universe: share })
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error updating universe share:', error);
+    return false;
+  }
+
+  return true;
 }
 
 // Delete a memory

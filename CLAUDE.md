@@ -152,7 +152,10 @@ src/
 ## Database Schema
 
 ### `memories`
-`id` (uuid PK), `user_id` (uuid FK auth.users), `title` (text), `status` ('pending'|'active'|'failed'), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at`, `created_at`, `updated_at`
+`id` (uuid PK), `user_id` (uuid FK auth.users), `title` (text), `status` ('pending'|'active'|'failed'), `stripe_checkout_session_id`, `stripe_payment_intent_id`, `paid_at`, `share_to_universe` (bool, default true — opt-out), `created_at`, `updated_at`
+
+### `universe_reactions`
+`id` (uuid PK), `story_id` (uuid, **no FK** — saveMemory rewrites stories as delete+re-insert with same ids; an FK cascade would wipe reactions on every edit), `memory_id` (uuid FK memories CASCADE), `user_id` (uuid FK auth.users), `emoji`, `removed_at` (soft toggle-off), `notified_at` (owner notified max once per story+user), `created_at`, `updated_at`. UNIQUE(story_id, user_id). RLS enabled, no client policies (service-role API + RPC only).
 
 ### `stories`
 `id` (uuid PK), `memory_id` (uuid FK memories), `type` ('password'|'image'|'text'|'text-image'|'youtube'|'scratch'|'question'), `priority` (int), `title` (text?), `content` (jsonb), `created_at`
@@ -207,6 +210,16 @@ src/
 
 `getThemeColors(theme)` returns theme colors with fallback to `love`.
 
+## Universe (จักรวาล) Feed
+
+Instagram-like public feed of stories from shared memories — a tab in the dashboard next to ความทรงจำ.
+
+- **Sharing**: opt-out per memory (`memories.share_to_universe`, default true). Toggle in create/edit page + quick toggle on dashboard memory cards.
+- **Feed**: `get_universe_feed(p_seed, p_limit, p_offset)` SECURITY DEFINER RPC, called from the browser with the user's JWT (works without service-role key). Seeded-random order `md5(story_id || seed)` — one seed per visit (stable shuffle) so OFFSET paging (10/page, IntersectionObserver lazy-load) never duplicates. Joins `auth.users` for owner name/avatar; returns aggregated reaction counts + caller's own reaction; never returns the owner's user id.
+- **Feed rules**: only `active` + shared memories; only `image`/`text-image`/`text` stories; viewer's own stories excluded; **stories at/after a PIN (password) story are never exposed**.
+- **Reactions**: emoji set reused from `REACTION_EMOJIS` (❤️ 😍 🥹 🔥 🙏). `POST /api/universe/reaction` (bearer auth + service role) toggles: same emoji → off (soft delete via `removed_at`), different emoji → switch. Owner gets in-app notification + Web Push at most once per (story, user) via `notified_at` — re-toggling never re-notifies.
+- **Files**: `components/UniverseFeed.tsx`, `lib/universe.ts`, `types/universe.ts`, `api/universe/reaction/route.ts`, migration `023-add-universe.sql`.
+
 ## Use Case System
 
 6 SSG pages at `/use-case/[slug]` defined in `src/data/use-cases.ts`:
@@ -254,6 +267,8 @@ Located in `supabase/migrations/`:
 3. `009-add-scratch-story-type.sql` → `010-add-question-story-type.sql`
 4. `011-add-credits-system.sql` → `012-add-cartoon-generations.sql`
 5. `013-add-user-profiles.sql` → `014-add-age-function.sql` → `015-expand-theme-types.sql`
+6. `016-add-pwa-installs.sql` → `017-add-memory-views.sql` → `018-add-notifications.sql` → `019-add-notification-dismissal.sql` → `020-add-push-credits-claimed.sql`
+7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql`
 
 ## Development
 
