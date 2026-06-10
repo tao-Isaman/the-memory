@@ -220,6 +220,12 @@ Instagram-like public feed of stories from shared memories — a tab in the dash
 - **Reactions**: emoji set reused from `REACTION_EMOJIS` (❤️ 😍 🥹 🔥 🙏). `POST /api/universe/reaction` (bearer auth + service role) toggles: same emoji → off (soft delete via `removed_at`), different emoji → switch. Owner gets in-app notification + Web Push at most once per (story, user) via `notified_at` — re-toggling never re-notifies.
 - **Files**: `components/UniverseFeed.tsx`, `lib/universe.ts`, `types/universe.ts`, `api/universe/reaction/route.ts`, migration `023-add-universe.sql`.
 
+## Legal Consent (PDPA)
+
+- Public pages `/privacy` + `/terms` (Thai, under `(landing)`); constants in `src/data/legal.ts` — bump `CONSENT_VERSION` on material changes to force re-acceptance.
+- Login page: checkbox gates the Google button; acceptance stored in localStorage (`storePendingConsent`), then persisted to `user_consents` by `ConsentGuard` (in `(app)/layout.tsx`) after OAuth. Existing sessions without a record for the current version get a blocking re-consent modal (accept or sign out).
+- `user_consents` table (migration 024): `user_id` + `version` UNIQUE, `accepted_at`, `source` ('login'|'modal'), `user_agent`. RLS: users select/insert own rows from the browser (no service role required). Helpers in `src/lib/consent.ts` fail open on transient errors.
+
 ## Use Case System
 
 6 SSG pages at `/use-case/[slug]` defined in `src/data/use-cases.ts`:
@@ -268,7 +274,7 @@ Located in `supabase/migrations/`:
 4. `011-add-credits-system.sql` → `012-add-cartoon-generations.sql`
 5. `013-add-user-profiles.sql` → `014-add-age-function.sql` → `015-expand-theme-types.sql`
 6. `016-add-pwa-installs.sql` → `017-add-memory-views.sql` → `018-add-notifications.sql` → `019-add-notification-dismissal.sql` → `020-add-push-credits-claimed.sql`
-7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql`
+7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql` → `024-add-user-consents.sql`
 
 ## Development
 

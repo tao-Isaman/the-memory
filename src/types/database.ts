@@ -693,6 +693,43 @@ export interface Database {
           }
         ]
       }
+      user_consents: {
+        Row: {
+          id: string
+          user_id: string
+          version: string
+          accepted_at: string
+          source: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          version: string
+          accepted_at?: string
+          source?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          version?: string
+          accepted_at?: string
+          source?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_consents_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       universe_reactions: {
         Row: {
           id: string

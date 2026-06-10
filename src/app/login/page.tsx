@@ -1,8 +1,10 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { storePendingConsent } from '@/lib/consent';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 
@@ -22,6 +24,16 @@ function UseCaseCapture() {
 export default function LoginPage() {
   const { user, loading, signInWithGoogle } = useAuth();
   const router = useRouter();
+  const [accepted, setAccepted] = useState(false);
+
+  // PDPA: users must read + accept the legal docs BEFORE login. The acceptance is
+  // remembered locally here (no account yet) and persisted to user_consents by
+  // ConsentGuard right after the OAuth round-trip.
+  const handleSignIn = () => {
+    if (!accepted) return;
+    storePendingConsent();
+    signInWithGoogle();
+  };
 
   useEffect(() => {
     if (!loading && user) {
@@ -55,13 +67,43 @@ export default function LoginPage() {
           <HeartIcon size={40} className="animate-pulse-heart" />
         </div>
 
-        <p className="text-gray-600 mb-8">
+        <p className="text-gray-600 mb-6">
           เข้าสู่ระบบเพื่อสร้างและจัดการความทรงจำของคุณ
         </p>
 
+        <label className="flex items-start gap-2.5 text-left mb-5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={accepted}
+            onChange={(e) => setAccepted(e.target.checked)}
+            className="mt-0.5 w-4 h-4 accent-[#E63946] flex-shrink-0"
+            aria-label="ยอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว"
+          />
+          <span className="text-xs text-gray-500 leading-relaxed">
+            ฉันได้อ่านและยอมรับ{' '}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="text-[#E63946] underline hover:opacity-80"
+            >
+              ข้อกำหนดการใช้งาน
+            </Link>{' '}
+            และ{' '}
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="text-[#E63946] underline hover:opacity-80"
+            >
+              นโยบายความเป็นส่วนตัว
+            </Link>{' '}
+            ของ The Memory
+          </span>
+        </label>
+
         <button
-          onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+          onClick={handleSignIn}
+          disabled={!accepted}
+          className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path

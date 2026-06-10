@@ -624,6 +624,12 @@ export default function LandingPage() {
               <a href="#faq" className="hover:text-white transition-colors">
                 คำถาม
               </a>
+              <Link href="/terms" className="hover:text-white transition-colors">
+                ข้อกำหนด
+              </Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">
+                ความเป็นส่วนตัว
+              </Link>
             </div>
           </div>
 
