@@ -216,9 +216,9 @@ Instagram-like public feed of stories from shared memories — a tab in the dash
 
 - **Sharing**: opt-out per memory (`memories.share_to_universe`, default true). Toggle in create/edit page + quick toggle on dashboard memory cards.
 - **Feed**: `get_universe_feed(p_seed, p_limit, p_offset)` SECURITY DEFINER RPC, called from the browser with the user's JWT (works without service-role key). Seeded-random order `md5(story_id || seed)` — one seed per visit (stable shuffle) so OFFSET paging (10/page, IntersectionObserver lazy-load) never duplicates. Joins `auth.users` for owner name/avatar; returns aggregated reaction counts + caller's own reaction; never returns the owner's user id.
-- **Feed rules**: only `active` + shared memories; only `image`/`text-image`/`text` stories; viewer's own stories excluded; **stories at/after a PIN (password) story are never exposed**.
+- **Feed rules**: only `active` + shared memories; only `image`/`text-image`/`text` stories; viewer's own stories excluded. PIN-gated stories ARE included — the share checkbox is the owner's explicit consent; PIN gates only the link's viewing sequence (product decision 2026-06-12, migration 025; legal docs bumped to CONSENT_VERSION 1.1 to match).
 - **Reactions**: emoji set reused from `REACTION_EMOJIS` (❤️ 😍 🥹 🔥 🙏). `POST /api/universe/reaction` (bearer auth + service role) toggles: same emoji → off (soft delete via `removed_at`), different emoji → switch. Owner gets in-app notification + Web Push at most once per (story, user) via `notified_at` — re-toggling never re-notifies.
-- **Files**: `components/UniverseFeed.tsx`, `lib/universe.ts`, `types/universe.ts`, `api/universe/reaction/route.ts`, migration `023-add-universe.sql`.
+- **Files**: `components/UniverseFeed.tsx`, `lib/universe.ts`, `types/universe.ts`, `api/universe/reaction/route.ts`, migrations `023-add-universe.sql` + `025-universe-include-pin-gated.sql`.
 
 ## Legal Consent (PDPA)
 
@@ -274,7 +274,7 @@ Located in `supabase/migrations/`:
 4. `011-add-credits-system.sql` → `012-add-cartoon-generations.sql`
 5. `013-add-user-profiles.sql` → `014-add-age-function.sql` → `015-expand-theme-types.sql`
 6. `016-add-pwa-installs.sql` → `017-add-memory-views.sql` → `018-add-notifications.sql` → `019-add-notification-dismissal.sql` → `020-add-push-credits-claimed.sql`
-7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql` → `024-add-user-consents.sql`
+7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql` → `024-add-user-consents.sql` → `025-universe-include-pin-gated.sql`
 
 ## Development
 

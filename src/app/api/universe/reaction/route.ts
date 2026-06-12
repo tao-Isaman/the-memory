@@ -31,10 +31,10 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     // 1. The story must actually be visible in the feed: a feed-eligible type, inside an
-    //    active + shared memory, not the caller's own, and not at/after a PIN story.
+    //    active + shared memory, and not the caller's own.
     const { data: story } = await supabase
       .from('stories')
-      .select('id, memory_id, type, priority')
+      .select('id, memory_id, type')
       .eq('id', storyId)
       .single();
     if (!story || !FEED_STORY_TYPES.includes(story.type)) {
@@ -51,17 +51,6 @@ export async function POST(request: NextRequest) {
     }
     if (memory.user_id === user.id) {
       return NextResponse.json({ error: 'Cannot react to your own story' }, { status: 400 });
-    }
-
-    const { data: pinGate } = await supabase
-      .from('stories')
-      .select('id')
-      .eq('memory_id', story.memory_id)
-      .eq('type', 'password')
-      .lte('priority', story.priority)
-      .limit(1);
-    if (pinGate && pinGate.length > 0) {
-      return NextResponse.json({ error: 'Story not available' }, { status: 404 });
     }
 
     // 2. Toggle. ONE row per (story, user) forever: removed_at flips, emoji switches.
