@@ -5,7 +5,6 @@
 // lazy-loaded with an IntersectionObserver sentinel. Reactions are optimistic.
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import { UniverseStory, UniverseStoryType } from '@/types/universe';
 import {
   getUniverseFeed,
@@ -190,12 +189,6 @@ function StoryCard({
             </button>
           );
         })}
-        <Link
-          href={`/memory/${story.memoryId}`}
-          className="ml-auto text-xs text-gray-400 hover:text-[#E63946] transition-colors flex-shrink-0"
-        >
-          เปิดดูความทรงจำ →
-        </Link>
       </div>
     </article>
   );
