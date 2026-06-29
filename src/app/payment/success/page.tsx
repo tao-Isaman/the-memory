@@ -23,45 +23,63 @@ function PaymentSuccessContent() {
   const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
-    async function verifyPayment() {
-      // If this is a free memory activation (credit use), skip verification
-      if (isFree && memoryId) {
-        setStatus('success');
-        return;
-      }
+    // If this is a free memory activation (credit use), skip verification
+    if (isFree && memoryId) {
+      setStatus('success');
+      return;
+    }
+    if (!sessionId) {
+      setStatus('error');
+      return;
+    }
 
-      if (!sessionId) {
-        setStatus('error');
-        return;
-      }
+    // PromptPay confirms asynchronously — verify can return 'pending' for a while
+    // after the user has actually paid. Poll until it flips to active (~60s) before
+    // settling on the "still processing" screen. The webhook/cron is the backstop.
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const POLL_MS = 3000;
+    const MAX_ATTEMPTS = 20;
 
+    async function poll(attempt: number) {
       try {
         const response = await fetch('/api/payment/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
         });
-
         const data = await response.json();
+        if (cancelled) return;
 
         if (data.status === 'active') {
-          if (data.type === 'credits') {
-            setCreditsAdded(data.credits || 0);
-          }
+          if (data.type === 'credits') setCreditsAdded(data.credits || 0);
           setStatus('success');
           trackEvent('payment_success');
-        } else if (data.status === 'pending') {
-          setStatus('pending');
+          return;
+        }
+        // 'pending' or a transient error — keep waiting until attempts run out.
+        if (attempt < MAX_ATTEMPTS) {
+          timer = setTimeout(() => poll(attempt + 1), POLL_MS);
         } else {
-          setStatus('error');
+          // Still unconfirmed: show "processing" (safe for in-flight payment), not a hard error.
+          setStatus('pending');
         }
       } catch (error) {
+        if (cancelled) return;
         console.error('Error verifying payment:', error);
-        setStatus('error');
+        if (attempt < MAX_ATTEMPTS) {
+          timer = setTimeout(() => poll(attempt + 1), POLL_MS);
+        } else {
+          setStatus('pending');
+        }
       }
     }
 
-    verifyPayment();
+    poll(1);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [sessionId, isFree, memoryId]);
 
   if (status === 'loading') {
