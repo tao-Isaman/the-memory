@@ -40,11 +40,17 @@ export async function GET() {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Get all users for email lookup
+    // Exact total via RPC (listUsers caps at one page). The list below is still
+    // used for the email map — see note: it truncates past 10000 users.
+    const { data: userCountData } = await supabase.rpc('get_user_count');
+    const totalUsers = Number(userCountData) || 0;
+
+    // Get users for email lookup
+    // ponytail: email map truncates at 10000 users (one listUsers page) — paginate
+    // this (and the other admin listUsers calls) if accurate per-user lookup past 10k matters.
     const { data: allUsers } = await supabase.auth.admin.listUsers({
       perPage: 10000,
     });
-    const totalUsers = allUsers?.users?.length || 0;
 
     // Create user ID to email map
     const userEmailMap = new Map<string, string>();

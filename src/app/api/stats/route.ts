@@ -10,11 +10,9 @@ const CACHE_STALE_WHILE_REVALIDATE = 7200; // 2 hours
 async function getStatsFromDatabase() {
   const supabase = getSupabaseServiceClient();
 
-  // Get user count from Supabase Auth
-  const { data: allUsers } = await supabase.auth.admin.listUsers({
-    perPage: 1000,
-  });
-  const userCount = allUsers?.users?.length || 0;
+  // Get user count from Supabase Auth (RPC counts directly — listUsers() caps at one page)
+  const { data: userCountData } = await supabase.rpc('get_user_count');
+  const userCount = Number(userCountData) || 0;
 
   // Get other stats
   const [memories, stories] = await Promise.all([

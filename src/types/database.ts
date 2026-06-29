@@ -778,6 +778,10 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      get_user_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       get_universe_feed: {
         Args: {
           p_seed: string

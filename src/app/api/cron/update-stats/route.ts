@@ -36,11 +36,11 @@ export async function GET(request: NextRequest) {
       .lt('created_at', notifCutoff);
     if (pruneError) console.error('notification prune error:', pruneError);
 
-    // Get user count from Supabase Auth (real users)
-    const { data: allUsers } = await supabase.auth.admin.listUsers({ 
-      perPage: 10000,
-    });
-    const userCount = allUsers?.users?.length || 0;
+    // Get user count from Supabase Auth (real users).
+    // RPC counts auth.users directly — listUsers() only returns one capped page,
+    // which froze this at 10000 once real users passed it.
+    const { data: userCountData } = await supabase.rpc('get_user_count');
+    const userCount = Number(userCountData) || 0;
 
     // Count other stats in parallel
     const [memories, stories] = await Promise.all([
