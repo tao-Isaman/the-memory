@@ -105,12 +105,6 @@ body {
   to { opacity: 1; transform: translateX(0) scale(1); }
 }
 
-/* Auto-advance timer fill */
-@keyframes auto-advance-fill {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
 /* Slideshow polaroid pile — each photo drops in and settles at its seeded tilt (--rot).
    The keyframe ends at rotate(var(--rot)) so it lines up with the card's resting transform. */
 @keyframes polaroid-drop {

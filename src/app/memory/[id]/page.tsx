@@ -142,27 +142,12 @@ export default function MemoryViewerPage({ params }: PageProps) {
     }
   }, [sortedMemory, currentIndex, navigateWithTransition]);
 
-  // Derived: should this story auto-advance?
   const currentStory: MemoryStory | undefined = sortedMemory?.stories[currentIndex];
   const isLastStory = sortedMemory ? currentIndex >= sortedMemory.stories.length - 1 : false;
 
-  const shouldAutoAdvance = !!currentStory &&
-    !isPasswordLocked && !isQuestionLocked && !isLastStory &&
-    currentStory.type !== 'password' && currentStory.type !== 'question' &&
-    currentStory.type !== 'youtube' && currentStory.type !== 'voice' &&
-    !(currentStory.type === 'scratch' && !revealedStories.has(currentStory.id)) &&
-    !(currentStory.type === 'slideshow' && !revealedStories.has(currentStory.id));
-
-  // Auto-advance (always on for applicable stories)
-  useEffect(() => {
-    if (!shouldAutoAdvance || !sortedMemory) return;
-
-    const timer = setTimeout(() => {
-      handleNext();
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [shouldAutoAdvance, currentIndex, sortedMemory, handleNext]);
+  // ponytail: no auto-advance timer — each story stays until the viewer taps or
+  // keys forward, so viewing time is unlimited. The IG-style segmented progress
+  // bar below is kept, but as a static reading-position indicator (no countdown).
 
   // Tap to navigate
   const handleContentTap = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -340,23 +325,10 @@ export default function MemoryViewerPage({ params }: PageProps) {
               className="h-[3px] flex-1 rounded-full overflow-hidden"
               style={{ backgroundColor: `${themeColors.dark}18` }}
             >
-              {showEnding || i < currentIndex ? (
+              {showEnding || i <= currentIndex ? (
                 <div
                   className="w-full h-full rounded-full"
                   style={{ backgroundColor: themeColors.primary }}
-                />
-              ) : i === currentIndex ? (
-                <div
-                  key={`seg-${currentIndex}`}
-                  className="h-full rounded-full"
-                  style={{
-                    backgroundColor: themeColors.primary,
-                    transformOrigin: 'left',
-                    animation: shouldAutoAdvance
-                      ? 'auto-advance-fill 5s linear forwards'
-                      : 'none',
-                    transform: shouldAutoAdvance ? undefined : 'scaleX(0)',
-                  }}
                 />
               ) : null}
             </div>
