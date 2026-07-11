@@ -22,7 +22,10 @@ export interface UserCredits {
   updatedAt: string;
 }
 
-export type CreditTransactionType = 'purchase' | 'use' | 'refund';
+/** 'purchase' = user actually paid us (always has a package_id + Stripe session).
+ *  'bonus' = free grant (profile completion, push notification). Keep these distinct:
+ *  referral.hasUserPaidBefore treats 'purchase' as proof of payment. */
+export type CreditTransactionType = 'purchase' | 'use' | 'refund' | 'bonus';
 
 export interface CreditTransaction {
   id: string;

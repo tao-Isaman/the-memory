@@ -253,9 +253,11 @@ export async function grantPushCredits(
     return { granted: 0, newBalance: balance };
   }
 
+  // 'bonus', not 'purchase' — this is a free grant. referral.hasUserPaidBefore
+  // counts 'purchase' rows as proof of payment.
   await supabase.from('credit_transactions').insert({
     user_id: userId,
-    type: 'purchase',
+    type: 'bonus',
     amount: NOTIFICATION_CREDITS,
     balance_after: newBalance,
     description: `โบนัสเปิดการแจ้งเตือน (${NOTIFICATION_CREDITS} เครดิต)`,

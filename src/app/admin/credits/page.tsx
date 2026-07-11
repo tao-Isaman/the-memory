@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Coins, TrendingUp, TrendingDown, RotateCcw, DollarSign, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Coins, TrendingUp, TrendingDown, RotateCcw, DollarSign, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 
 interface PackageWithSales {
@@ -13,10 +13,12 @@ interface PackageWithSales {
   revenue: number;
 }
 
+type TxType = 'purchase' | 'use' | 'refund' | 'bonus';
+
 interface RecentTransaction {
   id: string;
   userEmail: string;
-  type: 'purchase' | 'use' | 'refund';
+  type: TxType;
   amount: number;
   balanceAfter: number;
   description: string | null;
@@ -34,17 +36,82 @@ interface Summary {
   totalCreditsSold: number;
   totalCreditsUsed: number;
   totalCreditsRefunded: number;
+  totalCreditsBonus: number;
   totalRevenueTHB: number;
 }
 
 interface CreditsData {
   packages: PackageWithSales[];
   recentTransactions: RecentTransaction[];
+  /** Real paid purchases only — the all-types feed is dominated by free bonuses. */
+  recentPurchases: RecentTransaction[];
   topUsers: TopUser[];
   summary: Summary;
 }
 
 const ITEMS_PER_PAGE = 20;
+
+function getTypeBadge(type: TxType) {
+  switch (type) {
+    case 'purchase':
+      return <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">ซื้อ</span>;
+    case 'use':
+      return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">ใช้</span>;
+    case 'refund':
+      return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">คืนเงิน</span>;
+    case 'bonus':
+      return <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">โบนัสฟรี</span>;
+  }
+}
+
+function TransactionTable({ rows }: { rows: RecentTransaction[] }) {
+  if (rows.length === 0) {
+    return <div className="text-center py-12 text-gray-500">ไม่มีรายการ</div>;
+  }
+  return (
+    <table className="w-full">
+      <thead className="bg-gray-50 border-b border-gray-200">
+        <tr>
+          <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">User</th>
+          <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Type</th>
+          <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Amount</th>
+          <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Balance After</th>
+          <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Description</th>
+          <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Date</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-100">
+        {rows.map((tx) => (
+          <tr key={tx.id} className="hover:bg-gray-50">
+            <td className="px-6 py-4 text-sm text-gray-800">{tx.userEmail}</td>
+            <td className="px-6 py-4 text-center">{getTypeBadge(tx.type)}</td>
+            <td className="px-6 py-4 text-right">
+              <span
+                className={`font-medium ${tx.type === 'use' ? 'text-red-600' : 'text-green-600'}`}
+              >
+                {tx.type === 'use' ? '-' : '+'}
+                {Math.abs(tx.amount).toLocaleString()}
+              </span>
+            </td>
+            <td className="px-6 py-4 text-right font-medium text-gray-800">
+              {tx.balanceAfter.toLocaleString()}
+            </td>
+            <td className="px-6 py-4 text-sm text-gray-500">{tx.description || '-'}</td>
+            <td className="px-6 py-4 text-right text-sm text-gray-500">
+              {new Date(tx.createdAt).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 export default function AdminCreditsPage() {
   const [data, setData] = useState<CreditsData | null>(null);
@@ -113,23 +180,19 @@ export default function AdminCreditsPage() {
       color: 'bg-blue-500',
     },
     {
+      // Free grants (profile/notification bonuses) — used to be counted as "sold".
+      label: 'Credits แจกฟรี (โบนัส)',
+      value: data.summary.totalCreditsBonus.toLocaleString(),
+      icon: Gift,
+      color: 'bg-purple-500',
+    },
+    {
       label: 'รายได้จาก Credits',
       value: `฿${data.summary.totalRevenueTHB.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-pink-500',
     },
   ];
-
-  const getTypeBadge = (type: 'purchase' | 'use' | 'refund') => {
-    switch (type) {
-      case 'purchase':
-        return <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">ซื้อ</span>;
-      case 'use':
-        return <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">ใช้</span>;
-      case 'refund':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">คืนเงิน</span>;
-    }
-  };
 
   return (
     <div>
@@ -138,7 +201,7 @@ export default function AdminCreditsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -194,59 +257,21 @@ export default function AdminCreditsPage() {
         )}
       </div>
 
-      {/* Recent Transactions */}
+      {/* Real paid purchases only. The all-types feed below is flooded by free bonus
+          grants, so a package sale could sit hundreds of rows deep and never be seen. */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800">การซื้อ Package ล่าสุด (จ่ายเงินจริง)</h2>
+        </div>
+        <TransactionTable rows={data.recentPurchases} />
+      </div>
+
+      {/* Recent Transactions (all types, incl. free bonuses) */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-800">Recent Transactions</h2>
         </div>
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">User</th>
-              <th className="text-center px-6 py-4 text-sm font-semibold text-gray-600">Type</th>
-              <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Amount</th>
-              <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Balance After</th>
-              <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Description</th>
-              <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {paginatedTransactions.map((tx) => (
-              <tr key={tx.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm text-gray-800">{tx.userEmail}</td>
-                <td className="px-6 py-4 text-center">{getTypeBadge(tx.type)}</td>
-                <td className="px-6 py-4 text-right">
-                  <span
-                    className={`font-medium ${
-                      tx.type === 'purchase' || tx.type === 'refund'
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                    }`}
-                  >
-                    {tx.type === 'use' ? '-' : '+'}
-                    {Math.abs(tx.amount).toLocaleString()}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right font-medium text-gray-800">
-                  {tx.balanceAfter.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-500">{tx.description || '-'}</td>
-                <td className="px-6 py-4 text-right text-sm text-gray-500">
-                  {new Date(tx.createdAt).toLocaleDateString('th-TH', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {paginatedTransactions.length === 0 && (
-          <div className="text-center py-12 text-gray-500">ไม่มีรายการ</div>
-        )}
+        <TransactionTable rows={paginatedTransactions} />
       </div>
 
       {/* Pagination for Transactions */}

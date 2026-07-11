@@ -778,6 +778,16 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      get_credit_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          packageSales: Record<string, number>
+          totalCreditsSold: number
+          totalCreditsUsed: number
+          totalCreditsRefunded: number
+          totalCreditsBonus: number
+        }
+      }
       get_user_count: {
         Args: Record<PropertyKey, never>
         Returns: number

@@ -5,12 +5,18 @@ export async function GET() {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Batch query all data in parallel
+    // Batch query all data in parallel.
+    // Package sales / summary totals come from the get_credit_stats RPC: this used to
+    // fetch every credit_transaction with an unbounded .select() and reduce in JS, but
+    // PostgREST truncates that (default 1000 rows, and there are thousands), so real
+    // purchases — a tiny fraction of rows next to free 'bonus' grants — went missing.
     const [
       { data: authData, error: authError },
       { data: packages },
       { data: transactions },
+      { data: recentPurchaseRows },
       { data: userCredits },
+      { data: stats, error: statsError },
     ] = await Promise.all([
       supabase.auth.admin.listUsers({ perPage: 10000 }),
       supabase.from('credit_packages').select('*').order('sort_order'),
@@ -19,42 +25,48 @@ export async function GET() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50),
+      // Real purchases only — the all-types feed above is dominated by free bonuses,
+      // so a paid package sale can sit hundreds of rows deep and never be seen.
+      supabase
+        .from('credit_transactions')
+        .select('*')
+        .eq('type', 'purchase')
+        .order('created_at', { ascending: false })
+        .limit(20),
       supabase.from('user_credits').select('*').order('balance', { ascending: false }).limit(20),
+      supabase.rpc('get_credit_stats'),
     ]);
 
-    if (authError) {
-      throw authError;
-    }
+    if (authError) throw authError;
+    if (statsError) throw statsError;
 
     // Build user email map
     const authUsers = authData?.users || [];
     const userEmailMap = new Map(authUsers.map((u) => [u.id, u.email || 'No email']));
 
-    // Calculate package sales
-    const { data: allTransactions } = await supabase
-      .from('credit_transactions')
-      .select('package_id, type, amount');
+    const packageSales = stats?.packageSales ?? {};
 
-    const packageSalesMap = new Map<string, number>();
-    for (const tx of allTransactions || []) {
-      if (tx.type === 'purchase' && tx.package_id) {
-        const count = packageSalesMap.get(tx.package_id) || 0;
-        packageSalesMap.set(tx.package_id, count + 1);
-      }
-    }
+    const packagesWithSales = (packages || []).map((pkg) => {
+      const salesCount = packageSales[pkg.id] ?? 0;
+      return {
+        id: pkg.id,
+        name: pkg.name,
+        priceTHB: pkg.price_thb,
+        credits: pkg.credits,
+        salesCount,
+        revenue: salesCount * pkg.price_thb,
+      };
+    });
 
-    // Build packages with sales count
-    const packagesWithSales = (packages || []).map((pkg) => ({
-      id: pkg.id,
-      name: pkg.name,
-      priceTHB: pkg.price_thb,
-      credits: pkg.credits,
-      salesCount: packageSalesMap.get(pkg.id) || 0,
-      revenue: (packageSalesMap.get(pkg.id) || 0) * pkg.price_thb,
-    }));
-
-    // Build recent transactions with user email
-    const recentTransactions = (transactions || []).map((tx) => ({
+    const toTx = (tx: {
+      id: string;
+      user_id: string;
+      type: string;
+      amount: number;
+      balance_after: number;
+      description: string | null;
+      created_at: string;
+    }) => ({
       id: tx.id,
       userEmail: userEmailMap.get(tx.user_id) || 'Unknown',
       type: tx.type,
@@ -62,9 +74,11 @@ export async function GET() {
       balanceAfter: tx.balance_after,
       description: tx.description,
       createdAt: tx.created_at,
-    }));
+    });
 
-    // Build top users with email
+    const recentTransactions = (transactions || []).map(toTx);
+    const recentPurchases = (recentPurchaseRows || []).map(toTx);
+
     const topUsers = (userCredits || []).map((uc) => ({
       userEmail: userEmailMap.get(uc.user_id) || 'Unknown',
       balance: uc.balance,
@@ -72,32 +86,18 @@ export async function GET() {
       totalUsed: uc.total_used,
     }));
 
-    // Calculate summary stats
-    const allTx = allTransactions || [];
-    const totalCreditsSold = allTx
-      .filter((tx) => tx.type === 'purchase')
-      .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
-
-    const totalCreditsUsed = allTx
-      .filter((tx) => tx.type === 'use')
-      .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
-
-    const totalCreditsRefunded = allTx
-      .filter((tx) => tx.type === 'refund')
-      .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
-
-    const totalRevenueTHB = packagesWithSales.reduce((sum, pkg) => sum + pkg.revenue, 0);
-
     const summary = {
-      totalCreditsSold,
-      totalCreditsUsed,
-      totalCreditsRefunded,
-      totalRevenueTHB,
+      totalCreditsSold: Number(stats?.totalCreditsSold ?? 0),
+      totalCreditsUsed: Number(stats?.totalCreditsUsed ?? 0),
+      totalCreditsRefunded: Number(stats?.totalCreditsRefunded ?? 0),
+      totalCreditsBonus: Number(stats?.totalCreditsBonus ?? 0),
+      totalRevenueTHB: packagesWithSales.reduce((sum, pkg) => sum + pkg.revenue, 0),
     };
 
     return NextResponse.json({
       packages: packagesWithSales,
       recentTransactions,
+      recentPurchases,
       topUsers,
       summary,
     });

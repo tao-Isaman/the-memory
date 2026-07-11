@@ -123,12 +123,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert credit transaction
+    // Insert credit transaction ('bonus', not 'purchase' — this is a free grant;
+    // referral.hasUserPaidBefore counts 'purchase' rows as proof of payment)
     const { error: txError } = await supabase
       .from('credit_transactions')
       .insert({
         user_id: userId,
-        type: 'purchase',
+        type: 'bonus',
         amount: PROFILE_COMPLETION_CREDITS,
         balance_after: newBalance,
         description: `โบนัสกรอกโปรไฟล์ครบ (${PROFILE_COMPLETION_CREDITS} เครดิต)`,
