@@ -13,6 +13,16 @@
     "announcement": "Pengumuman"
   },
   "notes": {
+    "v3_0_0": {
+      "title": "The Memory kini hadir dalam 3 bahasa — Thailand, Inggris, Indonesia",
+      "summary": "The Memory sekarang tersedia dalam bahasa Thailand, Inggris, dan Indonesia. Ganti bahasa kapan saja — dan saat kamu mengirim kenangan ke seseorang di luar negeri, tautannya otomatis terbuka dalam bahasa mereka.",
+      "items": [
+        "Tiga bahasa — ไทย, English, Bahasa Indonesia. Ganti kapan saja lewat tombol bahasa di bar atas.",
+        "Kirim kenangan ke seseorang di luar negeri — tautan yang kamu bagikan otomatis terbuka dalam bahasa penerima.",
+        "Halaman pembayaran dan notifikasi kini tampil dalam bahasa yang kamu pakai.",
+        "Pengguna internasional bisa membayar dengan kartu kredit atau debit (PromptPay tetap tersedia untuk pengguna di Thailand)."
+      ]
+    },
     "v2_9_0": {
       "title": "Nikmati kenangan sepuasnya, tanpa hitung mundur",
       "summary": "Cerita tidak lagi berganti otomatis setiap 5 detik — setiap cerita akan bertahan sampai kamu sendiri yang mengetuk atau menggantinya. Baca pelan-pelan, resapi sepuasnya. Bilah progres ala IG Stories tetap seperti sebelumnya.",

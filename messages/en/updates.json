@@ -13,6 +13,16 @@
     "announcement": "News"
   },
   "notes": {
+    "v3_0_0": {
+      "title": "The Memory now speaks 3 languages — Thai, English, Indonesian",
+      "summary": "The Memory is now available in Thai, English and Bahasa Indonesia. Switch language any time — and when you send a memory to someone abroad, the link opens in their language automatically.",
+      "items": [
+        "Three languages — ไทย, English, Bahasa Indonesia. Switch any time from the language button in the top bar.",
+        "Send a memory to someone abroad — your shared link opens in the recipient's language automatically.",
+        "Checkout and notifications now appear in the language you use.",
+        "International users can pay by credit or debit card (PromptPay stays available for users in Thailand)."
+      ]
+    },
     "v2_9_0": {
       "title": "Take your time — no more countdown",
       "summary": "Stories no longer flip every 5 seconds. Each one stays put until you tap or click to move on, so you can read and linger for as long as you like. The Instagram-style progress bar stays exactly as it was.",
