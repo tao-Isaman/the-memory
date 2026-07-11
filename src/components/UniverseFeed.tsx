@@ -17,13 +17,17 @@ import { REACTION_EMOJIS } from '@/lib/reactions';
 import { getThemeColors } from '@/lib/themes';
 import { trackEvent } from '@/lib/analytics';
 import HeartLoader from './HeartLoader';
-import { Sparkles, ImageIcon, Quote, ImagePlus } from 'lucide-react';
+import ScratchCard from './ScratchCard';
+import SlideshowViewer from './SlideshowViewer';
+import { Sparkles, ImageIcon, Quote, ImagePlus, Sparkle, Images } from 'lucide-react';
 
 /** Story type → its chip icon + the message key holding the localized label. */
 const TYPE_CHIP: Record<UniverseStoryType, { labelKey: string; Icon: typeof ImageIcon }> = {
   image: { labelKey: 'types.image', Icon: ImageIcon },
   text: { labelKey: 'types.text', Icon: Quote },
   'text-image': { labelKey: 'types.textImage', Icon: ImagePlus },
+  scratch: { labelKey: 'types.scratch', Icon: Sparkle },
+  slideshow: { labelKey: 'types.slideshow', Icon: Images },
 };
 
 /** Apply an emoji toggle to a story locally (same emoji → off, different → switch). */
@@ -150,6 +154,31 @@ function StoryCard({
         >
           <Quote size={18} className="mx-auto mb-3 opacity-40" style={{ color: colors.primary }} />
           <StoryText text={story.content.text} dark={colors.dark} />
+        </div>
+      )}
+
+      {/* Secret image: stays scratchable in the feed — revealing it up front would throw
+          away the whole point of the story type. */}
+      {story.type === 'scratch' && story.content.imageUrl && (
+        <div className="px-4 pt-3">
+          <ScratchCard imageUrl={story.content.imageUrl} themeColors={colors} />
+          {story.content.caption && (
+            <p className="pt-3 text-sm text-gray-700 whitespace-pre-wrap">
+              {story.content.caption}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* อัลบั้ม: revealed on arrival — a feed has no reveal gate to pass. */}
+      {story.type === 'slideshow' && !!story.content.imageUrls?.length && (
+        <div className="px-4 pt-3">
+          <SlideshowViewer
+            imageUrls={story.content.imageUrls}
+            themeColors={colors}
+            initialRevealed
+            caption={story.content.caption}
+          />
         </div>
       )}
 

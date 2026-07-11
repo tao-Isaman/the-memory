@@ -336,6 +336,42 @@ export interface Database {
           }
         ]
       }
+      app_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          started_at: string
+          last_event_at: string
+          duration_seconds: number
+          page_views: number
+          locale: string | null
+          is_pwa: boolean
+          created_at: string
+        }
+        Insert: {
+          id: string
+          user_id: string
+          started_at?: string
+          last_event_at?: string
+          duration_seconds?: number
+          page_views?: number
+          locale?: string | null
+          is_pwa?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          started_at?: string
+          last_event_at?: string
+          duration_seconds?: number
+          page_views?: number
+          locale?: string | null
+          is_pwa?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
       cartoon_generations: {
         Row: {
           id: string
@@ -782,6 +818,33 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      get_engagement_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          totals: {
+            sessions: number
+            activeUsers: number
+            totalSeconds: number
+            avgSessionSeconds: number
+            secondsPerUser: number
+          }
+          daily: Array<{
+            day: string
+            sessions: number
+            activeUsers: number
+            totalSeconds: number
+            avgSessionSeconds: number
+          }>
+          topUsers: Array<{
+            userId: string
+            email: string
+            sessions: number
+            totalSeconds: number
+            lastSeenAt: string
+          }>
+          stickiness: { dau: number; mau: number }
+        }
+      }
       get_credit_stats: {
         Args: Record<PropertyKey, never>
         Returns: {

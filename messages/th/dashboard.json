@@ -45,7 +45,9 @@
     "types": {
       "image": "รูปภาพ",
       "text": "ข้อความ",
-      "textImage": "รูป + ข้อความ"
+      "textImage": "รูป + ข้อความ",
+      "scratch": "การ์ดลับ",
+      "slideshow": "อัลบั้มภาพ"
     }
   },
   "notifications": {

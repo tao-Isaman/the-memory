@@ -45,7 +45,9 @@
     "types": {
       "image": "Photo",
       "text": "Message",
-      "textImage": "Photo + message"
+      "textImage": "Photo + message",
+      "scratch": "Secret card",
+      "slideshow": "Photo album"
     }
   },
   "notifications": {

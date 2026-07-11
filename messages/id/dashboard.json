@@ -45,7 +45,9 @@
     "types": {
       "image": "Foto",
       "text": "Pesan",
-      "textImage": "Foto + pesan"
+      "textImage": "Foto + pesan",
+      "scratch": "Kartu rahasia",
+      "slideshow": "Album foto"
     }
   },
   "notifications": {
