@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 
 interface ScratchCardProps {
@@ -25,6 +26,7 @@ export default function ScratchCard({
     revealThreshold = 50,
     initialRevealed = false,
 }: ScratchCardProps) {
+    const t = useTranslations('viewer');
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isRevealed, setIsRevealed] = useState(initialRevealed);
@@ -217,7 +219,7 @@ export default function ScratchCard({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={imageUrl}
-                    alt="ความลับของเรา"
+                    alt={t('scratch.alt')}
                     className="w-full h-auto max-h-[500px] object-contain"
                     style={{ display: isLoaded ? 'block' : 'none' }}
                 />
@@ -256,7 +258,7 @@ export default function ScratchCard({
                     className="text-center text-sm mt-3 animate-pulse"
                     style={{ color: themeColors.primary }}
                 >
-                    👆 แตะแล้วลากเพื่อขูดเปิดความลับ
+                    {t('scratch.hint')}
                 </p>
             )}
         </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { sendPushToSubscriptions, isPushConfigured } from '@/lib/push-server';
 import { REACTION_EMOJIS, REACTION_MESSAGE_MAX } from '@/lib/reactions';
+import { REACTION_NOTIFICATION, ownerLocale } from '@/lib/notification-messages';
 
 export const runtime = 'nodejs';
 
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     // 1. The memory must exist and be active (don't accept reactions on drafts / unknown ids).
     const { data: memory } = await supabase
       .from('memories')
-      .select('id, user_id, title, status')
+      .select('id, user_id, title, status, locale')
       .eq('id', memoryId)
       .single();
     if (!memory || memory.status !== 'active') {
@@ -87,10 +88,12 @@ export async function POST(request: NextRequest) {
     // 5. Notify the owner (skip owner self-reactions). Best-effort — failures here never
     //    fail the reaction itself.
     if (!isOwner && memory.user_id) {
-      const title = message
-        ? '💌 มีคนตอบกลับความทรงจำของคุณ'
-        : `${emoji} มีคนส่งหัวใจให้ความทรงจำของคุณ`;
-      const notifBody = message ? message : `"${memory.title}" — แตะเพื่อเปิดดูอีกครั้ง`;
+      // Rendered in the OWNER's language (the one they built the memory in), not the
+      // reacting visitor's — a Web Push body is baked at send time and can't be
+      // re-translated on the device.
+      const copy = REACTION_NOTIFICATION[ownerLocale(memory.locale)];
+      const title = message ? copy.replyTitle : copy.heartTitle(emoji);
+      const notifBody = message ? message : copy.fallbackBody(memory.title);
       const url = `/memory/${memoryId}`;
 
       const { error: notifErr } = await supabase.from('notifications').insert({

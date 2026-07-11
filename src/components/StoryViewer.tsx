@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import YouTubeEmbed from './YouTubeEmbed';
@@ -26,6 +27,8 @@ const defaultColors: ThemeColors = {
 };
 
 function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal }: StoryViewerProps) {
+  const t = useTranslations('viewer');
+
   const TitleHeader = ({ title }: { title?: string }) => (
     <div className="flex items-center gap-2 mb-4 flex-shrink-0">
       <HeartIcon size={20} style={{ color: themeColors.primary }} />
@@ -54,7 +57,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
           <TitleHeader title={story.title} />
           <ImageWithLoader
             src={story.content.imageUrl}
-            alt={story.content.caption || 'รูปภาพความทรงจำ'}
+            alt={story.content.caption || t('story.imageAlt')}
             className="w-full rounded-lg shadow-md"
             style={{ maxHeight: '500px', objectFit: 'contain' }}
             themeColors={themeColors}
@@ -75,7 +78,7 @@ function StoryViewer({ story, themeColors = defaultColors, isRevealed, onReveal 
             <div className="mb-4">
               <ImageWithLoader
                 src={story.content.imageUrl}
-                alt="ความทรงจำ"
+                alt={t('story.memoryImageAlt')}
                 className="w-full rounded-lg shadow-md"
                 style={{ maxHeight: '400px', objectFit: 'contain' }}
                 themeColors={themeColors}

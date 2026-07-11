@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "The Memory - Surprise Gift Ideas for Your Girlfriend or Boyfriend",
+    "description": "Build a surprise gift they can open in seconds: photos, messages and music in one link. Perfect for anniversaries, birthdays, apologies, long distance and family. Ready in 5 minutes.",
+    "keywords": [
+      "surprise gift for girlfriend",
+      "surprise gift for boyfriend",
+      "digital gift",
+      "online gift link",
+      "anniversary gift idea",
+      "birthday gift idea",
+      "long distance relationship gift",
+      "apology gift",
+      "romantic gift ideas",
+      "personalised memory gift"
+    ]
+  },
+  "nav": {
+    "signIn": "Sign in",
+    "start": "Start creating"
+  },
+  "hero": {
+    "badge": "The #1 way to surprise the person you love",
+    "titleTop": "A surprise gift they'll never delete",
+    "titleBottom": "Say how you feel, with a memory you built yourself",
+    "tagline": "Photos, messages and the song that means something — all in one link.",
+    "occasions": "Made for every occasion: <b>anniversaries, birthdays, apologies, long distance, family</b>",
+    "ctaPrimary": "Start for free",
+    "ctaSecondary": "See how it works",
+    "pricingHint": "Free to build | Activate for just <price>฿99</price>"
+  },
+  "trust": {
+    "secure": "100% secure",
+    "noApp": "No app to install",
+    "easy": "Simple to use",
+    "forever": "Yours to keep forever"
+  },
+  "stats": {
+    "users": "people",
+    "memories": "memories",
+    "stories": "stories"
+  },
+  "features": {
+    "heading": "Build it however you want",
+    "subheading": "Pick the pieces you want and put them in the order you want them seen.",
+    "image": {
+      "title": "Photos",
+      "desc": "Upload the moments that mattered, with a caption."
+    },
+    "message": {
+      "title": "Heartfelt messages",
+      "desc": "Write the things you've been meaning to say."
+    },
+    "music": {
+      "title": "Music",
+      "desc": "Add any YouTube song that means something to you both."
+    },
+    "pin": {
+      "title": "Secret PIN",
+      "desc": "Lock it behind a 6-digit code and build the suspense."
+    },
+    "textImage": {
+      "title": "Text + photo",
+      "desc": "A picture and the words that go with it, on one page."
+    },
+    "scratch": {
+      "title": "Scratch card",
+      "desc": "They scratch to reveal a hidden photo. Pure surprise."
+    },
+    "question": {
+      "title": "Quiz question",
+      "desc": "They have to answer correctly to see what comes next."
+    },
+    "share": {
+      "title": "Share instantly",
+      "desc": "Send them a link or a QR code — that's the whole handover."
+    }
+  },
+  "socialProof": {
+    "heading": "Real people, real reactions",
+    "subheading": "From people who built a memory for someone who mattered.",
+    "items": [
+      {
+        "quote": "She opened it and started crying. So glad I made it myself.",
+        "occasion": "Valentine's Day"
+      },
+      {
+        "quote": "Took me under 10 minutes and it came out so lovely.",
+        "occasion": "Anniversary"
+      },
+      {
+        "quote": "Sent it to my mum on her birthday. She said she'll keep it forever.",
+        "occasion": "Mum's birthday"
+      }
+    ]
+  },
+  "howItWorks": {
+    "heading": "3 easy steps",
+    "subheading": "It really does only take a few minutes.",
+    "one": {
+      "title": "Create a memory",
+      "desc": "Give it a name, pick a theme, and start adding what you want."
+    },
+    "two": {
+      "title": "Add your stories",
+      "desc": "Photos, messages, music, a secret PIN — whatever fits."
+    },
+    "three": {
+      "title": "Share it with them",
+      "desc": "Send a link or a QR code to the person you love."
+    },
+    "pricingNote": "Free to build, free to preview | Activate for just <price>฿99</price> — keep it forever, send it as often as you like."
+  },
+  "useCases": {
+    "heading": "What's the occasion?",
+    "subheading": "Pick the one that fits, and start building."
+  },
+  "faq": {
+    "heading": "Frequently asked questions",
+    "subheading": "About The Memory",
+    "items": [
+      {
+        "q": "What is The Memory?",
+        "a": "The Memory is a platform for building online memories for the people you love. You gather photos, messages, music and even a secret PIN into a single link, and send it to them. It works for any occasion — a surprise for your partner, an anniversary, a birthday, an apology, or simply telling your family you love them."
+      },
+      {
+        "q": "Is it hard? How long does it take?",
+        "a": "Not hard at all. Three steps: 1) create a memory, 2) add photos, messages or music, 3) share the link. No app to install, and most people are done in under 5 minutes."
+      },
+      {
+        "q": "How much does it cost? Can I build it for free?",
+        "a": "Building and previewing is completely free. When you're happy with it, you pay ฿99 to activate the link and share it. It's yours to keep, and you can send it as many times as you like."
+      },
+      {
+        "q": "Is payment secure?",
+        "a": "Completely. We use Stripe, the same payment provider trusted by Shopify, Amazon and companies worldwide. Credit and debit cards and PromptPay are supported."
+      },
+      {
+        "q": "Does the person receiving it need an account?",
+        "a": "No. They tap the link and it opens — on a phone or a laptop. No app, no signup, nothing to install."
+      },
+      {
+        "q": "Can I lock it with a password?",
+        "a": "Yes. Add a 6-digit PIN and they'll have to enter it before they can see what's next. It's a great way to build a little suspense."
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Ready to tell them how you feel?",
+    "subheading": "Start building your memory — it takes less than 5 minutes.",
+    "note": "Free to build — pay only when you're ready to share.",
+    "button": "Start creating"
+  },
+  "footer": {
+    "tagline": "Online memories for the people who matter most",
+    "signIn": "Sign in",
+    "features": "Features",
+    "occasions": "Occasions",
+    "faq": "FAQ",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "trustLine": "Secure payments via Stripe | Built in minutes, shared instantly | Yours to keep forever",
+    "seoLine": "The Memory — surprise gifts and online memories for anniversaries, birthdays, apologies, long distance and family.",
+    "keywordLine": "surprise gift for girlfriend | surprise gift for boyfriend | anniversary gift idea | birthday gift idea | apology gift | long distance relationship gift | family gift idea | digital memory gift"
+  }
+}

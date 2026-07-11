@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Bell, X, Sparkles } from 'lucide-react';
 import { NOTIFICATION_CREDITS } from '@/lib/constants';
 import { isPushSupported, getPushState, subscribeToPush } from '@/lib/push';
@@ -16,6 +17,7 @@ const SNOOZE_MS = 24 * 60 * 60 * 1000; // re-ask tomorrow
  * subscribed, hasn't hard-denied, and isn't within the 24h snooze window.
  */
 export default function PushNotificationPrompt() {
+  const t = useTranslations('dashboard.pushPrompt');
   const [isVisible, setIsVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const { refresh } = useCreditBalance();
@@ -63,16 +65,16 @@ export default function PushNotificationPrompt() {
       setIsVisible(false);
       if (res.creditsGranted && res.creditsGranted > 0) {
         await refresh();
-        showToast(`เปิดการแจ้งเตือนสำเร็จ! รับ ${res.creditsGranted} เครดิต 🎉`, 'success');
+        showToast(t('successWithCredits', { credits: res.creditsGranted }), 'success');
       } else {
-        showToast('เปิดการแจ้งเตือนสำเร็จ!', 'success');
+        showToast(t('success'), 'success');
       }
     } else if (res.error === 'denied') {
       snooze();
       setIsVisible(false);
-      showToast('คุณปิดสิทธิ์การแจ้งเตือนไว้ เปิดได้ภายหลังที่ไอคอนกระดิ่ง', 'info');
+      showToast(t('denied'), 'info');
     } else {
-      showToast('ไม่สามารถเปิดการแจ้งเตือนได้ ลองใหม่อีกครั้ง', 'error');
+      showToast(t('error'), 'error');
     }
   };
 
@@ -85,7 +87,7 @@ export default function PushNotificationPrompt() {
         <button
           onClick={handleLater}
           className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="ปิด"
+          aria-label={t('close')}
         >
           <X size={18} className="text-gray-400" />
         </button>
@@ -97,16 +99,12 @@ export default function PushNotificationPrompt() {
         </div>
 
         <div className="text-center mb-6">
-          <h3 className="font-kanit text-xl font-bold text-gray-800 mb-2">
-            เปิดการแจ้งเตือน รับเครดิตฟรี!
-          </h3>
-          <p className="text-gray-500 text-sm mb-3">
-            รับแจ้งเตือนข่าวสาร โปรโมชัน และเรื่องสำคัญ — ส่งตรงถึงเครื่องคุณ
-          </p>
+          <h3 className="font-kanit text-xl font-bold text-gray-800 mb-2">{t('title')}</h3>
+          <p className="text-gray-500 text-sm mb-3">{t('description')}</p>
           <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-pink-50 to-red-50 border border-pink-200 rounded-full px-4 py-1.5">
             <Sparkles size={16} className="text-[#E63946]" />
             <span className="font-kanit font-semibold text-[#E63946]">
-              {NOTIFICATION_CREDITS} เครดิตฟรี
+              {t('creditsBadge', { credits: NOTIFICATION_CREDITS })}
             </span>
           </div>
         </div>
@@ -117,14 +115,14 @@ export default function PushNotificationPrompt() {
             disabled={busy}
             className="flex-1 py-2.5 rounded-xl border-2 border-gray-200 text-gray-500 font-kanit text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            ไว้ทีหลัง
+            {t('later')}
           </button>
           <button
             onClick={handleEnable}
             disabled={busy}
             className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#E63946] to-[#FF6B6B] text-white font-kanit font-semibold text-sm hover:shadow-lg transition-all disabled:opacity-50"
           >
-            {busy ? 'กำลังเปิด...' : 'เปิดเลย'}
+            {busy ? t('enabling') : t('enable')}
           </button>
         </div>
       </div>

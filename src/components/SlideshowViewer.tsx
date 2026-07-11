@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 
 interface SlideshowViewerProps {
@@ -55,6 +56,7 @@ export default function SlideshowViewer({
     onComplete,
     caption,
 }: SlideshowViewerProps) {
+    const t = useTranslations('viewer');
     const total = imageUrls.length;
 
     // Which photo is lifted to the very front (by index). -1 = natural stacking order.
@@ -119,7 +121,7 @@ export default function SlideshowViewer({
     }, []);
 
     return (
-        <div className="w-full flex flex-col" role="group" aria-roledescription="อัลบั้มภาพ">
+        <div className="w-full flex flex-col" role="group" aria-roledescription={t('slideshow.album')}>
             {/* Stage — data-interactive so the page tap-nav never hijacks photo taps. */}
             <div
                 data-interactive
@@ -150,7 +152,7 @@ export default function SlideshowViewer({
                                 type="button"
                                 data-interactive
                                 onClick={(e) => liftToFront(e, i)}
-                                aria-label={`รูปที่ ${i + 1} จาก ${total}`}
+                                aria-label={t('slideshow.photoAlt', { index: i + 1, total })}
                                 className={`block w-full border-0 cursor-pointer ${reducedMotion ? '' : 'polaroid-drop'}`}
                                 style={{
                                     ...cardVars,
@@ -176,7 +178,7 @@ export default function SlideshowViewer({
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={url}
-                                        alt={`รูปที่ ${i + 1} จาก ${total}`}
+                                        alt={t('slideshow.photoAlt', { index: i + 1, total })}
                                         loading="eager"
                                         draggable={false}
                                         className="absolute inset-0 w-full h-full object-cover select-none"
@@ -189,7 +191,7 @@ export default function SlideshowViewer({
             </div>
 
             {/* aria-live announcement */}
-            <span className="sr-only" aria-live="polite">{`อัลบั้มภาพ ${total} รูป`}</span>
+            <span className="sr-only" aria-live="polite">{t('slideshow.announce', { count: total })}</span>
 
             {/* Single overall caption beneath the pile */}
             {caption && (

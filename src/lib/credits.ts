@@ -190,7 +190,8 @@ export async function addCredits(
     return { success: false, newBalance: userCredits.balance };
   }
 
-  // Insert transaction record
+  // Insert transaction record. `description` is a locale-neutral ledger note (admin-facing);
+  // the user-facing label in the credits page is derived from `type`, not from this string.
   const { error: txError } = await supabase
     .from('credit_transactions')
     .insert({
@@ -201,7 +202,7 @@ export async function addCredits(
       package_id: packageId,
       stripe_checkout_session_id: stripeSessionId,
       stripe_payment_intent_id: stripePaymentIntentId,
-      description: `ซื้อ ${credits} เครดิต`,
+      description: `Purchased ${credits} credits`,
     });
 
   if (txError) {
@@ -260,7 +261,7 @@ export async function grantPushCredits(
     type: 'bonus',
     amount: NOTIFICATION_CREDITS,
     balance_after: newBalance,
-    description: `โบนัสเปิดการแจ้งเตือน (${NOTIFICATION_CREDITS} เครดิต)`,
+    description: `Push-notification bonus (${NOTIFICATION_CREDITS} credits)`,
   });
 
   console.log(

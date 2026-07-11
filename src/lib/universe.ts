@@ -1,4 +1,4 @@
-// Universe (จักรวาล) — client helpers for the public story feed + emoji reactions.
+// Universe — client helpers for the public story feed + emoji reactions.
 // The feed is read through the get_universe_feed RPC with the user's own JWT
 // (SECURITY DEFINER server-side); reactions go through the service-role API so the
 // story owner can be notified (in-app + Web Push).
@@ -70,18 +70,25 @@ export async function getUniverseFeed(
 }
 
 /**
+ * Failure reasons, as locale-independent codes. This module is a plain (non-React)
+ * helper, so it never translates — the caller maps the code to a message if it
+ * needs to show one.
+ */
+export type UniverseReactionError = 'unauthenticated' | 'failed' | 'network';
+
+/**
  * Toggle the current user's emoji reaction on a feed story.
  * Same emoji again → removed; different emoji → switched. Never throws.
  */
 export async function toggleUniverseReaction(
   storyId: string,
   emoji: string
-): Promise<{ ok: boolean; action?: 'added' | 'removed'; error?: string }> {
+): Promise<{ ok: boolean; action?: 'added' | 'removed'; error?: UniverseReactionError }> {
   try {
     const supabase = getSupabaseBrowserClient();
     const sess = await supabase?.auth.getSession();
     const token = sess?.data.session?.access_token;
-    if (!token) return { ok: false, error: 'กรุณาเข้าสู่ระบบ' };
+    if (!token) return { ok: false, error: 'unauthenticated' };
 
     const res = await fetch('/api/universe/reaction', {
       method: 'POST',
@@ -89,9 +96,9 @@ export async function toggleUniverseReaction(
       body: JSON.stringify({ storyId, emoji }),
     });
     const data = await res.json().catch(() => null);
-    if (!res.ok) return { ok: false, error: data?.error || 'ส่งไม่สำเร็จ' };
+    if (!res.ok) return { ok: false, error: 'failed' };
     return { ok: true, action: data?.action };
   } catch {
-    return { ok: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' };
+    return { ok: false, error: 'network' };
   }
 }

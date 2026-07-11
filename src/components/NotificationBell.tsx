@@ -1,40 +1,34 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useTranslations, useFormatter } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { Bell, BellRing, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { AppNotification } from '@/types/notification';
 import { fetchNotifications, markNotificationsRead, dismissNotifications } from '@/lib/notifications';
 import { getPushState, subscribeToPush, unsubscribeFromPush, isPushSupported } from '@/lib/push';
-import { patchNotes, getLatestVersion } from '@/data/patch-notes';
+import { patchNotes, getLatestVersion, versionKey } from '@/data/patch-notes';
 import { hasUnseenUpdate, setLastSeenVersion } from '@/lib/patch-notes';
 
 type Tab = 'notifications' | 'updates';
 
-const typeBadge: Record<string, { label: string; cls: string }> = {
-  feature: { label: 'ใหม่', cls: 'bg-green-100 text-green-700' },
-  improvement: { label: 'ปรับปรุง', cls: 'bg-blue-100 text-blue-700' },
-  fix: { label: 'แก้ไข', cls: 'bg-amber-100 text-amber-700' },
-  announcement: { label: 'ประกาศ', cls: 'bg-pink-100 text-pink-700' },
+/** Badge colours per patch-note type; the label itself is translated. */
+const typeBadgeClass: Record<string, string> = {
+  feature: 'bg-green-100 text-green-700',
+  improvement: 'bg-blue-100 text-blue-700',
+  fix: 'bg-amber-100 text-amber-700',
+  announcement: 'bg-pink-100 text-pink-700',
 };
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'เมื่อสักครู่';
-  if (m < 60) return `${m} นาทีที่แล้ว`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} ชม.ที่แล้ว`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d} วันที่แล้ว`;
-  return new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-}
 
 export default function NotificationBell() {
   const { user } = useAuth();
   const router = useRouter();
+  const t = useTranslations('dashboard.notifications');
+  // Patch-note copy lives in the `updates` namespace (data/patch-notes.ts now holds
+  // only version/date/badge-type), so the Updates tab reads from there.
+  const tUpdates = useTranslations('updates');
+  const format = useFormatter();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('notifications');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -139,7 +133,7 @@ export default function NotificationBell() {
           setTab('notifications');
         }}
         className="relative w-9 h-9 rounded-full hover:bg-pink-50 flex items-center justify-center transition-colors"
-        aria-label="การแจ้งเตือน"
+        aria-label={t('bell')}
       >
         <Bell size={20} className="text-gray-500" />
         {showDot && (
@@ -157,13 +151,13 @@ export default function NotificationBell() {
               onClick={() => openTab('notifications')}
               className={`flex-1 py-3 text-sm font-medium transition-colors ${tab === 'notifications' ? 'text-[#E63946] border-b-2 border-[#E63946]' : 'text-gray-500'}`}
             >
-              การแจ้งเตือน{unreadCount > 0 ? ` (${unreadCount})` : ''}
+              {t('tabNotifications')}{unreadCount > 0 ? ` (${unreadCount})` : ''}
             </button>
             <button
               onClick={() => openTab('updates')}
               className={`flex-1 py-3 text-sm font-medium transition-colors relative ${tab === 'updates' ? 'text-[#E63946] border-b-2 border-[#E63946]' : 'text-gray-500'}`}
             >
-              อัปเดต
+              {t('tabUpdates')}
               {hasPatchUpdate && <span className="absolute top-2.5 ml-1 w-2 h-2 bg-[#E63946] rounded-full" />}
             </button>
           </div>
@@ -178,9 +172,7 @@ export default function NotificationBell() {
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-xs border-b border-pink-50 text-gray-600 hover:bg-pink-50/50 disabled:opacity-50"
                   >
                     <BellRing size={14} className={pushOn ? 'text-[#E63946]' : 'text-gray-400'} />
-                    {pushOn
-                      ? 'การแจ้งเตือนบนอุปกรณ์นี้: เปิดอยู่ (แตะเพื่อปิด)'
-                      : 'เปิดการแจ้งเตือนบนอุปกรณ์นี้'}
+                    {pushOn ? t('pushOn') : t('pushOff')}
                   </button>
                 )}
                 {!loading && notifications.length > 0 && (
@@ -189,16 +181,16 @@ export default function NotificationBell() {
                       onClick={handleClearAll}
                       className="text-xs text-gray-400 hover:text-[#E63946] transition-colors"
                     >
-                      ล้างทั้งหมด
+                      {t('clearAll')}
                     </button>
                   </div>
                 )}
                 {loading ? (
-                  <p className="text-center text-sm text-gray-400 py-8">กำลังโหลด...</p>
+                  <p className="text-center text-sm text-gray-400 py-8">{t('loading')}</p>
                 ) : notifications.length === 0 ? (
                   <div className="text-center py-10 px-4">
                     <Bell size={32} className="mx-auto text-gray-300 mb-2" />
-                    <p className="text-sm text-gray-400">ยังไม่มีการแจ้งเตือน</p>
+                    <p className="text-sm text-gray-400">{t('empty')}</p>
                   </div>
                 ) : (
                   notifications.map((n) => (
@@ -215,14 +207,16 @@ export default function NotificationBell() {
                           <div className={`flex-1 min-w-0 ${n.read ? 'pl-4' : ''}`}>
                             <p className="text-sm font-semibold text-gray-800 truncate">{n.title}</p>
                             <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{n.body}</p>
-                            <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
+                            <p className="text-[10px] text-gray-400 mt-1">
+                              {format.relativeTime(new Date(n.createdAt))}
+                            </p>
                           </div>
                         </div>
                       </button>
                       <button
                         onClick={() => handleDismiss(n.id)}
                         className="p-2 mt-1.5 mr-1 text-gray-300 hover:text-[#E63946] flex-shrink-0"
-                        aria-label="ลบการแจ้งเตือน"
+                        aria-label={t('dismiss')}
                       >
                         <X size={14} />
                       </button>
@@ -232,33 +226,40 @@ export default function NotificationBell() {
               </div>
             ) : (
               <div>
-                {patchNotes.slice(0, 6).map((pn) => (
+                {patchNotes.slice(0, 6).map((pn) => {
+                  // Patch-note TEXT lives in messages/<locale>/updates.json, keyed by an
+                  // underscored version ("2.9.0" -> "v2_9_0") because next-intl splits
+                  // message keys on ".". items[i] here lines up with pn.items[i].type.
+                  const noteKey = `notes.${versionKey(pn.version)}`;
+                  const itemTexts = tUpdates.raw(`${noteKey}.items`) as string[] | undefined;
+                  return (
                   <div key={pn.version} className="px-4 py-3 border-b border-pink-50">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-semibold text-gray-800">{pn.title}</p>
+                      <p className="text-sm font-semibold text-gray-800">{tUpdates(`${noteKey}.title`)}</p>
                       <span className="text-[10px] text-gray-400">v{pn.version}</span>
                     </div>
-                    {pn.summary && <p className="text-xs text-gray-500 mb-1.5">{pn.summary}</p>}
+                    <p className="text-xs text-gray-500 mb-1.5">{tUpdates(`${noteKey}.summary`)}</p>
                     <ul className="space-y-1">
                       {pn.items.slice(0, 4).map((it, i) => (
                         <li key={i} className="flex items-start gap-1.5 text-xs text-gray-600">
                           <span
-                            className={`mt-0.5 px-1.5 rounded text-[9px] font-medium ${typeBadge[it.type]?.cls ?? 'bg-gray-100 text-gray-600'}`}
+                            className={`mt-0.5 px-1.5 rounded text-[9px] font-medium ${typeBadgeClass[it.type] ?? 'bg-gray-100 text-gray-600'}`}
                           >
-                            {typeBadge[it.type]?.label ?? it.type}
+                            {typeBadgeClass[it.type] ? t(`patchTypes.${it.type}`) : it.type}
                           </span>
-                          <span className="flex-1">{it.text}</span>
+                          <span className="flex-1">{itemTexts?.[i] ?? ''}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                ))}
+                  );
+                })}
                 <Link
                   href="/updates"
                   onClick={() => setOpen(false)}
                   className="block text-center py-3 text-sm text-[#E63946] font-medium hover:bg-pink-50/50"
                 >
-                  ดูอัปเดตทั้งหมด →
+                  {t('viewAllUpdates')}
                 </Link>
               </div>
             )}

@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/credits.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     if (fetchError || !gen) {
       return NextResponse.json(
-        { error: 'ไม่พบรูปภาพ' },
+        { error: 'DELETE_FAILED' },
         { status: 404 }
       );
     }
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     if (deleteError) {
       console.error('Error deleting cartoon generation:', deleteError);
       return NextResponse.json(
-        { error: 'ลบรูปไม่สำเร็จ' },
+        { error: 'DELETE_FAILED' },
         { status: 500 }
       );
     }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Cartoon delete error:', error);
     return NextResponse.json(
-      { error: 'เกิดข้อผิดพลาด' },
+      { error: 'GENERIC' },
       { status: 500 }
     );
   }

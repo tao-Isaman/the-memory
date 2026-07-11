@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 import { HelpCircle, Check } from 'lucide-react';
@@ -29,6 +30,7 @@ const QuestionGate = memo(function QuestionGate({
     onUnlock,
     themeColors = defaultColors,
 }: QuestionGateProps) {
+    const t = useTranslations('viewer');
     const [error, setError] = useState(false);
     const [shake, setShake] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
@@ -68,7 +70,7 @@ const QuestionGate = memo(function QuestionGate({
                     </div>
 
                     <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
-                        คำถาม
+                        {t('question.title')}
                     </h2>
 
                     {title && (
@@ -125,7 +127,7 @@ const QuestionGate = memo(function QuestionGate({
                         <div className="mt-6 flex items-center justify-center gap-2 text-red-500 animate-fade-in">
                             <HeartIcon size={16} className="fill-current" />
                             <p className="text-sm font-medium">
-                                คำตอบไม่ถูกต้อง ลองใหม่อีกครั้ง
+                                {t('question.wrong')}
                             </p>
                         </div>
                     )}
@@ -134,7 +136,7 @@ const QuestionGate = memo(function QuestionGate({
                         <div className="mt-6 flex items-center justify-center gap-2 text-green-500 animate-fade-in">
                             <Check size={20} />
                             <p className="text-sm font-medium">
-                                ถูกต้อง!
+                                {t('question.correct')}
                             </p>
                         </div>
                     )}

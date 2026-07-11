@@ -3,8 +3,8 @@
 // THE PROBLEM this solves: desktop/Android Chrome's MediaRecorder produces Opus audio
 // (e.g. 'audio/mp4;codecs=opus' or 'audio/webm;codecs=opus'). iOS/iPadOS WebKit — which
 // powers EVERY browser on iPhone/iPad, Safari and Chrome alike — cannot decode Opus in any
-// container. A gift recorded on a laptop then played on the recipient's iPhone shows
-// "ไม่สามารถเล่นเสียงได้ในอุปกรณ์นี้". See VoicePlayer's onError fallback.
+// container. A gift recorded on a laptop then played on the recipient's iPhone shows the
+// "can't play audio on this device" error. See VoicePlayer's onError fallback.
 //
 // THE FIX: before upload, if the recorded/uploaded blob is NOT a codec iOS can play
 // (AAC / MP3 / WAV), decode it on the RECORDING browser (which can always decode what it

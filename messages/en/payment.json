@@ -1,0 +1,35 @@
+{
+  "button": {
+    "discountBanner": "You've got a <b>฿{amount}</b> discount from a referral code!",
+    "processing": "Processing...",
+    "pay": "Pay now",
+    "payWithDiscount": "Pay now (฿{amount} off)"
+  },
+  "status": {
+    "pending": "Awaiting payment",
+    "active": "Active",
+    "failed": "Payment failed"
+  },
+  "success": {
+    "verifying": "Confirming your payment...",
+    "creditsTitle": "Credits purchased!",
+    "creditsDescription": "You received <b>{credits} credits</b>, ready to unlock your memories.",
+    "goToCredits": "Go to credits",
+    "titleFree": "Free memory unlocked!",
+    "titlePaid": "Payment complete!",
+    "titlePending": "Payment in progress",
+    "titleError": "Something went wrong",
+    "bodyPending": "Your payment is being processed. With PromptPay this can take a little while. You'll be able to share your link the moment it goes through.",
+    "bodyFree": "You've used your free memory from a referral code!",
+    "bodyPaid": "Your memory is ready to share with someone special!",
+    "bodyError": "We couldn't confirm your payment. Please try again or get in touch with us.",
+    "shareMemory": "Share memory",
+    "memoryTitleFallback": "Your memory"
+  },
+  "cancel": {
+    "title": "Payment cancelled",
+    "body": "Your payment was cancelled. Your memory is safe and still waiting for payment — you can try again any time.",
+    "note": "Your memory becomes visible to others once the payment is complete."
+  },
+  "backToDashboard": "Back to home"
+}

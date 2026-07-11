@@ -81,7 +81,13 @@ export async function getMemoryById(id: string): Promise<Memory | null> {
 }
 
 // Save (create or update) a memory - OPTIMIZED: Reduced round-trips
-export async function saveMemory(memory: Memory, userId: string): Promise<Memory | null> {
+export async function saveMemory(
+  memory: Memory,
+  userId: string,
+  // Creator's language, persisted so reaction notifications to the owner (rendered
+  // server-side in an API route) can be written in the language they built this in.
+  locale: string = 'th',
+): Promise<Memory | null> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return null;
 
@@ -96,6 +102,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
       title: memory.title,
       theme: memory.theme,
       share_to_universe: memory.shareToUniverse ?? true,
+      locale,
       created_at: memory.createdAt,
       updated_at: now,
       status: memory.status || 'pending',
@@ -150,7 +157,7 @@ export async function saveMemory(memory: Memory, userId: string): Promise<Memory
   };
 }
 
-// Toggle a memory's universe (จักรวาล) sharing flag without touching its stories
+// Toggle a memory's universe sharing flag without touching its stories
 export async function setMemoryUniverseShare(
   id: string,
   userId: string,

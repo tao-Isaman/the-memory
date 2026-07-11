@@ -1,0 +1,147 @@
+{
+  "backToHome": "Back to home",
+  "effectiveDate": "12 June 2026",
+  "versionLine": "Version {version} • Effective from {date}",
+  "readTerms": "Read the Terms of Use →",
+  "readPrivacy": "Read the Privacy Policy →",
+  "privacy": {
+    "metaTitle": "Privacy Policy | The Memory",
+    "metaDescription": "The Memory's Privacy Policy — the data we collect, why we use it, who we disclose it to, and your rights under Thailand's Personal Data Protection Act (PDPA).",
+    "title": "Privacy Policy",
+    "s1": {
+      "title": "1. Introduction",
+      "body": "{service} ({url}) (“we”, “us”) is a platform for creating digital memories to give to the people who matter to you. We take your privacy seriously. This policy explains how we collect, use and disclose your personal data in accordance with Thailand's Personal Data Protection Act B.E. 2562 (PDPA)."
+    },
+    "s2": {
+      "title": "2. Data We Collect",
+      "intro": "When you use the service, we may collect the following data:",
+      "i1": "<b>Google account data</b> — your name, email address and profile picture, when you sign in with Google.",
+      "i2": "<b>Profile data (optional)</b> — phone number, date of birth, gender, occupation, relationship status and the occasion you are creating for, if you choose to provide them.",
+      "i3": "<b>Content you create</b> — images, text, audio files, video links and any other content you upload into a memory.",
+      "i4": "<b>Payment data</b> — handled entirely by Stripe. We do <b>not</b> store your card number or bank account details on our systems (we keep only the transaction reference and the payment status).",
+      "i5": "<b>Referral payout data</b> — your PromptPay number or bank account, only if you request a payout from the referral programme.",
+      "i6": "<b>Usage data</b> — visit statistics via Google Analytics, cookies required to sign in, and device data for push notifications (if you enable them)."
+    },
+    "s3": {
+      "title": "3. Why We Use Your Data",
+      "i1": "To create, store and share memories as you have asked us to.",
+      "i2": "To process payments and issue records of your transactions.",
+      "i3": "To send notifications relating to your account — for example, when someone sends a heart or reacts to your memory.",
+      "i4": "To generate AI cartoon images at your request (images you upload are sent to our AI provider for processing).",
+      "i5": "To analyse and improve the service overall (anonymised, aggregated statistics).",
+      "i6": "To pay out referral rewards when you request them."
+    },
+    "s4": {
+      "title": "4. Disclosure to Third Parties",
+      "intro": "We do <b>not</b> sell your personal data. We disclose only what is necessary to the service providers that keep the platform running:",
+      "i1": "<b>Supabase</b> — database and file storage.",
+      "i2": "<b>Stripe</b> — payment processing (credit/debit cards and PromptPay).",
+      "i3": "<b>OpenAI</b> — processing only the images you upload for cartoon generation.",
+      "i4": "<b>Google</b> — sign-in (OAuth) and Google Analytics.",
+      "i5": "<b>Vercel</b> — website hosting.",
+      "outro": "We may also disclose data where we are required to do so by law or by order of a competent authority."
+    },
+    "s5": {
+      "title": "5. Sharing Content and the Universe Feed",
+      "i1": "An activated memory is reachable through a public link — anyone who has the link can open it. Please share the link only with people you trust; you can also set a PIN to protect the content.",
+      "i2": "<b>The Universe feed</b> — image and text stories from your activated memories, together with your name and profile picture, are shown to other users in the Universe feed <b>by default</b>. This includes stories placed behind a PIN (a PIN only protects the viewing sequence of the link). If you would rather they were not shown, you can turn sharing off for any individual memory at any time, from your dashboard or the memory's edit page."
+    },
+    "s6": {
+      "title": "6. Retention and Security",
+      "body": "We keep your data for as long as your account is active or as long as it is needed to provide the service. When you delete a memory, the content it contains is removed from our systems. Payment records may be retained longer where accounting and tax law requires it. We apply industry-standard security measures, such as encryption in transit (HTTPS) and database access controls (Row Level Security)."
+    },
+    "s7": {
+      "title": "7. Your Rights Under the PDPA",
+      "intro": "You have the following rights in relation to your personal data:",
+      "i1": "To access your personal data and request a copy of it.",
+      "i2": "To have your data corrected and kept up to date.",
+      "i3": "To have your data erased or destroyed, including deletion of your account.",
+      "i4": "To restrict or object to the processing of your data.",
+      "i5": "To withdraw consent you have previously given.",
+      "i6": "To lodge a complaint with the Personal Data Protection Committee.",
+      "outro": "To exercise these rights, email us at <email></email>. We will act within the time limits set by law."
+    },
+    "s8": {
+      "title": "8. Cookies",
+      "body": "We use cookies that are necessary to sign you in and keep your session alive, and Google Analytics cookies to understand how the service is used overall. You can configure your browser to refuse cookies, but some features may then stop working."
+    },
+    "s9": {
+      "title": "9. Minors",
+      "body": "This service is not aimed at minors. If you are under 20 years of age, you should obtain consent from your parent or guardian before using it."
+    },
+    "s10": {
+      "title": "10. Changes to This Policy",
+      "body": "We may update this policy from time to time. If we make a material change, we will notify you and ask for your consent again in the app before you continue. The latest version is always shown on this page."
+    },
+    "s11": {
+      "title": "11. Contact Us",
+      "body": "If you have any questions about this Privacy Policy, contact us at <email></email>"
+    }
+  },
+  "terms": {
+    "metaTitle": "Terms of Use | The Memory",
+    "metaDescription": "The Memory's Terms of Use — conditions of service, payment, user content, the Universe feed and limitation of liability.",
+    "title": "Terms of Use",
+    "s1": {
+      "title": "1. Acceptance of These Terms",
+      "body": "By signing up for or using {service} ({url}), you confirm that you have read and understood these Terms of Use and agree to be bound by them, together with our <privacyLink>Privacy Policy</privacyLink>. If you do not accept them, please do not use the service."
+    },
+    "s2": {
+      "title": "2. Our Service",
+      "body": "{service} is a platform for creating digital “memories” — story-based presentations built from images, text, audio, video and other touches, shared with someone special through a link or a QR code. It also offers extras such as AI cartoon generation via a credit system, and the Universe feed for viewing stories that other users have shared."
+    },
+    "s3": {
+      "title": "3. Your Account",
+      "i1": "You sign in using your Google account.",
+      "i2": "You are responsible for all activity that takes place under your account.",
+      "i3": "You must not use anyone else's account or impersonate another person."
+    },
+    "s4": {
+      "title": "4. Payments and Credits",
+      "i1": "Activating a memory for sharing costs the fee shown on the payment page. It is a one-time payment, yours to keep, processed through Stripe (credit/debit card or PromptPay).",
+      "i2": "Credits for AI features are bought as packages at the prices shown on the credits page.",
+      "i3": "If AI cartoon generation fails, your credits are refunded automatically.",
+      "i4": "As a general rule, fees already paid are <b>non-refundable</b>, unless the fault lies with our system — in that case, contact <email></email>",
+      "i5": "Prices may change, without affecting transactions that have already been paid for."
+    },
+    "s5": {
+      "title": "5. User Content",
+      "i1": "The content you upload remains yours. You grant us permission to store, process and display it as far as is necessary to provide the service.",
+      "i2": "You warrant that you own or hold the rights to the content you upload, and that you have obtained the consent of any person appearing in the images or audio.",
+      "i3": "You must not upload content that is unlawful, infringes copyright, is pornographic, involves minors inappropriately, is defamatory, incites hatred, or violates the rights of others.",
+      "i4": "We reserve the right to remove content or suspend accounts that breach these terms, without prior notice and without refund."
+    },
+    "s6": {
+      "title": "6. Sharing and the Universe Feed",
+      "i1": "An activated memory can be opened by anyone who has the link. You decide who you share that link with.",
+      "i2": "Image and text stories appear in the Universe feed by default, including stories placed behind a PIN (a PIN only protects the viewing sequence of the link). You can turn sharing off for any individual memory at any time.",
+      "i3": "Reactions to other people's stories must be respectful. We reserve the right to suspend access if we find the feature being misused."
+    },
+    "s7": {
+      "title": "7. Our Intellectual Property",
+      "body": "The logo, design, software and components of the service (other than user content) are the property of {service}. They may not be copied, modified or used commercially without our written permission."
+    },
+    "s8": {
+      "title": "8. Limitation of Liability",
+      "i1": "The service is provided “as is”. We do not guarantee that it will be uninterrupted or free of errors.",
+      "i2": "We are not liable for indirect damages or for loss of data beyond our reasonable control. Our total aggregate liability is limited to the amount you have paid us over the past 12 months.",
+      "i3": "We recommend that you always keep your own copies of important images and files."
+    },
+    "s9": {
+      "title": "9. Suspension and Termination",
+      "body": "You may stop using the service and request deletion of your account at any time. We may suspend or terminate accounts that breach these terms. If the service has to shut down, we will give you reasonable notice so that you can back up your content."
+    },
+    "s10": {
+      "title": "10. Governing Law",
+      "body": "These terms are governed by the laws of the Kingdom of Thailand. Any dispute shall fall under the jurisdiction of the Thai courts."
+    },
+    "s11": {
+      "title": "11. Changes to These Terms",
+      "body": "We may update these terms from time to time. If we make a material change, we will notify you and ask for your consent again in the app before you continue."
+    },
+    "s12": {
+      "title": "12. Contact Us",
+      "body": "If you have any questions about these Terms of Use, contact us at <email></email>"
+    }
+  }
+}

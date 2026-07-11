@@ -1,9 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { X, Wallet, Loader2, Smartphone, Building, CheckCircle } from 'lucide-react';
-import HeartIcon from './HeartIcon';
 import { PaymentMethod } from '@/types/referral';
+
+// Fixed payout, in THB for every locale (deliberate product decision).
+const CLAIM_AMOUNT_THB = 50;
+
+// Bank codes only — the label comes from referral.banks.<code>. The label (not the code)
+// is what gets submitted as `bankName`, so admins still read a human bank name.
+const THAI_BANK_CODES = ['kbank', 'ktb', 'bbl', 'scb', 'bay', 'ttb', 'gsb', 'other'] as const;
 
 interface ClaimMoneyModalProps {
   isOpen: boolean;
@@ -13,17 +20,6 @@ interface ClaimMoneyModalProps {
   pendingClaims: number;
 }
 
-const THAI_BANKS = [
-  { value: 'kbank', label: 'ธนาคารกสิกรไทย' },
-  { value: 'ktb', label: 'ธนาคารกรุงไทย' },
-  { value: 'bbl', label: 'ธนาคารกรุงเทพ' },
-  { value: 'scb', label: 'ธนาคารไทยพาณิชย์' },
-  { value: 'bay', label: 'ธนาคารกรุงศรีอยุธยา' },
-  { value: 'ttb', label: 'ธนาคารทหารไทยธนชาต (TTB)' },
-  { value: 'gsb', label: 'ธนาคารออมสิน' },
-  { value: 'other', label: 'อื่นๆ' },
-];
-
 export default function ClaimMoneyModal({
   isOpen,
   onClose,
@@ -31,16 +27,28 @@ export default function ClaimMoneyModal({
   userId,
   pendingClaims,
 }: ClaimMoneyModalProps) {
+  const t = useTranslations('referral');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('promptpay');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Holds an error CODE (see messages/<locale>/referral.json → "errors"), never prose.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
   if (!isOpen) return null;
+
+  /**
+   * Maps an error code to translated copy. Anything we don't recognise (e.g. a raw
+   * message from an API route that hasn't been converted to codes yet) falls back to
+   * the generic error, so a Thai server string never leaks into an EN/ID screen.
+   */
+  const errorText = (code: string | null) => {
+    if (!code) return '';
+    return t.has(`errors.${code}`) ? t(`errors.${code}`) : t('errors.GENERIC');
+  };
 
   const validatePhone = (phone: string): boolean => {
     const cleaned = phone.replace(/\D/g, '');
@@ -59,28 +67,28 @@ export default function ClaimMoneyModal({
     // Only allow numbers, max 10 digits
     const cleaned = value.replace(/\D/g, '').slice(0, 10);
     setPhoneNumber(cleaned);
-    setError(null);
+    setErrorCode(null);
   };
 
   const handleAccountNumberChange = (value: string) => {
     // Only allow numbers
     const cleaned = value.replace(/\D/g, '');
     setAccountNumber(cleaned);
-    setError(null);
+    setErrorCode(null);
   };
 
   const handleSubmit = async () => {
-    setError(null);
+    setErrorCode(null);
 
     // Validation
     if (paymentMethod === 'promptpay') {
       if (!validatePhone(phoneNumber)) {
-        setError('กรุณากรอกเบอร์โทรศัพท์ 10 หลักที่ถูกต้อง');
+        setErrorCode('INVALID_PHONE');
         return;
       }
     } else {
       if (!validateBankTransfer()) {
-        setError('กรุณากรอกข้อมูลธนาคารให้ครบถ้วน');
+        setErrorCode('INCOMPLETE_BANK_INFO');
         return;
       }
     }
@@ -103,13 +111,13 @@ export default function ClaimMoneyModal({
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || 'เกิดข้อผิดพลาด');
+        throw new Error(data.error || 'CLAIM_FAILED');
       }
 
       setShowSuccess(true);
       onSuccess(data.remainingClaims);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+      setErrorCode(err instanceof Error ? err.message : 'GENERIC');
     } finally {
       setLoading(false);
     }
@@ -122,12 +130,10 @@ export default function ClaimMoneyModal({
     setBankName('');
     setAccountNumber('');
     setAccountName('');
-    setError(null);
+    setErrorCode(null);
     setShowSuccess(false);
     onClose();
   };
-
-  const claimAmount = 50; // Fixed 50 THB per claim
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -136,7 +142,7 @@ export default function ClaimMoneyModal({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Wallet size={24} className="text-green-600" />
-            <h2 className="text-xl font-bold text-green-700">ขอรับเงิน</h2>
+            <h2 className="text-xl font-bold text-green-700">{t('modal.title')}</h2>
           </div>
           <button
             onClick={handleClose}
@@ -153,24 +159,23 @@ export default function ClaimMoneyModal({
               <CheckCircle size={32} className="text-green-600" />
             </div>
             <h3 className="text-lg font-bold text-green-700 mb-2">
-              ส่งคำขอสำเร็จ!
+              {t('modal.successTitle')}
             </h3>
             <p className="text-gray-600 mb-4">
-              คำขอรับเงิน {claimAmount} บาท ถูกส่งแล้ว
+              {t('modal.successBody', { amount: CLAIM_AMOUNT_THB })}
               <br />
-              กรุณารอแอดมินตรวจสอบและโอนเงินให้
+              {t('modal.successWait')}
             </p>
             <p className="text-sm text-gray-500 mb-6">
               {paymentMethod === 'promptpay'
-                ? `พร้อมเพย์: ${phoneNumber}`
-                : `${bankName} เลขบัญชี: ${accountNumber}`
-              }
+                ? t('modal.successPromptpay', { value: phoneNumber })
+                : t('modal.successBank', { bank: bankName, value: accountNumber })}
             </p>
             <button
               onClick={handleClose}
               className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-medium hover:shadow-lg transition-all"
             >
-              เสร็จสิ้น
+              {t('modal.done')}
             </button>
           </div>
         ) : (
@@ -178,26 +183,26 @@ export default function ClaimMoneyModal({
             {/* Amount Info */}
             <div className="text-center mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
               <Wallet size={32} className="mx-auto mb-2 text-green-600" />
-              <p className="text-gray-700 font-medium">จำนวนเงินที่จะได้รับ</p>
+              <p className="text-gray-700 font-medium">{t('modal.amountLabel')}</p>
               <p className="text-3xl font-bold text-green-700 mt-1">
-                {claimAmount} บาท
+                {t('modal.amount', { amount: CLAIM_AMOUNT_THB })}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                (1 สิทธิ์จาก {pendingClaims} สิทธิ์ที่มี)
+                {t('modal.rightsNote', { pending: pendingClaims })}
               </p>
             </div>
 
             {/* Payment Method Tabs */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                เลือกวิธีรับเงิน
+                {t('modal.methodLabel')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     setPaymentMethod('promptpay');
-                    setError(null);
+                    setErrorCode(null);
                   }}
                   className={`p-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                     paymentMethod === 'promptpay'
@@ -206,13 +211,13 @@ export default function ClaimMoneyModal({
                   }`}
                 >
                   <Smartphone size={18} />
-                  <span className="font-medium">พร้อมเพย์</span>
+                  <span className="font-medium">{t('method.promptpay')}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setPaymentMethod('bank_transfer');
-                    setError(null);
+                    setErrorCode(null);
                   }}
                   className={`p-3 rounded-lg border-2 transition-all flex items-center justify-center gap-2 ${
                     paymentMethod === 'bank_transfer'
@@ -221,7 +226,7 @@ export default function ClaimMoneyModal({
                   }`}
                 >
                   <Building size={18} />
-                  <span className="font-medium">โอนธนาคาร</span>
+                  <span className="font-medium">{t('method.bank_transfer')}</span>
                 </button>
               </div>
             </div>
@@ -230,18 +235,18 @@ export default function ClaimMoneyModal({
             {paymentMethod === 'promptpay' && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  เบอร์โทรศัพท์ (พร้อมเพย์)
+                  {t('modal.phoneLabel')}
                 </label>
                 <input
                   type="tel"
                   value={phoneNumber}
                   onChange={(e) => handlePhoneChange(e.target.value)}
-                  placeholder="0812345678"
+                  placeholder={t('modal.phonePlaceholder')}
                   className="input-valentine w-full text-center text-lg tracking-wider"
                   disabled={loading}
                 />
                 <p className="text-xs text-gray-500 mt-2 text-center">
-                  กรอกเบอร์โทรศัพท์ที่ลงทะเบียนพร้อมเพย์
+                  {t('modal.phoneHint')}
                 </p>
               </div>
             )}
@@ -251,21 +256,21 @@ export default function ClaimMoneyModal({
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ธนาคาร
+                    {t('modal.bankLabel')}
                   </label>
                   <select
                     value={bankName}
                     onChange={(e) => {
                       setBankName(e.target.value);
-                      setError(null);
+                      setErrorCode(null);
                     }}
                     className="input-valentine w-full"
                     disabled={loading}
                   >
-                    <option value="">-- เลือกธนาคาร --</option>
-                    {THAI_BANKS.map((bank) => (
-                      <option key={bank.value} value={bank.label}>
-                        {bank.label}
+                    <option value="">{t('modal.bankPlaceholder')}</option>
+                    {THAI_BANK_CODES.map((bank) => (
+                      <option key={bank} value={t(`banks.${bank}`)}>
+                        {t(`banks.${bank}`)}
                       </option>
                     ))}
                   </select>
@@ -273,13 +278,13 @@ export default function ClaimMoneyModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    เลขบัญชี
+                    {t('modal.accountNumber')}
                   </label>
                   <input
                     type="text"
                     value={accountNumber}
                     onChange={(e) => handleAccountNumberChange(e.target.value)}
-                    placeholder="1234567890"
+                    placeholder={t('modal.accountNumberPlaceholder')}
                     className="input-valentine w-full"
                     disabled={loading}
                   />
@@ -287,16 +292,16 @@ export default function ClaimMoneyModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ชื่อบัญชี
+                    {t('modal.accountName')}
                   </label>
                   <input
                     type="text"
                     value={accountName}
                     onChange={(e) => {
                       setAccountName(e.target.value);
-                      setError(null);
+                      setErrorCode(null);
                     }}
-                    placeholder="ชื่อ นามสกุล"
+                    placeholder={t('modal.accountNamePlaceholder')}
                     className="input-valentine w-full"
                     disabled={loading}
                   />
@@ -305,8 +310,8 @@ export default function ClaimMoneyModal({
             )}
 
             {/* Error Display */}
-            {error && (
-              <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+            {errorCode && (
+              <p className="text-red-500 text-sm mb-4 text-center">{errorText(errorCode)}</p>
             )}
 
             {/* Submit Button */}
@@ -318,12 +323,12 @@ export default function ClaimMoneyModal({
               {loading ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  กำลังส่งคำขอ...
+                  {t('modal.submitting')}
                 </>
               ) : (
                 <>
                   <Wallet size={18} />
-                  ยืนยันขอรับเงิน {claimAmount} บาท
+                  {t('modal.submit', { amount: CLAIM_AMOUNT_THB })}
                 </>
               )}
             </button>
@@ -334,7 +339,7 @@ export default function ClaimMoneyModal({
               disabled={loading}
               className="w-full mt-3 py-3 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
             >
-              ยกเลิก
+              {t('modal.cancel')}
             </button>
           </>
         )}

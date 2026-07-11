@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -17,7 +18,8 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-const HeartLoader = memo(function HeartLoader({ message = 'กำลังโหลด...', size = 'md', themeColors = defaultColors }: HeartLoaderProps) {
+const HeartLoader = memo(function HeartLoader({ message, size = 'md', themeColors = defaultColors }: HeartLoaderProps) {
+  const t = useTranslations('common');
   const sizes = {
     sm: { heart: 32, text: 'text-sm' },
     md: { heart: 48, text: 'text-base' },
@@ -25,6 +27,8 @@ const HeartLoader = memo(function HeartLoader({ message = 'กำลังโห
   };
 
   const { heart, text } = sizes[size];
+  // Callers may pass their own copy; otherwise fall back to the shared "Loading..." string.
+  const label = message === undefined ? t('state.loading') : message;
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
@@ -56,8 +60,8 @@ const HeartLoader = memo(function HeartLoader({ message = 'กำลังโห
         </div>
       </div>
 
-      {message && (
-        <p className={`text-gray-500 ${text} animate-pulse`}>{message}</p>
+      {label && (
+        <p className={`text-gray-500 ${text} animate-pulse`}>{label}</p>
       )}
     </div>
   );

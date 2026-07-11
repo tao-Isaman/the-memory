@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "เครดิต",
+    "subtitle": "ซื้อเครดิตเพื่อเปิดใช้งานความทรงจำ",
+    "back": "กลับไปหน้าหลัก"
+  },
+  "balance": {
+    "label": "เครดิตคงเหลือ",
+    "hint": "ใช้เครดิตเพื่อเปิดใช้งานความทรงจำ"
+  },
+  "packages": {
+    "loading": "กำลังโหลดแพ็กเกจ...",
+    "popular": "ยอดนิยม",
+    "unit": "เครดิต",
+    "price": "{price} บาท",
+    "perCredit": "≈ {price} บาท/เครดิต",
+    "save": "ประหยัด {percent}%",
+    "buy": "ซื้อเลย",
+    "processing": "กำลังดำเนินการ..."
+  },
+  "history": {
+    "title": "ประวัติการใช้เครดิต",
+    "show": "แสดง",
+    "hide": "ซ่อน",
+    "loading": "กำลังโหลด...",
+    "empty": "ยังไม่มีประวัติ",
+    "balanceAfter": "คงเหลือ {balance}"
+  },
+  "txType": {
+    "purchase": "ซื้อเครดิต",
+    "use": "ใช้เครดิต",
+    "refund": "คืนเครดิต",
+    "bonus": "โบนัสเครดิต"
+  },
+  "cartoon": {
+    "uploadTitle": "อัปโหลดรูปภาพ",
+    "dropzone": "ลากรูปมาวางหรือคลิกเพื่อเลือก",
+    "dropzoneHint": "รองรับ JPG, PNG, WebP (สูงสุด 10MB)",
+    "balanceLabel": "เครดิตคงเหลือ:",
+    "cost": "ใช้ {cost} เครดิต/ครั้ง",
+    "generating": "กำลังสร้างรูปการ์ตูน... (อาจใช้เวลา 30-60 วินาที)",
+    "generate": "สร้างรูปการ์ตูน (ใช้ {cost} เครดิต)",
+    "insufficient": "เครดิตไม่พอ (ต้องการ {cost})",
+    "resultTitle": "ผลลัพธ์",
+    "download": "ดาวน์โหลดรูป",
+    "galleryTitle": "รูปการ์ตูนของคุณ",
+    "galleryLoading": "กำลังโหลด...",
+    "galleryEmpty": "ยังไม่มีรูปการ์ตูน — สร้างรูปแรกของคุณเลย!",
+    "refresh": "รีเฟรช",
+    "delete": "ลบรูปนี้",
+    "deleting": "กำลังลบ...",
+    "close": "ปิด"
+  },
+  "errors": {
+    "GENERIC": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+    "NOT_AN_IMAGE": "กรุณาเลือกไฟล์รูปภาพ",
+    "FILE_TOO_LARGE": "ไฟล์ใหญ่เกินไป (สูงสุด 10MB)",
+    "GENERATION_FAILED": "สร้างรูปการ์ตูนไม่สำเร็จ",
+    "DELETE_FAILED": "ลบไม่สำเร็จ",
+    "CREDIT_ACCOUNT_NOT_FOUND": "ไม่พบข้อมูลเครดิต กรุณาซื้อเครดิตก่อน",
+    "INSUFFICIENT_CREDITS": "เครดิตไม่เพียงพอ (ต้องการ {required} เครดิต, คงเหลือ {balance})",
+    "CREDIT_DEDUCTION_FAILED": "ไม่สามารถหักเครดิตได้"
+  }
+}

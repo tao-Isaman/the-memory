@@ -1,0 +1,490 @@
+{
+  "ui": {
+    "signIn": "Sign in",
+    "startNow": "Start creating",
+    "backToAll": "See all occasions",
+    "trust": {
+      "secure": "100% secure",
+      "price": "Only ฿99",
+      "forever": "Yours to keep forever"
+    },
+    "features": {
+      "heading": "What can you put inside?",
+      "image": {
+        "title": "Photos",
+        "desc": "The moments you never want to forget"
+      },
+      "message": {
+        "title": "Heartfelt messages",
+        "desc": "Say the things you never said out loud"
+      },
+      "music": {
+        "title": "Music",
+        "desc": "The song that belongs to the two of you"
+      },
+      "pin": {
+        "title": "Secret PIN",
+        "desc": "Make them work for the surprise"
+      }
+    },
+    "prompts": {
+      "heading": "Not sure what to write? Try one of these"
+    },
+    "steps": {
+      "heading": "3 easy steps",
+      "one": {
+        "title": "Create your memory",
+        "desc": "Pick a theme and start adding"
+      },
+      "two": {
+        "title": "Add your stories",
+        "desc": "Photos, messages, music — however you like"
+      },
+      "three": {
+        "title": "Send it to them",
+        "desc": "Share a link or a QR code, that's it"
+      },
+      "pricing": "Free to build, free to preview | Activate for just <price>฿99</price>"
+    },
+    "faq": {
+      "heading": "Frequently asked questions"
+    },
+    "finalCta": {
+      "subtext": "Under 5 minutes. Free to build — pay only when you're ready to share."
+    },
+    "footer": {
+      "tagline": "Online memories for the people who matter most",
+      "home": "Home",
+      "signIn": "Sign in",
+      "faq": "FAQ"
+    }
+  },
+  "useCases": {
+    "surprise-gift": {
+      "title": "Surprise gift for your partner",
+      "subtitle": "Surprise the person you love with a memory link",
+      "heroHeadline": "A surprise gift they'll open, and smile at, again and again",
+      "heroSubtext": "Photos, messages, music, everything the two of you have been through — gathered into one link they can open any time.",
+      "ctaText": "Create your surprise gift",
+      "ctaHeading": "Ready to surprise them?",
+      "metaTitle": "Surprise Gift for Girlfriend or Boyfriend — Send It in Minutes | The Memory",
+      "metaDescription": "Looking for a surprise gift for your girlfriend or boyfriend? Build a digital memory — photos, messages and music in one shareable link. Just ฿99, ready in 5 minutes.",
+      "keywords": [
+        "surprise gift for girlfriend",
+        "surprise gift for boyfriend",
+        "digital gift for partner",
+        "romantic gift ideas",
+        "online gift link",
+        "personalised gift for her"
+      ],
+      "samplePrompts": [
+        "You're the reason the ordinary days feel like something...",
+        "Thank you for always staying, even when it was hard.",
+        "I love you more than I know how to say out loud."
+      ],
+      "faqItems": [
+        {
+          "q": "What occasions is a surprise gift like this good for?",
+          "a": "Any of them — Valentine's, an anniversary, their birthday, or a completely ordinary Tuesday when you just want them to know."
+        },
+        {
+          "q": "What will they see when they open the link?",
+          "a": "They move through your story one page at a time, in the order you chose: photos, messages, music and whatever surprises you hid along the way."
+        },
+        {
+          "q": "How do I send it once it's made?",
+          "a": "After payment you get a link and a QR code straight away. Send it over WhatsApp, Messenger, iMessage, or any social app you like."
+        }
+      ]
+    },
+    "anniversary": {
+      "title": "Anniversary gift",
+      "subtitle": "Celebrate the day that started everything",
+      "heroHeadline": "This anniversary, make them feel chosen — not just remembered",
+      "heroSubtext": "Every milestone from your first day to this one, gathered into one gift they can open again every year.",
+      "ctaText": "Create your anniversary gift",
+      "ctaHeading": "Ready to make this anniversary count?",
+      "metaTitle": "Anniversary Gift Ideas — A Digital Memory They'll Keep | The Memory",
+      "metaDescription": "A different kind of anniversary gift: photos, messages and your song in one link. Build it in minutes and send it to your girlfriend, boyfriend, husband or wife for ฿99.",
+      "keywords": [
+        "anniversary gift idea",
+        "anniversary gift for girlfriend",
+        "anniversary gift for boyfriend",
+        "digital anniversary gift",
+        "1 year anniversary gift",
+        "romantic anniversary surprise"
+      ],
+      "samplePrompts": [
+        "[X] years today. Thank you for choosing this, over and over...",
+        "Do you remember the first day we met? Look how far we've come...",
+        "Every day with you has been the best day."
+      ],
+      "faqItems": [
+        {
+          "q": "How is this different from just posting on social media?",
+          "a": "A memory link is private — it can be PIN-locked, it can carry your song, and you decide the order they see it in. It's a gift, not a post."
+        },
+        {
+          "q": "What should I put in it?",
+          "a": "Start where you started: a photo from the beginning, the moments that mattered, the song that's yours, and a message from the heart. A timeline reads beautifully."
+        }
+      ]
+    },
+    "birthday": {
+      "title": "Birthday gift",
+      "subtitle": "A birthday wish they'll actually keep",
+      "heroHeadline": "A birthday gift they'll still be talking about next year",
+      "heroSubtext": "Your wishes, your photos, their favourite song — turned into a birthday gift nobody else could give them.",
+      "ctaText": "Create your birthday gift",
+      "ctaHeading": "Ready to make their birthday?",
+      "metaTitle": "Birthday Gift Idea — Send a Digital Memory in Minutes | The Memory",
+      "metaDescription": "A birthday gift idea that isn't another card: photos, messages and music in one link. Perfect for your girlfriend, boyfriend, best friend or mum. Ready in 5 minutes.",
+      "keywords": [
+        "birthday gift idea",
+        "digital birthday card",
+        "birthday surprise for girlfriend",
+        "birthday gift for boyfriend",
+        "online birthday gift",
+        "personalised birthday message"
+      ],
+      "samplePrompts": [
+        "Happy birthday. This year, I hope you finally...",
+        "Thank you for being born — the world got a lot better that day.",
+        "There's something I've been wanting to tell you all year..."
+      ],
+      "faqItems": [
+        {
+          "q": "Can I build it ahead of time?",
+          "a": "Yes. Build and pay whenever you like — the link never expires, so you can send it the moment the day arrives."
+        },
+        {
+          "q": "Who is this a good birthday gift for?",
+          "a": "Anyone. Your partner, your best friend, your parents, your sibling — anyone whose birthday deserves more than a text."
+        }
+      ]
+    },
+    "apology": {
+      "title": "Say sorry",
+      "subtitle": "Say what you can't get out loud",
+      "heroHeadline": "You want to apologise, but the words won't come out. Send this instead.",
+      "heroSubtext": "Sometimes the best apology isn't a sentence — it's proof that you cared enough to sit down and make something.",
+      "ctaText": "Create your apology",
+      "ctaHeading": "Ready to say sorry properly?",
+      "metaTitle": "How to Apologise to Your Girlfriend or Boyfriend | The Memory",
+      "metaDescription": "Don't know how to say sorry? Build a memory link — an honest message, the photos of your good days, and a promise. Something that shows you actually tried.",
+      "keywords": [
+        "how to apologise to your girlfriend",
+        "how to say sorry to your boyfriend",
+        "apology gift",
+        "sorry message for her",
+        "make it up to him",
+        "apology idea for couples"
+      ],
+      "samplePrompts": [
+        "I'm sorry. I never meant for it to land the way it did.",
+        "I need you to know I don't want to lose you.",
+        "Give me one more chance — I'll do better, and I'll show you."
+      ],
+      "faqItems": [
+        {
+          "q": "Does sending an apology link actually work?",
+          "a": "Making something with your own hands says what a text can't. People tell us their partner opened it and smiled — or cried."
+        },
+        {
+          "q": "What should I put in it?",
+          "a": "Lead with an honest apology. Then the photos of your good days. End with what you're going to do differently."
+        }
+      ]
+    },
+    "long-distance": {
+      "title": "Long distance",
+      "subtitle": "Send how you feel across the distance",
+      "heroHeadline": "Miles apart, still the closest person to me",
+      "heroSubtext": "Every good memory in one link — sent to the person you miss, no matter how many time zones away they are.",
+      "ctaText": "Send your love",
+      "ctaHeading": "Ready to close the distance?",
+      "metaTitle": "Long Distance Relationship Gift — Send a Memory Link | The Memory",
+      "metaDescription": "A long distance relationship gift that arrives instantly: photos, messages and your song in one link. No shipping, no customs, no waiting. Just ฿99.",
+      "keywords": [
+        "long distance relationship gift",
+        "gift for long distance boyfriend",
+        "gift for long distance girlfriend",
+        "LDR gift idea",
+        "miss you gift",
+        "digital care package"
+      ],
+      "samplePrompts": [
+        "I miss you. I just need you to know I haven't forgotten a thing.",
+        "Different time zones, same person on my mind every day.",
+        "Counting down to the day I get to see you again."
+      ],
+      "faqItems": [
+        {
+          "q": "Can I send it to someone in another country?",
+          "a": "Yes. The link opens anywhere in the world, on a phone or a laptop. No app, no shipping, no waiting."
+        },
+        {
+          "q": "Can I add music?",
+          "a": "Yes — drop in any YouTube song. Pick the one that means something to the two of you."
+        }
+      ]
+    },
+    "family": {
+      "title": "Gift for family",
+      "subtitle": "For your parents, your siblings, the people who raised you",
+      "heroHeadline": "Tell your family you love them, in something they can keep",
+      "heroSubtext": "Family photos, the thank-you you never said out loud, the song from the house you grew up in — one gift for the people you love most.",
+      "ctaText": "Create a gift for your family",
+      "ctaHeading": "Ready to tell them?",
+      "metaTitle": "Gift for Mom, Dad and Family — A Memory They Can Keep | The Memory",
+      "metaDescription": "A gift for your mum, dad or family that isn't flowers: photos, a thank-you message and music in one link they can open forever. No app, no signup for them.",
+      "keywords": [
+        "gift for mom",
+        "gift for dad",
+        "family gift idea",
+        "thank you gift for parents",
+        "digital photo gift",
+        "mother's day gift idea"
+      ],
+      "samplePrompts": [
+        "Thank you for everything you gave up so I didn't have to. I love you.",
+        "Our family isn't perfect. It's better than perfect.",
+        "To my brother/sister — the one who's been there my whole life."
+      ],
+      "faqItems": [
+        {
+          "q": "Can my parents open it if they're not good with tech?",
+          "a": "Easily. They tap the link and it opens. No app to install, no account to create, nothing to figure out."
+        },
+        {
+          "q": "Can several people view it at once?",
+          "a": "Yes. One link, the whole family — no limit on how many people open it."
+        }
+      ]
+    }
+  },
+  "seoLandings": {
+    "anniversary": {
+      "title": "Anniversary",
+      "subtitle": "Celebrate the day that started it all",
+      "heroHeadline": "This anniversary, let them know they're still the one you'd choose",
+      "heroSubtext": "Walk back through every moment of yours — photos, messages and music in one link, a gift they can reopen every single year.",
+      "ctaText": "Create your anniversary gift",
+      "ctaHeading": "Ready for your anniversary?",
+      "metaTitle": "Anniversary Gift — Build Something Unforgettable in Minutes | The Memory",
+      "metaDescription": "Make this anniversary the one they remember. Photos, messages and your song in a single link — an anniversary gift for her or him, ready in minutes for ฿99.",
+      "keywords": [
+        "anniversary gift",
+        "anniversary gift for her",
+        "anniversary gift for him",
+        "anniversary surprise",
+        "wedding anniversary gift",
+        "anniversary ideas for couples"
+      ],
+      "samplePrompts": [
+        "[X] years today. Thank you for staying, through all of it.",
+        "Remember the first day we met? Time really doesn't slow down, does it.",
+        "Every day next to you has been the best day of my life."
+      ],
+      "faqItems": [
+        {
+          "q": "Does it work for any anniversary?",
+          "a": "Any of them — your first month, your first year, your fiftieth wedding anniversary. You write the content, so it fits wherever you are."
+        },
+        {
+          "q": "What if I don't know where to start?",
+          "a": "We give you sample messages and an anniversary theme. Pick one, add your photos, and you're done in five minutes."
+        },
+        {
+          "q": "What will they see when they open the link?",
+          "a": "Your story, one page at a time, in the order you set — photos, messages and music, a bit like Instagram Stories."
+        }
+      ]
+    },
+    "birthday": {
+      "title": "Their birthday",
+      "subtitle": "A birthday surprise nobody else could give them",
+      "heroHeadline": "Give them a birthday gift they'll smile at every time they open it",
+      "heroSubtext": "Your wishes, the photos that made you both laugh, their favourite song — a birthday link that lasts a lot longer than a cake.",
+      "ctaText": "Create their birthday gift",
+      "ctaHeading": "Ready for their birthday?",
+      "metaTitle": "Birthday Gift for Girlfriend or Boyfriend — Make It Unforgettable | The Memory",
+      "metaDescription": "A birthday gift for your girlfriend or boyfriend that's actually personal: wishes, photos and music in one link. Build it in minutes, send it on the day.",
+      "keywords": [
+        "birthday gift for girlfriend",
+        "birthday gift for boyfriend",
+        "birthday surprise ideas",
+        "happy birthday message for her",
+        "birthday gift idea",
+        "romantic birthday surprise"
+      ],
+      "samplePrompts": [
+        "Happy birthday. I hope this is the year everything goes your way.",
+        "Thank you for being born — I get to keep you, and that's the whole gift.",
+        "Happy Birthday. I love you more than I let on."
+      ],
+      "faqItems": [
+        {
+          "q": "Can I build it early and send it on the day?",
+          "a": "Yes. Build and pay whenever — the link never expires, so it's ready the second the clock hits midnight."
+        },
+        {
+          "q": "What if they're not great with technology?",
+          "a": "They tap the link and it opens. No app to install, no account to create, works on any phone."
+        },
+        {
+          "q": "Can I add a birthday song?",
+          "a": "Of course. Add any YouTube video — their favourite track, or the cheesiest happy birthday song you can find."
+        }
+      ]
+    },
+    "valentine": {
+      "title": "Valentine's Day",
+      "subtitle": "A Valentine's gift you actually made yourself",
+      "heroHeadline": "This Valentine's, give something better than chocolate",
+      "heroSubtext": "Photos, a love letter, the song that's yours — sent as a memory link they'll open on Valentine's Day and keep forever.",
+      "ctaText": "Create your Valentine's gift",
+      "ctaHeading": "Ready for Valentine's Day?",
+      "metaTitle": "Valentine's Day Gift 2026 — Better Than Chocolate | The Memory",
+      "metaDescription": "A Valentine's Day gift for her or him that isn't flowers: a love letter, photos and music in one link. Build it in 10 minutes and surprise them for ฿99.",
+      "keywords": [
+        "valentines day gift",
+        "valentines day gift for her",
+        "valentines day gift for him",
+        "valentine surprise",
+        "valentines gift ideas 2026",
+        "romantic valentine gift"
+      ],
+      "samplePrompts": [
+        "This Valentine's, all I want to say is — I love you, more than last year.",
+        "Happy Valentine's Day. Thank you for being the best part of my life.",
+        "Every day with you feels a little like Valentine's Day."
+      ],
+      "faqItems": [
+        {
+          "q": "How is this different from a normal Valentine's card?",
+          "a": "A memory link doesn't get thrown away. It holds music, photos and as many words as you want, and they can open it any time, forever."
+        },
+        {
+          "q": "Can I get it done in time for Valentine's?",
+          "a": "It takes under 10 minutes. Pay ฿99 and the link is live immediately — you can send it the same night."
+        },
+        {
+          "q": "Does it suit every kind of couple?",
+          "a": "Every kind. New couples, long distance couples, married-fifteen-years couples — and there's nothing stopping you making one for yourself."
+        }
+      ]
+    },
+    "reconcile": {
+      "title": "Make it up to them",
+      "subtitle": "An apology they can feel, not just read",
+      "heroHeadline": "Apologising is hard. Try sending how you actually feel instead.",
+      "heroSubtext": "The good photos, an honest apology, a promise you mean — sent as a link that shows you didn't take the easy way out.",
+      "ctaText": "Create your apology link",
+      "ctaHeading": "Ready to make it right?",
+      "metaTitle": "How to Apologise to Your Partner — The Way That Actually Lands | The Memory",
+      "metaDescription": "Don't know how to make it up to them? Build a memory link with an honest apology, photos of your good days and a real promise. Sent in minutes, felt for a lot longer.",
+      "keywords": [
+        "how to apologise to your girlfriend",
+        "how to make it up to your boyfriend",
+        "sorry message for her",
+        "get back together",
+        "apology gift idea",
+        "how to say sorry to your partner"
+      ],
+      "samplePrompts": [
+        "I'm sorry. I never wanted to be the reason you were hurting.",
+        "I know I got it wrong. Can we start again, together?",
+        "You matter more to me than being right. Let me make it up to you."
+      ],
+      "faqItems": [
+        {
+          "q": "Does sending an apology link actually work?",
+          "a": "Sitting down and building something yourself says what a rushed text never can. Plenty of couples have found their way back through exactly this kind of apology."
+        },
+        {
+          "q": "What should go in an apology link?",
+          "a": "Open with an honest apology. Then the photos of the good days you shared. Close with what you'll do differently — and mean it."
+        },
+        {
+          "q": "What if they won't open it yet?",
+          "a": "The link never expires. It'll be waiting for whenever they're ready."
+        }
+      ]
+    },
+    "family": {
+      "title": "Family",
+      "subtitle": "Tell your family you love them, in something they'll keep",
+      "heroHeadline": "Tell your family you love them — in a way they can open again and again",
+      "heroSubtext": "Family photos from every era, the thank-you you never said out loud, the song from the car rides. One gift for your parents, your siblings, your people.",
+      "ctaText": "Create a gift for your family",
+      "ctaHeading": "Ready to tell your family?",
+      "metaTitle": "Gift for Parents and Family — A Memory They'll Actually Keep | The Memory",
+      "metaDescription": "A gift for your mum, dad, or the whole family: photos, a thank-you message and music in one link. No app, no signup, works on any phone. Ready in minutes.",
+      "keywords": [
+        "family gift",
+        "gift for parents",
+        "gift for mom",
+        "gift for dad",
+        "thank you gift for family",
+        "meaningful gift for parents"
+      ],
+      "samplePrompts": [
+        "Thank you for everything you gave up for us. I love you both.",
+        "Our family was never perfect. It was always warm, and that's better.",
+        "To my brother and sister — thank you for a whole lifetime of showing up."
+      ],
+      "faqItems": [
+        {
+          "q": "Can older parents open it?",
+          "a": "Easily. They tap the link and it opens — no account, no app, nothing to figure out."
+        },
+        {
+          "q": "Can I share it with the whole family at once?",
+          "a": "Yes. One link, everyone. There's no limit on how many people open it."
+        },
+        {
+          "q": "What occasions does it suit?",
+          "a": "Mother's Day, Father's Day, a parent's birthday, a graduation — or no occasion at all, which is sometimes the best one."
+        }
+      ]
+    },
+    "missyou": {
+      "title": "Missing you",
+      "subtitle": "Send how much you miss them, across any distance",
+      "heroHeadline": "Missing them and can't say it? Send a memory instead.",
+      "heroSubtext": "The photos you took together, the things you've been meaning to say, the song you both play — so they know you're still thinking about them.",
+      "ctaText": "Send how you feel",
+      "ctaHeading": "Ready to tell them you miss them?",
+      "metaTitle": "Miss You Gift — Send Everything You Can't Say | The Memory",
+      "metaDescription": "Missing someone far away? Build a memory link with photos, messages and music and send it in seconds. A miss-you gift that arrives instantly, anywhere in the world.",
+      "keywords": [
+        "miss you gift",
+        "i miss you message",
+        "long distance gift",
+        "missing you ideas",
+        "long distance relationship idea",
+        "gift for someone far away"
+      ],
+      "samplePrompts": [
+        "I miss you. I wish the next time were tomorrow.",
+        "Different city, same thought every single day.",
+        "I'm counting the days until I get to see you again."
+      ],
+      "faqItems": [
+        {
+          "q": "Can I send it to someone abroad?",
+          "a": "Yes. The link opens anywhere in the world, on a phone or a laptop, with no app to install."
+        },
+        {
+          "q": "Can I add the song we both listen to?",
+          "a": "Yes — add any YouTube track. Pick the one that means something, and play it at the same time, wherever you both are."
+        },
+        {
+          "q": "Can I use it for a friend or family, not a partner?",
+          "a": "Anyone you miss. An old school friend, a relative overseas, whoever's been on your mind."
+        }
+      ]
+    }
+  }
+}

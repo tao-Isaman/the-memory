@@ -1,10 +1,11 @@
 'use client';
 
-// Universe (จักรวาล) — an Instagram-like public feed of stories from shared memories.
+// Universe — an Instagram-like public feed of stories from shared memories.
 // Order is a seeded random shuffle (one seed per visit), fetched 10 at a time and
 // lazy-loaded with an IntersectionObserver sentinel. Reactions are optimistic.
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { UniverseStory, UniverseStoryType } from '@/types/universe';
 import {
   getUniverseFeed,
@@ -18,23 +19,12 @@ import { trackEvent } from '@/lib/analytics';
 import HeartLoader from './HeartLoader';
 import { Sparkles, ImageIcon, Quote, ImagePlus } from 'lucide-react';
 
-const TYPE_CHIP: Record<UniverseStoryType, { label: string; Icon: typeof ImageIcon }> = {
-  image: { label: 'รูปภาพ', Icon: ImageIcon },
-  text: { label: 'ข้อความ', Icon: Quote },
-  'text-image': { label: 'รูป + ข้อความ', Icon: ImagePlus },
+/** Story type → its chip icon + the message key holding the localized label. */
+const TYPE_CHIP: Record<UniverseStoryType, { labelKey: string; Icon: typeof ImageIcon }> = {
+  image: { labelKey: 'types.image', Icon: ImageIcon },
+  text: { labelKey: 'types.text', Icon: Quote },
+  'text-image': { labelKey: 'types.textImage', Icon: ImagePlus },
 };
-
-function timeAgo(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'เมื่อสักครู่';
-  if (m < 60) return `${m} นาทีที่แล้ว`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} ชม.ที่แล้ว`;
-  const d = Math.floor(h / 24);
-  if (d < 7) return `${d} วันที่แล้ว`;
-  return new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-}
 
 /** Apply an emoji toggle to a story locally (same emoji → off, different → switch). */
 function applyToggle(s: UniverseStory, emoji: string): UniverseStory {
@@ -59,6 +49,7 @@ function applyToggle(s: UniverseStory, emoji: string): UniverseStory {
 const TEXT_CLAMP_THRESHOLD = 180;
 
 function StoryText({ text, dark }: { text: string; dark: string }) {
+  const t = useTranslations('dashboard.universe');
   const [expanded, setExpanded] = useState(false);
   const isLong = text.length > TEXT_CLAMP_THRESHOLD;
   return (
@@ -74,7 +65,7 @@ function StoryText({ text, dark }: { text: string; dark: string }) {
           onClick={() => setExpanded(true)}
           className="mt-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
         >
-          อ่านเพิ่มเติม
+          {t('readMore')}
         </button>
       )}
     </div>
@@ -88,9 +79,11 @@ function StoryCard({
   story: UniverseStory;
   onReact: (emoji: string) => void;
 }) {
+  const t = useTranslations('dashboard.universe');
+  const format = useFormatter();
   const colors = getThemeColors(story.theme);
   const chip = TYPE_CHIP[story.type];
-  const initial = (story.ownerName || 'ผ').charAt(0).toUpperCase();
+  const initial = (story.ownerName || '').charAt(0).toUpperCase() || '?';
 
   return (
     <article className="memory-card overflow-hidden">
@@ -118,7 +111,8 @@ function StoryCard({
             {story.ownerName}
           </p>
           <p className="text-[11px] text-gray-400 truncate">
-            {timeAgo(story.createdAt)} · จาก &ldquo;{story.memoryTitle}&rdquo;
+            {format.relativeTime(new Date(story.createdAt))} ·{' '}
+            {t('fromMemory', { title: story.memoryTitle })}
           </p>
         </div>
         <span
@@ -126,7 +120,7 @@ function StoryCard({
           style={{ backgroundColor: colors.background, color: colors.dark, borderColor: colors.accent }}
         >
           <chip.Icon size={11} />
-          {chip.label}
+          {t(chip.labelKey)}
         </span>
       </div>
 
@@ -169,7 +163,7 @@ function StoryCard({
               key={emoji}
               onClick={() => onReact(emoji)}
               aria-pressed={active}
-              aria-label={`รีแอคชัน ${emoji}`}
+              aria-label={t('reaction', { emoji })}
               className="flex items-center gap-1 px-2 py-1 rounded-full text-base transition-transform hover:scale-110 border"
               style={
                 active
@@ -195,6 +189,7 @@ function StoryCard({
 }
 
 export default function UniverseFeed() {
+  const t = useTranslations('dashboard.universe');
   const [items, setItems] = useState<UniverseStory[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -258,26 +253,22 @@ export default function UniverseFeed() {
   if (initialLoading) {
     return (
       <div className="text-center py-12">
-        <HeartLoader message="กำลังเดินทางสู่จักรวาล..." size="md" />
+        <HeartLoader message={t('loading')} size="md" />
       </div>
     );
   }
 
   return (
     <div className="max-w-md mx-auto">
-      <p className="text-center text-xs text-gray-400 mb-5">
-        เรื่องราวจากความทรงจำที่เพื่อนๆ แชร์ไว้ สุ่มใหม่ทุกครั้งที่เข้ามา ✨
-      </p>
+      <p className="text-center text-xs text-gray-400 mb-5">{t('intro')}</p>
 
       {items.length === 0 ? (
         <div className="memory-card p-12 text-center">
           <Sparkles size={48} className="mx-auto mb-4 text-pink-300" />
           <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">
-            จักรวาลยังว่างเปล่า
+            {t('emptyTitle')}
           </h2>
-          <p className="text-gray-500 text-sm">
-            ยังไม่มีเรื่องราวจากเพื่อนคนอื่นในตอนนี้ ลองกลับมาใหม่อีกครั้งนะ
-          </p>
+          <p className="text-gray-500 text-sm">{t('emptyDescription')}</p>
         </div>
       ) : (
         <div className="space-y-5">
@@ -294,13 +285,11 @@ export default function UniverseFeed() {
       {hasMore && <div ref={sentinelRef} className="h-1" />}
       {loadingMore && (
         <div className="py-6 text-center">
-          <HeartLoader message="กำลังโหลดเพิ่ม..." size="sm" />
+          <HeartLoader message={t('loadingMore')} size="sm" />
         </div>
       )}
       {!hasMore && items.length > 0 && (
-        <p className="text-center text-sm text-gray-400 py-8">
-          ✨ คุณเดินทางมาถึงสุดขอบจักรวาลแล้ว
-        </p>
+        <p className="text-center text-sm text-gray-400 py-8">{t('endOfFeed')}</p>
       )}
     </div>
   );

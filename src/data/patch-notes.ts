@@ -1,39 +1,52 @@
 export type PatchItemType = 'feature' | 'improvement' | 'fix' | 'announcement';
 
 export interface PatchItem {
+  /** Badge type. The item's TEXT lives in messages/<locale>/updates.json (see below). */
   type: PatchItemType;
-  text: string;
 }
 
 export interface PatchNote {
-  /** Version string, e.g. "1.3.0" — used as localStorage key */
+  /** Version string, e.g. "1.3.0" — used as localStorage key and message key */
   version: string;
-  /** ISO date string, e.g. "2026-02-09" */
+  /** ISO date string, e.g. "2026-02-09" — formatted per locale at render time */
   date: string;
-  /** Thai title for this release */
-  title: string;
-  /** Optional short summary */
-  summary?: string;
-  /** List of changes */
+  /** Badge types, in display order. Index i maps to notes.<key>.items[i] in updates.json. */
   items: PatchItem[];
+}
+
+/**
+ * next-intl resolves message keys by splitting on ".", so a raw version like
+ * "2.9.0" cannot be used as a key. Store/read them as "v2_9_0" instead.
+ */
+export function versionKey(version: string): string {
+  return `v${version.replace(/\./g, '_')}`;
 }
 
 /**
  * Patch notes — NEWEST FIRST
  *
- * To add a new update, copy the template below and paste it
- * at the TOP of this array:
+ * Only locale-independent data lives here (version, date, badge types).
+ * The title, summary and item texts live in messages/{th,en,id}/updates.json under
+ * `notes.<versionKey>` — e.g. version "3.0.0" → key "v3_0_0":
+ *
+ *   "v3_0_0": {
+ *     "title": "<release title>",
+ *     "summary": "<short summary>",
+ *     "items": ["<item 1 text>", "<item 2 text>"]
+ *   }
+ *
+ * To add a new update: paste the entry below at the TOP of this array AND add the
+ * matching `notes.<versionKey>` block to ALL THREE locale files. `items` must have
+ * the same length in both places, and `summary` is required.
  *
  * {
  *   version: "X.Y.Z",
  *   date: "YYYY-MM-DD",
- *   title: "ชื่ออัปเดต",
- *   summary: "สรุปสั้นๆ (ไม่บังคับ)",
  *   items: [
- *     { type: "feature", text: "ฟีเจอร์ใหม่ที่เพิ่มเข้ามา" },
- *     { type: "improvement", text: "ปรับปรุงสิ่งที่มีอยู่แล้ว" },
- *     { type: "fix", text: "แก้ไขบั๊ก" },
- *     { type: "announcement", text: "ประกาศทั่วไป" },
+ *     { type: "feature" },
+ *     { type: "improvement" },
+ *     { type: "fix" },
+ *     { type: "announcement" },
  *   ],
  * },
  */
@@ -41,246 +54,200 @@ export const patchNotes: PatchNote[] = [
   {
     version: '2.9.0',
     date: '2026-07-04',
-    title: 'ดูความทรงจำได้ตามใจ ไม่มีจับเวลา',
-    summary:
-      'ยกเลิกการเปลี่ยนเรื่องราวอัตโนมัติทุก 5 วินาที — แต่ละเรื่องราวจะค้างอยู่จนกว่าคุณจะแตะหรือกดเปลี่ยนเอง ค่อยๆ อ่าน ค่อยๆ ดูได้เต็มที่ พร้อมคงดีไซน์แถบความคืบหน้าแบบ IG Stories ไว้เหมือนเดิม',
     items: [
-      { type: 'improvement', text: 'ดูความทรงจำได้ไม่จำกัดเวลา — เรื่องราวไม่เปลี่ยนเองอัตโนมัติแล้ว แตะด้านขวาเพื่อไปต่อ แตะด้านซ้ายเพื่อย้อนกลับ (หรือกดลูกศรบนคอมพิวเตอร์)' },
-      { type: 'improvement', text: 'คงแถบความคืบหน้าแบบ IG Stories ไว้ครบ บอกให้รู้ว่าคุณอยู่เรื่องราวที่เท่าไหร่จากทั้งหมด' },
-      { type: 'fix', text: 'แก้ปัญหาชำระเงินผ่าน PromptPay (โดยเฉพาะบน Safari) ที่จ่ายเงินแล้วแต่สถานะไม่อัปเดต — ระบบยืนยันการชำระเงินและเปิดใช้งานความทรงจำให้อัตโนมัติ' },
+      { type: 'improvement' },
+      { type: 'improvement' },
+      { type: 'fix' },
     ],
   },
   {
     version: '2.8.1',
     date: '2026-06-12',
-    title: 'จักรวาลแสดงเรื่องราวหลังรหัส PIN ด้วย',
-    summary:
-      'เมื่อเปิด "แชร์ไปจักรวาล" เรื่องราวรูปภาพ/ข้อความทั้งหมดของความทรงจำจะแสดงในฟีด รวมถึงเรื่องราวที่อยู่หลังรหัส PIN — รหัส PIN ยังคงป้องกันลำดับการเปิดดูผ่านลิงก์เหมือนเดิม',
     items: [
-      { type: 'improvement', text: 'เปิดแชร์ไปจักรวาล = แชร์เรื่องราวรูปภาพ/ข้อความทั้งหมด รวมที่อยู่หลังรหัส PIN (ปิดแชร์ได้ทุกเมื่อ)' },
-      { type: 'announcement', text: 'อัปเดตนโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานเป็นเวอร์ชัน 1.1 ให้ตรงกับพฤติกรรมใหม่' },
+      { type: 'improvement' },
+      { type: 'announcement' },
     ],
   },
   {
     version: '2.8.0',
     date: '2026-06-10',
-    title: 'นโยบายความเป็นส่วนตัว & ข้อกำหนดการใช้งาน',
-    summary:
-      'เพิ่มหน้านโยบายความเป็นส่วนตัว (PDPA) และข้อกำหนดการใช้งาน พร้อมขั้นตอนยอมรับก่อนเข้าสู่ระบบ เพื่อความโปร่งใสในการดูแลข้อมูลของคุณ',
     items: [
-      { type: 'feature', text: 'หน้านโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานฉบับภาษาไทย อ่านได้ทุกเมื่อจากท้ายเว็บไซต์' },
-      { type: 'improvement', text: 'ผู้ใช้ใหม่อ่านและยอมรับเงื่อนไขก่อนเข้าสู่ระบบ ผู้ใช้เดิมยืนยันได้จากหน้าหลักครั้งเดียว' },
-      { type: 'announcement', text: 'เราไม่ขายข้อมูลของคุณ และคุณขอเข้าถึง แก้ไข หรือลบข้อมูลได้ตามสิทธิใน PDPA' },
+      { type: 'feature' },
+      { type: 'improvement' },
+      { type: 'announcement' },
     ],
   },
   {
     version: '2.7.0',
     date: '2026-06-10',
-    title: 'จักรวาล — ฟีดเรื่องราวจากเพื่อนทั่วไทย',
-    summary:
-      'แท็บใหม่ "จักรวาล" รวมเรื่องราว (รูปภาพ/ข้อความ) จากความทรงจำที่เพื่อนๆ แชร์ไว้ เลื่อนดูแบบสุ่มเหมือนฟีดโซเชียล พร้อมกดรีแอคชันส่งกำลังใจถึงผู้สร้าง',
     items: [
-      { type: 'feature', text: 'แท็บ "จักรวาล" ใหม่ในหน้าหลัก — เลื่อนดูเรื่องราวจากเพื่อนคนอื่นแบบสุ่ม โหลดเพิ่มอัตโนมัติเมื่อเลื่อนลง' },
-      { type: 'feature', text: 'กดรีแอคชัน (❤️ 😍 🥹 🔥 🙏) ให้เรื่องราวในจักรวาล — เจ้าของได้รับการแจ้งเตือนทันที' },
-      { type: 'feature', text: 'เลือกแชร์/ไม่แชร์ความทรงจำไปจักรวาลได้ทั้งตอนสร้างและจากหน้าหลัก (เปิดแชร์ให้อัตโนมัติ)' },
-      { type: 'improvement', text: 'ความเป็นส่วนตัว: เรื่องราวที่อยู่หลังรหัส PIN จะไม่ปรากฏในจักรวาลเด็ดขาด' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '2.6.0',
     date: '2026-06-08',
-    title: 'ส่งหัวใจ & ตอบกลับความทรงจำ',
-    summary: 'เมื่อดูความทรงจำจบ ผู้รับส่งหัวใจหรือเขียนข้อความตอบกลับถึงผู้สร้างได้ และผู้สร้างจะได้รับการแจ้งเตือนทันที',
     items: [
-      { type: 'feature', text: 'ส่งความรู้สึกท้ายความทรงจำ — ผู้รับเลือกส่งอีโมจิ (❤️ 😍 🥹 🔥 🙏) ถึงผู้สร้างได้' },
-      { type: 'feature', text: 'เขียนข้อความตอบกลับสั้นๆ ถึงผู้สร้างความทรงจำได้' },
-      { type: 'feature', text: 'ผู้สร้างได้รับการแจ้งเตือน (ในแอปและแบบ Push) ทันทีเมื่อมีคนส่งหัวใจหรือข้อความตอบกลับ' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '2.5.0',
     date: '2026-06-03',
-    title: 'เรื่องราวแบบใหม่ — ข้อความเสียง & อัลบั้มภาพ',
-    summary: 'เพิ่มเรื่องราว 2 แบบใหม่ ส่งความรู้สึกด้วยเสียงของคุณเอง และรวมรูปหลายใบเป็นสไลด์โชว์สวยงาม',
     items: [
-      { type: 'feature', text: 'เรื่องราวแบบข้อความเสียง — อัดเสียงหรืออัปโหลดไฟล์เสียงให้คนพิเศษฟัง สูงสุด 1 นาที' },
-      { type: 'feature', text: 'เรื่องราวแบบอัลบั้มภาพ — รวมรูป 2-5 รูป เล่นเป็นสไลด์โชว์พร้อมเอฟเฟกต์ซูมสวยงาม' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '2.4.0',
     date: '2026-05-24',
-    title: 'ระบบแจ้งเตือน & หน้าจบความทรงจำใหม่',
-    summary: 'เพิ่มระบบแจ้งเตือนทั้งในแอปและบนอุปกรณ์ (push), เปิดรับแจ้งเตือนรับ 10 เครดิตฟรี, หน้าจบความทรงจำใหม่พร้อมดูซ้ำ และแก้ปัญหาการเข้าสู่ระบบ',
     items: [
-      { type: 'feature', text: 'ระบบแจ้งเตือนใหม่ — กระดิ่งแบบ 2 แท็บ (การแจ้งเตือน + อัปเดต) รวมข่าวสารและประวัติอัปเดตไว้ในที่เดียว' },
-      { type: 'feature', text: 'การแจ้งเตือนแบบ Push — รับแจ้งเตือนบนอุปกรณ์ได้แม้ไม่ได้เปิดแอป' },
-      { type: 'feature', text: 'เปิดการแจ้งเตือนครั้งแรก รับ 10 เครดิตฟรีทันที!' },
-      { type: 'feature', text: 'จัดการการแจ้งเตือนได้ — ลบทีละรายการ หรือล้างทั้งหมด' },
-      { type: 'feature', text: 'หน้าจบใหม่เมื่อดูความทรงจำจบ — กดดูซ้ำได้ พร้อมปุ่มชวนสร้างความทรงจำของคุณเอง และเอฟเฟกต์หัวใจฉลอง' },
-      { type: 'fix', text: 'แก้ปัญหาค้างที่หน้า "กำลังเชื่อมต่อ" เมื่อออกจากระบบแล้วเข้าสู่ระบบใหม่' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'fix' },
     ],
   },
   {
     version: '2.3.0',
     date: '2026-05-22',
-    title: 'ติดตั้งเป็นแอปได้แล้ว! (PWA)',
-    summary: 'เพิ่ม The Memory ลงหน้าจอโฮมเหมือนแอปจริง เปิดเร็วขึ้น เต็มจอ และมีหน้าสำรองตอนออฟไลน์',
     items: [
-      { type: 'feature', text: 'ติดตั้งเป็นแอปลงหน้าจอโฮมได้ทั้ง Android, iOS และคอมพิวเตอร์ (PWA)' },
-      { type: 'feature', text: 'เปิดแบบเต็มจอเหมือนแอปจริง ไม่มีแถบเบราว์เซอร์ เปิดใช้ได้รวดเร็ว' },
-      { type: 'feature', text: 'มีหน้าแจ้งเตือนเมื่อออฟไลน์ พร้อมปุ่มลองใหม่' },
-      { type: 'improvement', text: 'จำกัดความยาวข้อความในแต่ละเรื่องราว พร้อมตัวนับจำนวนตัวอักษร เพื่อให้แสดงผลสวยงามทุกหน้าจอ' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '2.2.0',
     date: '2026-04-22',
-    title: 'หน้า Landing ใหม่สำหรับทุกโอกาส',
-    summary: 'เพิ่มหน้า Landing 6 หน้าใหม่ ปรับเนื้อหาเฉพาะแต่ละโอกาส เพื่อให้ค้นหาเจอง่ายขึ้น',
     items: [
-      { type: 'feature', text: 'หน้า /anniversary — วันครบรอบ พร้อมเนื้อหาและตัวอย่างข้อความเฉพาะ' },
-      { type: 'feature', text: 'หน้า /birthday — วันเกิดแฟน พร้อมไอเดียคำอวยพร' },
-      { type: 'feature', text: 'หน้า /valentine — วาเลนไทน์ ของขวัญวันแห่งความรัก' },
-      { type: 'feature', text: 'หน้า /reconcile — ง้อแฟน พร้อมตัวอย่างข้อความขอโทษ' },
-      { type: 'feature', text: 'หน้า /family — บอกรักครอบครัว พ่อแม่ พี่น้อง' },
-      { type: 'feature', text: 'หน้า /missyou — ส่งความคิดถึงคนสำคัญ' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '2.1.1',
     date: '2026-04-22',
-    title: 'เลื่อนดูข้อความยาวได้แล้ว',
-    summary: 'เรื่องราวแบบข้อความและรูป+ข้อความ รองรับการเลื่อนดูเมื่อเนื้อหายาวเกินจอ',
     items: [
-      { type: 'improvement', text: 'ข้อความยาวในเรื่องราวแบบข้อความและรูป+ข้อความ เลื่อนดูได้ทั้งในโหมดพรีวิวและโหมดจริง' },
-      { type: 'improvement', text: 'หัวเรื่องคงที่ด้านบนขณะเลื่อน อ่านเนื้อหายาวได้สะดวกขึ้น' },
+      { type: 'improvement' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '2.1.0',
     date: '2026-03-09',
-    title: 'โหมดดูความทรงจำแบบ Instagram Stories',
-    summary: 'ปรับหน้าดูความทรงจำใหม่ทั้งหมด สไตล์ IG Stories — แตะซ้าย/ขวาเพื่อเลื่อน, แถบความคืบหน้าแบบแบ่งส่วน, เต็มหน้าจอ',
     items: [
-      { type: 'feature', text: 'แตะหน้าจอเพื่อเปลี่ยนเรื่องราว (เหมือน IG Stories)' },
-      { type: 'feature', text: 'แถบความคืบหน้าแบบแบ่งส่วน — แสดงจำนวนเรื่องราวทั้งหมดพร้อมแถบเติมอัตโนมัติ 5 วินาที' },
-      { type: 'feature', text: 'รองรับคีย์บอร์ด — กดลูกศรซ้าย/ขวาเพื่อเปลี่ยนเรื่องราวบนเดสก์ท็อป' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '2.0.0',
     date: '2026-02-16',
-    title: 'The Memory 2.0 — แพลตฟอร์มความทรงจำสำหรับทุกโอกาส',
-    summary: 'รีแบรนด์ครั้งใหญ่! เพิ่มธีมสีใหม่ 4 แบบ, หน้า Use Case 6 โอกาส, โทนสีอบอุ่นขึ้น พร้อมระบบ Analytics',
     items: [
-      { type: 'announcement', text: 'รีแบรนด์เป็น "Digital Memory & Emotion Platform" รองรับทุกโอกาส ไม่ใช่แค่วาเลนไทน์' },
-      { type: 'feature', text: 'ธีมสีใหม่ 4 แบบ — วันครบรอบ (ทอง), วันเกิด (ส้ม), ขอโทษ (ม่วง), คิดถึง (ฟ้า) รวมเป็น 7 ธีม' },
-      { type: 'feature', text: 'หน้า Use Case 6 โอกาส — เซอร์ไพรส์แฟน, วันครบรอบ, วันเกิด, ขอโทษ, คิดถึง, ครอบครัว พร้อม SEO' },
-      { type: 'feature', text: 'ส่วน Social Proof บนหน้าแรก — รีวิวจากผู้ใช้จริง' },
-      { type: 'feature', text: 'ระบบ Analytics — ติดตามพฤติกรรมผู้ใช้ตลอด Funnel' },
-      { type: 'improvement', text: 'หน้าแรกใหม่ทั้งหมด — Use Case Navigator, FAQ แบบ Accordion, Trust Badges' },
-      { type: 'improvement', text: 'โทนสีอบอุ่นขึ้น — เปลี่ยนจากชมพูเข้มเป็น Warm Neutral เหมาะกับทุกเพศทุกวัย' },
-      { type: 'improvement', text: 'ตัวเลือกธีมสี 7 แบบพร้อมคำอธิบายอารมณ์ในหน้าสร้าง' },
-      { type: 'improvement', text: 'ข้อความชำระเงินชัดเจนขึ้น — "เพียง 99 บาท เก็บได้ตลอด ส่งกี่ครั้งก็ได้"' },
-      { type: 'improvement', text: 'เอฟเฟกต์หัวใจนุ่มนวลขึ้น — สีอ่อนลง จำนวนน้อยลง' },
+      { type: 'announcement' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
+      { type: 'improvement' },
+      { type: 'improvement' },
+      { type: 'improvement' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '1.8.0',
     date: '2026-02-14',
-    title: 'ระบบโปรไฟล์ผู้ใช้ & Toast',
-    summary: 'กรอกข้อมูลโปรไฟล์รับ 10 เครดิตฟรี พร้อมระบบแจ้งเตือนใหม่',
     items: [
-      { type: 'feature', text: 'ระบบโปรไฟล์ผู้ใช้ — กรอกข้อมูลเพิ่มเติม (เบอร์โทร, วันเกิด, เพศ, อาชีพ, สถานะ, โอกาส)' },
-      { type: 'feature', text: 'หน้า Onboarding — ต้อนรับผู้ใช้ใหม่พร้อมแบบฟอร์มกรอกโปรไฟล์' },
-      { type: 'feature', text: 'รับ 10 เครดิตฟรีเมื่อกรอกโปรไฟล์ครบ!' },
-      { type: 'feature', text: 'Modal แจ้งเตือนบน Dashboard เชิญกรอกโปรไฟล์' },
-      { type: 'improvement', text: 'หน้าโปรไฟล์แก้ไขได้ — เพิ่มฟอร์มแก้ไขข้อมูลส่วนตัว' },
-      { type: 'improvement', text: 'ระบบ Toast แจ้งเตือน — แทนที่ alert ด้วยการแจ้งเตือนสวยงาม' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '1.6.0',
     date: '2026-02-13',
-    title: 'สร้างรูปการ์ตูนจากรูปจริง',
-    summary: 'อัปโหลดรูปคู่รักแล้วแปลงเป็นรูปการ์ตูนสุดน่ารัก!',
     items: [
-      { type: 'feature', text: 'สร้างรูปการ์ตูน — อัปโหลดรูปแล้วแปลงเป็นสไตล์การ์ตูนด้วย AI (ใช้ 10 เครดิต)' },
-      { type: 'feature', text: 'แกลเลอรีรูปการ์ตูน — ดูและดาวน์โหลดผลงานทั้งหมดของคุณ' },
-      { type: 'improvement', text: 'ระบบแท็บบน Dashboard — สลับระหว่างความทรงจำและสร้างรูปการ์ตูน' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '1.5.0',
     date: '2026-02-13',
-    title: 'ระบบเครดิต',
-    summary: 'ซื้อเครดิตเป็นแพ็กเกจ ประหยัดกว่า เปิดใช้งานความทรงจำได้ทันที',
     items: [
-      { type: 'feature', text: 'ระบบเครดิต — ซื้อแพ็กเกจเครดิตพร้อมส่วนลดเมื่อซื้อเยอะ' },
-      { type: 'feature', text: 'แสดงยอดเครดิตบน AppBar พร้อมหน้าจัดการเครดิตและประวัติ' },
-      { type: 'feature', text: '3 แพ็กเกจให้เลือก: 100, 300 และ 500 เครดิต' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '1.4.0',
     date: '2026-02-09',
-    title: 'AppBar, โปรไฟล์ & หน้าอัปเดต',
-    summary: 'ปรับโครงสร้างแอปใหม่พร้อม AppBar แจ้งเตือนอัปเดต และหน้าโปรไฟล์',
     items: [
-      { type: 'feature', text: 'AppBar — แถบนำทางด้านบนพร้อมโลโก้ กระดิ่งแจ้งเตือน และเมนูผู้ใช้' },
-      { type: 'feature', text: 'หน้าโปรไฟล์ — ดูรูปโปรไฟล์ ชื่อ อีเมล และวันที่สมัครสมาชิก' },
-      { type: 'feature', text: 'หน้า "มีอะไรใหม่" — ดูประวัติอัปเดตทุกเวอร์ชัน พร้อมแจ้งเตือนเมื่อมีอัปเดตใหม่' },
-      { type: 'improvement', text: 'จัดโครงสร้าง Route Group (app) เพื่อใช้ AppBar ร่วมกันทุกหน้า' },
-      { type: 'improvement', text: 'ปรับหน้า Dashboard ให้กระชับขึ้น ย้ายเมนูไปที่ AppBar' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '1.3.0',
     date: '2026-02-09',
-    title: 'เรื่องราวแบบตอบคำถาม & ใส่โค้ดแนะนำย้อนหลัง',
-    summary: 'เพิ่มสตอรี่คำถามและเปิดให้ใส่โค้ดแนะนำภายหลังได้',
     items: [
-      { type: 'feature', text: 'เรื่องราวแบบตอบคำถาม (Question) — ตั้งคำถาม 4 ตัวเลือกให้คนพิเศษตอบ' },
-      { type: 'feature', text: 'ใส่โค้ดแนะนำย้อนหลังได้ สำหรับคนที่ข้ามตอนแรก' },
-      { type: 'fix', text: 'แก้ไขปัญหาขูดการ์ดลับ 2 ใบ สถานะทับกัน' },
-      { type: 'fix', text: 'แก้ไข Webhook สำหรับการชำระเงินผ่าน PromptPay' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'fix' },
+      { type: 'fix' },
     ],
   },
   {
     version: '1.2.0',
     date: '2026-02-05',
-    title: 'ระบบแนะนำเพื่อน',
-    summary: 'แชร์โค้ดให้เพื่อน รับส่วนลด 50 บาท',
     items: [
-      { type: 'feature', text: 'ระบบโค้ดแนะนำเพื่อน — แชร์โค้ดให้เพื่อนรับส่วนลด 50 บาท' },
-      { type: 'feature', text: 'ขอรับเงินค่าแนะนำผ่าน PromptPay หรือบัญชีธนาคาร' },
-      // { type: 'feature', text: 'หน้า Admin สำหรับจัดการผู้ใช้และ Memory' },
-      // { type: 'improvement', text: 'ปรับปรุง Pagination และ Filter ในหน้า Admin' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
   {
     version: '1.1.0',
     date: '2026-02-03',
-    title: 'การ์ดลับ & สถิติเว็บไซต์',
-    summary: 'เพิ่มสตอรี่ขูดเปิดการ์ดลับและตัวเลขสถิติบนหน้าแรก',
     items: [
-      { type: 'feature', text: 'เรื่องราวแบบขูดเปิดการ์ดลับ (Scratch Card)' },
-      { type: 'feature', text: 'ตัวเลขสถิติแบบเคลื่อนไหวบนหน้าแรก' },
-      { type: 'improvement', text: 'แปลงรูปเป็น WebP อัตโนมัติเพื่อความเร็ว' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
     ],
   },
   {
     version: '1.0.0',
     date: '2026-02-01',
-    title: 'เปิดตัว The Memory!',
-    summary: 'สร้างความทรงจำสุดพิเศษให้คนที่คุณรัก',
     items: [
-      { type: 'announcement', text: 'เปิดให้บริการครั้งแรก!' },
-      { type: 'feature', text: 'สร้าง Memory พร้อมเรื่องราว 5 แบบ: ข้อความ, รูปภาพ, รูป+ข้อความ, YouTube, รหัสผ่าน' },
-      { type: 'feature', text: 'ระบบล็อค PIN 6 หลักพร้อม Numpad' },
-      { type: 'feature', text: 'แชร์ผ่าน QR Code, คัดลอกลิงก์ หรือ Share ผ่านแอป' },
-      { type: 'feature', text: 'ชำระเงินผ่าน Stripe (บัตรเครดิต & PromptPay)' },
+      { type: 'announcement' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
     ],
   },
 ];

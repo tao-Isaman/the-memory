@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { CreditCard, Tag } from 'lucide-react';
 import HeartIcon from './HeartIcon';
 import { trackEvent } from '@/lib/analytics';
@@ -27,6 +28,8 @@ export default function PaymentButton({
   onPaymentStart,
   onPaymentError,
 }: PaymentButtonProps) {
+  const t = useTranslations('payment.button');
+  const locale = useLocale();
   const [loading, setLoading] = useState(false);
   const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null);
   const [checkingDiscount, setCheckingDiscount] = useState(true);
@@ -68,6 +71,8 @@ export default function PaymentButton({
           memoryId,
           memoryTitle,
           userId,
+          // Drives PromptPay availability (Thailand-only) + Stripe's checkout UI language.
+          locale,
         }),
       });
 
@@ -95,7 +100,11 @@ export default function PaymentButton({
         <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-3 border border-yellow-200 flex items-center gap-2">
           <Tag size={18} className="text-yellow-600" />
           <p className="text-sm text-yellow-800">
-            คุณได้รับส่วนลด <span className="font-bold">{discountInfo.discountAmount} บาท</span> จากโค้ดแนะนำ!
+            {t.rich('discountBanner', {
+              amount: discountInfo.discountAmount,
+              // Prices stay in THB for every locale — deliberate product decision.
+              b: (chunks) => <span className="font-bold">{chunks}</span>,
+            })}
           </p>
         </div>
       )}
@@ -110,12 +119,16 @@ export default function PaymentButton({
         {loading ? (
           <>
             <HeartIcon size={16} className="animate-pulse-heart" />
-            <span>กำลังดำเนินการ...</span>
+            <span>{t('processing')}</span>
           </>
         ) : (
           <>
             <CreditCard size={16} />
-            <span>ชำระเงิน{discountInfo?.eligible ? ` (ลด ${discountInfo.discountAmount} บาท)` : ''}</span>
+            <span>
+              {discountInfo?.eligible
+                ? t('payWithDiscount', { amount: discountInfo.discountAmount })
+                : t('pay')}
+            </span>
           </>
         )}
       </button>

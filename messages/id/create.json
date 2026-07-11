@@ -1,0 +1,173 @@
+{
+  "page": {
+    "titleCreate": "Buat kenangan",
+    "titleEdit": "Ubah kenangan",
+    "memoryTitleLabel": "Nama kenangan",
+    "memoryTitlePlaceholder": "Beri nama spesial untuk kenanganmu...",
+    "storiesHeading": "Cerita di dalamnya",
+    "storyCount": "{count, plural, =0 {Belum ada cerita} other {# cerita}}",
+    "addStory": "Tambah cerita",
+    "saveMemory": "Simpan kenangan",
+    "updateMemory": "Perbarui kenangan",
+    "errorTitleRequired": "Beri nama dulu untuk kenanganmu ya",
+    "errorStoryRequired": "Tambahkan minimal satu cerita"
+  },
+  "universe": {
+    "title": "Bagikan ke Universe",
+    "description": "Biarkan ceritamu (foto/pesan) muncul secara acak di feed Universe pengguna lain — termasuk cerita yang ada di balik PIN."
+  },
+  "paymentPrompt": {
+    "title": "Sedikit lagi selesai!",
+    "subtitle": "Tinggal satu langkah sebelum dikirim ke orang spesialmu",
+    "note": "Tautan ini jadi kado yang bisa dia buka kapan saja",
+    "price": "Cuma 99 THB — jadi milikmu selamanya, bisa dikirim berkali-kali",
+    "preview": "Lihat pratinjau dulu",
+    "backToDashboard": "Kembali ke beranda",
+    "footnote": "Kamu bisa melihat pratinjaunya, tapi harus membayar dulu sebelum bisa membagikannya."
+  },
+  "themes": {
+    "label": "Pilih tema warna",
+    "love": { "name": "Cinta", "mood": "Hangat, romantis" },
+    "friend": { "name": "Persahabatan", "mood": "Ceria, seru" },
+    "family": { "name": "Keluarga", "mood": "Hangat, mengharukan" },
+    "anniversary": { "name": "Anniversary", "mood": "Manis, berkesan" },
+    "birthday": { "name": "Ulang tahun", "mood": "Meriah, seru" },
+    "apology": { "name": "Minta maaf", "mood": "Tulus, lembut" },
+    "longdistance": { "name": "Jarak jauh", "mood": "Kangen, lembut" }
+  },
+  "storyTypes": {
+    "password": {
+      "label": "Kode PIN",
+      "description": "Tambahkan PIN 6 digit untuk mengunci isi berikutnya"
+    },
+    "text": {
+      "label": "Pesan",
+      "description": "Tulis sesuatu dari hati"
+    },
+    "image": {
+      "label": "Foto",
+      "description": "Tambahkan foto spesial"
+    },
+    "text-image": {
+      "label": "Pesan + foto",
+      "description": "Gabungkan pesan dengan foto"
+    },
+    "youtube": {
+      "label": "Video YouTube",
+      "description": "Tambahkan lagu atau video yang berkesan"
+    },
+    "scratch": {
+      "label": "Rahasia kita",
+      "description": "Sembunyikan foto di balik awan untuk digosok olehnya"
+    },
+    "question": {
+      "label": "Pertanyaan",
+      "description": "Buat pertanyaan dengan 4 pilihan jawaban"
+    },
+    "voice": {
+      "label": "Pesan suara",
+      "description": "Rekam suara atau unggah file audio, maksimal 1 menit"
+    },
+    "slideshow": {
+      "label": "Album foto",
+      "description": "Gabungkan 2-5 foto jadi slideshow dengan efek zoom"
+    }
+  },
+  "editor": {
+    "titleAdd": "Tambah cerita baru",
+    "titleEdit": "Ubah cerita",
+    "typeLabel": "Jenis cerita",
+    "storyTitleLabel": "Nama cerita (opsional)",
+    "storyTitlePlaceholder": "Beri nama yang gampang diingat, misal \"Hari pertama kita ketemu\"",
+    "storyTitleHint": "Nama ini akan tampil menggantikan jenis cerita di daftar",
+    "submitAdd": "Tambah",
+    "submitSave": "Simpan",
+    "uploading": "Mengunggah...",
+    "uploadingProgress": "Mengunggah {done}/{total}...",
+    "password": {
+      "label": "Kode PIN (6 digit)",
+      "hint": "Masukkan 6 angka untuk mengunci isi berikutnya",
+      "error": "Masukkan PIN 6 digit"
+    },
+    "text": {
+      "label": "Pesanmu",
+      "placeholder": "Tulis sesuatu dari hati...",
+      "textImageHint": "Pesan singkat untuk menemani foto (sekitar 3-4 baris)"
+    },
+    "image": {
+      "uploadLabel": "Unggah foto",
+      "changeLabel": "Ganti foto (opsional)",
+      "previewAlt": "Pratinjau",
+      "captionLabel": "Keterangan (opsional)",
+      "captionPlaceholder": "Tambahkan keterangan manis...",
+      "uploadFailed": "Gagal mengunggah foto. Coba lagi ya."
+    },
+    "youtube": {
+      "label": "URL YouTube",
+      "placeholder": "https://www.youtube.com/watch?v=...",
+      "hint": "Tempel tautan YouTube untuk berbagi lagu atau video yang berkesan"
+    },
+    "question": {
+      "label": "Pertanyaan",
+      "placeholder": "Misal: Di mana kita pertama kali bertemu?",
+      "choicesLabel": "Pilihan jawaban (4)",
+      "choicePlaceholder": "Pilihan {letter}",
+      "correctLabel": "Jawaban yang benar",
+      "correctHint": "Pilih jawaban yang benar",
+      "errorQuestion": "Tulis pertanyaannya dulu",
+      "errorChoices": "Isi keempat pilihan jawaban"
+    },
+    "voice": {
+      "statusRecording": "Sedang merekam",
+      "statusRecorded": "Rekaman selesai",
+      "recordAria": "Rekam",
+      "requesting": "Meminta izin mikrofon...",
+      "tapToRecord": "Ketuk untuk mulai merekam",
+      "orUploadFile": "Atau unggah file suara",
+      "stopAria": "Berhenti",
+      "tapToStop": "Ketuk untuk berhenti merekam",
+      "denied": "Akses mikrofon diblokir — izinkan di pengaturan browser lalu coba lagi, atau unggah file suara saja.",
+      "uploadFile": "Unggah file suara",
+      "unsupported": "Perangkat ini tidak bisa merekam suara. Silakan unggah file suara saja.",
+      "rerecord": "Rekam ulang",
+      "reselectFile": "Pilih file lain",
+      "captionLabel": "Keterangan (opsional)",
+      "captionPlaceholder": "Misal \"Dengerin ini ya...\"",
+      "maxDurationReached": "Rekaman maksimal 1 menit",
+      "micNotFound": "Mikrofon tidak ditemukan",
+      "micError": "Tidak bisa mengakses mikrofon",
+      "fileTooLarge": "File suara terlalu besar (maks {maxMb}MB)",
+      "notAudio": "Ini bukan file suara",
+      "tooLong": "Suaranya lebih dari 1 menit. Pilih file yang lebih pendek ya.",
+      "errorRequired": "Rekam suara atau unggah file suara dulu",
+      "uploadFailed": "Gagal mengunggah suara. Coba lagi ya."
+    },
+    "slideshow": {
+      "imagesLabel": "Foto ({min}-{max} foto)",
+      "empty": "Belum ada foto — tambahkan foto pertamamu",
+      "slideAlt": "Foto {index}",
+      "removeAria": "Hapus foto",
+      "moveLeftAria": "Geser ke kiri",
+      "moveRightAria": "Geser ke kanan",
+      "slideUploadFailed": "Gagal diunggah",
+      "addImage": "Tambah foto",
+      "full": "Sudah {max} foto",
+      "captionLabel": "Keterangan (opsional)",
+      "captionPlaceholder": "Keterangan untuk seluruh album...",
+      "maxImages": "Maksimal {max} foto",
+      "notImage": "Ini bukan file gambar",
+      "imageTooLarge": "Foto terlalu besar (maks {maxMb}MB)",
+      "errorMin": "Tambahkan minimal {min} foto",
+      "errorPartialUpload": "Ada foto yang gagal diunggah. Ketuk foto yang bermasalah untuk coba lagi."
+    }
+  },
+  "list": {
+    "empty": "Belum ada cerita",
+    "emptyHint": "Tambahkan cerita pertamamu untuk mulai merangkai kenangan!",
+    "moveUp": "Naikkan",
+    "moveDown": "Turunkan",
+    "editStory": "Ubah cerita",
+    "deleteStory": "Hapus cerita",
+    "imageCount": "{count, plural, other {# foto}}"
+  }
+}

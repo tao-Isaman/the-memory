@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import HeartIcon from './HeartIcon';
 import { X, Users, Loader2 } from 'lucide-react';
+
+// Fixed discount, in THB for every locale (deliberate product decision).
+const REFERRAL_AMOUNT_THB = 50;
 
 interface LinkReferralCodeModalProps {
   isOpen: boolean;
@@ -17,24 +21,36 @@ export default function LinkReferralCodeModal({
   onSuccess,
   userId,
 }: LinkReferralCodeModalProps) {
+  const t = useTranslations('referral');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Holds an error CODE (see messages/<locale>/referral.json → "errors"), never prose.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+
+  /**
+   * Maps an error code to translated copy. Anything we don't recognise (e.g. a raw
+   * message from an API route that hasn't been converted to codes yet) falls back to
+   * the generic error, so a Thai server string never leaks into an EN/ID screen.
+   */
+  const errorText = (c: string | null) => {
+    if (!c) return '';
+    return t.has(`errors.${c}`) ? t(`errors.${c}`) : t('errors.GENERIC');
+  };
 
   const handleCodeChange = (value: string) => {
     const cleaned = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     setCode(cleaned);
-    setError(null);
+    setErrorCode(null);
   };
 
   const handleSubmit = async () => {
     if (code.length !== 6) {
-      setError('กรุณาใส่โค้ดให้ครบ 6 ตัว');
+      setErrorCode('CODE_LENGTH');
       return;
     }
 
     setLoading(true);
-    setError(null);
+    setErrorCode(null);
 
     try {
       const response = await fetch('/api/referral/link-code', {
@@ -46,13 +62,13 @@ export default function LinkReferralCodeModal({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || 'เกิดข้อผิดพลาด');
+        setErrorCode(data.error || 'GENERIC');
         return;
       }
 
       onSuccess();
     } catch {
-      setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      setErrorCode('GENERIC');
     } finally {
       setLoading(false);
     }
@@ -67,7 +83,7 @@ export default function LinkReferralCodeModal({
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Users size={24} className="text-[#E63946]" />
-            <h2 className="text-xl font-bold text-[#E63946]">ใส่โค้ดแนะนำ</h2>
+            <h2 className="text-xl font-bold text-[#E63946]">{t('link.title')}</h2>
           </div>
           <button
             onClick={onClose}
@@ -81,34 +97,34 @@ export default function LinkReferralCodeModal({
         {/* Info Text */}
         <div className="text-center mb-6 p-4 bg-pink-50 rounded-xl border border-pink-200">
           <HeartIcon size={32} className="mx-auto mb-2 text-[#E63946]" filled />
-          <p className="text-gray-700 font-medium">ได้รับโค้ดแนะนำจากเพื่อนหรือเปล่า?</p>
+          <p className="text-gray-700 font-medium">{t('link.question')}</p>
           <p className="text-sm text-gray-500 mt-1">
-            ใส่โค้ดที่ได้รับจากเพื่อนเพื่อรับ
+            {t('link.subtitle')}
           </p>
           <p className="text-lg font-bold text-[#E63946] mt-2">
-            ส่วนลด 50 บาท
+            {t('link.discount', { amount: REFERRAL_AMOUNT_THB })}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            สำหรับการชำระเงินครั้งแรก
+            {t('link.firstPayment')}
           </p>
         </div>
 
         {/* Code Input */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ใส่โค้ดแนะนำ 6 ตัว
+            {t('link.inputLabel')}
           </label>
           <input
             type="text"
             value={code}
             onChange={(e) => handleCodeChange(e.target.value)}
-            placeholder="เช่น ABC123"
+            placeholder={t('link.inputPlaceholder')}
             maxLength={6}
             className="input-valentine w-full text-center text-2xl tracking-[0.5em] font-mono uppercase"
             disabled={loading}
           />
-          {error && (
-            <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
+          {errorCode && (
+            <p className="text-red-500 text-sm mt-2 text-center">{errorText(errorCode)}</p>
           )}
         </div>
 
@@ -124,14 +140,14 @@ export default function LinkReferralCodeModal({
             ) : (
               <Users size={18} />
             )}
-            {loading ? 'กำลังตรวจสอบ...' : 'ยืนยันโค้ด'}
+            {loading ? t('link.submitting') : t('link.submit')}
           </button>
           <button
             onClick={onClose}
             disabled={loading}
             className="w-full py-3 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
           >
-            ยกเลิก
+            {t('link.cancel')}
           </button>
         </div>
       </div>

@@ -1,0 +1,35 @@
+{
+  "button": {
+    "discountBanner": "Anda mendapat diskon <b>฿{amount}</b> dari kode referral!",
+    "processing": "Memproses...",
+    "pay": "Bayar sekarang",
+    "payWithDiscount": "Bayar sekarang (diskon ฿{amount})"
+  },
+  "status": {
+    "pending": "Menunggu pembayaran",
+    "active": "Aktif",
+    "failed": "Pembayaran gagal"
+  },
+  "success": {
+    "verifying": "Memeriksa pembayaran Anda...",
+    "creditsTitle": "Pembelian kredit berhasil!",
+    "creditsDescription": "Anda menerima <b>{credits} kredit</b>, siap dipakai untuk membuka kenangan Anda.",
+    "goToCredits": "Ke halaman kredit",
+    "titleFree": "Kenangan gratis berhasil dibuka!",
+    "titlePaid": "Pembayaran berhasil!",
+    "titlePending": "Pembayaran sedang diproses",
+    "titleError": "Terjadi kesalahan",
+    "bodyPending": "Pembayaran Anda sedang diproses. Jika memakai PromptPay, prosesnya bisa memakan waktu sebentar. Anda bisa langsung membagikan tautannya begitu pembayaran selesai.",
+    "bodyFree": "Anda telah memakai kenangan gratis dari kode referral!",
+    "bodyPaid": "Kenangan Anda siap dibagikan ke orang spesial!",
+    "bodyError": "Kami tidak dapat memverifikasi pembayaran Anda. Silakan coba lagi atau hubungi kami.",
+    "shareMemory": "Bagikan kenangan",
+    "memoryTitleFallback": "Kenangan Anda"
+  },
+  "cancel": {
+    "title": "Pembayaran dibatalkan",
+    "body": "Pembayaran dibatalkan. Kenangan Anda tetap tersimpan dan menunggu pembayaran — Anda bisa mencoba membayar lagi kapan saja.",
+    "note": "Kenangan Anda baru bisa dilihat orang lain setelah pembayaran selesai."
+  },
+  "backToDashboard": "Kembali ke beranda"
+}

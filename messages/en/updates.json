@@ -1,0 +1,216 @@
+{
+  "page": {
+    "backToDashboard": "Back to home",
+    "title": "What's new",
+    "subtitle": "The latest updates and improvements",
+    "latest": "Latest",
+    "madeWith": "Made with <heart></heart> for your special moments"
+  },
+  "types": {
+    "feature": "New",
+    "improvement": "Improved",
+    "fix": "Fixed",
+    "announcement": "News"
+  },
+  "notes": {
+    "v2_9_0": {
+      "title": "Take your time — no more countdown",
+      "summary": "Stories no longer flip every 5 seconds. Each one stays put until you tap or click to move on, so you can read and linger for as long as you like. The Instagram-style progress bar stays exactly as it was.",
+      "items": [
+        "View memories with no time limit — stories don't advance on their own any more. Tap the right side to go forward, the left side to go back (or use the arrow keys on a computer).",
+        "The IG Stories-style progress bar is still there, showing which story you're on and how many are left.",
+        "Fixed PromptPay payments (especially on Safari) where the money went through but the status never updated — payments are now confirmed and memories activated automatically."
+      ]
+    },
+    "v2_8_1": {
+      "title": "Universe now shows PIN-protected stories too",
+      "summary": "With \"Share to Universe\" on, all of a memory's image and text stories appear in the feed — including the ones behind a PIN. The PIN still protects the viewing sequence of your link, exactly as before.",
+      "items": [
+        "Sharing to Universe now means sharing all image and text stories, including those behind a PIN (you can turn sharing off at any time).",
+        "Privacy Policy and Terms of Use updated to version 1.1 to match the new behaviour."
+      ]
+    },
+    "v2_8_0": {
+      "title": "Privacy Policy & Terms of Use",
+      "summary": "New Privacy Policy (PDPA) and Terms of Use pages, plus an acceptance step before sign-in — so it's clear exactly how we look after your data.",
+      "items": [
+        "Privacy Policy and Terms of Use pages, readable any time from the footer.",
+        "New users read and accept the terms before signing in; existing users confirm once from the home page.",
+        "We don't sell your data, and you can request access to it, correct it or delete it under your PDPA rights."
+      ]
+    },
+    "v2_7_0": {
+      "title": "Universe — a feed of stories from everyone",
+      "summary": "A new \"Universe\" tab collecting image and text stories from memories that other people have shared. Scroll through them like a social feed, and send a reaction to the creator.",
+      "items": [
+        "New \"Universe\" tab on the home page — scroll through other people's stories in random order, with more loading automatically as you go.",
+        "React (❤️ 😍 🥹 🔥 🙏) to stories in Universe — the creator is notified straight away.",
+        "Choose whether or not to share a memory to Universe, both while creating it and from the home page (sharing is on by default).",
+        "Privacy: stories behind a PIN never appear in Universe."
+      ]
+    },
+    "v2_6_0": {
+      "title": "Send a heart & reply to a memory",
+      "summary": "At the end of a memory, the person you sent it to can send a heart or write you a reply — and you're notified the moment they do.",
+      "items": [
+        "Send a feeling at the end of a memory — the recipient can pick an emoji (❤️ 😍 🥹 🔥 🙏) to send to the creator.",
+        "Write a short reply back to the person who made the memory.",
+        "Creators get a notification (in-app and push) the instant someone sends a heart or a reply."
+      ]
+    },
+    "v2_5_0": {
+      "title": "New story types — voice message & photo album",
+      "summary": "Two new kinds of story: say it in your own voice, or turn a handful of photos into a beautiful slideshow.",
+      "items": [
+        "Voice message story — record or upload audio for someone special, up to 1 minute long.",
+        "Photo album story — combine 2-5 photos into a slideshow with a soft zoom effect."
+      ]
+    },
+    "v2_4_0": {
+      "title": "Notifications & a new memory ending",
+      "summary": "In-app and push notifications, 10 free credits for turning them on, a brand-new ending screen with replay, and a sign-in fix.",
+      "items": [
+        "New notification system — a two-tab bell (notifications + updates) bringing news and release history together in one place.",
+        "Push notifications — get notified on your device even when the app isn't open.",
+        "Turn notifications on for the first time and get 10 free credits!",
+        "Manage your notifications — dismiss them one by one, or clear them all.",
+        "A new ending screen when a memory finishes — replay it, create one of your own, and enjoy a little heart celebration.",
+        "Fixed getting stuck on the \"Connecting\" screen after signing out and back in."
+      ]
+    },
+    "v2_3_0": {
+      "title": "Install it as an app! (PWA)",
+      "summary": "Add The Memory to your home screen like a real app — faster to open, full screen, with an offline fallback page.",
+      "items": [
+        "Install it to your home screen on Android, iOS and desktop (PWA).",
+        "Opens full screen like a native app, with no browser bars and a quick start.",
+        "An offline page with a retry button when you lose connection.",
+        "Text length limits per story with a character counter, so everything looks right on every screen."
+      ]
+    },
+    "v2_2_0": {
+      "title": "New landing pages for every occasion",
+      "summary": "Six new landing pages with content tailored to each occasion, so people can find us more easily.",
+      "items": [
+        "/anniversary — anniversaries, with tailored copy and sample messages.",
+        "/birthday — birthdays, with ideas for what to write.",
+        "/valentine — Valentine's Day gifts.",
+        "/reconcile — making up, with sample apology messages.",
+        "/family — telling your family you love them.",
+        "/missyou — sending someone how much you miss them."
+      ]
+    },
+    "v2_1_1": {
+      "title": "Long messages now scroll",
+      "summary": "Text and text+image stories can now be scrolled when the content runs past the screen.",
+      "items": [
+        "Long text in text and text+image stories now scrolls, in both preview and live mode.",
+        "The heading stays fixed at the top while you scroll, making long content easier to read."
+      ]
+    },
+    "v2_1_0": {
+      "title": "Instagram Stories-style viewing",
+      "summary": "A complete rework of the memory viewer in the style of IG Stories — tap left/right to move, a segmented progress bar, and full screen.",
+      "items": [
+        "Tap the screen to change story (just like IG Stories).",
+        "Segmented progress bar — shows how many stories there are, filling automatically every 5 seconds.",
+        "Keyboard support — use the left/right arrow keys to move between stories on desktop."
+      ]
+    },
+    "v2_0_0": {
+      "title": "The Memory 2.0 — a memory platform for every occasion",
+      "summary": "A big rebrand! Four new colour themes, six use-case pages, a warmer palette, and analytics.",
+      "items": [
+        "Rebranded as a \"Digital Memory & Emotion Platform\" — for every occasion, not just Valentine's.",
+        "Four new colour themes — anniversary (gold), birthday (orange), apology (purple), missing you (blue), for 7 in total.",
+        "Six use-case pages — surprise gift, anniversary, birthday, apology, missing you, family, all SEO-ready.",
+        "Social proof on the home page — reviews from real users.",
+        "Analytics — tracking user behaviour across the whole funnel.",
+        "A completely new home page — use case navigator, accordion FAQ, trust badges.",
+        "A warmer palette — from deep pink to warm neutral, suited to everyone.",
+        "Seven theme options with a mood description on the create page.",
+        "Clearer payment copy — \"Just 99 baht, yours forever, share it as often as you like\".",
+        "Softer heart effects — lighter colours, fewer of them."
+      ]
+    },
+    "v1_8_0": {
+      "title": "User profiles & toasts",
+      "summary": "Fill in your profile and get 10 free credits, plus a brand-new notification style.",
+      "items": [
+        "User profiles — add a few more details (phone, birthday, gender, occupation, relationship status, occasion).",
+        "Onboarding page — welcoming new users with a profile form.",
+        "Get 10 free credits for completing your profile!",
+        "A dashboard modal inviting you to fill in your profile.",
+        "The profile page is now editable — with a form for changing your details.",
+        "Toast notifications — replacing alerts with something far nicer to look at."
+      ]
+    },
+    "v1_6_0": {
+      "title": "Turn real photos into cartoons",
+      "summary": "Upload a photo of the two of you and turn it into an adorable cartoon!",
+      "items": [
+        "Cartoon generation — upload a photo and turn it into a cartoon with AI (costs 10 credits).",
+        "Cartoon gallery — view and download everything you've made.",
+        "Tabs on the dashboard — switch between your memories and the cartoon creator."
+      ]
+    },
+    "v1_5_0": {
+      "title": "Credits",
+      "summary": "Buy credits as a package — cheaper, and your memories activate instantly.",
+      "items": [
+        "Credit system — buy credit packages, with a discount when you buy more.",
+        "Credit balance in the app bar, plus a page to manage credits and see your history.",
+        "Three packages to choose from: 100, 300 and 500 credits."
+      ]
+    },
+    "v1_4_0": {
+      "title": "App bar, profile & updates page",
+      "summary": "A restructured app with an app bar, update notifications, and a profile page.",
+      "items": [
+        "App bar — a top navigation bar with the logo, notification bell and user menu.",
+        "Profile page — see your picture, name, email and the date you joined.",
+        "\"What's new\" page — browse the release history, with a notification whenever there's something new.",
+        "Restructured into an (app) route group so every page shares the app bar.",
+        "A tidier dashboard, with the menu moved into the app bar."
+      ]
+    },
+    "v1_3_0": {
+      "title": "Question stories & adding a referral code later",
+      "summary": "A new question story type, plus the option to enter a referral code after signing up.",
+      "items": [
+        "Question story — ask a question with four answers for someone special to pick from.",
+        "Add a referral code retroactively, for anyone who skipped it the first time.",
+        "Fixed two scratch cards sharing the same state.",
+        "Fixed the webhook for PromptPay payments."
+      ]
+    },
+    "v1_2_0": {
+      "title": "Refer a friend",
+      "summary": "Share your code with a friend and get 50 baht off.",
+      "items": [
+        "Referral codes — share your code with friends and get 50 baht off.",
+        "Request your referral earnings via PromptPay or bank transfer."
+      ]
+    },
+    "v1_1_0": {
+      "title": "Scratch cards & site statistics",
+      "summary": "A new scratch-to-reveal story type, and live numbers on the home page.",
+      "items": [
+        "Scratch card story — scratch to reveal what's underneath.",
+        "Animated statistics on the home page.",
+        "Automatic WebP image conversion for speed."
+      ]
+    },
+    "v1_0_0": {
+      "title": "The Memory is live!",
+      "summary": "Create something unforgettable for the person you love.",
+      "items": [
+        "Our very first release!",
+        "Create a memory with 5 story types: text, image, image + text, YouTube and password.",
+        "6-digit PIN lock with a numpad.",
+        "Share via QR code, copy the link, or share through any app.",
+        "Payment through Stripe (card & PromptPay)."
+      ]
+    }
+  }
+}

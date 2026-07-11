@@ -3,35 +3,27 @@ import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { getPackageById } from '@/lib/credits';
 import { isEligibleForReferralDiscount } from '@/lib/referral';
+import {
+  normalizeLocale,
+  paymentMethodsFor,
+  stripeLocaleFor,
+  localizedUrl,
+  ensureReferralCoupon,
+} from '@/lib/checkout-locale';
+import type { Locale } from '@/i18n/routing';
 import Stripe from 'stripe';
 
-const REFERRAL_COUPON_ID = 'REFERRAL_50_THB';
-const DISCOUNT_AMOUNT = 5000; // 50 THB in satang
-
-async function ensureReferralCouponExists(): Promise<string | null> {
-  try {
-    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
-    return REFERRAL_COUPON_ID;
-  } catch {
-    try {
-      await stripe.coupons.create({
-        id: REFERRAL_COUPON_ID,
-        amount_off: DISCOUNT_AMOUNT,
-        currency: 'thb',
-        name: 'ส่วนลดจากโค้ดแนะนำ 50 บาท',
-        duration: 'once',
-      });
-      return REFERRAL_COUPON_ID;
-    } catch (createError) {
-      console.error('Failed to create referral coupon:', createError);
-      return null;
-    }
-  }
-}
+// Shown on Stripe's hosted checkout page, so it can't come from the React tree.
+const PACKAGE_DESCRIPTION: Record<Locale, (credits: number) => string> = {
+  th: (c) => `${c} เครดิตสำหรับเปิดใช้งานความทรงจำ`,
+  en: (c) => `${c} credits to activate your memories`,
+  id: (c) => `${c} kredit untuk mengaktifkan kenangan Anda`,
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const { packageId, userId } = await request.json();
+    const { packageId, userId, locale: rawLocale } = await request.json();
+    const locale = normalizeLocale(rawLocale);
 
     if (!packageId || !userId) {
       return NextResponse.json(
@@ -59,14 +51,16 @@ export async function POST(request: NextRequest) {
 
     // Create Stripe checkout session with inline price_data
     const sessionOptions: Stripe.Checkout.SessionCreateParams = {
-      payment_method_types: ['card', 'promptpay'],
+      // PromptPay is Thailand-only — non-Thai customers get card only.
+      payment_method_types: paymentMethodsFor(locale),
+      locale: stripeLocaleFor(locale),
       line_items: [
         {
           price_data: {
             currency: 'thb',
             product_data: {
               name: pkg.name,
-              description: `${pkg.credits} เครดิตสำหรับเปิดใช้งานความทรงจำ`,
+              description: PACKAGE_DESCRIPTION[locale](pkg.credits),
             },
             unit_amount: pkg.priceSatang,
           },
@@ -74,8 +68,12 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${appUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}&type=credits`,
-      cancel_url: `${appUrl}/credits?cancelled=true`,
+      success_url: localizedUrl(
+        appUrl,
+        locale,
+        '/payment/success?session_id={CHECKOUT_SESSION_ID}&type=credits',
+      ),
+      cancel_url: localizedUrl(appUrl, locale, '/credits?cancelled=true'),
       metadata: {
         type: 'credits',
         package_id: packageId,
@@ -88,7 +86,8 @@ export async function POST(request: NextRequest) {
 
     // Apply referral discount if eligible
     if (hasReferralDiscount) {
-      const couponId = await ensureReferralCouponExists();
+      // Per-locale coupon: its name is the discount line on Stripe's checkout page.
+      const couponId = await ensureReferralCoupon(locale);
       if (couponId) {
         sessionOptions.discounts = [{ coupon: couponId }];
       }

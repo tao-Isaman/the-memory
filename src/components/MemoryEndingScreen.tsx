@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { RotateCcw, Send } from 'lucide-react';
 import { ThemeColors } from '@/lib/themes';
 import { trackEvent } from '@/lib/analytics';
@@ -31,6 +32,7 @@ export default function MemoryEndingScreen({
   onReplay,
   onCreateOwn,
 }: MemoryEndingScreenProps) {
+  const t = useTranslations('viewer.ending');
   const primaryGradient = `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`;
   const primaryClass =
     'flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-95';
@@ -70,7 +72,7 @@ export default function MemoryEndingScreen({
       style={{ color: themeColors.dark, borderColor: `${themeColors.dark}33` }}
     >
       <RotateCcw size={16} />
-      ดูอีกครั้ง
+      {t('replay')}
     </button>
   );
 
@@ -93,12 +95,10 @@ export default function MemoryEndingScreen({
       {isOwner ? (
         <>
           <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
-            ดูจบแล้ว 🎉
+            {t('owner.title')}
           </h2>
           <p className="text-sm mb-8 max-w-xs" style={{ color: `${themeColors.dark}cc` }}>
-            {isPreviewMode
-              ? 'นี่คือสิ่งที่คนรับจะได้เห็น เปิดใช้งานเพื่อส่งให้คนสำคัญ'
-              : 'ความทรงจำของคุณพร้อมส่งให้คนสำคัญแล้ว'}
+            {isPreviewMode ? t('owner.previewSubtitle') : t('owner.activeSubtitle')}
           </p>
           <div className="flex flex-col items-stretch gap-3 w-full max-w-xs">
             <Link
@@ -106,7 +106,7 @@ export default function MemoryEndingScreen({
               className={primaryClass}
               style={{ background: primaryGradient, boxShadow: `0 8px 25px ${themeColors.dark}50` }}
             >
-              {isPreviewMode ? 'แก้ไขต่อ' : 'ไปที่แดชบอร์ด'}
+              {isPreviewMode ? t('owner.editCta') : t('owner.dashboardCta')}
               <HeartIcon size={18} filled color="white" />
             </Link>
             {ReplayButton}
@@ -115,10 +115,10 @@ export default function MemoryEndingScreen({
       ) : (
         <>
           <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
-            หวังว่าคุณจะชอบนะ 💕
+            {t('recipient.title')}
           </h2>
           <p className="text-sm mb-6 max-w-xs" style={{ color: `${themeColors.dark}cc` }}>
-            อยากสร้างความทรงจำแบบนี้ให้คนสำคัญของคุณบ้างไหม?
+            {t('recipient.subtitle')}
           </p>
 
           {/* ── Reaction / reply loop: let the recipient send love back to the creator ── */}
@@ -129,12 +129,12 @@ export default function MemoryEndingScreen({
                 style={{ color: themeColors.dark }}
               >
                 <span className="text-2xl animate-pulse-heart">{sentEmoji}</span>
-                <span>ขอบคุณที่ส่งความรู้สึก!</span>
+                <span>{t('recipient.thanks')}</span>
               </div>
             ) : (
               <>
                 <p className="text-xs mb-2" style={{ color: `${themeColors.dark}aa` }}>
-                  ส่งความรู้สึกถึงผู้สร้าง
+                  {t('recipient.reactPrompt')}
                 </p>
                 <div className="flex justify-center gap-2">
                   {REACTION_EMOJIS.map((e) => (
@@ -142,7 +142,7 @@ export default function MemoryEndingScreen({
                       key={e}
                       onClick={() => handleReact(e)}
                       disabled={sending}
-                      aria-label={`ส่ง ${e}`}
+                      aria-label={t('recipient.sendEmojiAria', { emoji: e })}
                       className="flex items-center justify-center w-11 h-11 rounded-full text-2xl bg-white/50 backdrop-blur-sm border transition-all duration-200 hover:scale-110 active:scale-95 disabled:opacity-50"
                       style={{ borderColor: `${themeColors.dark}22` }}
                     >
@@ -160,7 +160,7 @@ export default function MemoryEndingScreen({
                   className="flex items-center justify-center gap-1.5 text-sm"
                   style={{ color: themeColors.dark }}
                 >
-                  💌 <span>ส่งข้อความแล้ว</span>
+                  💌 <span>{t('recipient.messageSent')}</span>
                 </div>
               ) : showMessage ? (
                 <div className="animate-fade-in-up">
@@ -169,7 +169,7 @@ export default function MemoryEndingScreen({
                     onChange={(e) => setMessage(e.target.value)}
                     maxLength={REACTION_MESSAGE_MAX}
                     rows={3}
-                    placeholder="เขียนข้อความถึงผู้สร้าง..."
+                    placeholder={t('recipient.messagePlaceholder')}
                     className="w-full rounded-xl p-3 text-sm resize-none bg-white/60 backdrop-blur-sm border focus:outline-none"
                     style={{ borderColor: `${themeColors.dark}22`, color: themeColors.dark }}
                   />
@@ -180,7 +180,7 @@ export default function MemoryEndingScreen({
                     style={{ background: primaryGradient, boxShadow: `0 8px 25px ${themeColors.dark}50` }}
                   >
                     <Send size={16} />
-                    ส่งข้อความ
+                    {t('recipient.sendMessage')}
                   </button>
                 </div>
               ) : (
@@ -189,7 +189,7 @@ export default function MemoryEndingScreen({
                   className="text-xs underline underline-offset-2"
                   style={{ color: `${themeColors.dark}aa` }}
                 >
-                  + เขียนข้อความถึงผู้สร้าง
+                  {t('recipient.writeMessage')}
                 </button>
               )}
             </div>
@@ -201,12 +201,12 @@ export default function MemoryEndingScreen({
               className={primaryClass}
               style={{ background: primaryGradient, boxShadow: `0 8px 25px ${themeColors.dark}50` }}
             >
-              สร้างความทรงจำของคุณเอง
+              {t('recipient.createOwn')}
               <HeartIcon size={18} filled color="white" />
             </button>
             {ReplayButton}
             <p className="text-xs mt-1" style={{ color: `${themeColors.dark}99` }}>
-              เริ่มต้นฟรี · ดูตัวอย่างก่อนได้
+              {t('recipient.footnote')}
             </p>
           </div>
         </>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { QRCode } from 'react-qrcode-logo';
 import HeartIcon from './HeartIcon';
 import { trackEvent } from '@/lib/analytics';
@@ -15,6 +16,7 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, showSuccessMessage = true }: ShareModalProps) {
+  const t = useTranslations('dashboard.shareModal');
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const qrRef = useRef<QRCode>(null);
@@ -42,7 +44,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
         trackEvent('share_link_click', { memory_id: memoryId });
         await navigator.share({
           title: memoryTitle,
-          text: `ดูความทรงจำ "${memoryTitle}" ที่ฉันสร้างให้คุณ`,
+          text: t('shareText', { title: memoryTitle }),
           url: shareUrl,
         });
       } catch (error) {
@@ -66,7 +68,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <HeartIcon size={24} className="text-[#E63946]" filled />
-            <h2 className="text-xl font-bold text-[#E63946]">แชร์ความทรงจำ</h2>
+            <h2 className="text-xl font-bold text-[#E63946]">{t('title')}</h2>
           </div>
           <button
             onClick={onClose}
@@ -80,8 +82,8 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
         {showSuccessMessage && (
           <div className="text-center mb-6 p-4 bg-green-50 rounded-xl border border-green-200">
             <Check size={32} className="mx-auto mb-2 text-green-600" />
-            <p className="text-green-700 font-medium">บันทึกความทรงจำสำเร็จ!</p>
-            <p className="text-sm text-green-600 mt-1">แชร์ลิงก์นี้ให้คนที่คุณรักได้เลย</p>
+            <p className="text-green-700 font-medium">{t('successTitle')}</p>
+            <p className="text-sm text-green-600 mt-1">{t('successSubtitle')}</p>
           </div>
         )}
 
@@ -115,7 +117,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
         {/* URL Input */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ลิงก์แชร์
+            {t('linkLabel')}
           </label>
           <div className="flex gap-2">
             <input
@@ -133,7 +135,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
               }`}
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
-              {copied ? 'คัดลอกแล้ว!' : 'คัดลอก'}
+              {copied ? t('copied') : t('copy')}
             </button>
           </div>
         </div>
@@ -145,7 +147,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
             className="btn-secondary flex-1 flex items-center justify-center gap-2"
           >
             <Download size={18} />
-            ดาวน์โหลด QR
+            {t('downloadQr')}
           </button>
           {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
             <button
@@ -153,7 +155,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
               className="btn-primary flex-1 flex items-center justify-center gap-2"
             >
               <Share2 size={18} />
-              แชร์
+              {t('share')}
             </button>
           )}
         </div>
@@ -163,7 +165,7 @@ export default function ShareModal({ isOpen, onClose, memoryId, memoryTitle, sho
           onClick={onClose}
           className="w-full mt-4 py-3 text-gray-500 hover:text-gray-700 transition-colors"
         >
-          ปิด
+          {t('close')}
         </button>
       </div>
     </div>

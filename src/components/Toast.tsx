@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { CheckCircle, XCircle, Info, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -38,6 +39,7 @@ const toastStyles = {
 };
 
 export function ToastItem({ toast, onDismiss }: ToastProps) {
+  const t = useTranslations('common.actions');
   const style = toastStyles[toast.type];
   const Icon = style.icon;
 
@@ -57,6 +59,7 @@ export function ToastItem({ toast, onDismiss }: ToastProps) {
       <span className={`flex-1 text-sm font-medium ${style.text}`}>{toast.message}</span>
       <button
         onClick={() => onDismiss(toast.id)}
+        aria-label={t('close')}
         className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
       >
         <X size={16} />

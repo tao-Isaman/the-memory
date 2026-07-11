@@ -1,0 +1,99 @@
+{
+  "page": {
+    "back": "Back to dashboard",
+    "loading": "Connecting..."
+  },
+  "info": {
+    "name": "Name",
+    "email": "Email",
+    "memberSince": "Member since",
+    "noName": "No name set"
+  },
+  "reward": {
+    "title": "Your profile is complete!",
+    "subtitle": "Claim your {credits} free credits",
+    "claim": "Claim credits",
+    "claiming": "Claiming...",
+    "claimed": "🎉 {credits} free credits are yours!"
+  },
+  "form": {
+    "sectionTitle": "A little more about you",
+    "phone": "Phone number",
+    "phonePlaceholder": "08X-XXX-XXXX",
+    "birthday": "Birthday",
+    "gender": "Gender",
+    "job": "Job",
+    "jobPlaceholder": "Choose your job...",
+    "customJobPlaceholder": "Tell us your job...",
+    "relationship": "Relationship status",
+    "occasion": "What are you creating for?",
+    "select": "Choose...",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Saved!"
+  },
+  "gender": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "relationship": {
+    "single": "Single",
+    "dating": "Dating",
+    "married": "Married",
+    "other": "Other"
+  },
+  "occasion": {
+    "valentine": "Valentine's Day",
+    "anniversary": "Anniversary",
+    "birthday": "Birthday",
+    "other": "Something else"
+  },
+  "jobs": [
+    "Student (school)",
+    "Student (university)",
+    "Undergraduate student",
+    "Business owner",
+    "Company employee",
+    "Civil servant",
+    "State enterprise employee",
+    "Merchant / shop owner",
+    "Freelance / general work",
+    "Programmer",
+    "IT",
+    "Engineer",
+    "Doctor",
+    "Nurse",
+    "Teacher",
+    "Lecturer",
+    "Marketing",
+    "Advertising",
+    "Accounting",
+    "Finance",
+    "Artist",
+    "Designer",
+    "Farmer",
+    "Homemaker (mother)",
+    "Homemaker (father)",
+    "Not working right now",
+    "Other"
+  ],
+  "onboarding": {
+    "welcome": "Welcome!",
+    "subtitle": "Tell us a little about yourself",
+    "rewardHint": "Fill in all 6 fields and get {credits} free credits!",
+    "skip": "Skip for now",
+    "save": "Save",
+    "saving": "Saving...",
+    "claimedToast": "Congrats! You just got {credits} free credits"
+  },
+  "errors": {
+    "GENERIC": "Something went wrong. Please try again.",
+    "INCOMPLETE_FORM": "Please fill in every field to get your free credits.",
+    "SAVE_FAILED": "We couldn't save your details.",
+    "CLAIM_FAILED": "We couldn't claim your credits.",
+    "PROFILE_NOT_FOUND": "We couldn't find your profile.",
+    "PROFILE_INCOMPLETE": "Please fill in every field of your profile.",
+    "CREDIT_GRANT_FAILED": "We couldn't add your credits."
+  }
+}

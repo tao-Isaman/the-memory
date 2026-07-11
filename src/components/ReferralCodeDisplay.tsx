@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { Copy, Check, Users, Gift, CheckCircle, Clock, Wallet } from 'lucide-react';
 import { ReferralStats } from '@/types/referral';
 import ClaimMoneyModal from './ClaimMoneyModal';
 import ClaimHistorySection from './ClaimHistorySection';
+
+// Fixed reward/discount, in THB for every locale (deliberate product decision).
+const REFERRAL_AMOUNT_THB = 50;
 
 interface ReferralCodeDisplayProps {
   code: string;
@@ -24,6 +28,8 @@ export default function ReferralCodeDisplay({
   stats,
   userId,
 }: ReferralCodeDisplayProps) {
+  const t = useTranslations('referral');
+  const format = useFormatter();
   const [copied, setCopied] = useState(false);
   const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -65,19 +71,18 @@ export default function ReferralCodeDisplay({
     fetchReferredUsers();
   }, [userId]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
+  const formatDate = (dateString: string) =>
+    format.dateTime(new Date(dateString), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-  };
 
   return (
     <div className="space-y-4">
       {/* Referral Code Section */}
       <div className="bg-gradient-to-r from-pink-50 to-red-50 rounded-xl p-4 border border-pink-200">
-        <p className="text-xs text-gray-500 mb-2">โค้ดแนะนำของคุณ</p>
+        <p className="text-xs text-gray-500 mb-2">{t('code.label')}</p>
         <div className="flex items-center justify-between">
           <p className="text-2xl font-mono font-bold text-[#E63946] tracking-widest">
             {code}
@@ -91,15 +96,18 @@ export default function ReferralCodeDisplay({
             }`}
           >
             {copied ? <Check size={18} /> : <Copy size={18} />}
-            {copied ? 'คัดลอกแล้ว!' : 'คัดลอกโค้ด'}
+            {copied ? t('code.copied') : t('code.copy')}
           </button>
         </div>
 
         {/* How it works */}
         <div className="mt-4 p-3 bg-white/50 rounded-lg">
           <p className="text-sm text-gray-700">
-            <span className="font-medium">วิธีใช้:</span> บอกโค้ดนี้ให้เพื่อนหรือคนรู้จัก
-            เมื่อพวกเขาใช้โค้ดตอนสมัครและชำระเงินครั้งแรก จะได้รับส่วนลด <span className="font-bold text-[#E63946]">50 บาท</span> ทันที!
+            {t.rich('code.howToUse', {
+              amount: REFERRAL_AMOUNT_THB,
+              label: (chunks) => <span className="font-medium">{chunks}</span>,
+              amt: (chunks) => <span className="font-bold text-[#E63946]">{chunks}</span>,
+            })}
           </p>
         </div>
       </div>
@@ -109,18 +117,18 @@ export default function ReferralCodeDisplay({
         <div className="bg-white rounded-xl p-3 border border-gray-100 text-center">
           <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
             <Users size={14} />
-            <span className="text-xs">ใช้โค้ดแล้ว</span>
+            <span className="text-xs">{t('stats.signups')}</span>
           </div>
           <p className="text-2xl font-bold text-gray-800">{stats.totalSignups}</p>
-          <p className="text-xs text-gray-400">คน</p>
+          <p className="text-xs text-gray-400">{t('stats.unit')}</p>
         </div>
         <div className="bg-white rounded-xl p-3 border border-gray-100 text-center">
           <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
             <Gift size={14} />
-            <span className="text-xs">ชำระเงินแล้ว</span>
+            <span className="text-xs">{t('stats.paid')}</span>
           </div>
           <p className="text-2xl font-bold text-[#E63946]">{stats.totalPaidConversions}</p>
-          <p className="text-xs text-gray-400">คน</p>
+          <p className="text-xs text-gray-400">{t('stats.unit')}</p>
         </div>
       </div>
 
@@ -130,10 +138,13 @@ export default function ReferralCodeDisplay({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">
-                คุณมี <span className="font-bold text-green-600">{currentPendingClaims}</span> สิทธิ์รับเงิน
+                {t.rich('claim.rights', {
+                  count: currentPendingClaims,
+                  n: (chunks) => <span className="font-bold text-green-600">{chunks}</span>,
+                })}
               </p>
               <p className="text-lg font-bold text-green-700">
-                รวม {currentPendingClaims * 50} บาท
+                {t('claim.total', { amount: currentPendingClaims * REFERRAL_AMOUNT_THB })}
               </p>
             </div>
             <button
@@ -141,7 +152,7 @@ export default function ReferralCodeDisplay({
               className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full font-medium hover:shadow-lg transition-all flex items-center gap-2"
             >
               <Wallet size={18} />
-              ขอรับเงิน
+              {t('claim.button')}
             </button>
           </div>
         </div>
@@ -150,15 +161,15 @@ export default function ReferralCodeDisplay({
       {/* Referred Users List */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-4 py-3 bg-gray-50 border-b border-gray-100">
-          <h4 className="font-medium text-gray-800">รายชื่อผู้ใช้โค้ด</h4>
+          <h4 className="font-medium text-gray-800">{t('users.title')}</h4>
         </div>
 
         {loadingUsers ? (
-          <div className="p-4 text-center text-gray-500 text-sm">กำลังโหลด...</div>
+          <div className="p-4 text-center text-gray-500 text-sm">{t('users.loading')}</div>
         ) : referredUsers.length === 0 ? (
           <div className="p-6 text-center text-gray-400">
             <Users size={32} className="mx-auto mb-2 opacity-50" />
-            <p className="text-sm">ยังไม่มีผู้ใช้โค้ดของคุณ</p>
+            <p className="text-sm">{t('users.empty')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -170,10 +181,10 @@ export default function ReferralCodeDisplay({
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">
-                      ผู้ใช้ #{user.userId.slice(0, 8)}...
+                      {t('users.user', { id: user.userId.slice(0, 8) })}
                     </p>
                     <p className="text-xs text-gray-400">
-                      ใช้โค้ดเมื่อ {formatDate(user.appliedAt)}
+                      {t('users.usedAt', { date: formatDate(user.appliedAt) })}
                     </p>
                   </div>
                 </div>
@@ -181,12 +192,12 @@ export default function ReferralCodeDisplay({
                   {user.hasPaid ? (
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
                       <CheckCircle size={12} />
-                      ชำระแล้ว
+                      {t('users.paid')}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
                       <Clock size={12} />
-                      รอชำระ
+                      {t('users.awaiting')}
                     </span>
                   )}
                 </div>

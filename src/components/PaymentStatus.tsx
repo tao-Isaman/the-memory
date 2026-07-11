@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { MemoryStatus } from '@/types/memory';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
 
@@ -11,17 +12,14 @@ interface PaymentStatusProps {
 
 const statusConfig = {
   pending: {
-    label: 'รอชำระเงิน',
     icon: Clock,
     className: 'bg-yellow-100 text-yellow-700',
   },
   active: {
-    label: 'ใช้งานได้',
     icon: CheckCircle,
     className: 'bg-green-100 text-green-700',
   },
   failed: {
-    label: 'ชำระเงินล้มเหลว',
     icon: XCircle,
     className: 'bg-red-100 text-red-700',
   },
@@ -32,6 +30,7 @@ export default function PaymentStatus({
   showLabel = true,
   size = 'sm',
 }: PaymentStatusProps) {
+  const t = useTranslations('payment.status');
   const config = statusConfig[status];
   const Icon = config.icon;
   const iconSize = size === 'sm' ? 14 : 16;
@@ -43,7 +42,7 @@ export default function PaymentStatus({
       className={`inline-flex items-center gap-1 rounded-full font-medium ${padding} ${textSize} ${config.className}`}
     >
       <Icon size={iconSize} />
-      {showLabel && <span>{config.label}</span>}
+      {showLabel && <span>{t(status)}</span>}
     </span>
   );
 }

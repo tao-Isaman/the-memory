@@ -1,0 +1,147 @@
+{
+  "backToHome": "Kembali ke beranda",
+  "effectiveDate": "12 Juni 2026",
+  "versionLine": "Versi {version} • Berlaku sejak {date}",
+  "readTerms": "Baca Ketentuan Penggunaan →",
+  "readPrivacy": "Baca Kebijakan Privasi →",
+  "privacy": {
+    "metaTitle": "Kebijakan Privasi | The Memory",
+    "metaDescription": "Kebijakan Privasi The Memory — data yang kami kumpulkan, tujuan penggunaannya, pengungkapan kepada pihak ketiga, dan hak Anda menurut Undang-Undang Perlindungan Data Pribadi Thailand (PDPA).",
+    "title": "Kebijakan Privasi",
+    "s1": {
+      "title": "1. Pendahuluan",
+      "body": "{service} ({url}) (“kami”) adalah platform untuk membuat kenangan digital dan memberikannya kepada orang spesial Anda. Kami menghargai privasi pengguna. Kebijakan ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan mengungkapkan data pribadi Anda sesuai dengan Undang-Undang Perlindungan Data Pribadi Thailand B.E. 2562 (PDPA)."
+    },
+    "s2": {
+      "title": "2. Data yang Kami Kumpulkan",
+      "intro": "Saat Anda menggunakan layanan ini, kami dapat mengumpulkan data berikut:",
+      "i1": "<b>Data akun Google</b> — nama, email, dan foto profil, ketika Anda masuk dengan Google.",
+      "i2": "<b>Data profil (bersifat sukarela)</b> — nomor telepon, tanggal lahir, jenis kelamin, pekerjaan, status hubungan, dan momen yang ingin Anda rayakan, jika Anda memilih untuk mengisinya.",
+      "i3": "<b>Konten yang Anda buat</b> — foto, teks, berkas suara, tautan video, dan konten lain yang Anda unggah ke dalam kenangan.",
+      "i4": "<b>Data pembayaran</b> — sepenuhnya diproses melalui Stripe. Kami <b>tidak menyimpan</b> nomor kartu atau data rekening bank Anda di sistem kami (kami hanya menyimpan nomor referensi transaksi dan status pembayaran).",
+      "i5": "<b>Data untuk pencairan komisi referral</b> — nomor PromptPay atau rekening bank, hanya jika Anda mengajukan pencairan hadiah dari program referral.",
+      "i6": "<b>Data penggunaan</b> — statistik kunjungan melalui Google Analytics, cookie yang diperlukan untuk masuk, dan data perangkat untuk notifikasi push (jika Anda mengaktifkannya)."
+    },
+    "s3": {
+      "title": "3. Tujuan Penggunaan Data",
+      "i1": "Menyediakan layanan untuk membuat, menyimpan, dan membagikan kenangan sesuai permintaan Anda.",
+      "i2": "Memproses pembayaran dan menerbitkan bukti transaksi.",
+      "i3": "Mengirim notifikasi terkait akun Anda, misalnya ketika seseorang mengirim hati atau memberi reaksi pada kenangan Anda.",
+      "i4": "Membuat gambar kartun dengan AI sesuai permintaan Anda (foto yang diunggah akan dikirim untuk diproses oleh penyedia layanan AI).",
+      "i5": "Menganalisis dan meningkatkan layanan secara keseluruhan (data statistik anonim).",
+      "i6": "Membayarkan hadiah program referral sesuai permintaan Anda."
+    },
+    "s4": {
+      "title": "4. Pengungkapan kepada Pihak Ketiga",
+      "intro": "Kami <b>tidak menjual</b> data pribadi Anda. Kami hanya mengungkapkan data seperlunya kepada penyedia layanan yang membuat platform ini berjalan, yaitu:",
+      "i1": "<b>Supabase</b> — basis data dan penyimpanan berkas.",
+      "i2": "<b>Stripe</b> — pemrosesan pembayaran (kartu kredit/debit dan PromptPay).",
+      "i3": "<b>OpenAI</b> — memproses hanya foto yang Anda unggah untuk pembuatan gambar kartun.",
+      "i4": "<b>Google</b> — proses masuk (OAuth) dan Google Analytics.",
+      "i5": "<b>Vercel</b> — hosting situs web.",
+      "outro": "Kami dapat mengungkapkan data apabila diwajibkan oleh hukum atau atas perintah instansi yang berwenang."
+    },
+    "s5": {
+      "title": "5. Berbagi Konten dan Fitur Universe",
+      "i1": "Kenangan yang sudah aktif dapat diakses melalui tautan publik — siapa pun yang memiliki tautannya dapat membukanya. Bagikan tautan hanya kepada orang yang Anda percaya. Anda juga dapat memasang PIN untuk melindungi isinya.",
+      "i2": "<b>Fitur Universe</b> — cerita berupa foto dan teks dari kenangan Anda yang sudah aktif, beserta nama dan foto profil Anda, akan ditampilkan kepada pengguna lain di feed Universe <b>secara bawaan</b>. Ini termasuk cerita yang berada di balik PIN (PIN hanya melindungi urutan penayangan lewat tautan). Jika Anda tidak menginginkannya, Anda dapat mematikan berbagi untuk setiap kenangan kapan saja, dari beranda atau halaman ubah kenangan."
+    },
+    "s6": {
+      "title": "6. Masa Penyimpanan dan Keamanan",
+      "body": "Kami menyimpan data Anda selama akun Anda masih aktif atau selama diperlukan untuk menyediakan layanan. Ketika Anda menghapus sebuah kenangan, konten yang terkait akan dihapus dari sistem kami. Data pembayaran dapat disimpan lebih lama sesuai jangka waktu yang diwajibkan oleh hukum akuntansi dan perpajakan. Kami menerapkan langkah keamanan sesuai standar industri, seperti enkripsi saat pengiriman data (HTTPS) dan pengendalian hak akses basis data (Row Level Security)."
+    },
+    "s7": {
+      "title": "7. Hak Anda Menurut PDPA",
+      "intro": "Anda memiliki hak-hak berikut atas data pribadi Anda:",
+      "i1": "Mengakses dan meminta salinan data pribadi Anda.",
+      "i2": "Meminta perbaikan data agar akurat dan terkini.",
+      "i3": "Meminta penghapusan atau pemusnahan data, termasuk penghapusan akun.",
+      "i4": "Meminta pembatasan atau mengajukan keberatan atas pemrosesan data.",
+      "i5": "Menarik kembali persetujuan yang pernah Anda berikan.",
+      "i6": "Mengajukan keluhan kepada Komite Perlindungan Data Pribadi.",
+      "outro": "Untuk menggunakan hak-hak tersebut, hubungi kami melalui email <email></email>. Kami akan menindaklanjutinya dalam jangka waktu yang ditetapkan oleh hukum."
+    },
+    "s8": {
+      "title": "8. Cookie",
+      "body": "Kami menggunakan cookie yang diperlukan untuk proses masuk dan menjaga sesi Anda, serta cookie analitik Google Analytics untuk memahami penggunaan layanan secara keseluruhan. Anda dapat mengatur peramban untuk menolak cookie, tetapi beberapa fitur mungkin tidak berfungsi."
+    },
+    "s9": {
+      "title": "9. Anak di Bawah Umur",
+      "body": "Layanan ini tidak ditujukan untuk anak di bawah umur. Jika usia Anda belum genap 20 tahun, Anda sebaiknya memperoleh persetujuan orang tua atau wali sebelum menggunakan layanan ini."
+    },
+    "s10": {
+      "title": "10. Perubahan Kebijakan",
+      "body": "Kami dapat memperbarui kebijakan ini dari waktu ke waktu. Apabila terjadi perubahan yang bersifat material, kami akan memberi tahu Anda dan meminta persetujuan baru melalui sistem sebelum Anda melanjutkan. Versi terbaru selalu ditampilkan di halaman ini."
+    },
+    "s11": {
+      "title": "11. Hubungi Kami",
+      "body": "Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini, hubungi kami di <email></email>"
+    }
+  },
+  "terms": {
+    "metaTitle": "Ketentuan Penggunaan | The Memory",
+    "metaDescription": "Ketentuan Penggunaan The Memory — syarat layanan, pembayaran, konten pengguna, fitur Universe, dan batasan tanggung jawab.",
+    "title": "Ketentuan Penggunaan",
+    "s1": {
+      "title": "1. Penerimaan Ketentuan",
+      "body": "Dengan mendaftar atau menggunakan layanan {service} ({url}), Anda dianggap telah membaca, memahami, dan setuju untuk terikat pada Ketentuan Penggunaan ini, termasuk <privacyLink>Kebijakan Privasi</privacyLink> kami. Jika Anda tidak menyetujuinya, mohon tidak menggunakan layanan ini."
+    },
+    "s2": {
+      "title": "2. Layanan Kami",
+      "body": "{service} adalah platform untuk membuat “kenangan” digital — rangkaian cerita dari foto, teks, suara, video, dan sentuhan lainnya, untuk dibagikan kepada orang spesial melalui tautan atau QR Code. Tersedia pula layanan tambahan seperti pembuatan gambar kartun dengan AI melalui sistem kredit, serta feed Universe untuk melihat cerita yang dibagikan pengguna lain."
+    },
+    "s3": {
+      "title": "3. Akun Pengguna",
+      "i1": "Proses masuk dilakukan melalui akun Google Anda.",
+      "i2": "Anda bertanggung jawab atas seluruh aktivitas yang terjadi di bawah akun Anda.",
+      "i3": "Dilarang menggunakan akun orang lain atau mengaku sebagai orang lain."
+    },
+    "s4": {
+      "title": "4. Pembayaran dan Kredit",
+      "i1": "Mengaktifkan kenangan agar dapat dibagikan dikenakan biaya sesuai yang tertera di halaman pembayaran. Sekali bayar, simpan selamanya, melalui Stripe (kartu kredit/debit atau PromptPay).",
+      "i2": "Kredit untuk fitur AI dibeli dalam bentuk paket sesuai harga yang tertera di halaman kredit.",
+      "i3": "Jika pembuatan gambar kartun dengan AI gagal, sistem akan mengembalikan kredit Anda secara otomatis.",
+      "i4": "Pada umumnya biaya yang telah dibayarkan <b>tidak dapat dikembalikan</b>, kecuali jika kesalahan berasal dari sistem kami — untuk kasus tersebut, hubungi <email></email>",
+      "i5": "Harga dapat berubah sewaktu-waktu, tanpa memengaruhi transaksi yang telah dibayarkan."
+    },
+    "s5": {
+      "title": "5. Konten Pengguna",
+      "i1": "Konten yang Anda unggah tetap menjadi milik Anda. Anda memberi kami izin untuk menyimpan, memproses, dan menampilkan konten tersebut sebatas yang diperlukan untuk menyediakan layanan.",
+      "i2": "Anda menjamin bahwa Anda adalah pemilik atau memiliki hak atas konten yang diunggah, termasuk telah memperoleh persetujuan dari orang yang tampil dalam foto/suara tersebut.",
+      "i3": "Dilarang mengunggah konten yang melanggar hukum, melanggar hak cipta, bermuatan pornografi, melibatkan anak di bawah umur secara tidak pantas, bersifat memfitnah, menimbulkan kebencian, atau melanggar hak orang lain.",
+      "i4": "Kami berhak menghapus konten atau menangguhkan akun yang melanggar ketentuan ini, tanpa pemberitahuan terlebih dahulu dan tanpa pengembalian biaya."
+    },
+    "s6": {
+      "title": "6. Berbagi dan Fitur Universe",
+      "i1": "Kenangan yang sudah aktif dapat dibuka oleh siapa pun yang memiliki tautannya. Andalah yang menentukan kepada siapa tautan itu dibagikan.",
+      "i2": "Cerita berupa foto dan teks akan ditampilkan di feed Universe secara bawaan, termasuk cerita yang berada di balik PIN (PIN hanya melindungi urutan penayangan lewat tautan). Anda dapat mematikan berbagi untuk setiap kenangan kapan saja.",
+      "i3": "Reaksi terhadap cerita orang lain harus diberikan secara terhormat. Kami berhak menangguhkan penggunaan apabila ditemukan penyalahgunaan."
+    },
+    "s7": {
+      "title": "7. Kekayaan Intelektual Kami",
+      "body": "Logo, desain, perangkat lunak, dan komponen layanan (selain konten pengguna) adalah milik {service}. Dilarang menggandakan, mengubah, atau menggunakannya untuk kepentingan komersial tanpa izin tertulis dari kami."
+    },
+    "s8": {
+      "title": "8. Batasan Tanggung Jawab",
+      "i1": "Layanan diberikan “sebagaimana adanya” (as is). Kami tidak menjamin layanan akan berjalan tanpa gangguan atau bebas dari kesalahan.",
+      "i2": "Kami tidak bertanggung jawab atas kerugian tidak langsung atau kehilangan data yang berada di luar kendali wajar kami. Total tanggung jawab maksimum kami terbatas pada jumlah yang telah Anda bayarkan kepada kami dalam 12 bulan terakhir.",
+      "i3": "Kami menyarankan Anda untuk selalu menyimpan salinan asli dari foto/berkas penting Anda."
+    },
+    "s9": {
+      "title": "9. Penangguhan dan Penghentian Layanan",
+      "body": "Anda dapat berhenti menggunakan layanan dan mengajukan penghapusan akun kapan saja. Kami dapat menangguhkan atau menghentikan akun yang melanggar ketentuan ini. Apabila layanan harus ditutup, kami akan memberi tahu Anda sebelumnya dalam waktu yang wajar agar Anda dapat mencadangkan konten Anda."
+    },
+    "s10": {
+      "title": "10. Hukum yang Berlaku",
+      "body": "Ketentuan ini tunduk pada hukum Kerajaan Thailand. Setiap sengketa berada dalam yurisdiksi pengadilan Thailand."
+    },
+    "s11": {
+      "title": "11. Perubahan Ketentuan",
+      "body": "Kami dapat memperbarui ketentuan ini dari waktu ke waktu. Apabila terjadi perubahan yang bersifat material, kami akan memberi tahu Anda dan meminta persetujuan baru melalui sistem sebelum Anda melanjutkan."
+    },
+    "s12": {
+      "title": "12. Hubungi Kami",
+      "body": "Jika Anda memiliki pertanyaan mengenai Ketentuan Penggunaan ini, hubungi kami di <email></email>"
+    }
+  }
+}

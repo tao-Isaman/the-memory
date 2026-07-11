@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { Clock, CheckCircle, XCircle, History, Loader2, Wallet } from 'lucide-react';
 import { ClaimStatus } from '@/types/referral';
 
@@ -25,6 +26,8 @@ export default function ClaimHistorySection({
   userId,
   refreshTrigger = 0,
 }: ClaimHistorySectionProps) {
+  const t = useTranslations('referral');
+  const format = useFormatter();
   const [claims, setClaims] = useState<ClaimRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -45,15 +48,14 @@ export default function ClaimHistorySection({
     fetchClaims();
   }, [userId, refreshTrigger]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
+  const formatDate = (dateString: string) =>
+    format.dateTime(new Date(dateString), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
 
   const getStatusBadge = (status: ClaimStatus) => {
     switch (status) {
@@ -61,21 +63,21 @@ export default function ClaimHistorySection({
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
             <Clock size={12} />
-            รอดำเนินการ
+            {t('status.pending')}
           </span>
         );
       case 'completed':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
             <CheckCircle size={12} />
-            โอนแล้ว
+            {t('status.completed')}
           </span>
         );
       case 'rejected':
         return (
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
             <XCircle size={12} />
-            ปฏิเสธ
+            {t('status.rejected')}
           </span>
         );
       default:
@@ -83,9 +85,8 @@ export default function ClaimHistorySection({
     }
   };
 
-  const getPaymentMethodLabel = (method: string) => {
-    return method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร';
-  };
+  const getPaymentMethodLabel = (method: string) =>
+    method === 'promptpay' ? t('method.promptpay') : t('method.bank_transfer');
 
   // Don't show section if no claims
   if (!loading && claims.length === 0) {
@@ -96,13 +97,13 @@ export default function ClaimHistorySection({
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
         <History size={16} className="text-gray-500" />
-        <h4 className="font-medium text-gray-800">ประวัติการขอรับเงิน</h4>
+        <h4 className="font-medium text-gray-800">{t('history.title')}</h4>
       </div>
 
       {loading ? (
         <div className="p-6 text-center">
           <Loader2 size={24} className="animate-spin mx-auto text-gray-400" />
-          <p className="text-sm text-gray-500 mt-2">กำลังโหลด...</p>
+          <p className="text-sm text-gray-500 mt-2">{t('history.loading')}</p>
         </div>
       ) : (
         <div className="divide-y divide-gray-100">
@@ -115,7 +116,7 @@ export default function ClaimHistorySection({
                   </div>
                   <div>
                     <p className="font-medium text-gray-800">
-                      {claim.amount} บาท
+                      {t('history.amount', { amount: claim.amount })}
                     </p>
                     <p className="text-xs text-gray-500">
                       {getPaymentMethodLabel(claim.paymentMethod)}
@@ -129,13 +130,12 @@ export default function ClaimHistorySection({
               <div className="ml-10 text-xs text-gray-500">
                 <p>
                   {claim.paymentMethod === 'promptpay'
-                    ? `เบอร์: ${claim.paymentInfo}`
-                    : `เลขบัญชี: ${claim.paymentInfo}`
-                  }
+                    ? t('history.phone', { value: claim.paymentInfo })
+                    : t('history.account', { value: claim.paymentInfo })}
                 </p>
-                <p className="mt-1">ส่งคำขอ: {formatDate(claim.createdAt)}</p>
+                <p className="mt-1">{t('history.sentAt', { date: formatDate(claim.createdAt) })}</p>
                 {claim.processedAt && (
-                  <p>ดำเนินการ: {formatDate(claim.processedAt)}</p>
+                  <p>{t('history.processedAt', { date: formatDate(claim.processedAt) })}</p>
                 )}
               </div>
 
@@ -143,7 +143,7 @@ export default function ClaimHistorySection({
               {claim.status === 'rejected' && claim.adminNote && (
                 <div className="ml-10 mt-2 p-2 bg-red-50 rounded-lg border border-red-100">
                   <p className="text-xs text-red-600">
-                    <span className="font-medium">หมายเหตุ:</span> {claim.adminNote}
+                    <span className="font-medium">{t('history.noteLabel')}</span> {claim.adminNote}
                   </p>
                 </div>
               )}

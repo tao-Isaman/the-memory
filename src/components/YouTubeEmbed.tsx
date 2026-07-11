@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface YouTubeEmbedProps {
   url: string;
 }
@@ -18,12 +20,13 @@ function extractVideoId(url: string): string | null {
 }
 
 export default function YouTubeEmbed({ url }: YouTubeEmbedProps) {
+  const t = useTranslations('viewer.youtube');
   const videoId = extractVideoId(url);
 
   if (!videoId) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-600">
-        URL YouTube ไม่ถูกต้อง
+        {t('invalidUrl')}
       </div>
     );
   }

@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "The Memory - Ide Kado Kejutan untuk Pacar dan Orang Tersayang",
+    "description": "Buat kado kejutan yang bisa dibuka detik itu juga: foto, pesan, dan lagu dalam satu tautan. Cocok untuk anniversary, ulang tahun, minta maaf, LDR, dan keluarga. Jadi dalam 5 menit.",
+    "keywords": [
+      "kado kejutan untuk pacar",
+      "hadiah kejutan pacar",
+      "kado digital",
+      "kado online",
+      "ide kado anniversary",
+      "kado ulang tahun pacar",
+      "kado LDR",
+      "cara minta maaf ke pacar",
+      "ide kado romantis",
+      "kado kenangan"
+    ]
+  },
+  "nav": {
+    "signIn": "Masuk",
+    "start": "Mulai buat"
+  },
+  "hero": {
+    "badge": "Cara paling berkesan buat bikin dia kaget",
+    "titleTop": "Kado kejutan yang nggak akan dia hapus",
+    "titleBottom": "Sampaikan perasaanmu lewat kenangan yang kamu buat sendiri",
+    "tagline": "Foto, pesan, dan lagu yang berarti — semuanya dalam satu tautan.",
+    "occasions": "Cocok untuk semua momen: <b>anniversary, ulang tahun, minta maaf, LDR, keluarga</b>",
+    "ctaPrimary": "Mulai gratis",
+    "ctaSecondary": "Lihat cara kerjanya",
+    "pricingHint": "Gratis dibuat | Aktifkan hanya <price>99 THB</price>"
+  },
+  "trust": {
+    "secure": "100% aman",
+    "noApp": "Tanpa instal aplikasi",
+    "easy": "Gampang dipakai",
+    "forever": "Bisa dibuka kapan pun"
+  },
+  "stats": {
+    "users": "pengguna",
+    "memories": "kenangan",
+    "stories": "cerita"
+  },
+  "features": {
+    "heading": "Bebas kamu susun sendiri",
+    "subheading": "Pilih isinya, lalu atur urutannya sesuai yang kamu mau dia lihat.",
+    "image": {
+      "title": "Foto",
+      "desc": "Unggah momen paling berkesan, lengkap dengan keterangannya."
+    },
+    "message": {
+      "title": "Pesan dari hati",
+      "desc": "Tulis hal-hal yang selama ini belum sempat kamu bilang."
+    },
+    "music": {
+      "title": "Musik",
+      "desc": "Tambahkan lagu dari YouTube yang berarti buat kalian."
+    },
+    "pin": {
+      "title": "Kode rahasia",
+      "desc": "Kunci dengan PIN 6 digit biar dia deg-degan dulu."
+    },
+    "textImage": {
+      "title": "Teks + foto",
+      "desc": "Satu foto dan kata-katanya, dalam satu halaman."
+    },
+    "scratch": {
+      "title": "Kartu gosok",
+      "desc": "Digosok dulu buat lihat foto rahasianya. Kejutan banget."
+    },
+    "question": {
+      "title": "Kuis tebak-tebakan",
+      "desc": "Harus jawab benar dulu sebelum lanjut ke cerita berikutnya."
+    },
+    "share": {
+      "title": "Langsung dibagikan",
+      "desc": "Kirim tautan atau QR Code ke orang tersayang, selesai."
+    }
+  },
+  "socialProof": {
+    "heading": "Cerita nyata dari pengguna",
+    "subheading": "Dari mereka yang membuat kenangan untuk orang tersayang.",
+    "items": [
+      {
+        "quote": "Pacarku buka terus langsung nangis. Seneng banget bikin sendiri.",
+        "occasion": "Valentine"
+      },
+      {
+        "quote": "Nggak sampai 10 menit udah jadi, dan hasilnya lucu banget.",
+        "occasion": "Anniversary"
+      },
+      {
+        "quote": "Aku kirim ke ibu pas ulang tahunnya. Katanya mau disimpan terus.",
+        "occasion": "Ulang tahun ibu"
+      }
+    ]
+  },
+  "howItWorks": {
+    "heading": "3 langkah mudah",
+    "subheading": "Beneran cuma butuh beberapa menit.",
+    "one": {
+      "title": "Buat kenangan baru",
+      "desc": "Kasih judul, pilih tema, lalu mulai isi sesuka kamu."
+    },
+    "two": {
+      "title": "Tambahkan ceritanya",
+      "desc": "Foto, pesan, lagu, kode rahasia — bebas."
+    },
+    "three": {
+      "title": "Kirim ke orang tersayang",
+      "desc": "Tinggal bagikan tautan atau QR Code-nya."
+    },
+    "pricingNote": "Gratis dibuat, gratis dilihat dulu | Aktifkan hanya <price>99 THB</price> — disimpan selamanya, dikirim berkali-kali pun boleh."
+  },
+  "useCases": {
+    "heading": "Momennya apa nih?",
+    "subheading": "Pilih yang paling pas, lalu mulai buat kadonya."
+  },
+  "faq": {
+    "heading": "Pertanyaan yang sering ditanya",
+    "subheading": "Tentang The Memory",
+    "items": [
+      {
+        "q": "The Memory itu apa?",
+        "a": "The Memory adalah platform untuk membuat kenangan online bagi orang tersayang. Kamu bisa menggabungkan foto, pesan, lagu, bahkan kode rahasia dalam satu tautan, lalu mengirimkannya. Cocok untuk semua momen — kejutan buat pacar, anniversary, ulang tahun, minta maaf, atau sekadar bilang sayang ke keluarga."
+      },
+      {
+        "q": "Susah nggak? Butuh waktu lama?",
+        "a": "Nggak susah sama sekali. Cuma 3 langkah: 1) buat kenangan baru, 2) tambahkan foto, pesan, atau lagu, 3) bagikan tautannya. Tanpa instal aplikasi, dan biasanya selesai kurang dari 5 menit."
+      },
+      {
+        "q": "Berapa harganya? Bisa dibuat gratis?",
+        "a": "Membuat dan melihat pratinjaunya gratis sepenuhnya. Kalau sudah puas, kamu cukup bayar 99 THB untuk mengaktifkan tautannya. Tautannya milikmu selamanya dan bisa dikirim berkali-kali."
+      },
+      {
+        "q": "Pembayarannya aman?",
+        "a": "Sangat aman. Kami memakai Stripe, penyedia pembayaran yang juga dipakai Shopify, Amazon, dan perusahaan global lainnya. Mendukung kartu kredit/debit dan PromptPay."
+      },
+      {
+        "q": "Penerimanya harus daftar akun dulu?",
+        "a": "Nggak perlu. Tinggal klik tautannya, langsung terbuka — di HP maupun laptop. Tanpa aplikasi, tanpa daftar."
+      },
+      {
+        "q": "Bisa dikunci pakai kata sandi?",
+        "a": "Bisa. Tambahkan PIN 6 digit, dan dia harus memasukkannya dulu sebelum bisa lanjut. Seru banget buat bikin dia penasaran."
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Siap menyampaikan perasaanmu?",
+    "subheading": "Mulai buat kenangannya sekarang — kurang dari 5 menit.",
+    "note": "Gratis dibuat — bayar saat kamu siap mengirimnya.",
+    "button": "Mulai buat"
+  },
+  "footer": {
+    "tagline": "Platform kenangan online untuk orang tersayang",
+    "signIn": "Masuk",
+    "features": "Fitur",
+    "occasions": "Momen",
+    "faq": "FAQ",
+    "terms": "Ketentuan",
+    "privacy": "Privasi",
+    "trustLine": "Pembayaran aman lewat Stripe | Dibuat dalam menit, langsung dibagikan | Disimpan selamanya",
+    "seoLine": "The Memory — kado kejutan dan kenangan online untuk anniversary, ulang tahun, minta maaf, LDR, dan keluarga.",
+    "keywordLine": "kado kejutan untuk pacar | ide kado anniversary | kado ulang tahun pacar | cara minta maaf ke pacar | kado LDR | kado untuk keluarga | hadiah romantis | kado kenangan digital"
+  }
+}

@@ -1,0 +1,490 @@
+{
+  "ui": {
+    "signIn": "Masuk",
+    "startNow": "Mulai buat",
+    "backToAll": "Lihat semua momen",
+    "trust": {
+      "secure": "100% aman",
+      "price": "Hanya 99 THB",
+      "forever": "Bisa dibuka kapan pun"
+    },
+    "features": {
+      "heading": "Apa saja yang bisa dimasukkan?",
+      "image": {
+        "title": "Foto",
+        "desc": "Momen yang nggak mau kamu lupakan"
+      },
+      "message": {
+        "title": "Pesan dari hati",
+        "desc": "Tulis yang belum sempat kamu bilang"
+      },
+      "music": {
+        "title": "Musik",
+        "desc": "Lagu yang cuma berarti buat kalian berdua"
+      },
+      "pin": {
+        "title": "Kode rahasia",
+        "desc": "Bikin dia deg-degan dulu"
+      }
+    },
+    "prompts": {
+      "heading": "Bingung mau nulis apa? Coba ini"
+    },
+    "steps": {
+      "heading": "3 langkah mudah",
+      "one": {
+        "title": "Buat kenangan",
+        "desc": "Pilih tema lalu mulai isi"
+      },
+      "two": {
+        "title": "Tambah cerita",
+        "desc": "Foto, pesan, musik — sesuka kamu"
+      },
+      "three": {
+        "title": "Kirim ke dia",
+        "desc": "Tinggal bagikan tautan atau QR Code"
+      },
+      "pricing": "Gratis dibuat, gratis dilihat dulu | Aktifkan hanya <price>99 THB</price>"
+    },
+    "faq": {
+      "heading": "Pertanyaan yang sering ditanya"
+    },
+    "finalCta": {
+      "subtext": "Kurang dari 5 menit. Gratis dibuat — bayar saat kamu siap mengirimnya."
+    },
+    "footer": {
+      "tagline": "Platform kenangan online untuk orang tersayang",
+      "home": "Beranda",
+      "signIn": "Masuk",
+      "faq": "FAQ"
+    }
+  },
+  "useCases": {
+    "surprise-gift": {
+      "title": "Kado kejutan untuk pacar",
+      "subtitle": "Bikin dia kaget dengan satu tautan kenangan",
+      "heroHeadline": "Kado kejutan yang bikin dia senyum tiap kali dibuka",
+      "heroSubtext": "Foto, pesan, lagu, semua yang pernah kalian lewati — dijadikan satu tautan yang bisa dia buka kapan saja.",
+      "ctaText": "Buat kado kejutan",
+      "ctaHeading": "Siap bikin dia kaget?",
+      "metaTitle": "Kado Kejutan untuk Pacar — Jadi dalam 5 Menit | The Memory",
+      "metaDescription": "Cari kado kejutan untuk pacar? Buat kenangan digital berisi foto, pesan, dan lagu dalam satu tautan. Cuma 99 THB, langsung bisa dikirim hari ini.",
+      "keywords": [
+        "kado kejutan untuk pacar",
+        "hadiah kejutan pacar",
+        "kado digital pacar",
+        "ide kado romantis",
+        "surprise pacar online",
+        "kado spesial buat pacar"
+      ],
+      "samplePrompts": [
+        "Kamu yang bikin hari-hari biasa jadi berarti...",
+        "Makasih ya, udah selalu ada, bahkan pas lagi susah.",
+        "Aku sayang kamu, lebih dari yang bisa aku ucapkan."
+      ],
+      "faqItems": [
+        {
+          "q": "Kado kejutan seperti ini cocok buat momen apa?",
+          "a": "Semua momen — Valentine, anniversary, ulang tahun dia, atau hari biasa yang tiba-tiba kamu pengin bilang sayang."
+        },
+        {
+          "q": "Apa yang dia lihat saat membuka tautannya?",
+          "a": "Dia akan melihat ceritamu satu per satu sesuai urutan yang kamu susun: foto, pesan, lagu, dan kejutan yang kamu selipkan."
+        },
+        {
+          "q": "Setelah jadi, gimana cara kirimnya?",
+          "a": "Setelah pembayaran, kamu langsung dapat tautan dan QR Code. Tinggal kirim lewat WhatsApp, DM Instagram, atau media sosial apa pun."
+        }
+      ]
+    },
+    "anniversary": {
+      "title": "Kado anniversary",
+      "subtitle": "Rayakan hari yang mengawali semuanya",
+      "heroHeadline": "Anniversary tahun ini, bikin dia merasa benar-benar dipilih",
+      "heroSubtext": "Semua momen kalian dari hari pertama sampai hari ini, dikemas jadi satu kado yang bisa dibuka lagi tiap tahun.",
+      "ctaText": "Buat kado anniversary",
+      "ctaHeading": "Siap buat anniversary kalian?",
+      "metaTitle": "Ide Kado Anniversary — Kenangan Digital yang Dia Simpan | The Memory",
+      "metaDescription": "Kado anniversary yang beda: foto, pesan, dan lagu kalian dalam satu tautan. Bisa jadi dalam hitungan menit, cuma 99 THB. Cocok buat pacar atau pasangan.",
+      "keywords": [
+        "kado anniversary",
+        "hadiah anniversary pacar",
+        "ide kado anniversary",
+        "surprise anniversary",
+        "kado 1 tahun jadian",
+        "anniversary pacar"
+      ],
+      "samplePrompts": [
+        "Udah [X] tahun ya. Makasih udah bertahan sejauh ini...",
+        "Masih ingat hari pertama kita ketemu? Lihat kita sekarang...",
+        "Tiap hari sama kamu itu hari terbaik."
+      ],
+      "faqItems": [
+        {
+          "q": "Bedanya apa sama posting di media sosial?",
+          "a": "Tautan kenangan itu privat — bisa dikunci PIN, bisa ada lagunya, dan urutannya kamu yang atur. Ini kado, bukan postingan."
+        },
+        {
+          "q": "Sebaiknya diisi apa?",
+          "a": "Mulai dari foto awal kalian, momen-momen penting, lagu yang berarti, dan pesan dari hati. Disusun kayak timeline itu bagus banget."
+        }
+      ]
+    },
+    "birthday": {
+      "title": "Kado ulang tahun",
+      "subtitle": "Ucapan ulang tahun yang benar-benar disimpan",
+      "heroHeadline": "Kado ulang tahun yang masih dia ceritakan tahun depan",
+      "heroSubtext": "Ucapanmu, foto-foto kalian, lagu favoritnya — jadi kado ulang tahun yang cuma bisa datang dari kamu.",
+      "ctaText": "Buat kado ulang tahun",
+      "ctaHeading": "Siap bikin ulang tahunnya berkesan?",
+      "metaTitle": "Ide Kado Ulang Tahun Pacar — Kirim dalam Hitungan Menit | The Memory",
+      "metaDescription": "Ide kado ulang tahun yang bukan kartu biasa: foto, ucapan, dan lagu dalam satu tautan. Cocok buat pacar, sahabat, atau ibu. Siap dalam 5 menit.",
+      "keywords": [
+        "kado ulang tahun pacar",
+        "ucapan ulang tahun pacar",
+        "surprise ulang tahun",
+        "kado ultah digital",
+        "ide kado ulang tahun",
+        "hadiah ulang tahun sahabat"
+      ],
+      "samplePrompts": [
+        "Selamat ulang tahun! Semoga tahun ini kamu akhirnya...",
+        "Makasih udah lahir. Dunia jadi jauh lebih baik hari itu.",
+        "Ada yang dari dulu pengin aku bilang ke kamu..."
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dibuat jauh-jauh hari?",
+          "a": "Bisa banget. Buat dan bayar kapan pun — tautannya nggak ada masa kedaluwarsa, jadi tinggal kirim pas hari H."
+        },
+        {
+          "q": "Cocok buat siapa saja?",
+          "a": "Siapa pun. Pacar, sahabat, orang tua, adik atau kakak — siapa pun yang ulang tahunnya layak lebih dari sekadar chat."
+        }
+      ]
+    },
+    "apology": {
+      "title": "Minta maaf",
+      "subtitle": "Sampaikan yang nggak sanggup kamu ucapkan",
+      "heroHeadline": "Pengin minta maaf tapi nggak tahu mulai dari mana? Kirim ini aja.",
+      "heroSubtext": "Kadang permintaan maaf terbaik bukan kata-kata, tapi bukti bahwa kamu mau duduk dan membuat sesuatu untuk dia.",
+      "ctaText": "Buat tautan permintaan maaf",
+      "ctaHeading": "Siap minta maaf beneran?",
+      "metaTitle": "Cara Minta Maaf ke Pacar yang Benar-Benar Terasa | The Memory",
+      "metaDescription": "Bingung cara minta maaf ke pacar? Buat tautan kenangan berisi permintaan maaf yang jujur, foto momen baik kalian, dan janji yang kamu tepati.",
+      "keywords": [
+        "cara minta maaf ke pacar",
+        "kado minta maaf",
+        "cara minta maaf ke pacar yang marah",
+        "kata kata minta maaf buat pacar",
+        "cara balikan sama pacar",
+        "surat permintaan maaf pacar"
+      ],
+      "samplePrompts": [
+        "Maaf ya... aku nggak pernah bermaksud bikin kamu sesakit itu.",
+        "Aku cuma pengin kamu tahu, aku nggak mau kehilangan kamu.",
+        "Kasih aku satu kesempatan lagi. Aku akan buktikan, bukan cuma janji."
+      ],
+      "faqItems": [
+        {
+          "q": "Kirim tautan minta maaf beneran ngefek?",
+          "a": "Bikin sesuatu sendiri itu ngomong lebih keras daripada chat panjang. Banyak yang cerita pacarnya buka, lalu senyum — atau nangis."
+        },
+        {
+          "q": "Sebaiknya diisi apa?",
+          "a": "Mulai dari permintaan maaf yang jujur, lanjut foto momen baik kalian, dan tutup dengan janji yang benar-benar kamu tepati."
+        }
+      ]
+    },
+    "long-distance": {
+      "title": "LDR",
+      "subtitle": "Kirim rasa kangen menembus jarak",
+      "heroHeadline": "Jauh di mata, tetap paling dekat di hati",
+      "heroSubtext": "Semua kenangan manis dalam satu tautan — dikirim ke orang yang kamu rindukan, sejauh apa pun dia sekarang.",
+      "ctaText": "Kirim rasa kangenmu",
+      "ctaHeading": "Siap bikin jarak terasa dekat?",
+      "metaTitle": "Kado LDR — Kirim Kenangan Kalian dalam Satu Tautan | The Memory",
+      "metaDescription": "Kado LDR yang sampai detik itu juga: foto, pesan, dan lagu kalian dalam satu tautan. Tanpa ongkir, tanpa nunggu paket. Cuma 99 THB.",
+      "keywords": [
+        "kado LDR",
+        "hadiah buat pacar LDR",
+        "kangen pacar",
+        "surprise LDR",
+        "ide kado jarak jauh",
+        "hubungan jarak jauh"
+      ],
+      "samplePrompts": [
+        "Kangen. Cuma pengin kamu tahu aku nggak lupa satu pun.",
+        "Beda kota, tapi tiap hari kamu terus yang kepikiran.",
+        "Ngitung hari sampai bisa ketemu kamu lagi."
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dikirim ke orang di luar negeri?",
+          "a": "Bisa. Tautannya bisa dibuka dari mana pun di dunia, lewat HP atau laptop, tanpa perlu instal aplikasi."
+        },
+        {
+          "q": "Bisa nambahin lagu?",
+          "a": "Bisa. Tambahkan lagu apa pun dari YouTube — pilih yang paling berarti buat kalian berdua."
+        }
+      ]
+    },
+    "family": {
+      "title": "Kado untuk keluarga",
+      "subtitle": "Buat orang tua, kakak, adik, dan semua di rumah",
+      "heroHeadline": "Bilang sayang ke keluarga, lewat sesuatu yang bisa mereka simpan",
+      "heroSubtext": "Foto keluarga, ucapan terima kasih yang belum sempat kamu bilang, lagu yang selalu diputar di rumah — satu kado untuk orang yang paling kamu sayang.",
+      "ctaText": "Buat kado untuk keluarga",
+      "ctaHeading": "Siap bilang sayang ke keluarga?",
+      "metaTitle": "Kado untuk Ibu, Ayah, dan Keluarga yang Berkesan | The Memory",
+      "metaDescription": "Kado untuk ibu, ayah, atau keluarga yang bukan sekadar bunga: foto, ucapan terima kasih, dan lagu dalam satu tautan. Tanpa aplikasi, tanpa daftar akun.",
+      "keywords": [
+        "kado untuk ibu",
+        "kado untuk ayah",
+        "hadiah untuk orang tua",
+        "ucapan terima kasih orang tua",
+        "kado keluarga",
+        "hadiah hari ibu"
+      ],
+      "samplePrompts": [
+        "Makasih buat semua yang Ayah Ibu korbankan. Sayang kalian.",
+        "Keluarga kita nggak sempurna, tapi paling hangat.",
+        "Buat kakak/adik — yang selalu ada seumur hidupku."
+      ],
+      "faqItems": [
+        {
+          "q": "Orang tua yang gaptek bisa buka nggak?",
+          "a": "Bisa banget. Tinggal klik tautannya, langsung terbuka. Nggak perlu instal aplikasi, nggak perlu daftar akun."
+        },
+        {
+          "q": "Bisa dilihat banyak orang sekaligus?",
+          "a": "Bisa. Satu tautan untuk seluruh keluarga, tanpa batas jumlah yang membuka."
+        }
+      ]
+    }
+  },
+  "seoLandings": {
+    "anniversary": {
+      "title": "Anniversary",
+      "subtitle": "Rayakan hari yang mengawali semuanya",
+      "heroHeadline": "Anniversary tahun ini, bikin dia tahu dia tetap yang kamu pilih",
+      "heroSubtext": "Putar ulang semua momen kalian — foto, pesan, dan lagu dalam satu tautan, kado yang bisa dibuka lagi setiap tahun.",
+      "ctaText": "Buat kado anniversary",
+      "ctaHeading": "Siap buat anniversary kalian?",
+      "metaTitle": "Kado Anniversary — Bikin Kejutan Berkesan dalam Menit | The Memory",
+      "metaDescription": "Bikin anniversary tahun ini yang paling dia ingat. Foto, pesan, dan lagu kalian dalam satu tautan — kado anniversary buat pacar atau pasangan, cuma 99 THB.",
+      "keywords": [
+        "anniversary",
+        "kado anniversary",
+        "hadiah anniversary",
+        "surprise anniversary pacar",
+        "anniversary pernikahan",
+        "ide anniversary"
+      ],
+      "samplePrompts": [
+        "Udah [X] tahun ya. Makasih udah bertahan bareng aku selama ini.",
+        "Masih ingat hari pertama kita ketemu? Cepat banget ya waktu jalan.",
+        "Tiap hari sama kamu itu hari terbaik dalam hidupku."
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dipakai untuk anniversary tahun ke berapa pun?",
+          "a": "Bisa semua — anniversary bulan pertama, tahun pertama, sampai 50 tahun pernikahan. Isinya bebas kamu sesuaikan."
+        },
+        {
+          "q": "Kalau bingung mulai dari mana?",
+          "a": "Kami sudah siapkan contoh pesan dan tema anniversary. Tinggal pilih, tambahkan foto kalian, selesai dalam 5 menit."
+        },
+        {
+          "q": "Apa yang dia lihat saat membuka tautannya?",
+          "a": "Ceritamu satu per satu sesuai urutan yang kamu susun — foto, pesan, dan lagu, mirip Instagram Stories."
+        }
+      ]
+    },
+    "birthday": {
+      "title": "Ulang tahun pacar",
+      "subtitle": "Ucapan ulang tahun yang nggak pasaran",
+      "heroHeadline": "Ulang tahun pacar tahun ini, kasih kado yang bikin dia senyum tiap kali dibuka",
+      "heroSubtext": "Ucapan, foto-foto yang bikin kalian ketawa, lagu favoritnya — jadi satu tautan ulang tahun yang awetnya jauh melebihi kue.",
+      "ctaText": "Buat kado ulang tahun pacar",
+      "ctaHeading": "Siap buat ulang tahun dia?",
+      "metaTitle": "Kado Ulang Tahun Pacar — Bikin Dia Nggak Nyangka | The Memory",
+      "metaDescription": "Kado ulang tahun pacar yang benar-benar personal: ucapan, foto, dan lagu dalam satu tautan. Bisa dibuat sekarang, dikirim tepat di hari H.",
+      "keywords": [
+        "ulang tahun pacar",
+        "kado ulang tahun pacar",
+        "surprise ulang tahun pacar",
+        "ucapan ulang tahun pacar",
+        "ide kado ultah",
+        "hadiah ulang tahun pacar"
+      ],
+      "samplePrompts": [
+        "Selamat ulang tahun! Semoga tahun ini jadi tahun terbaik kamu.",
+        "Makasih udah lahir. Aku jadi punya kamu, dan itu hadiah terbesarnya.",
+        "Happy Birthday. Sayang kamu, lebih dari yang aku tunjukkan."
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dibuat duluan lalu dikirim pas hari H?",
+          "a": "Bisa. Buat dan bayar kapan pun — tautannya nggak kedaluwarsa, jadi siap dikirim tepat tengah malam."
+        },
+        {
+          "q": "Kalau dia gaptek gimana?",
+          "a": "Tinggal klik tautannya, langsung terbuka. Nggak perlu instal aplikasi, nggak perlu daftar, jalan di HP apa pun."
+        },
+        {
+          "q": "Bisa nambahin lagu ulang tahun?",
+          "a": "Tentu. Tambahkan video YouTube apa pun — lagu favoritnya, atau lagu happy birthday paling receh yang kamu temukan."
+        }
+      ]
+    },
+    "valentine": {
+      "title": "Valentine",
+      "subtitle": "Kado Valentine yang kamu bikin sendiri",
+      "heroHeadline": "Valentine tahun ini, kasih sesuatu yang lebih berkesan dari cokelat",
+      "heroSubtext": "Foto, surat cinta, lagu kalian — dikirim jadi satu tautan kenangan yang dia buka pas Valentine dan disimpan selamanya.",
+      "ctaText": "Buat kado Valentine",
+      "ctaHeading": "Siap buat Valentine kalian?",
+      "metaTitle": "Kado Valentine 2026 — Lebih Berkesan dari Cokelat | The Memory",
+      "metaDescription": "Kado Valentine buat pacar yang bukan bunga: surat cinta, foto, dan lagu dalam satu tautan. Bisa jadi dalam 10 menit, cuma 99 THB.",
+      "keywords": [
+        "valentine",
+        "kado valentine",
+        "hadiah valentine buat pacar",
+        "surprise valentine",
+        "ide kado valentine 2026",
+        "kado valentine romantis"
+      ],
+      "samplePrompts": [
+        "Valentine tahun ini, aku cuma mau bilang — aku sayang kamu, makin sayang.",
+        "Happy Valentine's Day. Makasih udah jadi bagian terbaik hidupku.",
+        "Tiap hari sama kamu rasanya kayak Valentine."
+      ],
+      "faqItems": [
+        {
+          "q": "Bedanya apa sama kartu Valentine biasa?",
+          "a": "Tautan kenangan nggak akan dibuang. Ada lagu, foto, dan sepanjang apa pun kata-katamu — bisa dibuka lagi kapan saja, selamanya."
+        },
+        {
+          "q": "Masih keburu buat Valentine?",
+          "a": "Bikinnya nggak sampai 10 menit. Bayar 99 THB dan tautannya langsung aktif — bisa dikirim malam itu juga."
+        },
+        {
+          "q": "Cocok buat pasangan seperti apa?",
+          "a": "Semua. Yang baru jadian, yang LDR, yang sudah menikah belasan tahun — bahkan buat diri sendiri pun boleh."
+        }
+      ]
+    },
+    "reconcile": {
+      "title": "Minta maaf ke pacar",
+      "subtitle": "Permintaan maaf yang terasa, bukan cuma terbaca",
+      "heroHeadline": "Minta maaf itu susah. Coba kirim perasaanmu lewat tautan kenangan.",
+      "heroSubtext": "Foto-foto momen baik kalian, permintaan maaf yang jujur, janji yang kamu tepati — dikirim jadi satu tautan yang bikin dia tahu kamu nggak asal-asalan.",
+      "ctaText": "Buat tautan minta maaf",
+      "ctaHeading": "Siap memperbaiki semuanya?",
+      "metaTitle": "Cara Minta Maaf ke Pacar yang Paling Ngena | The Memory",
+      "metaDescription": "Bingung cara minta maaf ke pacar yang marah? Buat tautan kenangan berisi permintaan maaf jujur, foto momen baik kalian, dan janji yang nyata.",
+      "keywords": [
+        "cara minta maaf ke pacar",
+        "cara minta maaf ke pacar yang marah",
+        "cara balikan sama pacar",
+        "kado minta maaf",
+        "kata kata minta maaf buat pacar",
+        "minta maaf ke pacar"
+      ],
+      "samplePrompts": [
+        "Maaf ya... aku nggak pernah pengin jadi alasan kamu sedih.",
+        "Aku tahu aku salah. Kita mulai lagi dari awal, bisa?",
+        "Kamu lebih penting daripada siapa yang benar. Kasih aku kesempatan memperbaiki."
+      ],
+      "faqItems": [
+        {
+          "q": "Kirim tautan minta maaf beneran ngefek?",
+          "a": "Bikin sendiri itu menunjukkan niat dan usaha. Banyak pasangan balikan justru karena permintaan maaf yang setulus ini."
+        },
+        {
+          "q": "Isinya sebaiknya apa?",
+          "a": "Mulai dari permintaan maaf yang jujur, lanjut foto momen baik kalian berdua, dan tutup dengan apa yang akan kamu perbaiki."
+        },
+        {
+          "q": "Kalau dia belum mau buka gimana?",
+          "a": "Tautannya nggak kedaluwarsa. Dia bisa buka kapan pun, saat dia sudah siap."
+        }
+      ]
+    },
+    "family": {
+      "title": "Keluarga",
+      "subtitle": "Bilang sayang ke keluarga lewat kenangan",
+      "heroHeadline": "Bilang sayang ke keluarga, lewat sesuatu yang bisa mereka buka berkali-kali",
+      "heroSubtext": "Foto keluarga dari berbagai masa, ucapan terima kasih dari anaknya, lagu yang selalu diputar bareng — satu kado untuk orang tua, kakak, dan adik.",
+      "ctaText": "Buat kado untuk keluarga",
+      "ctaHeading": "Siap bilang sayang ke keluarga?",
+      "metaTitle": "Kado untuk Keluarga dan Orang Tua yang Berkesan | The Memory",
+      "metaDescription": "Kado untuk ibu, ayah, atau seluruh keluarga: foto, ucapan terima kasih, dan lagu dalam satu tautan. Tanpa aplikasi, tanpa daftar, jalan di HP apa pun.",
+      "keywords": [
+        "keluarga",
+        "kado untuk keluarga",
+        "hadiah untuk orang tua",
+        "kado untuk ibu",
+        "kado untuk ayah",
+        "ucapan terima kasih orang tua"
+      ],
+      "samplePrompts": [
+        "Makasih Ayah Ibu, buat semua yang kalian korbankan. Sayang kalian.",
+        "Keluarga kita mungkin nggak sempurna, tapi paling hangat.",
+        "Buat kakak dan adik... makasih udah selalu ada seumur hidup."
+      ],
+      "faqItems": [
+        {
+          "q": "Orang tua yang sudah sepuh bisa buka?",
+          "a": "Bisa. Tinggal klik tautannya, langsung terbuka. Nggak perlu daftar akun, nggak perlu instal aplikasi."
+        },
+        {
+          "q": "Bisa dibagikan ke banyak anggota keluarga sekaligus?",
+          "a": "Bisa. Satu tautan untuk semua, tanpa batas jumlah yang membuka."
+        },
+        {
+          "q": "Cocok buat momen apa saja?",
+          "a": "Hari Ibu, Hari Ayah, ulang tahun orang tua, wisuda — atau tanpa momen khusus sama sekali, yang justru sering paling berkesan."
+        }
+      ]
+    },
+    "missyou": {
+      "title": "Kangen",
+      "subtitle": "Kirim rasa kangen menembus jarak dan waktu",
+      "heroHeadline": "Kangen tapi nggak sanggup ngomong? Kirim kenangan aja.",
+      "heroSubtext": "Foto yang kalian ambil bareng, kata-kata yang belum sempat terucap, lagu yang selalu kalian putar — biar dia tahu kamu masih mikirin dia.",
+      "ctaText": "Kirim rasa kangenmu",
+      "ctaHeading": "Siap bilang kamu kangen?",
+      "metaTitle": "Kangen Pacar? Kirim Semua yang Nggak Sanggup Kamu Bilang | The Memory",
+      "metaDescription": "Lagi kangen sama yang jauh? Buat tautan kenangan berisi foto, pesan, dan lagu, lalu kirim detik itu juga — sampai ke mana pun di dunia.",
+      "keywords": [
+        "kangen",
+        "kangen pacar",
+        "kata kata kangen buat pacar",
+        "LDR",
+        "hadiah buat pacar yang jauh",
+        "rindu jarak jauh"
+      ],
+      "samplePrompts": [
+        "Kangen. Andai besok kita udah bisa ketemu.",
+        "Beda kota, tapi isi kepalanya kamu terus tiap hari.",
+        "Aku ngitung hari sampai bisa ketemu kamu lagi."
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dikirim ke orang di luar negeri?",
+          "a": "Bisa. Tautannya terbuka dari mana pun di dunia, lewat HP atau laptop, tanpa instal aplikasi apa pun."
+        },
+        {
+          "q": "Bisa masukin lagu yang sering kalian dengar bareng?",
+          "a": "Bisa. Tambahkan lagu apa pun dari YouTube, lalu putar bareng-bareng meski beda kota."
+        },
+        {
+          "q": "Kalau kangen teman atau keluarga, bisa juga?",
+          "a": "Bisa buat siapa pun. Teman lama, keluarga yang di perantauan, atau siapa saja yang kamu rindukan."
+        }
+      ]
+    }
+  }
+}

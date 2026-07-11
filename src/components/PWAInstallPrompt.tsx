@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { X, Share, Plus } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 import { isIOS, isStandalone, trackInstall, trackLaunch } from '@/lib/pwa';
@@ -30,6 +31,7 @@ function alreadyInstalled(): boolean {
 }
 
 export default function PWAInstallPrompt() {
+  const t = useTranslations('dashboard.pwaPrompt');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [iosMode, setIosMode] = useState(false);
@@ -123,14 +125,12 @@ export default function PWAInstallPrompt() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icon-192.png" alt="The Memory" className="w-12 h-12 rounded-xl flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="font-kanit font-bold text-gray-800 text-sm">ติดตั้งแอป The Memory</p>
-            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-              เพิ่มลงหน้าจอโฮม เปิดใช้ได้เร็วขึ้น เหมือนแอปจริง ไม่ต้องเปิดเบราว์เซอร์
-            </p>
+            <p className="font-kanit font-bold text-gray-800 text-sm">{t('title')}</p>
+            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{t('description')}</p>
           </div>
           <button
             onClick={handleLater}
-            aria-label="ปิด"
+            aria-label={t('close')}
             className="text-gray-400 hover:text-gray-600 flex-shrink-0 -mt-1 -mr-1 p-1"
           >
             <X size={18} />
@@ -142,12 +142,16 @@ export default function PWAInstallPrompt() {
           <div className="px-4 pb-4">
             <div className="rounded-xl bg-pink-50 p-3 text-xs text-gray-600 space-y-2">
               <p className="flex items-center gap-2">
-                <span className="font-semibold">1.</span> แตะปุ่มแชร์
-                <Share size={15} className="inline text-blue-500" /> ด้านล่างของ Safari
+                <span className="font-semibold">1.</span>{' '}
+                {t.rich('iosStep1', {
+                  share: () => <Share size={15} className="inline text-blue-500" />,
+                })}
               </p>
               <p className="flex items-center gap-2">
-                <span className="font-semibold">2.</span> เลือก &quot;เพิ่มลงในหน้าจอโฮม&quot;
-                <Plus size={15} className="inline text-gray-600" />
+                <span className="font-semibold">2.</span>{' '}
+                {t.rich('iosStep2', {
+                  plus: () => <Plus size={15} className="inline text-gray-600" />,
+                })}
               </p>
             </div>
           </div>
@@ -157,7 +161,7 @@ export default function PWAInstallPrompt() {
               onClick={handleLater}
               className="flex-1 py-2.5 rounded-full text-sm font-semibold border-2 border-pink-200 text-gray-600 hover:bg-pink-50 transition-colors"
             >
-              ไว้ก่อน
+              {t('later')}
             </button>
             <button
               onClick={handleInstall}
@@ -167,7 +171,7 @@ export default function PWAInstallPrompt() {
                 boxShadow: '0 4px 15px rgba(230, 57, 70, 0.3)',
               }}
             >
-              ติดตั้ง
+              {t('install')}
             </button>
           </div>
         )}

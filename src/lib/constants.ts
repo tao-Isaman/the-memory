@@ -1,4 +1,9 @@
-// Job options for user profiles
+// Job options for user profiles.
+// i18n NOTE: these strings are NOT UI copy — the selected value is what gets written to
+// `user_profiles.job` (free text), and thousands of rows already store the Thai value.
+// Localising them means keying the list and migrating stored rows, which is a profile-flow
+// decision, not a create-flow one. Left verbatim on purpose; the profile/onboarding pages
+// (which import this) own that call.
 export const JOB_OPTIONS = [
     'นักเรียน',
     'นักศึกษา',

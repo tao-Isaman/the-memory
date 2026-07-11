@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "Credits",
+    "subtitle": "Buy credits to bring your memories to life",
+    "back": "Back to dashboard"
+  },
+  "balance": {
+    "label": "Your balance",
+    "hint": "Use credits to activate your memories"
+  },
+  "packages": {
+    "loading": "Loading packages...",
+    "popular": "Most popular",
+    "unit": "credits",
+    "price": "฿{price}",
+    "perCredit": "≈ ฿{price} per credit",
+    "save": "Save {percent}%",
+    "buy": "Buy now",
+    "processing": "Processing..."
+  },
+  "history": {
+    "title": "Credit history",
+    "show": "Show",
+    "hide": "Hide",
+    "loading": "Loading...",
+    "empty": "No history yet",
+    "balanceAfter": "Balance {balance}"
+  },
+  "txType": {
+    "purchase": "Credits purchased",
+    "use": "Credits used",
+    "refund": "Credits refunded",
+    "bonus": "Bonus credits"
+  },
+  "cartoon": {
+    "uploadTitle": "Upload a photo",
+    "dropzone": "Drag a photo here, or click to choose one",
+    "dropzoneHint": "JPG, PNG, WebP (up to 10MB)",
+    "balanceLabel": "Balance:",
+    "cost": "{cost} credits per image",
+    "generating": "Creating your cartoon... (this can take 30-60 seconds)",
+    "generate": "Create cartoon ({cost} credits)",
+    "insufficient": "Not enough credits (needs {cost})",
+    "resultTitle": "Your cartoon",
+    "download": "Download image",
+    "galleryTitle": "Your cartoons",
+    "galleryLoading": "Loading...",
+    "galleryEmpty": "No cartoons yet — create your first one!",
+    "refresh": "Refresh",
+    "delete": "Delete this image",
+    "deleting": "Deleting...",
+    "close": "Close"
+  },
+  "errors": {
+    "GENERIC": "Something went wrong. Please try again.",
+    "NOT_AN_IMAGE": "Please choose an image file.",
+    "FILE_TOO_LARGE": "That file is too big (10MB max).",
+    "GENERATION_FAILED": "We couldn't create the cartoon.",
+    "DELETE_FAILED": "We couldn't delete that image.",
+    "CREDIT_ACCOUNT_NOT_FOUND": "No credit balance found. Please buy credits first.",
+    "INSUFFICIENT_CREDITS": "Not enough credits (needs {required}, you have {balance}).",
+    "CREDIT_DEDUCTION_FAILED": "We couldn't deduct your credits."
+  }
+}

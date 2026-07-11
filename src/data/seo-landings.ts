@@ -1,238 +1,149 @@
 import type { Metadata } from 'next';
-import { UseCase } from './use-cases';
+import { routing, type Locale } from '@/i18n/routing';
+import type { UseCaseConfig } from './use-cases';
 
-export const SEO_LANDINGS: UseCase[] = [
+/**
+ * Locale-independent config for the standalone SEO landing pages (/valentine, /birthday, …).
+ *
+ * Same split as use-cases.ts: text lives in `messages/<locale>/useCase.json` under
+ * `seoLandings.<slug>`, because the whole point of these pages is to rank, and
+ * ranking copy has to be written natively per locale rather than translated.
+ *
+ * NOTE: this module is imported by the (client) create page, so it must stay free of
+ * `next-intl/server` / `server-only` imports. Pages resolve their own translations and
+ * hand the finished strings to `buildLandingMetadata`.
+ */
+export const SEO_LANDINGS: UseCaseConfig[] = [
   {
     slug: 'anniversary',
     theme: 'anniversary',
-    titleThai: 'วันครบรอบ',
-    subtitleThai: 'ฉลองวันสำคัญของเราสองคน',
-    heroHeadline: 'วันครบรอบปีนี้ ให้เขารู้ว่าเขาคือคนที่เราเลือก',
-    heroSubtext: 'ย้อนรอยทุกช่วงเวลาของเรา รวมรูปภาพ ข้อความ เพลง ไว้ในลิงก์เดียว ส่งเป็นของขวัญที่เปิดดูได้ทุกปี',
-    metaTitle: 'วันครบรอบ - สร้างของขวัญสุดพิเศษในไม่กี่นาที | The Memory',
-    metaDescription: 'วันครบรอบปีนี้บอกรักเขาให้ประทับใจ รวมรูปภาพ ข้อความ เพลงในลิงก์เดียว ส่งเป็นของขวัญวันครบรอบเพียง 99 บาท',
-    keywords: ['วันครบรอบ', 'ของขวัญวันครบรอบ', 'ครบรอบแฟน', 'เซอร์ไพรส์วันครบรอบ', 'ครบรอบแต่งงาน'],
     emoji: '💍',
     color: 'from-amber-500 to-yellow-600',
-    samplePrompts: [
-      'ครบรอบปีที่ [X] แล้วนะ ขอบคุณที่อยู่ด้วยกันมาตลอด',
-      'จำวันแรกที่เจอกันได้ไหม? เวลาผ่านไปเร็วจริงๆ',
-      'ทุกวันที่อยู่กับเธอ คือวันที่ดีที่สุดในชีวิต',
-    ],
-    faqItems: [
-      {
-        q: 'วันครบรอบปีไหนก็ใช้ได้ไหม?',
-        a: 'ได้เลย ใช้ได้ตั้งแต่ครบรอบเดือนแรก ครบรอบปีแรก ไปจนครบรอบแต่งงาน 50 ปี ปรับเนื้อหาให้เข้ากับช่วงเวลาของคุณได้อิสระ',
-      },
-      {
-        q: 'ถ้าไม่รู้จะเริ่มยังไง?',
-        a: 'เราเตรียมตัวอย่างข้อความและธีมสีวันครบรอบไว้ให้แล้ว แค่เลือกแล้วเพิ่มรูปของเราสองคน ก็เสร็จได้ใน 5 นาที',
-      },
-      {
-        q: 'แฟนจะเห็นอะไรเมื่อเปิดลิงก์?',
-        a: 'แฟนจะเห็นเรื่องราวทีละหน้าตามลำดับที่คุณจัดไว้ ทั้งรูปภาพ ข้อความ เพลง แบบ Instagram Stories',
-      },
-    ],
-    ctaText: 'สร้างของขวัญวันครบรอบ',
   },
   {
     slug: 'birthday',
     theme: 'birthday',
-    titleThai: 'วันเกิดแฟน',
-    subtitleThai: 'อวยพรวันเกิดแฟนแบบไม่เหมือนใคร',
-    heroHeadline: 'วันเกิดแฟนปีนี้ มอบของขวัญที่เขาจะยิ้มทุกครั้งที่เปิด',
-    heroSubtext: 'รวมคำอวยพร รูปภาพประทับใจ เพลงที่เขาชอบ ส่งเป็นลิงก์วันเกิดที่เปิดดูได้ตลอดชีวิต',
-    metaTitle: 'วันเกิดแฟน - อวยพรวันเกิดแบบพิเศษสุด | The Memory',
-    metaDescription: 'อวยพรวันเกิดแฟนด้วยลิงก์ความทรงจำ รวมคำอวยพร รูปภาพ เพลง ส่งเป็นของขวัญวันเกิดแฟนที่ไม่ซ้ำใคร',
-    keywords: ['วันเกิดแฟน', 'ของขวัญวันเกิดแฟน', 'เซอร์ไพรส์วันเกิดแฟน', 'อวยพรวันเกิดแฟน', 'ไอเดียวันเกิด'],
     emoji: '🎂',
     color: 'from-orange-400 to-amber-500',
-    samplePrompts: [
-      'สุขสันต์วันเกิดนะ! ขอให้ปีนี้เป็นปีที่ดีที่สุด',
-      'ขอบคุณที่เกิดมาเป็นของเราในทุกๆ วัน',
-      'Happy Birthday รักเธอที่สุดเลย',
-    ],
-    faqItems: [
-      {
-        q: 'สร้างล่วงหน้าแล้วค่อยส่งวันเกิดได้ไหม?',
-        a: 'ได้เลย สร้างและชำระเงินล่วงหน้าได้ ลิงก์ใช้งานได้ตลอด ไม่มีวันหมดอายุ จะส่งวันเกิดพอดีก็ง่ายมาก',
-      },
-      {
-        q: 'แฟนไม่ถนัดเทคโนโลยีเปิดดูได้ไหม?',
-        a: 'แค่กดลิงก์ก็เปิดดูได้ทันที ไม่ต้องติดตั้งแอป ไม่ต้องสมัครสมาชิก ใช้งานง่ายบนทุกมือถือ',
-      },
-      {
-        q: 'ใส่เพลงอวยพรวันเกิดได้ไหม?',
-        a: 'ใส่ได้ครับ เพิ่ม YouTube เพลงที่เขาชอบ หรือเพลงแฮปปี้เบิร์ดเดย์สุดน่ารักก็ได้',
-      },
-    ],
-    ctaText: 'สร้างของขวัญวันเกิดแฟน',
   },
   {
     slug: 'valentine',
     theme: 'love',
-    titleThai: 'วาเลนไทน์',
-    subtitleThai: 'ของขวัญวาเลนไทน์ที่สร้างจากใจ',
-    heroHeadline: 'วาเลนไทน์ปีนี้ ให้ของขวัญที่พิเศษกว่าช็อกโกแลต',
-    heroSubtext: 'รวมรูปภาพ ข้อความรัก เพลงของเรา ส่งเป็นลิงก์ความทรงจำ เซอร์ไพรส์เขาในวันวาเลนไทน์',
-    metaTitle: 'วาเลนไทน์ - ของขวัญวันวาเลนไทน์แบบใหม่ 2026 | The Memory',
-    metaDescription: 'สร้างของขวัญวาเลนไทน์ออนไลน์ รวมข้อความรัก รูปภาพ เพลง ส่งเป็นลิงก์เซอร์ไพรส์แฟนในวันวาเลนไทน์ เพียง 99 บาท',
-    keywords: ['วาเลนไทน์', 'ของขวัญวาเลนไทน์', 'valentine', 'เซอร์ไพรส์วาเลนไทน์', 'ของขวัญวาเลนไทน์แฟน'],
     emoji: '💘',
     color: 'from-rose-500 to-pink-600',
-    samplePrompts: [
-      'วาเลนไทน์ปีนี้ อยากบอกว่า...รักเธอที่สุด',
-      'Happy Valentine\'s Day ขอบคุณที่เป็นคนสำคัญในชีวิต',
-      'ทุกวันที่อยู่กับเธอ เหมือนวันวาเลนไทน์',
-    ],
-    faqItems: [
-      {
-        q: 'ต่างจากการ์ดวาเลนไทน์ทั่วไปยังไง?',
-        a: 'ลิงก์ความทรงจำเก็บได้ตลอด ใส่เพลง รูป และข้อความได้เต็มที่ เปิดดูได้ทุกเมื่อ ไม่ต้องทิ้งเหมือนการ์ดกระดาษ',
-      },
-      {
-        q: 'ทำทันวาเลนไทน์หรือเปล่า?',
-        a: 'ใช้เวลาสร้างไม่ถึง 10 นาที พร้อมส่งได้ทันที ชำระ 99 บาทแล้วได้ลิงก์เลย',
-      },
-      {
-        q: 'เหมาะกับแฟนแนวไหน?',
-        a: 'เหมาะกับทุกแนว ทั้งคู่ที่หวานๆ คู่ที่ไกลกัน หรือแม้แต่ Gifts ให้ตัวเองก็ได้ เพราะความรักไม่จำกัดรูปแบบ',
-      },
-    ],
-    ctaText: 'สร้างของขวัญวาเลนไทน์',
   },
   {
     slug: 'reconcile',
     theme: 'apology',
-    titleThai: 'ง้อแฟน',
-    subtitleThai: 'ง้อแฟนด้วยความรู้สึกจากใจ ไม่ใช่แค่คำพูด',
-    heroHeadline: 'ง้อแฟนยากจัง... ลองส่งความรู้สึกผ่านลิงก์ความทรงจำดูไหม',
-    heroSubtext: 'รวมรูปดีๆ ข้อความขอโทษจากใจ คำสัญญาใหม่ๆ ส่งเป็นลิงก์ที่เขาจะสัมผัสได้ถึงความใส่ใจ',
-    metaTitle: 'ง้อแฟน - วิธีง้อแฟนที่ได้ผลที่สุด | The Memory',
-    metaDescription: 'ง้อแฟนไม่รู้จะทำยังไง? สร้างลิงก์ความทรงจำ รวมข้อความจากใจ รูปภาพช่วงเวลาดีๆ ส่งให้เขารู้ว่าเราใส่ใจจริง',
-    keywords: ['ง้อแฟน', 'วิธีง้อแฟน', 'ง้อแฟนยังไง', 'ของขวัญง้อแฟน', 'ขอโทษแฟน'],
     emoji: '🌷',
     color: 'from-purple-400 to-violet-500',
-    samplePrompts: [
-      'ขอโทษนะ...ไม่ได้ตั้งใจทำให้เธอเสียใจ',
-      'รู้ว่าเราผิด เรามาเริ่มต้นใหม่ด้วยกันได้ไหม',
-      'เธอสำคัญกับเรามากกว่าทุกอย่าง ขอให้เราได้แก้ตัว',
-    ],
-    faqItems: [
-      {
-        q: 'ส่งลิงก์ง้อแฟนจะได้ผลไหม?',
-        a: 'การที่คุณลงมือสร้างของขวัญเองแสดงถึงความตั้งใจและความใส่ใจ หลายคู่กลับมาคืนดีเพราะคำขอโทษที่จริงใจแบบนี้',
-      },
-      {
-        q: 'ควรใส่เนื้อหาอะไรในลิงก์ง้อแฟน?',
-        a: 'เริ่มจากคำขอโทษจากใจ ตามด้วยรูปช่วงเวลาดีๆ ของเราสองคน และจบด้วยคำสัญญาว่าจะทำให้ดีกว่าเดิม',
-      },
-      {
-        q: 'ถ้าแฟนยังไม่ยอมเปิดจะทำยังไง?',
-        a: 'ลิงก์เก็บได้ตลอดไม่มีวันหมดอายุ รอเวลาที่เขาพร้อมก็ค่อยให้เขาเปิดดูได้ทุกเมื่อ',
-      },
-    ],
-    ctaText: 'สร้างลิงก์ง้อแฟน',
   },
   {
     slug: 'family',
     theme: 'family',
-    titleThai: 'ครอบครัว',
-    subtitleThai: 'บอกรักครอบครัวผ่านความทรงจำ',
-    heroHeadline: 'บอกรักครอบครัว ด้วยวิธีที่เขาจะเก็บไว้ดูตลอด',
-    heroSubtext: 'รวมรูปครอบครัวทุกช่วงวัย ข้อความจากใจลูก เพลงที่ฟังคู่กัน ส่งเป็นของขวัญให้พ่อแม่ พี่น้อง',
-    metaTitle: 'ครอบครัว - ของขวัญให้ครอบครัวแบบมีความหมาย | The Memory',
-    metaDescription: 'สร้างของขวัญให้ครอบครัว รวมรูปภาพ ข้อความขอบคุณ เพลง ส่งลิงก์ความทรงจำบอกรักพ่อแม่ พี่น้อง คนในบ้าน',
-    keywords: ['ครอบครัว', 'ของขวัญครอบครัว', 'บอกรักครอบครัว', 'ของขวัญให้แม่', 'ของขวัญให้พ่อ', 'ขอบคุณพ่อแม่'],
     emoji: '👨‍👩‍👧‍👦',
     color: 'from-emerald-400 to-green-500',
-    samplePrompts: [
-      'ขอบคุณพ่อแม่ที่เลี้ยงดูมาตลอด รักทุกคนนะ',
-      'ครอบครัวของเราอาจไม่สมบูรณ์แบบ แต่อบอุ่นที่สุดแล้ว',
-      'ถึงพี่น้อง... ขอบคุณที่อยู่ด้วยกันมาตลอดชีวิต',
-    ],
-    faqItems: [
-      {
-        q: 'พ่อแม่ที่อายุเยอะเปิดดูได้ไหม?',
-        a: 'ได้เลย แค่กดลิงก์ก็เปิดดูได้ทันที ไม่ต้องสมัครสมาชิก ไม่ต้องติดตั้งแอป ใช้งานง่ายแม้ไม่ถนัดเทคโนโลยี',
-      },
-      {
-        q: 'ส่งให้หลายคนในครอบครัวพร้อมกันได้ไหม?',
-        a: 'ได้ครับ ลิงก์เดียวแชร์ให้สมาชิกในครอบครัวทุกคนเปิดดูได้ ไม่จำกัดจำนวนผู้ดู',
-      },
-      {
-        q: 'เหมาะกับโอกาสไหนบ้าง?',
-        a: 'เหมาะกับวันแม่ วันพ่อ วันเกิดพ่อแม่ วันสำเร็จการศึกษา หรือโอกาสไหนก็ได้ที่อยากบอกรักครอบครัว',
-      },
-    ],
-    ctaText: 'สร้างของขวัญให้ครอบครัว',
   },
   {
     slug: 'missyou',
     theme: 'longdistance',
-    titleThai: 'คิดถึง',
-    subtitleThai: 'ส่งความคิดถึงข้ามระยะทางและเวลา',
-    heroHeadline: 'คิดถึงแล้วบอกไม่ออก? ส่งเป็นความทรงจำแทนคำพูด',
-    heroSubtext: 'รวมรูปที่ถ่ายด้วยกัน ข้อความคิดถึง เพลงที่ฟังคู่กัน ส่งให้เขารู้ว่าเราคิดถึงอยู่เสมอ แม้อยู่ไกลกัน',
-    metaTitle: 'คิดถึง - ส่งความคิดถึงผ่านลิงก์ความทรงจำ | The Memory',
-    metaDescription: 'คิดถึงแฟน คิดถึงคนสำคัญ สร้างลิงก์ความทรงจำ รวมรูปภาพ ข้อความ เพลง ส่งความคิดถึงให้คนที่อยู่ไกล',
-    keywords: ['คิดถึง', 'คิดถึงแฟน', 'คิดถึงคนสำคัญ', 'ส่งความคิดถึง', 'รักทางไกล'],
     emoji: '💭',
     color: 'from-sky-400 to-blue-500',
-    samplePrompts: [
-      'คิดถึงนะ...อยากให้เจอกันเร็วๆ',
-      'ถึงจะห่างกัน แต่ทุกวันคิดถึงเธอเสมอ',
-      'นับวันรอคอยที่จะได้เจอกันอีกครั้ง',
-    ],
-    faqItems: [
-      {
-        q: 'ส่งให้คนที่อยู่ต่างประเทศได้ไหม?',
-        a: 'ได้เลย ลิงก์เปิดดูได้จากทุกที่ในโลก ผ่านมือถือหรือคอมพิวเตอร์ ไม่ต้องติดตั้งแอปใดๆ',
-      },
-      {
-        q: 'ใส่เพลงที่ฟังคู่กันได้ไหม?',
-        a: 'ได้ครับ เพิ่มเพลงจาก YouTube ที่มีความหมายพิเศษของเราสองคนได้ เปิดฟังพร้อมกันได้ข้ามระยะทาง',
-      },
-      {
-        q: 'ถ้าคิดถึงเพื่อนหรือครอบครัวใช้ได้ไหม?',
-        a: 'ใช้ได้ทุกคน ทั้งคิดถึงเพื่อนสมัยเรียน คนในครอบครัวที่อยู่ไกล หรือใครก็ตามที่เรานึกถึง',
-      },
-    ],
-    ctaText: 'ส่งความคิดถึง',
   },
 ];
 
-export function getSeoLandingBySlug(slug: string): UseCase | undefined {
+/** Used by the create page to auto-select the theme a visitor arrived with. */
+export function getSeoLandingBySlug(slug: string): UseCaseConfig | undefined {
   return SEO_LANDINGS.find((uc) => uc.slug === slug);
 }
 
-export function buildSeoLandingMetadata(slug: string): Metadata {
-  const data = getSeoLandingBySlug(slug);
-  if (!data) return {};
+const SITE_URL = 'https://thememory.app';
+
+const OG_LOCALE: Record<Locale, string> = {
+  th: 'th_TH',
+  en: 'en_US',
+  id: 'id_ID',
+};
+
+/** Thai is unprefixed (localePrefix: 'as-needed'); en/id live under /en and /id. */
+export function localeUrl(locale: Locale, path = ''): string {
+  const base = locale === routing.defaultLocale ? SITE_URL : `${SITE_URL}/${locale}`;
+  return `${base}${path}`;
+}
+
+/**
+ * Per-page canonical + hreflang. Without this every landing page inherits the root
+ * layout's canonical (the home page), which would collapse all of them into one URL
+ * in Google's eyes.
+ */
+export function localeAlternates(locale: Locale, path = ''): Metadata['alternates'] {
   return {
-    title: data.metaTitle,
-    description: data.metaDescription,
-    keywords: data.keywords.join(', '),
+    canonical: localeUrl(locale, path),
+    languages: {
+      th: localeUrl('th', path),
+      en: localeUrl('en', path),
+      id: localeUrl('id', path),
+      'x-default': localeUrl('th', path),
+    },
+  };
+}
+
+export function buildLandingMetadata({
+  locale,
+  path,
+  title,
+  description,
+  keywords,
+}: {
+  locale: Locale;
+  /** Path without the locale prefix, e.g. '' | '/valentine' | '/use-case/anniversary'. */
+  path: string;
+  title: string;
+  description: string;
+  keywords: string[];
+}): Metadata {
+  return {
+    title,
+    description,
+    keywords: keywords.join(', '),
+    alternates: localeAlternates(locale, path),
     openGraph: {
-      title: data.metaTitle,
-      description: data.metaDescription,
-      locale: 'th_TH',
+      title,
+      description,
+      locale: OG_LOCALE[locale],
       type: 'website',
       siteName: 'The Memory',
+      url: localeUrl(locale, path),
       images: [
         {
           url: '/og-image.webp',
           width: 420,
           height: 300,
-          alt: data.metaTitle,
+          alt: title,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: data.metaTitle,
-      description: data.metaDescription,
+      title,
+      description,
       images: ['/og-image.webp'],
     },
+  };
+}
+
+/** FAQPage structured data, shared by the landing page and every use-case page. */
+export function faqJsonLd(items: { q: string; a: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
   };
 }

@@ -1,0 +1,173 @@
+{
+  "page": {
+    "titleCreate": "Create a memory",
+    "titleEdit": "Edit memory",
+    "memoryTitleLabel": "Memory name",
+    "memoryTitlePlaceholder": "Give your memory a special name...",
+    "storiesHeading": "Your stories",
+    "storyCount": "{count, plural, =0 {No stories yet} one {# story} other {# stories}}",
+    "addStory": "Add a story",
+    "saveMemory": "Save memory",
+    "updateMemory": "Update memory",
+    "errorTitleRequired": "Please give your memory a name",
+    "errorStoryRequired": "Please add at least one story"
+  },
+  "universe": {
+    "title": "Share to the Universe",
+    "description": "Let your stories (photos/messages) appear at random in other people's Universe feed — including stories behind a PIN."
+  },
+  "paymentPrompt": {
+    "title": "You're almost there!",
+    "subtitle": "One last step before you send it to someone special",
+    "note": "This link becomes a gift they can open any time",
+    "price": "Just 99 THB — yours forever, share it as often as you like",
+    "preview": "Preview it first",
+    "backToDashboard": "Back to dashboard",
+    "footnote": "You can preview it now, but payment is needed before you can share it."
+  },
+  "themes": {
+    "label": "Choose a colour theme",
+    "love": { "name": "Love", "mood": "Warm, romantic" },
+    "friend": { "name": "Friendship", "mood": "Bright, playful" },
+    "family": { "name": "Family", "mood": "Warm, heartfelt" },
+    "anniversary": { "name": "Anniversary", "mood": "Deep, timeless" },
+    "birthday": { "name": "Birthday", "mood": "Happy, exciting" },
+    "apology": { "name": "Sorry", "mood": "Sincere, gentle" },
+    "longdistance": { "name": "Long distance", "mood": "Missing you, tender" }
+  },
+  "storyTypes": {
+    "password": {
+      "label": "PIN code",
+      "description": "Add a 6-digit PIN to protect what comes next"
+    },
+    "text": {
+      "label": "Message",
+      "description": "Write something from the heart"
+    },
+    "image": {
+      "label": "Photo",
+      "description": "Add a special photo"
+    },
+    "text-image": {
+      "label": "Message + photo",
+      "description": "Pair your words with a photo"
+    },
+    "youtube": {
+      "label": "YouTube video",
+      "description": "Add a song or video that means something"
+    },
+    "scratch": {
+      "label": "Our little secret",
+      "description": "Hide a photo behind clouds for them to scratch away"
+    },
+    "question": {
+      "label": "Question",
+      "description": "Ask them a question with 4 answers to choose from"
+    },
+    "voice": {
+      "label": "Voice message",
+      "description": "Record or upload audio, up to 1 minute"
+    },
+    "slideshow": {
+      "label": "Photo album",
+      "description": "Play 2-5 photos as a slideshow with a zoom effect"
+    }
+  },
+  "editor": {
+    "titleAdd": "Add a new story",
+    "titleEdit": "Edit story",
+    "typeLabel": "Story type",
+    "storyTitleLabel": "Story name (optional)",
+    "storyTitlePlaceholder": "Something memorable, like \"The day we met\"",
+    "storyTitleHint": "This name shows instead of the story type in the list",
+    "submitAdd": "Add",
+    "submitSave": "Save",
+    "uploading": "Uploading...",
+    "uploadingProgress": "Uploading {done}/{total}...",
+    "password": {
+      "label": "PIN code (6 digits)",
+      "hint": "Enter 6 digits to protect what comes next",
+      "error": "Please enter a 6-digit PIN"
+    },
+    "text": {
+      "label": "Your message",
+      "placeholder": "Write something from the heart...",
+      "textImageHint": "A short message to go with the photo (about 3-4 lines)"
+    },
+    "image": {
+      "uploadLabel": "Upload a photo",
+      "changeLabel": "Change photo (optional)",
+      "previewAlt": "Preview",
+      "captionLabel": "Caption (optional)",
+      "captionPlaceholder": "Add a sweet little caption...",
+      "uploadFailed": "Photo upload failed. Please try again."
+    },
+    "youtube": {
+      "label": "YouTube URL",
+      "placeholder": "https://www.youtube.com/watch?v=...",
+      "hint": "Paste a YouTube link to share a song or video that means something"
+    },
+    "question": {
+      "label": "Question",
+      "placeholder": "e.g. Where did we first meet?",
+      "choicesLabel": "Answers (4)",
+      "choicePlaceholder": "Answer {letter}",
+      "correctLabel": "Correct answer",
+      "correctHint": "Pick the answer that's correct",
+      "errorQuestion": "Please enter a question",
+      "errorChoices": "Please fill in all 4 answers"
+    },
+    "voice": {
+      "statusRecording": "Recording",
+      "statusRecorded": "Recording finished",
+      "recordAria": "Record",
+      "requesting": "Asking for microphone access...",
+      "tapToRecord": "Tap to start recording",
+      "orUploadFile": "Or upload an audio file",
+      "stopAria": "Stop",
+      "tapToStop": "Tap to stop recording",
+      "denied": "Microphone access is blocked — allow it in your browser settings and try again, or upload an audio file instead.",
+      "uploadFile": "Upload an audio file",
+      "unsupported": "This device can't record audio. Please upload an audio file instead.",
+      "rerecord": "Record again",
+      "reselectFile": "Choose another file",
+      "captionLabel": "Caption (optional)",
+      "captionPlaceholder": "e.g. \"Listen to this...\"",
+      "maxDurationReached": "Recordings can be up to 1 minute",
+      "micNotFound": "No microphone found",
+      "micError": "Couldn't access the microphone",
+      "fileTooLarge": "Audio file is too large (max {maxMb}MB)",
+      "notAudio": "This isn't an audio file",
+      "tooLong": "That audio is longer than 1 minute. Please pick a shorter file.",
+      "errorRequired": "Please record or upload an audio file first",
+      "uploadFailed": "Audio upload failed. Please try again."
+    },
+    "slideshow": {
+      "imagesLabel": "Photos ({min}-{max})",
+      "empty": "No photos yet — add your first one",
+      "slideAlt": "Photo {index}",
+      "removeAria": "Remove photo",
+      "moveLeftAria": "Move left",
+      "moveRightAria": "Move right",
+      "slideUploadFailed": "Upload failed",
+      "addImage": "Add photo",
+      "full": "That's all {max} photos",
+      "captionLabel": "Caption (optional)",
+      "captionPlaceholder": "A caption for the whole album...",
+      "maxImages": "You can pick up to {max} photos",
+      "notImage": "This isn't an image file",
+      "imageTooLarge": "Photo is too large (max {maxMb}MB)",
+      "errorMin": "Please add at least {min} photos",
+      "errorPartialUpload": "Some photos didn't upload. Tap the ones with an error to try again."
+    }
+  },
+  "list": {
+    "empty": "No stories yet",
+    "emptyHint": "Add your first story to start building your memory!",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "editStory": "Edit story",
+    "deleteStory": "Delete story",
+    "imageCount": "{count, plural, one {# photo} other {# photos}}"
+  }
+}

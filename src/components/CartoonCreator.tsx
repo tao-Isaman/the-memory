@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslations, useFormatter } from 'next-intl';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
 import { useToast } from '@/hooks/useToast';
 import HeartIcon from './HeartIcon';
@@ -18,13 +19,16 @@ interface CartoonCreatorProps {
 export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const { balance, refresh: refreshBalance } = useCreditBalance();
   const { showToast } = useToast();
+  const t = useTranslations('credits');
+  const format = useFormatter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // Holds an error CODE (see messages/<locale>/credits.json → "errors"), never prose.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const [gallery, setGallery] = useState<CartoonGeneration[]>([]);
   const [galleryTotal, setGalleryTotal] = useState(0);
@@ -36,6 +40,21 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const [deleting, setDeleting] = useState(false);
 
   const totalPages = Math.ceil(galleryTotal / PAGE_SIZE);
+
+  /**
+   * Maps an error code to translated copy. Anything we don't recognise (e.g. a raw
+   * message from an API route that hasn't been converted to codes yet) falls back to
+   * the generic error, so a Thai server string never leaks into an EN/ID screen.
+   */
+  const errorText = useCallback(
+    (code: string | null) => {
+      if (!code) return '';
+      return t.has(`errors.${code}`)
+        ? t(`errors.${code}`, { required: CARTOON_CREDIT_COST, balance })
+        : t('errors.GENERIC');
+    },
+    [t, balance],
+  );
 
   const fetchGallery = useCallback(async (page: number = 0) => {
     setLoadingGallery(true);
@@ -60,19 +79,19 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
 
   const handleFileSelect = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setError('กรุณาเลือกไฟล์รูปภาพ');
+      setErrorCode('NOT_AN_IMAGE');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      setError('ไฟล์ใหญ่เกินไป (สูงสุด 10MB)');
+      setErrorCode('FILE_TOO_LARGE');
       return;
     }
 
     setSelectedFile(file);
     setPreviewUrl(URL.createObjectURL(file));
     setResultUrl(null);
-    setError(null);
+    setErrorCode(null);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -90,7 +109,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setResultUrl(null);
-    setError(null);
+    setErrorCode(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -98,7 +117,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
     if (!selectedFile) return;
 
     setGenerating(true);
-    setError(null);
+    setErrorCode(null);
     setResultUrl(null);
 
     try {
@@ -114,7 +133,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'สร้างรูปการ์ตูนไม่สำเร็จ');
+        throw new Error(data.error || 'GENERATION_FAILED');
       }
 
       setResultUrl(data.cartoonUrl);
@@ -122,7 +141,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       setGalleryPage(0);
       fetchGallery(0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด');
+      setErrorCode(err instanceof Error ? err.message : 'GENERIC');
       refreshBalance();
     } finally {
       setGenerating(false);
@@ -140,13 +159,13 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'ลบไม่สำเร็จ');
+        throw new Error(data.error || 'DELETE_FAILED');
       }
 
       setSelectedGen(null);
       fetchGallery(galleryPage);
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด', 'error');
+      showToast(errorText(err instanceof Error ? err.message : 'GENERIC'), 'error');
     } finally {
       setDeleting(false);
     }
@@ -160,7 +179,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       <div className="memory-card p-6">
         <h2 className="font-kanit text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
           <ImageIcon size={20} className="text-[#E63946]" />
-          อัปโหลดรูปภาพ
+          {t('cartoon.uploadTitle')}
         </h2>
 
         {!previewUrl ? (
@@ -172,9 +191,9 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
           >
             <Upload size={40} className="mx-auto text-pink-300 mb-3" />
             <p className="font-kanit text-gray-600 mb-1">
-              ลากรูปมาวางหรือคลิกเพื่อเลือก
+              {t('cartoon.dropzone')}
             </p>
-            <p className="text-sm text-gray-400">รองรับ JPG, PNG, WebP (สูงสุด 10MB)</p>
+            <p className="text-sm text-gray-400">{t('cartoon.dropzoneHint')}</p>
           </div>
         ) : (
           <div className="relative">
@@ -210,18 +229,18 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
           <div className="flex items-center gap-2">
             <Coins size={18} className="text-[#E63946]" />
             <span className="text-sm text-gray-500">
-              เครดิตคงเหลือ: <span className="font-bold text-[#E63946]">{balance}</span>
+              {t('cartoon.balanceLabel')} <span className="font-bold text-[#E63946]">{balance}</span>
             </span>
           </div>
           <span className="text-xs text-gray-400">
-            ใช้ {CARTOON_CREDIT_COST} เครดิต/ครั้ง
+            {t('cartoon.cost', { cost: CARTOON_CREDIT_COST })}
           </span>
         </div>
 
         {generating ? (
           <div className="py-8">
             <HeartLoader
-              message="กำลังสร้างรูปการ์ตูน... (อาจใช้เวลา 30-60 วินาที)"
+              message={t('cartoon.generating')}
               size="md"
             />
           </div>
@@ -238,14 +257,14 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
             <HeartIcon size={16} filled />
             <span>
               {insufficientCredits
-                ? `เครดิตไม่พอ (ต้องการ ${CARTOON_CREDIT_COST})`
-                : `สร้างรูปการ์ตูน (ใช้ ${CARTOON_CREDIT_COST} เครดิต)`}
+                ? t('cartoon.insufficient', { cost: CARTOON_CREDIT_COST })
+                : t('cartoon.generate', { cost: CARTOON_CREDIT_COST })}
             </span>
           </button>
         )}
 
-        {error && (
-          <p className="mt-3 text-sm text-red-500 text-center">{error}</p>
+        {errorCode && (
+          <p className="mt-3 text-sm text-red-500 text-center">{errorText(errorCode)}</p>
         )}
       </div>
 
@@ -254,7 +273,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
         <div className="memory-card p-6">
           <h2 className="font-kanit text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
             <HeartIcon size={20} filled className="text-[#FF6B9D]" />
-            ผลลัพธ์
+            {t('cartoon.resultTitle')}
           </h2>
 
           <img
@@ -271,7 +290,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
             className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-kanit font-medium text-[#E63946] bg-white border-2 border-[#FF6B9D] hover:bg-pink-50 transition-all"
           >
             <Download size={16} />
-            ดาวน์โหลดรูป
+            {t('cartoon.download')}
           </a>
         </div>
       )}
@@ -281,13 +300,14 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-kanit text-lg font-bold text-gray-700 flex items-center gap-2">
             <ImageIcon size={20} className="text-[#E63946]" />
-            รูปการ์ตูนของคุณ
+            {t('cartoon.galleryTitle')}
             {galleryTotal > 0 && (
               <span className="text-sm font-normal text-gray-400">({galleryTotal})</span>
             )}
           </h2>
           <button
             onClick={() => fetchGallery(galleryPage)}
+            aria-label={t('cartoon.refresh')}
             className="text-gray-400 hover:text-[#E63946] transition-colors"
           >
             <RefreshCw size={16} />
@@ -296,11 +316,11 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
 
         {loadingGallery ? (
           <div className="flex justify-center py-8">
-            <HeartLoader message="กำลังโหลด..." size="sm" />
+            <HeartLoader message={t('cartoon.galleryLoading')} size="sm" />
           </div>
         ) : gallery.length === 0 ? (
           <p className="text-center text-gray-400 py-8 text-sm">
-            ยังไม่มีรูปการ์ตูน — สร้างรูปแรกของคุณเลย!
+            {t('cartoon.galleryEmpty')}
           </p>
         ) : (
           <>
@@ -319,7 +339,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
                     />
                   </button>
                   <p className="text-xs text-gray-400 mt-1 text-center">
-                    {new Date(gen.createdAt).toLocaleDateString('th-TH', {
+                    {format.dateTime(new Date(gen.createdAt), {
                       day: 'numeric',
                       month: 'short',
                     })}
@@ -382,7 +402,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
                 className="w-full rounded-xl"
               />
               <p className="text-xs text-gray-400 text-center mt-2">
-                {new Date(selectedGen.createdAt).toLocaleDateString('th-TH', {
+                {format.dateTime(new Date(selectedGen.createdAt), {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -402,7 +422,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full font-kanit font-medium text-white bg-gradient-to-r from-[#FF6B9D] to-[#E63946] shadow-md"
               >
                 <Download size={18} />
-                ดาวน์โหลดรูป
+                {t('cartoon.download')}
               </a>
 
               <button
@@ -413,12 +433,12 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
                 {deleting ? (
                   <>
                     <HeartIcon size={16} className="animate-pulse-heart" />
-                    กำลังลบ...
+                    {t('cartoon.deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 size={18} />
-                    ลบรูปนี้
+                    {t('cartoon.delete')}
                   </>
                 )}
               </button>
@@ -428,7 +448,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
                 disabled={deleting}
                 className="w-full py-3 text-center font-kanit text-gray-400 text-sm"
               >
-                ปิด
+                {t('cartoon.close')}
               </button>
             </div>
           </div>

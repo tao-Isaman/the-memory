@@ -52,50 +52,51 @@ export const THEMES: Record<MemoryTheme, ThemeColors> = {
   },
 };
 
-export const THEME_INFO: Record<MemoryTheme, { name: string; nameThai: string; emoji: string; moodThai: string }> = {
+// Locale-independent theme metadata. The display name + mood copy lives in the
+// `create.themes.<theme>` messages (this module is imported from plain server/client
+// libs, so it must NOT depend on next-intl); only the emoji + the internal English
+// name stay here.
+export const THEME_INFO: Record<MemoryTheme, { name: string; emoji: string }> = {
   love: {
     name: 'Love',
-    nameThai: 'ความรัก',
     emoji: '💕',
-    moodThai: 'อบอุ่น โรแมนติก',
   },
   friend: {
     name: 'Friend',
-    nameThai: 'มิตรภาพ',
     emoji: '🌿',
-    moodThai: 'สดใส สนุกสนาน',
   },
   family: {
     name: 'Family',
-    nameThai: 'ครอบครัว',
     emoji: '💙',
-    moodThai: 'อบอุ่น ซาบซึ้ง',
   },
   anniversary: {
     name: 'Anniversary',
-    nameThai: 'วันครบรอบ',
     emoji: '💍',
-    moodThai: 'หวานลึก ทรงคุณค่า',
   },
   birthday: {
     name: 'Birthday',
-    nameThai: 'วันเกิด',
     emoji: '🎂',
-    moodThai: 'สุขสันต์ ตื่นเต้น',
   },
   apology: {
     name: 'Apology',
-    nameThai: 'ขอโทษ/ง้อ',
     emoji: '🌷',
-    moodThai: 'จริงใจ อ่อนโยน',
   },
   longdistance: {
     name: 'Long Distance',
-    nameThai: 'คิดถึง/ไกลกัน',
     emoji: '✈️',
-    moodThai: 'คิดถึง อ่อนหวาน',
   },
 };
+
+// Display order of the theme grid in ThemeSelector.
+export const THEME_ORDER: MemoryTheme[] = [
+  'love',
+  'anniversary',
+  'birthday',
+  'apology',
+  'family',
+  'friend',
+  'longdistance',
+];
 
 export function getThemeColors(theme: MemoryTheme): ThemeColors {
   return THEMES[theme] || THEMES.love;

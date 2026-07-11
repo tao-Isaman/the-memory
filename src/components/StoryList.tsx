@@ -1,8 +1,9 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
-import { storyTypeLabels, storyTypeIcons } from './StoryEditor';
+import { storyTypeIcons } from './StoryEditor';
 import HeartIcon from './HeartIcon';
 import { ChevronUp, ChevronDown, X, Pencil } from 'lucide-react';
 
@@ -22,27 +23,6 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-function getStoryPreview(story: MemoryStory): string {
-  switch (story.type) {
-    case 'password':
-      return '••••••';
-    case 'text':
-      return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
-    case 'image':
-      return story.content.caption || 'รูปภาพ';
-    case 'text-image':
-      return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
-    case 'youtube':
-      return 'วิดีโอ YouTube';
-    case 'voice':
-      return story.content.caption || 'ข้อความเสียง';
-    case 'slideshow':
-      return story.content.caption || `${story.content.imageUrls.length} รูป`;
-    default:
-      return '';
-  }
-}
-
 export default function StoryList({
   stories,
   onReorder,
@@ -50,6 +30,34 @@ export default function StoryList({
   onEdit,
   themeColors = defaultColors,
 }: StoryListProps) {
+  const t = useTranslations('create.list');
+  const tType = useTranslations('create.storyTypes');
+
+  // One-line summary under the story title. Falls back to the story-type label
+  // when the story carries no user text of its own.
+  const getStoryPreview = (story: MemoryStory): string => {
+    switch (story.type) {
+      case 'password':
+        return '••••••';
+      case 'text':
+        return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
+      case 'image':
+        return story.content.caption || tType('image.label');
+      case 'text-image':
+        return story.content.text.substring(0, 50) + (story.content.text.length > 50 ? '...' : '');
+      case 'youtube':
+        return tType('youtube.label');
+      case 'voice':
+        return story.content.caption || tType('voice.label');
+      case 'slideshow':
+        return (
+          story.content.caption || t('imageCount', { count: story.content.imageUrls.length })
+        );
+      default:
+        return '';
+    }
+  };
+
   const moveUp = (index: number) => {
     if (index === 0) return;
     const newStories = [...stories];
@@ -76,9 +84,9 @@ export default function StoryList({
     return (
       <div className="memory-card p-8 text-center">
         <HeartIcon size={48} className="mx-auto mb-4 opacity-50" color={themeColors.primary} />
-        <p className="text-gray-500">ยังไม่มีเรื่องราวความทรงจำ</p>
+        <p className="text-gray-500">{t('empty')}</p>
         <p className="text-sm text-gray-400 mt-1">
-          เพิ่มเรื่องราวแรกเพื่อเริ่มสร้างความทรงจำของคุณ!
+          {t('emptyHint')}
         </p>
       </div>
     );
@@ -86,7 +94,9 @@ export default function StoryList({
 
   return (
     <div className="space-y-3">
-      {stories.map((story, index) => (
+      {stories.map((story, index) => {
+        const typeLabel = tType(`${story.type}.label`);
+        return (
         <div
           key={story.id}
           className="memory-card p-4 flex items-center gap-4"
@@ -112,10 +122,10 @@ export default function StoryList({
           {/* Story Info */}
           <div className="flex-grow min-w-0">
             <p className="font-kanit font-medium text-sm" style={{ color: themeColors.dark }}>
-              {story.title || storyTypeLabels[story.type]}
+              {story.title || typeLabel}
             </p>
             <p className="text-gray-600 text-sm truncate">
-              {story.title ? `${storyTypeLabels[story.type]} • ${getStoryPreview(story)}` : getStoryPreview(story)}
+              {story.title ? `${typeLabel} • ${getStoryPreview(story)}` : getStoryPreview(story)}
             </p>
           </div>
 
@@ -129,7 +139,7 @@ export default function StoryList({
                 backgroundColor: index === 0 ? '#f3f4f6' : `${themeColors.accent}66`,
                 color: index === 0 ? '#d1d5db' : themeColors.dark,
               }}
-              title="เลื่อนขึ้น"
+              title={t('moveUp')}
             >
               <ChevronUp size={18} />
             </button>
@@ -141,7 +151,7 @@ export default function StoryList({
                 backgroundColor: index === stories.length - 1 ? '#f3f4f6' : `${themeColors.accent}66`,
                 color: index === stories.length - 1 ? '#d1d5db' : themeColors.dark,
               }}
-              title="เลื่อนลง"
+              title={t('moveDown')}
             >
               <ChevronDown size={18} />
             </button>
@@ -162,7 +172,7 @@ export default function StoryList({
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
-            title="แก้ไขเรื่องราว"
+            title={t('editStory')}
           >
             <Pencil size={16} />
           </button>
@@ -182,12 +192,13 @@ export default function StoryList({
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
-            title="ลบเรื่องราว"
+            title={t('deleteStory')}
           >
             <X size={18} />
           </button>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

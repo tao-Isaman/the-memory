@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/credits.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -104,14 +105,14 @@ export async function POST(request: NextRequest) {
       });
 
       return NextResponse.json(
-        { error: 'สร้างรูปการ์ตูนไม่สำเร็จ เครดิตของคุณถูกคืนแล้ว', refunded: true },
+        { error: 'GENERATION_FAILED', refunded: true },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error('Cartoon generate error:', error);
     return NextResponse.json(
-      { error: 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง' },
+      { error: 'GENERIC' },
       { status: 500 }
     );
   }

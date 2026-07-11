@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "The Memory - Kado Kejutan untuk Pasangan | Buat Kenangan Online",
+    "description": "Buat kado kejutan online untuk orang tersayang. Gabungkan foto, pesan, dan musik dalam satu tautan — cocok untuk anniversary, ulang tahun, permintaan maaf, hubungan jarak jauh, dan keluarga. Langsung bisa dibagikan.",
+    "keywords": "kado kejutan untuk pacar, hadiah kejutan pacar, kado digital, kenangan online, ide kado anniversary, ide kado ulang tahun, kado LDR, hadiah romantis, kado minta maaf, kado spesial online",
+    "ogTitle": "The Memory - Kado Kejutan untuk Pasangan | Buat Kenangan Online",
+    "ogDescription": "Buat kado kejutan online: foto, pesan, dan musik dalam satu tautan. Cocok untuk anniversary, ulang tahun, minta maaf, LDR, dan keluarga.",
+    "ogAlt": "The Memory - Buat kado kenangan online yang berkesan",
+    "schemaAlternateName": "Kado Kejutan untuk Pasangan",
+    "schemaDescription": "Platform untuk membuat kenangan online bagi orang tersayang — foto, pesan, dan musik dalam satu tautan, untuk setiap momen: kejutan, anniversary, ulang tahun, permintaan maaf, hubungan jarak jauh, dan keluarga."
+  },
+  "language": {
+    "label": "Bahasa",
+    "switchTo": "Ganti bahasa"
+  },
+  "nav": {
+    "home": "Beranda",
+    "dashboard": "Beranda",
+    "create": "Buat kenangan",
+    "credits": "Kredit",
+    "profile": "Profil",
+    "updates": "Yang baru",
+    "login": "Masuk",
+    "logout": "Keluar",
+    "privacy": "Kebijakan Privasi",
+    "terms": "Ketentuan Penggunaan"
+  },
+  "actions": {
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "close": "Tutup",
+    "back": "Kembali",
+    "next": "Lanjut",
+    "previous": "Sebelumnya",
+    "confirm": "Konfirmasi",
+    "retry": "Coba lagi",
+    "share": "Bagikan",
+    "copy": "Salin",
+    "copied": "Tersalin",
+    "download": "Unduh",
+    "backToHome": "Kembali ke beranda"
+  },
+  "state": {
+    "loading": "Memuat...",
+    "saving": "Menyimpan...",
+    "empty": "Belum ada apa pun",
+    "error": "Terjadi kesalahan",
+    "genericError": "Terjadi kesalahan. Silakan coba lagi."
+  }
+}

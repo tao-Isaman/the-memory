@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { getUserReferral } from '@/lib/referral';
@@ -20,14 +21,14 @@ export async function POST(request: NextRequest) {
 
     if (!paymentMethod || !paymentInfo) {
       return NextResponse.json(
-        { success: false, error: 'กรุณากรอกข้อมูลการรับเงินให้ครบถ้วน' },
+        { success: false, error: 'INCOMPLETE_BANK_INFO' },
         { status: 400 }
       );
     }
 
     if (paymentMethod === 'bank_transfer' && (!bankName || !accountName)) {
       return NextResponse.json(
-        { success: false, error: 'กรุณากรอกชื่อธนาคารและชื่อบัญชี' },
+        { success: false, error: 'INCOMPLETE_BANK_INFO' },
         { status: 400 }
       );
     }
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (!referral) {
       return NextResponse.json(
-        { success: false, error: 'ไม่พบข้อมูลผู้ใช้', remainingClaims: 0 },
+        { success: false, error: 'GENERIC', remainingClaims: 0 },
         { status: 400 }
       );
     }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     if (pendingClaims <= 0) {
       return NextResponse.json(
-        { success: false, error: 'ไม่มีสิทธิ์รับเงินที่รอดำเนินการ', remainingClaims: 0 },
+        { success: false, error: 'NO_PENDING_CLAIMS', remainingClaims: 0 },
         { status: 400 }
       );
     }
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !userData.user?.email) {
       return NextResponse.json(
-        { success: false, error: 'ไม่พบอีเมลผู้ใช้' },
+        { success: false, error: 'GENERIC' },
         { status: 400 }
       );
     }
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
     if (claimError) {
       console.error('Error creating claim:', claimError);
       return NextResponse.json(
-        { success: false, error: 'ไม่สามารถสร้างคำขอได้' },
+        { success: false, error: 'CLAIM_FAILED' },
         { status: 500 }
       );
     }
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Claim discount error:', error);
     return NextResponse.json(
-      { success: false, error: 'เกิดข้อผิดพลาด กรุณาลองใหม่' },
+      { success: false, error: 'GENERIC' },
       { status: 500 }
     );
   }

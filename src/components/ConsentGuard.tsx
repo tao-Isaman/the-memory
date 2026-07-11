@@ -8,8 +8,8 @@
 // Fails open on transient errors — users are never locked out by a flaky network.
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import {
   hasRecordedConsent,
@@ -21,6 +21,8 @@ import HeartIcon from './HeartIcon';
 import { ScrollText, ShieldCheck } from 'lucide-react';
 
 export default function ConsentGuard() {
+  const t = useTranslations('auth.consentGuard');
+  const tCommon = useTranslations('common');
   const { user, signOut } = useAuth();
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -75,11 +77,9 @@ export default function ConsentGuard() {
       <div className="memory-card bg-white p-8 max-w-md w-full text-center">
         <HeartIcon size={40} className="mx-auto mb-4 animate-pulse-heart" />
         <h2 className="font-kanit text-xl font-bold text-[#4A1942] mb-2">
-          ข้อกำหนดและความเป็นส่วนตัว
+          {t('title')}
         </h2>
-        <p className="text-sm text-gray-600 mb-5">
-          ก่อนใช้งานต่อ กรุณาอ่านและยอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวของเรา
-        </p>
+        <p className="text-sm text-gray-600 mb-5">{t('description')}</p>
 
         <div className="space-y-2 mb-5">
           <Link
@@ -88,8 +88,8 @@ export default function ConsentGuard() {
             className="flex items-center gap-3 p-3 rounded-xl border border-pink-100 hover:bg-pink-50 transition-colors text-left"
           >
             <ScrollText size={18} className="text-[#E63946] flex-shrink-0" />
-            <span className="text-sm text-gray-700">ข้อกำหนดการใช้งาน</span>
-            <span className="ml-auto text-xs text-gray-400">เปิดอ่าน →</span>
+            <span className="text-sm text-gray-700">{tCommon('nav.terms')}</span>
+            <span className="ml-auto text-xs text-gray-400">{t('openLink')}</span>
           </Link>
           <Link
             href="/privacy"
@@ -97,8 +97,8 @@ export default function ConsentGuard() {
             className="flex items-center gap-3 p-3 rounded-xl border border-pink-100 hover:bg-pink-50 transition-colors text-left"
           >
             <ShieldCheck size={18} className="text-[#E63946] flex-shrink-0" />
-            <span className="text-sm text-gray-700">นโยบายความเป็นส่วนตัว</span>
-            <span className="ml-auto text-xs text-gray-400">เปิดอ่าน →</span>
+            <span className="text-sm text-gray-700">{tCommon('nav.privacy')}</span>
+            <span className="ml-auto text-xs text-gray-400">{t('openLink')}</span>
           </Link>
         </div>
 
@@ -110,7 +110,7 @@ export default function ConsentGuard() {
             className="mt-0.5 w-4 h-4 accent-[#E63946] flex-shrink-0"
           />
           <span className="text-xs text-gray-500 leading-relaxed">
-            ฉันได้อ่านและยอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวของ The Memory
+            {t('checkbox')}
           </span>
         </label>
 
@@ -119,13 +119,13 @@ export default function ConsentGuard() {
           disabled={!accepted || saving}
           className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'กำลังบันทึก...' : 'ยอมรับและใช้งานต่อ'}
+          {saving ? tCommon('state.saving') : t('accept')}
         </button>
         <button
           onClick={handleSignOut}
           className="mt-3 text-xs text-gray-400 hover:text-gray-600 transition-colors"
         >
-          ไม่ยอมรับ — ออกจากระบบ
+          {t('decline')}
         </button>
       </div>
     </div>

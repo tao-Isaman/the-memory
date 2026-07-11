@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "The Memory - Surprise Gift for Your Partner | Create an Online Memory",
+    "description": "Create a surprise online memory for someone you love. Combine photos, messages and music into one link — perfect for anniversaries, birthdays, apologies, long distance and family. Share instantly.",
+    "keywords": "surprise gift for girlfriend, surprise gift for boyfriend, digital gift, online memory gift, anniversary gift idea, birthday gift idea, long distance relationship gift, romantic gift, apology gift, personalised gift link",
+    "ogTitle": "The Memory - Surprise Gift for Your Partner | Create an Online Memory",
+    "ogDescription": "Create a surprise online gift: photos, messages and music in a single link. Perfect for anniversaries, birthdays, apologies, long distance and family.",
+    "ogAlt": "The Memory - Create a surprise online memory gift",
+    "schemaAlternateName": "Surprise Gift for Your Partner",
+    "schemaDescription": "A platform for creating online memories for the people you love — photos, messages and music in a single link, for any occasion: surprises, anniversaries, birthdays, apologies, long distance and family."
+  },
+  "language": {
+    "label": "Language",
+    "switchTo": "Change language"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "create": "Create memory",
+    "credits": "Credits",
+    "profile": "Profile",
+    "updates": "What's new",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "retry": "Try again",
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "backToHome": "Back to home"
+  },
+  "state": {
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "genericError": "Something went wrong. Please try again."
+  }
+}

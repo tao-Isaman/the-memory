@@ -1,0 +1,99 @@
+{
+  "page": {
+    "back": "Kembali ke beranda",
+    "loading": "Menghubungkan..."
+  },
+  "info": {
+    "name": "Nama",
+    "email": "Email",
+    "memberSince": "Bergabung sejak",
+    "noName": "Nama belum diisi"
+  },
+  "reward": {
+    "title": "Profilmu sudah lengkap!",
+    "subtitle": "Ambil {credits} kredit gratismu sekarang",
+    "claim": "Ambil kredit",
+    "claiming": "Mengambil...",
+    "claimed": "🎉 {credits} kredit gratis sudah masuk!"
+  },
+  "form": {
+    "sectionTitle": "Ceritakan sedikit tentang kamu",
+    "phone": "Nomor HP",
+    "phonePlaceholder": "08X-XXX-XXXX",
+    "birthday": "Tanggal lahir",
+    "gender": "Jenis kelamin",
+    "job": "Pekerjaan",
+    "jobPlaceholder": "Pilih pekerjaan...",
+    "customJobPlaceholder": "Tulis pekerjaanmu...",
+    "relationship": "Status hubungan",
+    "occasion": "Untuk momen apa?",
+    "select": "Pilih...",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "saved": "Tersimpan!"
+  },
+  "gender": {
+    "male": "Laki-laki",
+    "female": "Perempuan",
+    "other": "Lainnya"
+  },
+  "relationship": {
+    "single": "Single",
+    "dating": "Pacaran",
+    "married": "Menikah",
+    "other": "Lainnya"
+  },
+  "occasion": {
+    "valentine": "Valentine",
+    "anniversary": "Anniversary",
+    "birthday": "Ulang tahun",
+    "other": "Momen lain"
+  },
+  "jobs": [
+    "Pelajar",
+    "Mahasiswa",
+    "Mahasiswa S1",
+    "Pemilik usaha",
+    "Karyawan swasta",
+    "Pegawai negeri",
+    "Pegawai BUMN",
+    "Pedagang",
+    "Pekerja lepas",
+    "Programmer",
+    "IT",
+    "Insinyur",
+    "Dokter",
+    "Perawat",
+    "Guru",
+    "Dosen",
+    "Marketing",
+    "Periklanan",
+    "Akuntansi",
+    "Keuangan",
+    "Seniman",
+    "Desainer",
+    "Petani",
+    "Ibu rumah tangga",
+    "Bapak rumah tangga",
+    "Belum bekerja",
+    "Lainnya"
+  ],
+  "onboarding": {
+    "welcome": "Selamat datang!",
+    "subtitle": "Ceritakan sedikit tentang dirimu",
+    "rewardHint": "Isi 6 kolomnya, dapat {credits} kredit gratis!",
+    "skip": "Lewati dulu",
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "claimedToast": "Selamat! Kamu dapat {credits} kredit gratis"
+  },
+  "errors": {
+    "GENERIC": "Terjadi kesalahan. Coba lagi, ya.",
+    "INCOMPLETE_FORM": "Isi semua kolom dulu supaya kredit gratisnya cair.",
+    "SAVE_FAILED": "Datanya gagal disimpan.",
+    "CLAIM_FAILED": "Kreditnya gagal diambil.",
+    "PROFILE_NOT_FOUND": "Profilmu tidak ditemukan.",
+    "PROFILE_INCOMPLETE": "Lengkapi semua kolom di profilmu, ya.",
+    "CREDIT_GRANT_FAILED": "Kreditnya tidak bisa ditambahkan."
+  }
+}

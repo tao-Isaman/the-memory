@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/profile.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { ensureUserCreditsRow } from '@/lib/credits';
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     if (profileError || !profileData) {
       return NextResponse.json(
-        { error: 'Profile not found' },
+        { error: 'PROFILE_NOT_FOUND' },
         { status: 404 }
       );
     }
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Check if profile is complete
     if (!isProfileComplete(profile)) {
       return NextResponse.json(
-        { error: 'Profile is not complete' },
+        { error: 'PROFILE_INCOMPLETE' },
         { status: 400 }
       );
     }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     if (creditsError || !creditsData) {
       return NextResponse.json(
-        { error: 'Failed to fetch credit balance' },
+        { error: 'CREDIT_GRANT_FAILED' },
         { status: 500 }
       );
     }
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error('Error updating credit balance:', updateError);
       return NextResponse.json(
-        { error: 'Failed to grant credits' },
+        { error: 'CREDIT_GRANT_FAILED' },
         { status: 500 }
       );
     }
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error claiming profile credits:', error);
     return NextResponse.json(
-      { error: 'Failed to process request' },
+      { error: 'GENERIC' },
       { status: 500 }
     );
   }

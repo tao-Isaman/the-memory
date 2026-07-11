@@ -1,0 +1,213 @@
+'use client';
+
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
+import ShareModal from '@/components/ShareModal';
+import { CheckCircle, Coins } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
+
+function PaymentSuccessContent() {
+  const t = useTranslations('payment');
+  const searchParams = useSearchParams();
+  const memoryId = searchParams.get('memory_id');
+  const sessionId = searchParams.get('session_id');
+  const isFree = searchParams.get('free') === 'true';
+  const type = searchParams.get('type');
+
+  const isCredits = type === 'credits';
+
+  const [status, setStatus] = useState<'loading' | 'success' | 'pending' | 'error'>('loading');
+  const [creditsAdded, setCreditsAdded] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  useEffect(() => {
+    // If this is a free memory activation (credit use), skip verification
+    if (isFree && memoryId) {
+      setStatus('success');
+      return;
+    }
+    if (!sessionId) {
+      setStatus('error');
+      return;
+    }
+
+    // PromptPay confirms asynchronously — verify can return 'pending' for a while
+    // after the user has actually paid. Poll until it flips to active (~60s) before
+    // settling on the "still processing" screen. The webhook/cron is the backstop.
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const POLL_MS = 3000;
+    const MAX_ATTEMPTS = 20;
+
+    async function poll(attempt: number) {
+      try {
+        const response = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        });
+        const data = await response.json();
+        if (cancelled) return;
+
+        if (data.status === 'active') {
+          if (data.type === 'credits') setCreditsAdded(data.credits || 0);
+          setStatus('success');
+          trackEvent('payment_success');
+          return;
+        }
+        // 'pending' or a transient error — keep waiting until attempts run out.
+        if (attempt < MAX_ATTEMPTS) {
+          timer = setTimeout(() => poll(attempt + 1), POLL_MS);
+        } else {
+          // Still unconfirmed: show "processing" (safe for in-flight payment), not a hard error.
+          setStatus('pending');
+        }
+      } catch (error) {
+        if (cancelled) return;
+        console.error('Error verifying payment:', error);
+        if (attempt < MAX_ATTEMPTS) {
+          timer = setTimeout(() => poll(attempt + 1), POLL_MS);
+        } else {
+          setStatus('pending');
+        }
+      }
+    }
+
+    poll(1);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [sessionId, isFree, memoryId]);
+
+  if (status === 'loading') {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <HeartLoader message={t('success.verifying')} size="lg" />
+      </main>
+    );
+  }
+
+  // Credits purchase success view
+  if (isCredits && status === 'success') {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <div className="memory-card p-8 max-w-md w-full text-center">
+          <div className="w-20 h-20 mx-auto mb-6 bg-pink-50 rounded-full flex items-center justify-center">
+            <Coins size={40} className="text-[#E63946]" />
+          </div>
+
+          <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+            {t('success.creditsTitle')}
+          </h1>
+
+          <p className="text-gray-600 mb-6">
+            {t.rich('success.creditsDescription', {
+              credits: creditsAdded,
+              b: (chunks) => (
+                <span className="font-bold text-[#E63946]">{chunks}</span>
+              ),
+            })}
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/credits"
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              <Coins size={16} />
+              {t('success.goToCredits')}
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="btn-secondary w-full text-center"
+            >
+              {t('backToDashboard')}
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4">
+      <div className="memory-card p-8 max-w-md w-full text-center">
+        <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+          <CheckCircle size={40} className="text-green-600" />
+        </div>
+
+        <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
+          {status === 'success'
+            ? (isFree ? t('success.titleFree') : t('success.titlePaid'))
+            : status === 'pending'
+              ? t('success.titlePending')
+              : t('success.titleError')}
+        </h1>
+
+        {status === 'pending' ? (
+          <p className="text-gray-600 mb-6">{t('success.bodyPending')}</p>
+        ) : status === 'success' ? (
+          <p className="text-gray-600 mb-6">
+            {isFree ? t('success.bodyFree') : t('success.bodyPaid')}
+          </p>
+        ) : (
+          <p className="text-gray-600 mb-6">{t('success.bodyError')}</p>
+        )}
+
+        <div className="flex flex-col gap-3">
+          {memoryId && status === 'success' && (
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              <HeartIcon size={16} filled />
+              {t('success.shareMemory')}
+            </button>
+          )}
+
+          <Link
+            href="/dashboard"
+            className="btn-secondary w-full text-center"
+          >
+            {t('backToDashboard')}
+          </Link>
+        </div>
+      </div>
+
+      {memoryId && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          memoryId={memoryId}
+          memoryTitle={t('success.memoryTitleFallback')}
+          showSuccessMessage={true}
+        />
+      )}
+    </main>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <PaymentSuccessFallback />
+        </main>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}
+
+function PaymentSuccessFallback() {
+  const t = useTranslations('common');
+  return <HeartLoader message={t('state.loading')} size="lg" />;
+}

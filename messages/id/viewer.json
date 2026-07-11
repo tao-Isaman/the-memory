@@ -1,0 +1,75 @@
+{
+  "loading": "Memuat kenanganmu...",
+  "notFound": {
+    "title": "Kenangan tidak ditemukan",
+    "description": "Kenangan ini tidak ada atau sudah dihapus."
+  },
+  "notReady": {
+    "title": "Kenangan ini belum siap",
+    "description": "Pembuatnya belum mengaktifkannya. Coba tanya orang yang mengirimimu tautan ini."
+  },
+  "previewBanner": "Pratinjau — aktifkan seharga ฿99",
+  "finish": "Selesai",
+  "story": {
+    "imageAlt": "Foto kenangan",
+    "memoryImageAlt": "Kenangan"
+  },
+  "password": {
+    "title": "Kenangan ini terkunci",
+    "prompt": "Masukkan PIN 6 digit untuk membukanya",
+    "error": "PIN-nya salah. Coba lagi ya.",
+    "unlock": "Buka kenangan"
+  },
+  "question": {
+    "title": "Ada pertanyaan untukmu",
+    "wrong": "Belum tepat. Coba lagi ya.",
+    "correct": "Benar!"
+  },
+  "scratch": {
+    "alt": "Rahasia kita",
+    "hint": "👆 Sentuh lalu geser untuk menggosok rahasianya"
+  },
+  "slideshow": {
+    "album": "Album foto",
+    "photoAlt": "Foto {index} dari {total}",
+    "announce": "Album foto berisi {count} foto"
+  },
+  "image": {
+    "loading": "Memuat foto...",
+    "error": "Fotonya tidak bisa dimuat"
+  },
+  "ending": {
+    "replay": "Lihat lagi",
+    "owner": {
+      "title": "Sudah selesai dilihat 🎉",
+      "previewSubtitle": "Beginilah yang akan dilihat penerimanya. Aktifkan untuk mengirimnya ke orang tersayang.",
+      "activeSubtitle": "Kenanganmu siap dikirim ke orang tersayang.",
+      "editCta": "Lanjut ubah",
+      "dashboardCta": "Ke beranda"
+    },
+    "recipient": {
+      "title": "Semoga kamu suka ya 💕",
+      "subtitle": "Mau bikin kenangan seperti ini untuk orang tersayangmu juga?",
+      "thanks": "Terima kasih sudah mengirim perasaanmu!",
+      "reactPrompt": "Kirim perasaanmu ke pembuatnya",
+      "sendEmojiAria": "Kirim {emoji}",
+      "messageSent": "Pesan terkirim",
+      "messagePlaceholder": "Tulis pesan untuk pembuatnya...",
+      "sendMessage": "Kirim pesan",
+      "writeMessage": "+ Tulis pesan untuk pembuatnya",
+      "createOwn": "Buat kenanganmu sendiri",
+      "footnote": "Mulai gratis · Bisa lihat pratinjau dulu"
+    }
+  },
+  "voice": {
+    "errorTitle": "Perangkat ini tidak bisa memutar suaranya",
+    "openFile": "Buka file suara",
+    "play": "Putar pesan suara",
+    "pause": "Jeda pesan suara",
+    "seek": "Geser posisi suara",
+    "tapToListen": "Ketuk untuk mendengarkan pesan suara"
+  },
+  "youtube": {
+    "invalidUrl": "URL YouTube tidak valid"
+  }
+}

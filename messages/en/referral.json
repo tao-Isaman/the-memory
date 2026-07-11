@@ -1,0 +1,134 @@
+{
+  "page": {
+    "back": "Back to dashboard",
+    "title": "Referral code",
+    "subtitle": "Share your code — your friend saves ฿{amount}",
+    "loading": "Connecting...",
+    "loadingData": "Loading your data..."
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1": "Give your referral code to a friend",
+    "step2": "They enter the code when they sign up",
+    "step3": "They get <amt>฿{amount} off</amt> their first payment!"
+  },
+  "empty": {
+    "text": "You don't have a referral code yet",
+    "cta": "Create my code"
+  },
+  "haveFriendCode": "Got a code from a friend?",
+  "code": {
+    "label": "Your referral code",
+    "copy": "Copy code",
+    "copied": "Copied!",
+    "howToUse": "<label>How to use:</label> Share this code with a friend. When they use it at sign-up and make their first payment, they instantly get <amt>฿{amount} off</amt>!"
+  },
+  "stats": {
+    "signups": "Used your code",
+    "paid": "Have paid",
+    "unit": "people"
+  },
+  "claim": {
+    "rights": "You have <n>{count}</n> payouts waiting",
+    "total": "฿{amount} in total",
+    "button": "Request payout"
+  },
+  "users": {
+    "title": "People who used your code",
+    "loading": "Loading...",
+    "empty": "Nobody has used your code yet",
+    "user": "User #{id}...",
+    "usedAt": "Used your code on {date}",
+    "paid": "Paid",
+    "awaiting": "Not paid yet"
+  },
+  "history": {
+    "title": "Payout history",
+    "loading": "Loading...",
+    "amount": "฿{amount}",
+    "phone": "Phone: {value}",
+    "account": "Account no.: {value}",
+    "sentAt": "Requested: {date}",
+    "processedAt": "Processed: {date}",
+    "noteLabel": "Note:"
+  },
+  "status": {
+    "pending": "Pending",
+    "completed": "Paid out",
+    "rejected": "Rejected"
+  },
+  "method": {
+    "promptpay": "PromptPay",
+    "bank_transfer": "Bank transfer"
+  },
+  "modal": {
+    "title": "Request payout",
+    "amountLabel": "You'll receive",
+    "amount": "฿{amount}",
+    "rightsNote": "(1 of your {pending} available payouts)",
+    "methodLabel": "How should we pay you?",
+    "phoneLabel": "Phone number (PromptPay)",
+    "phonePlaceholder": "0812345678",
+    "phoneHint": "Use the phone number registered with PromptPay",
+    "bankLabel": "Bank",
+    "bankPlaceholder": "-- Choose a bank --",
+    "accountNumber": "Account number",
+    "accountNumberPlaceholder": "1234567890",
+    "accountName": "Account name",
+    "accountNamePlaceholder": "First name Last name",
+    "submit": "Confirm ฿{amount} payout",
+    "submitting": "Sending request...",
+    "cancel": "Cancel",
+    "successTitle": "Request sent!",
+    "successBody": "Your ฿{amount} payout request is on its way",
+    "successWait": "An admin will review it and transfer the money to you",
+    "successPromptpay": "PromptPay: {value}",
+    "successBank": "{bank} account no.: {value}",
+    "done": "Done"
+  },
+  "banks": {
+    "kbank": "Kasikornbank",
+    "ktb": "Krungthai Bank",
+    "bbl": "Bangkok Bank",
+    "scb": "Siam Commercial Bank",
+    "bay": "Krungsri (Bank of Ayudhya)",
+    "ttb": "TMBThanachart (TTB)",
+    "gsb": "Government Savings Bank",
+    "other": "Other"
+  },
+  "link": {
+    "title": "Enter a referral code",
+    "question": "Did a friend give you a code?",
+    "subtitle": "Enter their code to get",
+    "discount": "฿{amount} off",
+    "firstPayment": "on your first payment",
+    "inputLabel": "Enter the 6-character code",
+    "inputPlaceholder": "e.g. ABC123",
+    "submit": "Confirm code",
+    "submitting": "Checking...",
+    "cancel": "Cancel"
+  },
+  "setup": {
+    "title": "Referral code",
+    "question": "Do you have a referral code?",
+    "subtitle": "If a friend gave you one, enter it to get",
+    "discount": "฿{amount} off",
+    "firstPayment": "on your first payment",
+    "inputLabel": "Enter the 6-character code",
+    "inputPlaceholder": "e.g. ABC123",
+    "submit": "Confirm code",
+    "submitting": "Checking...",
+    "skip": "Skip (I don't have one)"
+  },
+  "errors": {
+    "GENERIC": "Something went wrong. Please try again.",
+    "CODE_LENGTH": "The code needs all 6 characters.",
+    "INVALID_PHONE": "Please enter a valid 10-digit phone number.",
+    "INCOMPLETE_BANK_INFO": "Please fill in all of your bank details.",
+    "CODE_ALREADY_LINKED": "You've already entered a referral code.",
+    "INVALID_CODE": "That referral code isn't valid.",
+    "OWN_CODE": "You can't use your own code.",
+    "NO_PENDING_CLAIMS": "You don't have any payouts waiting.",
+    "CLAIM_FAILED": "We couldn't create your request."
+  }
+}

@@ -1,0 +1,457 @@
+'use client';
+
+import { useEffect, useState, useCallback, useMemo, use, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
+import { Memory, MemoryStory, MemoryTheme } from '@/types/memory';
+import { getMemoryById } from '@/lib/storage';
+import { getThemeColors } from '@/lib/themes';
+import { useAuth } from '@/hooks/useAuth';
+import HeartIcon from '@/components/HeartIcon';
+import HeartLoader from '@/components/HeartLoader';
+import StoryViewer from '@/components/StoryViewer';
+import PasswordGate from '@/components/PasswordGate';
+import PaymentButton from '@/components/PaymentButton';
+import CelebrationBurst from '@/components/CelebrationBurst';
+import MemoryEndingScreen from '@/components/MemoryEndingScreen';
+import { Eye, X } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
+import { useMemoryViewTracking } from '@/hooks/useMemoryViewTracking';
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+type AnimState = 'idle' | 'exit-next' | 'enter-next' | 'exit-prev' | 'enter-prev';
+
+const floatingHearts = [
+  { size: 24, pos: { top: '12%', left: '6%' } as React.CSSProperties, delay: '0s', duration: '7s' },
+  { size: 18, pos: { top: '65%', left: '4%' } as React.CSSProperties, delay: '1.5s', duration: '8s' },
+  { size: 28, pos: { top: '25%', right: '5%' } as React.CSSProperties, delay: '0.5s', duration: '6s' },
+  { size: 14, pos: { top: '80%', right: '10%' } as React.CSSProperties, delay: '3s', duration: '9s' },
+  { size: 20, pos: { top: '45%', right: '3%' } as React.CSSProperties, delay: '2s', duration: '7.5s' },
+  { size: 16, pos: { top: '90%', left: '12%' } as React.CSSProperties, delay: '4s', duration: '8.5s' },
+];
+
+// Map a memory's theme to the matching use-case slug so the create flow opens
+// pre-themed to what the recipient just experienced (drives view→creator conversion).
+const THEME_TO_USECASE: Partial<Record<MemoryTheme, string>> = {
+  love: 'surprise-gift',
+  anniversary: 'anniversary',
+  birthday: 'birthday',
+  apology: 'apology',
+  longdistance: 'long-distance',
+  family: 'family',
+};
+
+function getStoryAnimation(state: AnimState): string {
+  switch (state) {
+    case 'exit-next': return 'slide-out-left 0.3s ease-in both';
+    case 'enter-next': return 'slide-in-from-right 0.45s ease-out both';
+    case 'exit-prev': return 'slide-out-right 0.3s ease-in both';
+    case 'enter-prev': return 'slide-in-from-left 0.45s ease-out both';
+    default: return 'none';
+  }
+}
+
+export default function MemoryViewerPage({ params }: PageProps) {
+  const { id } = use(params);
+  const { user } = useAuth();
+  const router = useRouter();
+  const t = useTranslations('viewer');
+  const tCommon = useTranslations('common');
+  const [memory, setMemory] = useState<Memory | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPasswordLocked, setIsPasswordLocked] = useState(false);
+  const [isQuestionLocked, setIsQuestionLocked] = useState(false);
+  const [revealedStories, setRevealedStories] = useState<Set<string>>(new Set());
+  const [animState, setAnimState] = useState<AnimState>('idle');
+  const [showEnding, setShowEnding] = useState(false);
+  const isNavigating = useRef(false);
+
+  const sortedMemory = useMemo(() => {
+    if (!memory) return null;
+    const sortedStories = [...memory.stories].sort((a, b) => a.priority - b.priority);
+    return { ...memory, stories: sortedStories };
+  }, [memory]);
+
+  useEffect(() => {
+    async function loadMemory() {
+      const foundMemory = await getMemoryById(id);
+      if (foundMemory) {
+        setMemory(foundMemory);
+        const sortedStories = [...foundMemory.stories].sort((a, b) => a.priority - b.priority);
+        if (sortedStories.length > 0 && sortedStories[0].type === 'password') {
+          setIsPasswordLocked(true);
+        }
+        if (sortedStories.length > 0 && sortedStories[0].type === 'question') {
+          setIsQuestionLocked(true);
+        }
+        if (foundMemory.status !== 'active' && user && foundMemory.userId === user.id) {
+          trackEvent('view_preview', { memory_id: id });
+        }
+      }
+      setLoading(false);
+    }
+    loadMemory();
+  }, [id, user]);
+
+  const navigateWithTransition = useCallback((newIndex: number, dir: 'next' | 'prev') => {
+    if (!sortedMemory || isNavigating.current) return;
+    if (newIndex < 0 || newIndex >= sortedMemory.stories.length) return;
+
+    isNavigating.current = true;
+    setAnimState(dir === 'next' ? 'exit-next' : 'exit-prev');
+
+    setTimeout(() => {
+      const story = sortedMemory.stories[newIndex];
+      setIsPasswordLocked(story?.type === 'password');
+      setIsQuestionLocked(story?.type === 'question');
+      setCurrentIndex(newIndex);
+      setAnimState(dir === 'next' ? 'enter-next' : 'enter-prev');
+
+      setTimeout(() => {
+        setAnimState('idle');
+        isNavigating.current = false;
+      }, 450);
+    }, 300);
+  }, [sortedMemory]);
+
+  const handleNext = useCallback(() => {
+    if (!sortedMemory || currentIndex >= sortedMemory.stories.length - 1) return;
+    navigateWithTransition(currentIndex + 1, 'next');
+  }, [sortedMemory, currentIndex, navigateWithTransition]);
+
+  const handlePrevious = useCallback(() => {
+    if (!sortedMemory || currentIndex <= 0) return;
+    navigateWithTransition(currentIndex - 1, 'prev');
+  }, [sortedMemory, currentIndex, navigateWithTransition]);
+
+  const handlePasswordUnlock = useCallback(() => {
+    if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
+      navigateWithTransition(currentIndex + 1, 'next');
+    } else {
+      setIsPasswordLocked(false);
+    }
+  }, [sortedMemory, currentIndex, navigateWithTransition]);
+
+  const handleQuestionUnlock = useCallback(() => {
+    if (sortedMemory && currentIndex < sortedMemory.stories.length - 1) {
+      navigateWithTransition(currentIndex + 1, 'next');
+    } else {
+      setIsQuestionLocked(false);
+    }
+  }, [sortedMemory, currentIndex, navigateWithTransition]);
+
+  const currentStory: MemoryStory | undefined = sortedMemory?.stories[currentIndex];
+  const isLastStory = sortedMemory ? currentIndex >= sortedMemory.stories.length - 1 : false;
+
+  // ponytail: no auto-advance timer — each story stays until the viewer taps or
+  // keys forward, so viewing time is unlimited. The IG-style segmented progress
+  // bar below is kept, but as a static reading-position indicator (no countdown).
+
+  // Tap to navigate
+  const handleContentTap = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isNavigating.current) return;
+    if (isPasswordLocked || isQuestionLocked) return;
+
+    // Don't intercept clicks on interactive elements
+    const target = e.target as HTMLElement;
+    if (target.closest('button, a, input, select, textarea, iframe, canvas, video, [data-interactive]')) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeX = (e.clientX - rect.left) / rect.width;
+
+    if (relativeX < 0.3) {
+      handlePrevious();
+    } else if (isLastStory) {
+      setShowEnding(true);
+    } else {
+      handleNext();
+    }
+  }, [isPasswordLocked, isQuestionLocked, handlePrevious, handleNext, isLastStory]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showEnding) {
+        if (e.key === 'ArrowLeft') setShowEnding(false);
+        return;
+      }
+      if (isPasswordLocked || isQuestionLocked || isNavigating.current) return;
+
+      if (e.key === 'ArrowLeft') {
+        handlePrevious();
+      } else if (e.key === 'ArrowRight') {
+        if (isLastStory) {
+          setShowEnding(true);
+        } else {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrevious, handleNext, isPasswordLocked, isQuestionLocked, isLastStory, showEnding]);
+
+  // ── Phase 0: recipient view tracking (engagement baseline) ──
+  const ownerFlag = !!(user && memory && memory.userId === user.id);
+  const isViewable = !!sortedMemory && (sortedMemory.status === 'active' || ownerFlag);
+  const { reportProgress, markComplete } = useMemoryViewTracking({
+    memoryId: id,
+    enabled: isViewable,
+    isOwner: ownerFlag,
+    storiesTotal: sortedMemory?.stories.length ?? 0,
+  });
+
+  useEffect(() => {
+    reportProgress(currentIndex);
+  }, [currentIndex, reportProgress]);
+
+  useEffect(() => {
+    if (isLastStory && !isPasswordLocked && !isQuestionLocked) {
+      markComplete();
+    }
+  }, [isLastStory, isPasswordLocked, isQuestionLocked, markComplete]);
+
+  const handleReplay = useCallback(() => {
+    setShowEnding(false);
+    setRevealedStories(new Set());
+    setAnimState('idle');
+    isNavigating.current = false;
+    setCurrentIndex(0);
+    const first = sortedMemory?.stories[0];
+    setIsPasswordLocked(first?.type === 'password');
+    setIsQuestionLocked(first?.type === 'question');
+    trackEvent('replay_memory', { memory_id: id });
+  }, [sortedMemory, id]);
+
+  const handleCreateOwn = useCallback(() => {
+    const slug = sortedMemory ? THEME_TO_USECASE[sortedMemory.theme] : undefined;
+    trackEvent('click_create_cta', { memory_id: id, theme: sortedMemory?.theme });
+    if (user) {
+      if (slug) sessionStorage.setItem('pending_usecase', slug);
+      router.push('/create');
+    } else {
+      router.push(slug ? `/login?usecase=${slug}` : '/login');
+    }
+  }, [sortedMemory, id, user, router]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <HeartLoader message={t('loading')} size="lg" />
+      </main>
+    );
+  }
+
+  if (!sortedMemory) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center memory-card p-12">
+          <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+          <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">{t('notFound.title')}</h2>
+          <p className="text-gray-500 mb-6">{t('notFound.description')}</p>
+          <Link href="/" className="btn-primary inline-block">
+            {tCommon('actions.backToHome')}
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const isOwner = user && sortedMemory.userId === user.id;
+  const isPreviewMode = sortedMemory.status !== 'active' && isOwner;
+
+  if (sortedMemory.status !== 'active' && !isOwner) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center memory-card p-12">
+          <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+          <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">{t('notReady.title')}</h2>
+          <p className="text-gray-500 mb-6">{t('notReady.description')}</p>
+          <Link href="/" className="btn-primary inline-block">
+            {tCommon('actions.backToHome')}
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const themeColors = getThemeColors(sortedMemory.theme);
+  const closeHref = isPreviewMode ? `/create?edit=${sortedMemory.id}` : '/';
+
+  return (
+    <main
+      className="h-dvh relative flex flex-col overflow-hidden select-none"
+      style={{ backgroundColor: themeColors.background }}
+    >
+      {/* Atmospheric background gradient orbs */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: `
+          radial-gradient(ellipse at 15% 50%, ${themeColors.accent}25 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 20%, ${themeColors.primary}12 0%, transparent 45%),
+          radial-gradient(ellipse at 50% 90%, ${themeColors.accent}18 0%, transparent 50%)
+        `,
+      }} />
+
+      {/* Floating hearts */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {floatingHearts.map((heart, i) => (
+          <HeartIcon
+            key={i}
+            size={heart.size}
+            className="absolute"
+            style={{
+              color: themeColors.primary,
+              opacity: 0.1,
+              ...heart.pos,
+              animation: `float ${heart.duration} ease-in-out ${heart.delay} infinite`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* ── Instagram-style top bar ── */}
+      <div
+        className="relative z-40 flex-shrink-0"
+        style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+      >
+        {/* Segmented progress bars */}
+        <div className="flex gap-1 px-3 pb-1">
+          {sortedMemory.stories.map((_, i) => (
+            <div
+              key={i}
+              className="h-[3px] flex-1 rounded-full overflow-hidden"
+              style={{ backgroundColor: `${themeColors.dark}18` }}
+            >
+              {showEnding || i <= currentIndex ? (
+                <div
+                  className="w-full h-full rounded-full"
+                  style={{ backgroundColor: themeColors.primary }}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+
+        {/* Title + close button */}
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <HeartIcon size={18} className="flex-shrink-0 animate-pulse-heart" style={{ color: themeColors.primary }} />
+            <span
+              className="font-kanit text-sm font-semibold truncate"
+              style={{ color: themeColors.dark }}
+            >
+              {sortedMemory.title}
+            </span>
+          </div>
+          <Link
+            href={closeHref}
+            className="flex-shrink-0 p-1.5 rounded-full transition-colors hover:bg-black/5"
+            aria-label={tCommon('actions.close')}
+          >
+            <X size={22} style={{ color: themeColors.dark }} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Preview Mode Banner (floating) */}
+      {isPreviewMode && (
+        <div className="relative z-40 mx-3 mb-2">
+          <div
+            className="rounded-2xl px-4 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2"
+            style={{
+              backgroundColor: 'rgba(254, 243, 199, 0.9)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(253, 224, 71, 0.5)',
+            }}
+          >
+            <div className="flex items-center gap-2 text-yellow-800 text-sm">
+              <Eye size={16} />
+              <span>{t('previewBanner')}</span>
+            </div>
+            <PaymentButton
+              memoryId={sortedMemory.id}
+              memoryTitle={sortedMemory.title}
+              userId={user!.id}
+              className="text-xs py-1 px-3"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Ending screen (after the last story) ── */}
+      {showEnding && (
+        <>
+          <CelebrationBurst themeColors={themeColors} />
+          <MemoryEndingScreen
+            themeColors={themeColors}
+            memoryId={sortedMemory.id}
+            isOwner={!!isOwner}
+            isPreviewMode={!!isPreviewMode}
+            editHref={closeHref}
+            onReplay={handleReplay}
+            onCreateOwn={handleCreateOwn}
+          />
+        </>
+      )}
+
+      {/* ── Story content area (tappable) ── */}
+      {!showEnding && (
+      <div
+        className="grow relative z-10 flex items-center justify-center p-4 cursor-pointer"
+        onClick={handleContentTap}
+      >
+        {/* Tap zone hints (visible briefly on first load) */}
+        <div className="absolute left-0 top-0 w-[30%] h-full z-20 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-[70%] h-full z-20 pointer-events-none" />
+
+        {/* Story content with slide animation */}
+        {/* YouTube needs a wider frame than other stories so its 16:9 video
+            renders as tall as image stories (see StoryViewer youtube case). */}
+        <div
+          className={`w-full ${currentStory?.type === 'youtube' ? 'max-w-4xl' : 'max-w-2xl'} relative z-10 h-full flex flex-col justify-center`}
+          style={{ animation: getStoryAnimation(animState) }}
+        >
+          {isPasswordLocked && currentStory?.type === 'password' ? (
+            <PasswordGate
+              correctPassword={currentStory.content.password}
+              title={currentStory.title}
+              onUnlock={handlePasswordUnlock}
+              themeColors={themeColors}
+            />
+          ) : currentStory ? (
+            <StoryViewer
+              key={currentStory.id}
+              story={currentStory}
+              themeColors={themeColors}
+              isRevealed={revealedStories.has(currentStory.id)}
+              onReveal={currentStory.type === 'question' ? handleQuestionUnlock : () => setRevealedStories(prev => new Set(prev).add(currentStory.id))}
+            />
+          ) : null}
+        </div>
+      </div>
+      )}
+
+      {/* ── Floating completion button (last story) ── */}
+      {isLastStory && !isPasswordLocked && !isQuestionLocked && !showEnding && (
+        <div className="absolute bottom-8 left-0 right-0 z-40 flex justify-center animate-fade-in-up">
+          <button
+            onClick={() => setShowEnding(true)}
+            className="flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
+              boxShadow: `0 8px 25px ${themeColors.dark}50`,
+            }}
+          >
+            {t('finish')}
+            <HeartIcon size={18} filled color="white" />
+          </button>
+        </div>
+      )}
+    </main>
+  );
+}

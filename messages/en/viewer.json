@@ -1,0 +1,75 @@
+{
+  "loading": "Loading your memory...",
+  "notFound": {
+    "title": "Memory not found",
+    "description": "This memory doesn't exist, or it has been deleted."
+  },
+  "notReady": {
+    "title": "This memory isn't ready yet",
+    "description": "The creator hasn't activated it yet. Try asking whoever sent you the link."
+  },
+  "previewBanner": "Preview — activate for ฿99",
+  "finish": "Finish",
+  "story": {
+    "imageAlt": "Memory photo",
+    "memoryImageAlt": "Memory"
+  },
+  "password": {
+    "title": "This memory is locked",
+    "prompt": "Enter the 6-digit PIN to unlock it",
+    "error": "That PIN isn't right. Give it another try.",
+    "unlock": "Unlock the memory"
+  },
+  "question": {
+    "title": "A question for you",
+    "wrong": "Not quite. Try again.",
+    "correct": "That's right!"
+  },
+  "scratch": {
+    "alt": "Our little secret",
+    "hint": "👆 Touch and drag to scratch the secret open"
+  },
+  "slideshow": {
+    "album": "Photo album",
+    "photoAlt": "Photo {index} of {total}",
+    "announce": "{count, plural, one {Photo album with # photo} other {Photo album with # photos}}"
+  },
+  "image": {
+    "loading": "Loading photo...",
+    "error": "Couldn't load this photo"
+  },
+  "ending": {
+    "replay": "Watch again",
+    "owner": {
+      "title": "You've seen it all 🎉",
+      "previewSubtitle": "This is exactly what they'll see. Activate it to send it to someone special.",
+      "activeSubtitle": "Your memory is ready to send to someone special.",
+      "editCta": "Keep editing",
+      "dashboardCta": "Go to dashboard"
+    },
+    "recipient": {
+      "title": "Hope you loved it 💕",
+      "subtitle": "Want to make a memory like this for someone special of yours?",
+      "thanks": "Thank you for sending that back!",
+      "reactPrompt": "Let the creator know how you feel",
+      "sendEmojiAria": "Send {emoji}",
+      "messageSent": "Message sent",
+      "messagePlaceholder": "Write a message back to the creator...",
+      "sendMessage": "Send message",
+      "writeMessage": "+ Write a message back",
+      "createOwn": "Create your own memory",
+      "footnote": "Free to start · Preview it before you pay"
+    }
+  },
+  "voice": {
+    "errorTitle": "This device can't play the audio",
+    "openFile": "Open audio file",
+    "play": "Play voice message",
+    "pause": "Pause voice message",
+    "seek": "Seek audio position",
+    "tapToListen": "Tap to hear the voice message"
+  },
+  "youtube": {
+    "invalidUrl": "Invalid YouTube URL"
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "page": {
+    "back": "Kembali ke beranda",
+    "title": "Kode referral",
+    "subtitle": "Bagikan kodemu — temanmu hemat ฿{amount}",
+    "loading": "Menghubungkan...",
+    "loadingData": "Memuat data..."
+  },
+  "howItWorks": {
+    "title": "Cara kerjanya",
+    "step1": "Kasih kode referralmu ke teman atau kenalan",
+    "step2": "Temanmu memasukkan kodenya saat daftar",
+    "step3": "Temanmu langsung dapat <amt>diskon ฿{amount}</amt> di pembayaran pertamanya!"
+  },
+  "empty": {
+    "text": "Kamu belum punya kode referral",
+    "cta": "Buat kode referral"
+  },
+  "haveFriendCode": "Punya kode referral dari teman?",
+  "code": {
+    "label": "Kode referral kamu",
+    "copy": "Salin kode",
+    "copied": "Tersalin!",
+    "howToUse": "<label>Cara pakai:</label> Bagikan kode ini ke teman atau kenalan. Begitu mereka memakainya saat daftar dan melakukan pembayaran pertama, mereka langsung dapat <amt>diskon ฿{amount}</amt>!"
+  },
+  "stats": {
+    "signups": "Memakai kodemu",
+    "paid": "Sudah bayar",
+    "unit": "orang"
+  },
+  "claim": {
+    "rights": "Kamu punya <n>{count}</n> hak pencairan",
+    "total": "Total ฿{amount}",
+    "button": "Cairkan"
+  },
+  "users": {
+    "title": "Daftar pemakai kode",
+    "loading": "Memuat...",
+    "empty": "Belum ada yang memakai kodemu",
+    "user": "Pengguna #{id}...",
+    "usedAt": "Pakai kode pada {date}",
+    "paid": "Sudah bayar",
+    "awaiting": "Belum bayar"
+  },
+  "history": {
+    "title": "Riwayat pencairan",
+    "loading": "Memuat...",
+    "amount": "฿{amount}",
+    "phone": "No. HP: {value}",
+    "account": "No. rekening: {value}",
+    "sentAt": "Diajukan: {date}",
+    "processedAt": "Diproses: {date}",
+    "noteLabel": "Catatan:"
+  },
+  "status": {
+    "pending": "Menunggu diproses",
+    "completed": "Sudah ditransfer",
+    "rejected": "Ditolak"
+  },
+  "method": {
+    "promptpay": "PromptPay",
+    "bank_transfer": "Transfer bank"
+  },
+  "modal": {
+    "title": "Cairkan uang",
+    "amountLabel": "Uang yang kamu terima",
+    "amount": "฿{amount}",
+    "rightsNote": "(1 dari {pending} hak pencairan yang kamu punya)",
+    "methodLabel": "Mau dicairkan ke mana?",
+    "phoneLabel": "Nomor HP (PromptPay)",
+    "phonePlaceholder": "0812345678",
+    "phoneHint": "Isi nomor HP yang terdaftar di PromptPay",
+    "bankLabel": "Bank",
+    "bankPlaceholder": "-- Pilih bank --",
+    "accountNumber": "Nomor rekening",
+    "accountNumberPlaceholder": "1234567890",
+    "accountName": "Nama pemilik rekening",
+    "accountNamePlaceholder": "Nama lengkap",
+    "submit": "Konfirmasi pencairan ฿{amount}",
+    "submitting": "Mengirim permintaan...",
+    "cancel": "Batal",
+    "successTitle": "Permintaan terkirim!",
+    "successBody": "Permintaan pencairan ฿{amount} sudah dikirim",
+    "successWait": "Tunggu admin memeriksa dan mentransfer uangnya",
+    "successPromptpay": "PromptPay: {value}",
+    "successBank": "{bank} no. rekening: {value}",
+    "done": "Selesai"
+  },
+  "banks": {
+    "kbank": "Kasikornbank",
+    "ktb": "Krungthai Bank",
+    "bbl": "Bangkok Bank",
+    "scb": "Siam Commercial Bank",
+    "bay": "Krungsri (Bank of Ayudhya)",
+    "ttb": "TMBThanachart (TTB)",
+    "gsb": "Government Savings Bank",
+    "other": "Lainnya"
+  },
+  "link": {
+    "title": "Masukkan kode referral",
+    "question": "Dapat kode referral dari teman?",
+    "subtitle": "Masukkan kodenya untuk dapat",
+    "discount": "diskon ฿{amount}",
+    "firstPayment": "untuk pembayaran pertama",
+    "inputLabel": "Masukkan kode 6 karakter",
+    "inputPlaceholder": "misal ABC123",
+    "submit": "Konfirmasi kode",
+    "submitting": "Memeriksa...",
+    "cancel": "Batal"
+  },
+  "setup": {
+    "title": "Kode referral",
+    "question": "Kamu punya kode referral?",
+    "subtitle": "Kalau dapat kode dari teman, masukkan untuk dapat",
+    "discount": "diskon ฿{amount}",
+    "firstPayment": "untuk pembayaran pertama",
+    "inputLabel": "Masukkan kode 6 karakter",
+    "inputPlaceholder": "misal ABC123",
+    "submit": "Konfirmasi kode",
+    "submitting": "Memeriksa...",
+    "skip": "Lewati (tidak punya kode)"
+  },
+  "errors": {
+    "GENERIC": "Terjadi kesalahan. Coba lagi, ya.",
+    "CODE_LENGTH": "Kodenya harus 6 karakter.",
+    "INVALID_PHONE": "Masukkan nomor HP 10 digit yang benar.",
+    "INCOMPLETE_BANK_INFO": "Lengkapi dulu data banknya.",
+    "CODE_ALREADY_LINKED": "Kamu sudah pernah memasukkan kode referral.",
+    "INVALID_CODE": "Kode referralnya tidak valid.",
+    "OWN_CODE": "Kode sendiri tidak bisa dipakai.",
+    "NO_PENDING_CLAIMS": "Belum ada hak pencairan yang menunggu.",
+    "CLAIM_FAILED": "Permintaannya gagal dibuat."
+  }
+}

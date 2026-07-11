@@ -1,0 +1,111 @@
+{
+  "appBar": {
+    "credits": "Kredit",
+    "userMenu": "Menu pengguna"
+  },
+  "tabs": {
+    "memories": "Kenangan",
+    "universe": "Jagat Raya",
+    "cartoon": "Buat Kartun"
+  },
+  "loading": {
+    "connecting": "Menghubungkan...",
+    "memories": "Memuat kenanganmu..."
+  },
+  "actions": {
+    "createNew": "Buat kenangan baru",
+    "referral": "Link referral & dapat ฿50",
+    "view": "Lihat kenangan",
+    "share": "Bagikan",
+    "preview": "Pratinjau",
+    "edit": "Ubah",
+    "delete": "Hapus"
+  },
+  "empty": {
+    "title": "Belum ada kenangan",
+    "description": "Yuk, buat kenangan manis untuk dibagikan ke orang spesialmu!",
+    "cta": "Buat kenangan pertamamu"
+  },
+  "card": {
+    "meta": "{count} cerita • dibuat {date}",
+    "shareToUniverse": "Bagikan ke Jagat Raya"
+  },
+  "confirmDelete": "Yakin mau menghapus kenangan ini?",
+  "footer": "Dibuat dengan <heart></heart> untuk momen spesialmu",
+  "universe": {
+    "intro": "Cerita dari kenangan yang dibagikan orang lain. Diacak ulang setiap kamu mampir ✨",
+    "loading": "Menuju jagat raya...",
+    "loadingMore": "Memuat lagi...",
+    "endOfFeed": "✨ Kamu sudah sampai di ujung jagat raya",
+    "emptyTitle": "Jagat raya masih kosong",
+    "emptyDescription": "Belum ada cerita dari orang lain sekarang. Coba mampir lagi nanti ya!",
+    "fromMemory": "dari “{title}”",
+    "readMore": "Baca selengkapnya",
+    "reaction": "Reaksi {emoji}",
+    "types": {
+      "image": "Foto",
+      "text": "Pesan",
+      "textImage": "Foto + pesan"
+    }
+  },
+  "notifications": {
+    "bell": "Notifikasi",
+    "tabNotifications": "Notifikasi",
+    "tabUpdates": "Update",
+    "pushOn": "Notifikasi di perangkat ini: aktif (ketuk untuk mematikan)",
+    "pushOff": "Aktifkan notifikasi di perangkat ini",
+    "clearAll": "Hapus semua",
+    "loading": "Memuat...",
+    "empty": "Belum ada notifikasi",
+    "dismiss": "Hapus notifikasi",
+    "viewAllUpdates": "Lihat semua update →",
+    "patchTypes": {
+      "feature": "Baru",
+      "improvement": "Perbaikan",
+      "fix": "Diperbaiki",
+      "announcement": "Pengumuman"
+    }
+  },
+  "pushPrompt": {
+    "close": "Tutup",
+    "title": "Aktifkan notifikasi, dapat kredit gratis!",
+    "description": "Dapat kabar, promo, dan hal penting — langsung ke perangkatmu.",
+    "creditsBadge": "{credits} kredit gratis",
+    "later": "Nanti saja",
+    "enable": "Aktifkan",
+    "enabling": "Mengaktifkan...",
+    "successWithCredits": "Notifikasi aktif! Kamu dapat {credits} kredit 🎉",
+    "success": "Notifikasi aktif!",
+    "denied": "Izin notifikasi kamu blokir. Bisa diaktifkan nanti lewat ikon lonceng.",
+    "error": "Notifikasi gagal diaktifkan. Coba lagi ya."
+  },
+  "pwaPrompt": {
+    "title": "Pasang aplikasi The Memory",
+    "description": "Tambahkan ke layar utama biar lebih cepat dibuka, seperti aplikasi asli, tanpa perlu browser.",
+    "close": "Tutup",
+    "iosStep1": "Ketuk tombol bagikan <share></share> di bagian bawah Safari",
+    "iosStep2": "Pilih “Tambahkan ke Layar Utama” <plus></plus>",
+    "later": "Nanti dulu",
+    "install": "Pasang"
+  },
+  "profileBanner": {
+    "close": "Tutup",
+    "title": "Lengkapi profil, dapat kredit gratis!",
+    "description": "Ceritakan sedikit tentang kamu, dan ambil hadiah dari kami.",
+    "creditsBadge": "{credits} kredit gratis",
+    "later": "Nanti saja",
+    "goToProfile": "Isi sekarang"
+  },
+  "shareModal": {
+    "title": "Bagikan kenangan",
+    "successTitle": "Kenanganmu tersimpan!",
+    "successSubtitle": "Kirim link ini ke orang yang kamu sayang",
+    "linkLabel": "Link berbagi",
+    "copy": "Salin",
+    "copied": "Tersalin!",
+    "downloadQr": "Unduh QR",
+    "share": "Bagikan",
+    "close": "Tutup",
+    "shareText": "Lihat kenangan \"{title}\" yang aku buat untuk kamu"
+  }
+}

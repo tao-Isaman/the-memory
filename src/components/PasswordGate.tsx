@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -19,6 +20,7 @@ const defaultColors: ThemeColors = {
 };
 
 const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlock, themeColors = defaultColors }: PasswordGateProps) {
+  const t = useTranslations('viewer');
   const [pin, setPin] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(false);
@@ -111,10 +113,10 @@ const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlo
           <HeartIcon size={64} className="mx-auto animate-pulse-heart" style={{ color: themeColors.primary }} />
         </div>
         <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
-          ความทรงจำถูกล็อค
+          {t('password.title')}
         </h2>
         <p className="text-gray-600 mb-2">
-          ใส่รหัส PIN 6 หลักเพื่อปลดล็อค
+          {t('password.prompt')}
         </p>
         {title && (
           <p className="text-gray-400 mb-6 italic text-sm">
@@ -146,7 +148,7 @@ const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlo
 
           {error && (
             <p className="text-red-500 text-sm animate-fade-in">
-              รหัส PIN ไม่ถูกต้อง ลองใหม่อีกครั้ง
+              {t('password.error')}
             </p>
           )}
 
@@ -158,7 +160,7 @@ const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlo
               boxShadow: `0 4px 15px ${themeColors.dark}4D`,
             }}
           >
-            ปลดล็อคความทรงจำ
+            {t('password.unlock')}
           </button>
         </form>
 

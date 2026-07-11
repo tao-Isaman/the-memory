@@ -18,10 +18,20 @@ export function toCartoonGeneration(
   };
 }
 
+/**
+ * Error codes returned to the client. The UI is localised, so these must stay
+ * stable, language-neutral identifiers — components map them to translated copy
+ * (messages/<locale>/credits.json → "errors"). Never return prose from here.
+ */
+export type CartoonCreditError =
+  | 'CREDIT_ACCOUNT_NOT_FOUND'
+  | 'INSUFFICIENT_CREDITS'
+  | 'CREDIT_DEDUCTION_FAILED';
+
 export async function deductCreditsForCartoon(
   supabase: SupabaseClient<Database>,
   userId: string
-): Promise<{ success: boolean; newBalance: number; error?: string }> {
+): Promise<{ success: boolean; newBalance: number; error?: CartoonCreditError }> {
   // Get current balance
   const { data: userCredits, error: fetchError } = await supabase
     .from('user_credits')
@@ -30,14 +40,14 @@ export async function deductCreditsForCartoon(
     .single();
 
   if (fetchError || !userCredits) {
-    return { success: false, newBalance: 0, error: 'ไม่พบข้อมูลเครดิต กรุณาซื้อเครดิตก่อน' };
+    return { success: false, newBalance: 0, error: 'CREDIT_ACCOUNT_NOT_FOUND' };
   }
 
   if (userCredits.balance < CARTOON_CREDIT_COST) {
     return {
       success: false,
       newBalance: userCredits.balance,
-      error: `เครดิตไม่เพียงพอ (ต้องการ ${CARTOON_CREDIT_COST} เครดิต, คงเหลือ ${userCredits.balance})`,
+      error: 'INSUFFICIENT_CREDITS',
     };
   }
 
@@ -54,16 +64,17 @@ export async function deductCreditsForCartoon(
     .eq('balance', userCredits.balance); // Optimistic lock
 
   if (updateError) {
-    return { success: false, newBalance: userCredits.balance, error: 'ไม่สามารถหักเครดิตได้' };
+    return { success: false, newBalance: userCredits.balance, error: 'CREDIT_DEDUCTION_FAILED' };
   }
 
-  // Record transaction
+  // Record transaction. `description` is a locale-neutral ledger note (admin-facing);
+  // the user-facing label in the credits page is derived from `type`, not from this string.
   await supabase.from('credit_transactions').insert({
     user_id: userId,
     type: 'use',
     amount: -CARTOON_CREDIT_COST,
     balance_after: newBalance,
-    description: `สร้างรูปการ์ตูน (${CARTOON_CREDIT_COST} เครดิต)`,
+    description: `Cartoon generation (${CARTOON_CREDIT_COST} credits)`,
   });
 
   return { success: true, newBalance };
@@ -96,7 +107,7 @@ export async function refundCreditsForCartoon(
     type: 'refund',
     amount: CARTOON_CREDIT_COST,
     balance_after: newBalance,
-    description: 'คืนเครดิต — สร้างรูปการ์ตูนไม่สำเร็จ',
+    description: 'Refund — cartoon generation failed',
   });
 }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 import { Play, Pause } from 'lucide-react';
 
@@ -62,6 +63,7 @@ export default function VoicePlayer({
     themeColors = defaultColors,
     onEnded,
 }: VoicePlayerProps) {
+    const t = useTranslations('viewer.voice');
     const audioRef = useRef<HTMLAudioElement>(null);
     const [state, setState] = useState<PlayerState>('loading');
     const [currentTime, setCurrentTime] = useState(0);
@@ -166,7 +168,7 @@ export default function VoicePlayer({
         return (
             <div className="w-full flex flex-col items-center gap-3 py-4">
                 <p className="text-center text-sm text-gray-600">
-                    ไม่สามารถเล่นเสียงได้ในอุปกรณ์นี้
+                    {t('errorTitle')}
                 </p>
                 <a
                     href={audioUrl}
@@ -180,7 +182,7 @@ export default function VoicePlayer({
                         boxShadow: `0 4px 15px ${themeColors.dark}4D`,
                     }}
                 >
-                    เปิดไฟล์เสียง
+                    {t('openFile')}
                 </a>
             </div>
         );
@@ -210,7 +212,7 @@ export default function VoicePlayer({
                 type="button"
                 onClick={togglePlay}
                 data-interactive
-                aria-label={isPlaying ? 'หยุดเสียง' : 'เล่นเสียง'}
+                aria-label={isPlaying ? t('pause') : t('play')}
                 aria-pressed={isPlaying}
                 className={`relative flex items-center justify-center rounded-full text-white transition-transform hover:scale-105 active:scale-95 ${
                     isPlaying ? 'voice-aura' : 'animate-pulse-heart'
@@ -257,7 +259,7 @@ export default function VoicePlayer({
                     value={Math.min(currentTime, totalKnown ? safeTotal : Math.max(currentTime, 1))}
                     onChange={handleSeek}
                     data-interactive
-                    aria-label="เลื่อนตำแหน่งเสียง"
+                    aria-label={t('seek')}
                     className="voice-seek absolute inset-0 w-full h-full cursor-pointer opacity-0 appearance-none [-webkit-appearance:none]"
                     style={{ touchAction: 'none' }}
                 />
@@ -278,7 +280,7 @@ export default function VoicePlayer({
                     className="text-center text-sm animate-pulse"
                     style={{ color: themeColors.primary }}
                 >
-                    แตะเพื่อฟังข้อความเสียง
+                    {t('tapToListen')}
                 </p>
             )}
 

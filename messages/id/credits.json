@@ -1,0 +1,64 @@
+{
+  "page": {
+    "title": "Kredit",
+    "subtitle": "Beli kredit untuk menghidupkan kenanganmu",
+    "back": "Kembali ke beranda"
+  },
+  "balance": {
+    "label": "Sisa kredit",
+    "hint": "Pakai kredit untuk mengaktifkan kenanganmu"
+  },
+  "packages": {
+    "loading": "Memuat paket...",
+    "popular": "Paling populer",
+    "unit": "kredit",
+    "price": "฿{price}",
+    "perCredit": "≈ ฿{price} per kredit",
+    "save": "Hemat {percent}%",
+    "buy": "Beli sekarang",
+    "processing": "Memproses..."
+  },
+  "history": {
+    "title": "Riwayat kredit",
+    "show": "Tampilkan",
+    "hide": "Sembunyikan",
+    "loading": "Memuat...",
+    "empty": "Belum ada riwayat",
+    "balanceAfter": "Sisa {balance}"
+  },
+  "txType": {
+    "purchase": "Pembelian kredit",
+    "use": "Kredit terpakai",
+    "refund": "Kredit dikembalikan",
+    "bonus": "Kredit bonus"
+  },
+  "cartoon": {
+    "uploadTitle": "Unggah foto",
+    "dropzone": "Tarik foto ke sini, atau klik untuk memilih",
+    "dropzoneHint": "JPG, PNG, WebP (maks. 10MB)",
+    "balanceLabel": "Sisa kredit:",
+    "cost": "{cost} kredit per gambar",
+    "generating": "Sedang membuat kartunmu... (bisa 30-60 detik)",
+    "generate": "Buat kartun ({cost} kredit)",
+    "insufficient": "Kredit tidak cukup (butuh {cost})",
+    "resultTitle": "Hasilnya",
+    "download": "Unduh gambar",
+    "galleryTitle": "Kartun kamu",
+    "galleryLoading": "Memuat...",
+    "galleryEmpty": "Belum ada kartun — bikin yang pertama, yuk!",
+    "refresh": "Muat ulang",
+    "delete": "Hapus gambar ini",
+    "deleting": "Menghapus...",
+    "close": "Tutup"
+  },
+  "errors": {
+    "GENERIC": "Terjadi kesalahan. Coba lagi, ya.",
+    "NOT_AN_IMAGE": "Pilih file gambar, ya.",
+    "FILE_TOO_LARGE": "File terlalu besar (maks. 10MB).",
+    "GENERATION_FAILED": "Kartunnya gagal dibuat.",
+    "DELETE_FAILED": "Gambarnya gagal dihapus.",
+    "CREDIT_ACCOUNT_NOT_FOUND": "Data kredit tidak ditemukan. Beli kredit dulu, ya.",
+    "INSUFFICIENT_CREDITS": "Kredit tidak cukup (butuh {required}, sisa {balance}).",
+    "CREDIT_DEDUCTION_FAILED": "Kredit tidak bisa dipotong."
+  }
+}

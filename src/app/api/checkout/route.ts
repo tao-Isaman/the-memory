@@ -2,38 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import { isEligibleForReferralDiscount } from '@/lib/referral';
+import {
+  normalizeLocale,
+  paymentMethodsFor,
+  stripeLocaleFor,
+  localizedUrl,
+  ensureReferralCoupon,
+} from '@/lib/checkout-locale';
 import Stripe from 'stripe';
-
-const REFERRAL_COUPON_ID = 'REFERRAL_50_THB';
-const DISCOUNT_AMOUNT = 5000; // 50 THB in satang (cents)
-
-// Ensure the referral discount coupon exists in Stripe
-async function ensureReferralCouponExists(): Promise<string | null> {
-  try {
-    // Try to retrieve existing coupon
-    await stripe.coupons.retrieve(REFERRAL_COUPON_ID);
-    return REFERRAL_COUPON_ID;
-  } catch {
-    // Coupon doesn't exist, create it
-    try {
-      await stripe.coupons.create({
-        id: REFERRAL_COUPON_ID,
-        amount_off: DISCOUNT_AMOUNT,
-        currency: 'thb',
-        name: 'ส่วนลดจากโค้ดแนะนำ 50 บาท',
-        duration: 'once',
-      });
-      return REFERRAL_COUPON_ID;
-    } catch (createError) {
-      console.error('Failed to create referral coupon:', createError);
-      return null;
-    }
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
-    const { memoryId, memoryTitle, userId } = await request.json();
+    const { memoryId, memoryTitle, userId, locale: rawLocale } = await request.json();
+    const locale = normalizeLocale(rawLocale);
 
     if (!memoryId || !userId) {
       return NextResponse.json(
@@ -82,7 +63,9 @@ export async function POST(request: NextRequest) {
 
     // Prepare checkout session options
     const sessionOptions: Stripe.Checkout.SessionCreateParams = {
-      payment_method_types: ['card', 'promptpay'],
+      // PromptPay is Thailand-only — non-Thai customers get card only.
+      payment_method_types: paymentMethodsFor(locale),
+      locale: stripeLocaleFor(locale),
       line_items: [
         {
           price: priceId,
@@ -90,8 +73,12 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${appUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}&memory_id=${memoryId}`,
-      cancel_url: `${appUrl}/payment/cancel?memory_id=${memoryId}`,
+      success_url: localizedUrl(
+        appUrl,
+        locale,
+        `/payment/success?session_id={CHECKOUT_SESSION_ID}&memory_id=${memoryId}`,
+      ),
+      cancel_url: localizedUrl(appUrl, locale, `/payment/cancel?memory_id=${memoryId}`),
       metadata: {
         memory_id: memoryId,
         user_id: userId,
@@ -103,7 +90,8 @@ export async function POST(request: NextRequest) {
 
     // Apply referral discount if eligible
     if (hasReferralDiscount) {
-      const couponId = await ensureReferralCouponExists();
+      // Per-locale coupon: its name is the discount line on Stripe's checkout page.
+      const couponId = await ensureReferralCoupon(locale);
       if (couponId) {
         sessionOptions.discounts = [{ coupon: couponId }];
       }

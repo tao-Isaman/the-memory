@@ -1,0 +1,216 @@
+{
+  "page": {
+    "backToDashboard": "Kembali ke beranda",
+    "title": "Apa yang baru",
+    "subtitle": "Pembaruan dan perbaikan terbaru",
+    "latest": "Terbaru",
+    "madeWith": "Dibuat dengan <heart></heart> untuk momen spesialmu"
+  },
+  "types": {
+    "feature": "Baru",
+    "improvement": "Peningkatan",
+    "fix": "Perbaikan",
+    "announcement": "Pengumuman"
+  },
+  "notes": {
+    "v2_9_0": {
+      "title": "Nikmati kenangan sepuasnya, tanpa hitung mundur",
+      "summary": "Cerita tidak lagi berganti otomatis setiap 5 detik — setiap cerita akan bertahan sampai kamu sendiri yang mengetuk atau menggantinya. Baca pelan-pelan, resapi sepuasnya. Bilah progres ala IG Stories tetap seperti sebelumnya.",
+      "items": [
+        "Lihat kenangan tanpa batas waktu — cerita tidak berganti sendiri lagi. Ketuk sisi kanan untuk lanjut, sisi kiri untuk kembali (atau pakai tombol panah di komputer).",
+        "Bilah progres ala IG Stories tetap ada, menunjukkan kamu ada di cerita ke berapa dari total keseluruhan.",
+        "Memperbaiki pembayaran PromptPay (terutama di Safari) yang sudah dibayar tetapi statusnya tidak ikut berubah — sistem kini memverifikasi pembayaran dan mengaktifkan kenangan secara otomatis."
+      ]
+    },
+    "v2_8_1": {
+      "title": "Universe kini juga menampilkan cerita di balik PIN",
+      "summary": "Saat \"Bagikan ke Universe\" aktif, semua cerita foto/teks dari sebuah kenangan akan tampil di feed, termasuk yang berada di balik PIN — PIN tetap melindungi urutan penayangan lewat tautan seperti biasa.",
+      "items": [
+        "Membagikan ke Universe berarti membagikan semua cerita foto/teks, termasuk yang di balik PIN (bisa dimatikan kapan saja).",
+        "Kebijakan Privasi dan Ketentuan Penggunaan diperbarui ke versi 1.1 agar sesuai dengan perilaku baru ini."
+      ]
+    },
+    "v2_8_0": {
+      "title": "Kebijakan Privasi & Ketentuan Penggunaan",
+      "summary": "Menambahkan halaman Kebijakan Privasi (PDPA) dan Ketentuan Penggunaan, beserta langkah persetujuan sebelum masuk, demi transparansi dalam menjaga datamu.",
+      "items": [
+        "Halaman Kebijakan Privasi dan Ketentuan Penggunaan, bisa dibaca kapan saja dari bagian bawah situs.",
+        "Pengguna baru membaca dan menyetujui ketentuan sebelum masuk; pengguna lama cukup mengonfirmasi sekali dari beranda.",
+        "Kami tidak menjual datamu, dan kamu bisa meminta akses, perbaikan, atau penghapusan data sesuai hakmu dalam PDPA."
+      ]
+    },
+    "v2_7_0": {
+      "title": "Universe — feed cerita dari pengguna lain",
+      "summary": "Tab baru \"Universe\" mengumpulkan cerita (foto/teks) dari kenangan yang dibagikan orang lain. Gulir secara acak seperti feed media sosial, dan kirim reaksi untuk pembuatnya.",
+      "items": [
+        "Tab \"Universe\" baru di beranda — gulir cerita dari orang lain secara acak, otomatis memuat lebih banyak saat kamu menggulir ke bawah.",
+        "Beri reaksi (❤️ 😍 🥹 🔥 🙏) pada cerita di Universe — pemiliknya langsung mendapat notifikasi.",
+        "Pilih untuk membagikan atau tidak membagikan kenangan ke Universe, baik saat membuat maupun dari beranda (bawaannya aktif).",
+        "Privasi: cerita yang berada di balik PIN tidak akan pernah muncul di Universe."
+      ]
+    },
+    "v2_6_0": {
+      "title": "Kirim hati & balas kenangan",
+      "summary": "Setelah kenangan selesai ditonton, penerima bisa mengirim hati atau menulis balasan untuk pembuatnya — dan pembuatnya langsung mendapat notifikasi.",
+      "items": [
+        "Kirim perasaan di akhir kenangan — penerima bisa memilih emoji (❤️ 😍 🥹 🔥 🙏) untuk dikirim ke pembuatnya.",
+        "Tulis pesan balasan singkat untuk pembuat kenangan.",
+        "Pembuat langsung mendapat notifikasi (di aplikasi dan push) begitu ada yang mengirim hati atau balasan."
+      ]
+    },
+    "v2_5_0": {
+      "title": "Cerita jenis baru — pesan suara & album foto",
+      "summary": "Dua jenis cerita baru: sampaikan perasaanmu dengan suaramu sendiri, atau gabungkan beberapa foto menjadi slideshow yang cantik.",
+      "items": [
+        "Cerita pesan suara — rekam atau unggah berkas suara untuk orang spesial, maksimal 1 menit.",
+        "Cerita album foto — gabungkan 2-5 foto menjadi slideshow dengan efek zoom yang cantik."
+      ]
+    },
+    "v2_4_0": {
+      "title": "Sistem notifikasi & layar penutup kenangan yang baru",
+      "summary": "Notifikasi di aplikasi dan perangkat (push), 10 kredit gratis saat mengaktifkannya, layar penutup baru dengan tombol putar ulang, dan perbaikan proses masuk.",
+      "items": [
+        "Sistem notifikasi baru — lonceng dengan 2 tab (notifikasi + pembaruan), menyatukan kabar terbaru dan riwayat pembaruan dalam satu tempat.",
+        "Notifikasi push — dapatkan notifikasi di perangkatmu meski aplikasi tidak sedang dibuka.",
+        "Aktifkan notifikasi untuk pertama kalinya dan dapatkan 10 kredit gratis!",
+        "Kelola notifikasi — hapus satu per satu, atau bersihkan semuanya.",
+        "Layar penutup baru setelah kenangan selesai — bisa diputar ulang, lengkap dengan ajakan membuat kenanganmu sendiri dan efek hati yang meriah.",
+        "Memperbaiki masalah macet di layar \"Menghubungkan\" setelah keluar lalu masuk kembali."
+      ]
+    },
+    "v2_3_0": {
+      "title": "Sekarang bisa dipasang seperti aplikasi! (PWA)",
+      "summary": "Tambahkan The Memory ke layar utama layaknya aplikasi sungguhan — lebih cepat dibuka, layar penuh, dan ada halaman cadangan saat offline.",
+      "items": [
+        "Pasang ke layar utama di Android, iOS, maupun komputer (PWA).",
+        "Terbuka layar penuh seperti aplikasi asli, tanpa bilah peramban, dan cepat dijalankan.",
+        "Ada halaman pemberitahuan saat offline, lengkap dengan tombol coba lagi.",
+        "Batas panjang teks di setiap cerita, lengkap dengan penghitung karakter, agar tampilannya rapi di semua layar."
+      ]
+    },
+    "v2_2_0": {
+      "title": "Halaman landing baru untuk setiap momen",
+      "summary": "Enam halaman landing baru dengan konten yang disesuaikan untuk tiap momen, agar lebih mudah ditemukan.",
+      "items": [
+        "/anniversary — hari jadi, lengkap dengan konten dan contoh pesan khusus.",
+        "/birthday — ulang tahun pasangan, lengkap dengan ide ucapan.",
+        "/valentine — Valentine, hadiah di hari kasih sayang.",
+        "/reconcile — minta maaf ke pasangan, lengkap dengan contoh pesan.",
+        "/family — mengungkapkan sayang untuk keluarga.",
+        "/missyou — mengirim rasa rindu untuk orang tersayang."
+      ]
+    },
+    "v2_1_1": {
+      "title": "Teks panjang kini bisa digulir",
+      "summary": "Cerita berjenis teks dan foto+teks kini bisa digulir ketika isinya lebih panjang dari layar.",
+      "items": [
+        "Teks panjang pada cerita teks dan foto+teks bisa digulir, baik di mode pratinjau maupun mode asli.",
+        "Judul tetap di atas saat digulir, sehingga isi yang panjang lebih nyaman dibaca."
+      ]
+    },
+    "v2_1_0": {
+      "title": "Mode tampilan ala Instagram Stories",
+      "summary": "Halaman kenangan dirombak total dengan gaya IG Stories — ketuk kiri/kanan untuk berpindah, bilah progres bersegmen, dan tampilan layar penuh.",
+      "items": [
+        "Ketuk layar untuk berganti cerita (persis seperti IG Stories).",
+        "Bilah progres bersegmen — menunjukkan jumlah seluruh cerita dan terisi otomatis tiap 5 detik.",
+        "Dukungan keyboard — tekan panah kiri/kanan untuk berganti cerita di desktop."
+      ]
+    },
+    "v2_0_0": {
+      "title": "The Memory 2.0 — platform kenangan untuk segala momen",
+      "summary": "Rebranding besar! Empat tema warna baru, enam halaman use case, palet yang lebih hangat, plus sistem analitik.",
+      "items": [
+        "Rebranding menjadi \"Digital Memory & Emotion Platform\" — untuk segala momen, bukan cuma Valentine.",
+        "Empat tema warna baru — hari jadi (emas), ulang tahun (oranye), permintaan maaf (ungu), rindu (biru), menjadi 7 tema.",
+        "Enam halaman use case — kejutan untuk pasangan, hari jadi, ulang tahun, permintaan maaf, rindu, keluarga, lengkap dengan SEO.",
+        "Bagian social proof di beranda — ulasan dari pengguna sungguhan.",
+        "Sistem analitik — memantau perilaku pengguna di sepanjang funnel.",
+        "Beranda baru sepenuhnya — use case navigator, FAQ akordeon, trust badge.",
+        "Palet yang lebih hangat — dari merah muda pekat menjadi warm neutral, cocok untuk semua orang.",
+        "Tujuh pilihan tema warna lengkap dengan deskripsi suasananya di halaman buat kenangan.",
+        "Pesan pembayaran lebih jelas — \"Cuma 99 baht, simpan selamanya, kirim sesering yang kamu mau\".",
+        "Efek hati yang lebih lembut — warnanya lebih pudar dan jumlahnya lebih sedikit."
+      ]
+    },
+    "v1_8_0": {
+      "title": "Profil pengguna & Toast",
+      "summary": "Lengkapi profilmu dan dapatkan 10 kredit gratis, plus gaya notifikasi yang baru.",
+      "items": [
+        "Profil pengguna — isi data tambahan (nomor telepon, tanggal lahir, jenis kelamin, pekerjaan, status, momen).",
+        "Halaman onboarding — menyambut pengguna baru dengan formulir profil.",
+        "Dapatkan 10 kredit gratis setelah profilmu lengkap!",
+        "Modal di dashboard yang mengajakmu melengkapi profil.",
+        "Halaman profil kini bisa diubah — lengkap dengan formulir untuk memperbarui data pribadi.",
+        "Notifikasi Toast — menggantikan alert dengan tampilan yang jauh lebih enak dilihat."
+      ]
+    },
+    "v1_6_0": {
+      "title": "Ubah foto asli menjadi kartun",
+      "summary": "Unggah foto kalian berdua dan ubah menjadi gambar kartun yang menggemaskan!",
+      "items": [
+        "Pembuatan gambar kartun — unggah foto lalu ubah menjadi gaya kartun dengan AI (memakai 10 kredit).",
+        "Galeri kartun — lihat dan unduh semua karyamu.",
+        "Sistem tab di dashboard — berpindah antara kenangan dan pembuat gambar kartun."
+      ]
+    },
+    "v1_5_0": {
+      "title": "Sistem kredit",
+      "summary": "Beli kredit dalam bentuk paket — lebih hemat, dan kenanganmu langsung aktif.",
+      "items": [
+        "Sistem kredit — beli paket kredit dengan diskon saat membeli lebih banyak.",
+        "Saldo kredit tampil di app bar, lengkap dengan halaman pengelolaan kredit dan riwayatnya.",
+        "Tiga paket pilihan: 100, 300, dan 500 kredit."
+      ]
+    },
+    "v1_4_0": {
+      "title": "App bar, profil & halaman pembaruan",
+      "summary": "Struktur aplikasi dirapikan dengan app bar, notifikasi pembaruan, dan halaman profil.",
+      "items": [
+        "App bar — bilah navigasi atas dengan logo, lonceng notifikasi, dan menu pengguna.",
+        "Halaman profil — lihat foto, nama, email, dan tanggal bergabungmu.",
+        "Halaman \"Apa yang baru\" — lihat riwayat pembaruan tiap versi, lengkap dengan notifikasi saat ada yang baru.",
+        "Struktur route group (app) agar semua halaman berbagi app bar yang sama.",
+        "Dashboard jadi lebih ringkas, menunya dipindahkan ke app bar."
+      ]
+    },
+    "v1_3_0": {
+      "title": "Cerita kuis & kode referral menyusul",
+      "summary": "Menambahkan cerita berjenis pertanyaan, serta membuka kesempatan memasukkan kode referral belakangan.",
+      "items": [
+        "Cerita kuis (Question) — buat pertanyaan dengan 4 pilihan untuk dijawab orang spesialmu.",
+        "Kode referral bisa dimasukkan menyusul, bagi yang sempat melewatinya.",
+        "Memperbaiki masalah dua kartu gosok yang statusnya saling tumpang tindih.",
+        "Memperbaiki webhook untuk pembayaran melalui PromptPay."
+      ]
+    },
+    "v1_2_0": {
+      "title": "Program referral",
+      "summary": "Bagikan kodemu ke teman dan dapatkan diskon 50 baht.",
+      "items": [
+        "Sistem kode referral — bagikan kodemu ke teman dan dapatkan diskon 50 baht.",
+        "Ajukan pencairan komisi referral lewat PromptPay atau rekening bank."
+      ]
+    },
+    "v1_1_0": {
+      "title": "Kartu gosok & statistik situs",
+      "summary": "Menambahkan cerita kartu gosok dan angka statistik di beranda.",
+      "items": [
+        "Cerita kartu gosok (Scratch Card) — gosok untuk membuka isinya.",
+        "Angka statistik beranimasi di beranda.",
+        "Konversi gambar ke WebP otomatis agar lebih cepat."
+      ]
+    },
+    "v1_0_0": {
+      "title": "The Memory resmi hadir!",
+      "summary": "Buat kenangan istimewa untuk orang yang kamu sayangi.",
+      "items": [
+        "Rilis perdana kami!",
+        "Buat kenangan dengan 5 jenis cerita: teks, foto, foto+teks, YouTube, dan kata sandi.",
+        "Kunci PIN 6 digit lengkap dengan numpad.",
+        "Bagikan lewat QR Code, salin tautan, atau bagikan melalui aplikasi apa pun.",
+        "Pembayaran melalui Stripe (kartu kredit & PromptPay)."
+      ]
+    }
+  }
+}

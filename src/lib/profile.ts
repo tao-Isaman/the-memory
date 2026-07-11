@@ -104,6 +104,16 @@ export async function upsertUserProfile(
 
 // -- Credit Grant --
 
+/**
+ * Error codes returned to the client. The UI is localised, so these must stay
+ * stable, language-neutral identifiers — components map them to translated copy
+ * (messages/<locale>/profile.json → "errors"). Never return prose from here.
+ */
+export type ProfileCreditError =
+  | 'PROFILE_NOT_FOUND'
+  | 'PROFILE_INCOMPLETE'
+  | 'CREDIT_GRANT_FAILED';
+
 export async function grantProfileCredits(
   supabase: SupabaseClient<Database>,
   userId: string
@@ -111,13 +121,13 @@ export async function grantProfileCredits(
   success: boolean;
   alreadyClaimed: boolean;
   newBalance?: number;
-  error?: string;
+  error?: ProfileCreditError;
 }> {
   // 1. Get profile and check if credits already claimed
   const profile = await getUserProfile(supabase, userId);
 
   if (!profile) {
-    return { success: false, alreadyClaimed: false, error: 'ไม่พบข้อมูลโปรไฟล์' };
+    return { success: false, alreadyClaimed: false, error: 'PROFILE_NOT_FOUND' };
   }
 
   if (profile.profileCreditsClaimed) {
@@ -129,7 +139,7 @@ export async function grantProfileCredits(
     return {
       success: false,
       alreadyClaimed: false,
-      error: 'กรุณากรอกข้อมูลโปรไฟล์ให้ครบทุกช่อง',
+      error: 'PROFILE_INCOMPLETE',
     };
   }
 
@@ -150,17 +160,19 @@ export async function grantProfileCredits(
 
   if (updateError) {
     console.error('Error updating credit balance for profile:', updateError);
-    return { success: false, alreadyClaimed: false, error: 'ไม่สามารถเพิ่มเครดิตได้' };
+    return { success: false, alreadyClaimed: false, error: 'CREDIT_GRANT_FAILED' };
   }
 
   // 6. Insert credit transaction ('bonus', not 'purchase' — this is a free grant;
-  //    referral.hasUserPaidBefore counts 'purchase' rows as proof of payment)
+  //    referral.hasUserPaidBefore counts 'purchase' rows as proof of payment).
+  //    `description` is a locale-neutral ledger note (admin-facing); the user-facing
+  //    label in the credits page is derived from `type`, not from this string.
   const { error: txError } = await supabase.from('credit_transactions').insert({
     user_id: userId,
     type: 'bonus',
     amount: PROFILE_COMPLETION_CREDITS,
     balance_after: newBalance,
-    description: 'โบนัสกรอกโปรไฟล์ครบ (10 เครดิต)',
+    description: `Profile completion bonus (${PROFILE_COMPLETION_CREDITS} credits)`,
   });
 
   if (txError) {

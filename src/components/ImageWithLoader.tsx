@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
 import HeartIcon from './HeartIcon';
 
@@ -20,6 +21,7 @@ const defaultColors: ThemeColors = {
 };
 
 export default function ImageWithLoader({ src, alt, className = '', style, themeColors = defaultColors }: ImageWithLoaderProps) {
+  const t = useTranslations('viewer');
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -48,7 +50,7 @@ export default function ImageWithLoader({ src, alt, className = '', style, theme
             <HeartIcon size={48} className="animate-pulse-heart relative z-10" style={{ color: themeColors.primary }} />
           </div>
           <p className="mt-4 text-sm font-medium animate-pulse" style={{ color: themeColors.primary }}>
-            กำลังโหลดรูปภาพ...
+            {t('image.loading')}
           </p>
           {/* Shimmer effect */}
           <div className="absolute inset-0 overflow-hidden rounded-lg">
@@ -61,7 +63,7 @@ export default function ImageWithLoader({ src, alt, className = '', style, theme
       {hasError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-linear-to-br from-gray-50 to-gray-100 rounded-lg">
           <HeartIcon size={48} className="text-gray-300 mb-4" />
-          <p className="text-sm text-gray-400">ไม่สามารถโหลดรูปภาพได้</p>
+          <p className="text-sm text-gray-400">{t('image.error')}</p>
         </div>
       )}
 

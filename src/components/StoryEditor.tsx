@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { StoryType, MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
 import { generateId } from '@/lib/storage';
@@ -51,29 +52,19 @@ const defaultColors: ThemeColors = {
   background: '#FFF0F5',
 };
 
-export const storyTypeLabels: Record<StoryType, string> = {
-  password: 'รหัส PIN',
-  text: 'ข้อความ',
-  image: 'รูปภาพ',
-  'text-image': 'ข้อความ + รูปภาพ',
-  youtube: 'วิดีโอ YouTube',
-  scratch: 'ความลับของเรา',
-  question: 'คำถาม',
-  voice: 'ข้อความเสียง',
-  slideshow: 'อัลบั้มภาพ',
-};
-
-const storyTypeDescriptions: Record<StoryType, string> = {
-  password: 'เพิ่มรหัส PIN 6 หลักเพื่อปกป้องเนื้อหา',
-  text: 'เพิ่มข้อความจากใจ',
-  image: 'เพิ่มรูปภาพพิเศษ',
-  'text-image': 'รวมข้อความกับรูปภาพ',
-  youtube: 'เพิ่มเพลงหรือวิดีโอที่มีความหมาย',
-  scratch: 'ซ่อนรูปภาพไว้ในเมฆให้คนพิเศษขูดเปิดดู',
-  question: 'สร้างคำถามให้คนพิเศษตอบ พร้อม 4 ตัวเลือก',
-  voice: 'บันทึกเสียงหรืออัปโหลดไฟล์เสียง สูงสุด 1 นาที',
-  slideshow: 'รวมรูป 2-5 รูป เล่นเป็นสไลด์โชว์พร้อมเอฟเฟกต์ซูม',
-};
+// Display order of the story-type picker. Labels + descriptions live in the
+// `create.storyTypes.<type>` messages (translated at render time).
+export const STORY_TYPE_ORDER: StoryType[] = [
+  'password',
+  'text',
+  'image',
+  'text-image',
+  'youtube',
+  'scratch',
+  'question',
+  'voice',
+  'slideshow',
+];
 
 export const storyTypeIcons: Record<StoryType, LucideIcon> = {
   password: Lock,
@@ -149,7 +140,14 @@ export default function StoryEditor({
   themeColors = defaultColors,
 }: StoryEditorProps) {
   const { showToast } = useToast();
+  const t = useTranslations('create.editor');
+  const tType = useTranslations('create.storyTypes');
+  const tc = useTranslations('common');
   const isEditing = !!editingStory;
+
+  // Byte limits are surfaced to the user in MB.
+  const voiceMaxMb = Math.round(VOICE_MAX_SIZE_BYTES / (1024 * 1024));
+  const slideMaxMb = Math.round(SLIDESHOW_IMAGE_MAX_BYTES / (1024 * 1024));
 
   // Initialize state from editing story if provided
   const getInitialType = (): StoryType => {
@@ -430,7 +428,7 @@ export default function StoryEditor({
             recTimerRef.current = null;
           }
           stopRecording();
-          showToast('อัดเสียงได้สูงสุด 1 นาที', 'info');
+          showToast(t('voice.maxDurationReached'), 'info');
         }
       }, 200);
     } catch (error) {
@@ -438,10 +436,10 @@ export default function StoryEditor({
       if (name === 'NotAllowedError' || name === 'SecurityError') {
         setRecMode('denied');
       } else if (name === 'NotFoundError') {
-        showToast('ไม่พบไมโครโฟน', 'error');
+        showToast(t('voice.micNotFound'), 'error');
         setRecMode('idle');
       } else {
-        showToast('ไม่สามารถเข้าถึงไมโครโฟนได้', 'error');
+        showToast(t('voice.micError'), 'error');
         setRecMode('idle');
       }
     }
@@ -454,11 +452,11 @@ export default function StoryEditor({
     if (!file) return;
 
     if (file.size > VOICE_MAX_SIZE_BYTES) {
-      showToast('ไฟล์เสียงใหญ่เกินไป (สูงสุด 10MB)', 'error');
+      showToast(t('voice.fileTooLarge', { maxMb: voiceMaxMb }), 'error');
       return;
     }
     if (!isAcceptableAudio(file)) {
-      showToast('ไฟล์นี้ไม่ใช่ไฟล์เสียง', 'error');
+      showToast(t('voice.notAudio'), 'error');
       return;
     }
 
@@ -474,9 +472,9 @@ export default function StoryEditor({
       setAudioBlob(file); setAudioMime(file.type || ''); setAudioSource('upload');
       setAudioPreviewUrl(probeUrl); setAudioDuration(durationSec); setRecMode('recorded');
     };
-    const reject = (msgKey: string) => {
+    const reject = (message: string) => {
       if (settled) return; settled = true;
-      clearTimeout(timer); URL.revokeObjectURL(probeUrl); showToast(msgKey, 'error');
+      clearTimeout(timer); URL.revokeObjectURL(probeUrl); showToast(message, 'error');
     };
     const timer = setTimeout(() => {
       // No metadata after 4s (corrupt/edge/stalled): accept with provisional, but
@@ -486,12 +484,12 @@ export default function StoryEditor({
     probe.addEventListener('loadedmetadata', () => {
       const d = probe.duration;
       if (Number.isFinite(d) && d > VOICE_MAX_DURATION_SEC + 1) {
-        reject('เสียงยาวเกิน 1 นาที กรุณาเลือกไฟล์สั้นกว่านี้'); return;
+        reject(t('voice.tooLong')); return;
       }
       // Non-finite (rare malformed/streamed upload) → store 0 = "unknown", NOT 60.
       accept(Number.isFinite(d) && d > 0 ? Math.min(VOICE_MAX_DURATION_SEC, Math.max(1, Math.round(d))) : 0);
     });
-    probe.addEventListener('error', () => reject('ไฟล์นี้ไม่ใช่ไฟล์เสียง'));
+    probe.addEventListener('error', () => reject(t('voice.notAudio')));
   };
 
   // Discard the current take and return to the record/upload chooser.
@@ -520,18 +518,18 @@ export default function StoryEditor({
 
     const remaining = SLIDESHOW_MAX_IMAGES - slides.length;
     if (incoming.length > remaining) {
-      showToast('เลือกรูปได้สูงสุด 5 รูป', 'info');
+      showToast(t('slideshow.maxImages', { max: SLIDESHOW_MAX_IMAGES }), 'info');
     }
     const toAdd = incoming.slice(0, Math.max(0, remaining));
 
     const accepted: SlideItem[] = [];
     for (const file of toAdd) {
       if (!file.type.startsWith('image/')) {
-        showToast('ไฟล์นี้ไม่ใช่รูปภาพ', 'error');
+        showToast(t('slideshow.notImage'), 'error');
         continue;
       }
       if (file.size > SLIDESHOW_IMAGE_MAX_BYTES) {
-        showToast('รูปภาพใหญ่เกินไป (สูงสุด 10MB)', 'error');
+        showToast(t('slideshow.imageTooLarge', { maxMb: slideMaxMb }), 'error');
         continue;
       }
       const previewUrl = URL.createObjectURL(file);
@@ -591,8 +589,8 @@ export default function StoryEditor({
       try {
         setUploading(true);
         uploadedImageUrl = await uploadImage(imageFile);
-      } catch (error) {
-        showToast('อัพโหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+      } catch {
+        showToast(t('image.uploadFailed'), 'error');
         setUploading(false);
         return;
       } finally {
@@ -603,7 +601,7 @@ export default function StoryEditor({
     switch (type) {
       case 'password':
         if (password.length !== 6 || !/^\d{6}$/.test(password)) {
-          showToast('กรุณาใส่รหัส PIN 6 หลัก', 'error');
+          showToast(t('password.error'), 'error');
           return;
         }
         story = { ...baseStory, type: 'password', content: { password: password } };
@@ -642,11 +640,11 @@ export default function StoryEditor({
         break;
       case 'question':
         if (!questionText.trim()) {
-          showToast('กรุณาใส่คำถาม', 'error');
+          showToast(t('question.errorQuestion'), 'error');
           return;
         }
         if (choices.some(c => !c.trim())) {
-          showToast('กรุณาใส่ตัวเลือกทั้ง 4 ข้อ', 'error');
+          showToast(t('question.errorChoices'), 'error');
           return;
         }
         story = {
@@ -661,7 +659,7 @@ export default function StoryEditor({
         break;
       case 'voice': {
         if (!audioBlob && !audioUrl) {
-          showToast('กรุณาอัดเสียงหรืออัปโหลดไฟล์เสียงก่อน', 'error');
+          showToast(t('voice.errorRequired'), 'error');
           return;
         }
         let finalAudioUrl = audioUrl;
@@ -683,7 +681,7 @@ export default function StoryEditor({
               safe.blob instanceof File ? safe.blob.name : undefined,
             );
           } catch {
-            showToast('อัปโหลดเสียงไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'error');
+            showToast(t('voice.uploadFailed'), 'error');
             setUploading(false);
             return;
           } finally {
@@ -706,11 +704,11 @@ export default function StoryEditor({
       }
       case 'slideshow': {
         if (slides.length < SLIDESHOW_MIN_IMAGES) {
-          showToast('กรุณาเพิ่มรูปอย่างน้อย 2 รูป', 'error');
+          showToast(t('slideshow.errorMin', { min: SLIDESHOW_MIN_IMAGES }), 'error');
           return;
         }
         if (slides.length > SLIDESHOW_MAX_IMAGES) {
-          showToast('เลือกรูปได้สูงสุด 5 รูป', 'error');
+          showToast(t('slideshow.maxImages', { max: SLIDESHOW_MAX_IMAGES }), 'error');
           return;
         }
 
@@ -760,7 +758,7 @@ export default function StoryEditor({
         }
 
         if (failed || working.some((s) => !s.uploadedUrl)) {
-          showToast('อัปโหลดบางรูปไม่สำเร็จ แตะรูปที่มีปัญหาเพื่อลองใหม่', 'error');
+          showToast(t('slideshow.errorPartialUpload'), 'error');
           return;
         }
 
@@ -807,14 +805,14 @@ export default function StoryEditor({
   return (
     <div className={noCard ? '' : 'memory-card p-6'} style={cssVariables}>
       <h3 className="font-kanit text-xl font-bold mb-4" style={{ color: themeColors.dark }}>
-        {isEditing ? 'แก้ไขเรื่องราว' : 'เพิ่มเรื่องราวความทรงจำใหม่'}
+        {isEditing ? t('titleEdit') : t('titleAdd')}
       </h3>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Story Type Selector */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ประเภทความทรงจำ
+            {t('typeLabel')}
           </label>
           {isEditing ? (
             // Show current type only when editing (can't change type)
@@ -829,18 +827,18 @@ export default function StoryEditor({
                 const IconComponent = storyTypeIcons[type];
                 return <IconComponent size={18} style={{ color: themeColors.dark }} />;
               })()}
-              <span className="font-medium text-sm">{storyTypeLabels[type]}</span>
+              <span className="font-medium text-sm">{tType(`${type}.label`)}</span>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {(Object.keys(storyTypeLabels) as StoryType[]).map((t) => {
-                const IconComponent = storyTypeIcons[t];
-                const isSelected = type === t;
+              {STORY_TYPE_ORDER.map((storyType) => {
+                const IconComponent = storyTypeIcons[storyType];
+                const isSelected = type === storyType;
                 return (
                   <button
-                    key={t}
+                    key={storyType}
                     type="button"
-                    onClick={() => setType(t)}
+                    onClick={() => setType(storyType)}
                     className="p-3 rounded-lg border-2 text-left transition-all"
                     style={{
                       borderColor: isSelected ? themeColors.primary : '#e5e7eb',
@@ -849,10 +847,10 @@ export default function StoryEditor({
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <IconComponent size={18} style={{ color: isSelected ? themeColors.dark : '#6b7280' }} />
-                      <span className="font-medium text-sm">{storyTypeLabels[t]}</span>
+                      <span className="font-medium text-sm">{tType(`${storyType}.label`)}</span>
                     </div>
                     <span className="block text-xs text-gray-500">
-                      {storyTypeDescriptions[t]}
+                      {tType(`${storyType}.description`)}
                     </span>
                   </button>
                 );
@@ -864,19 +862,19 @@ export default function StoryEditor({
         {/* Story Title */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            ชื่อเรื่องราว (ไม่จำเป็น)
+            {t('storyTitleLabel')}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="ตั้งชื่อให้จดจำง่าย เช่น 'วันแรกที่เจอกัน'"
+            placeholder={t('storyTitlePlaceholder')}
             className="input-valentine"
             maxLength={STORY_TEXT_LIMITS.title}
           />
           <div className="flex items-start justify-between gap-2">
             <p className="text-xs text-gray-500 mt-1">
-              ชื่อนี้จะแสดงแทนประเภทเรื่องราวในรายการ
+              {t('storyTitleHint')}
             </p>
             <CharCount value={title} max={STORY_TEXT_LIMITS.title} />
           </div>
@@ -886,7 +884,7 @@ export default function StoryEditor({
         {type === 'password' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              รหัส PIN (6 หลัก)
+              {t('password.label')}
             </label>
             <div className="flex justify-center gap-2" id="pin-inputs">
               {[0, 1, 2, 3, 4, 5].map((index) => (
@@ -938,7 +936,7 @@ export default function StoryEditor({
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-3 text-center">
-              ใส่ตัวเลข 6 หลักเพื่อปกป้องเนื้อหาถัดไป
+              {t('password.hint')}
             </p>
             {/* Number pad for mobile */}
             <div className="mt-4 grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
@@ -994,19 +992,19 @@ export default function StoryEditor({
         {(type === 'text' || type === 'text-image') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              ข้อความของคุณ
+              {t('text.label')}
             </label>
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="เขียนอะไรบางอย่างจากใจ..."
+              placeholder={t('text.placeholder')}
               className="input-valentine min-h-[120px] resize-y"
               maxLength={textMaxLength}
               required
             />
             {type === 'text-image' && (
               <p className="text-xs text-gray-500 mt-1">
-                ข้อความสั้นๆ ประกอบรูปภาพ (ประมาณ 3-4 บรรทัด)
+                {t('text.textImageHint')}
               </p>
             )}
             <CharCount value={text} max={textMaxLength} />
@@ -1016,7 +1014,7 @@ export default function StoryEditor({
         {(type === 'image' || type === 'text-image' || type === 'scratch') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {imageUrl && !imageFile ? 'เปลี่ยนรูปภาพ (ไม่จำเป็น)' : 'อัพโหลดรูปภาพ'}
+              {imageUrl && !imageFile ? t('image.changeLabel') : t('image.uploadLabel')}
             </label>
             <input
               type="file"
@@ -1030,7 +1028,7 @@ export default function StoryEditor({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imagePreview}
-                  alt="ตัวอย่าง"
+                  alt={t('image.previewAlt')}
                   className="max-h-40 mx-auto rounded"
                 />
               </div>
@@ -1041,13 +1039,13 @@ export default function StoryEditor({
         {(type === 'image' || type === 'scratch') && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              คำบรรยาย (ไม่จำเป็น)
+              {t('image.captionLabel')}
             </label>
             <input
               type="text"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
-              placeholder="เพิ่มคำบรรยายน่ารักๆ..."
+              placeholder={t('image.captionPlaceholder')}
               className="input-valentine"
               maxLength={STORY_TEXT_LIMITS.caption}
             />
@@ -1058,18 +1056,18 @@ export default function StoryEditor({
         {type === 'youtube' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              URL YouTube
+              {t('youtube.label')}
             </label>
             <input
               type="url"
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder={t('youtube.placeholder')}
               className="input-valentine"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              วางลิงก์ YouTube เพื่อแชร์เพลงหรือวิดีโอที่มีความหมาย
+              {t('youtube.hint')}
             </p>
           </div>
         )}
@@ -1078,13 +1076,13 @@ export default function StoryEditor({
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                คำถาม
+                {t('question.label')}
               </label>
               <input
                 type="text"
                 value={questionText}
                 onChange={(e) => setQuestionText(e.target.value)}
-                placeholder="เช่น: เราเจอกันครั้งแรกที่ไหน?"
+                placeholder={t('question.placeholder')}
                 className="input-valentine"
                 maxLength={STORY_TEXT_LIMITS.question}
                 required
@@ -1094,7 +1092,7 @@ export default function StoryEditor({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                ตัวเลือก (4 ข้อ)
+                {t('question.choicesLabel')}
               </label>
               <div className="space-y-2">
                 {[0, 1, 2, 3].map((index) => (
@@ -1115,7 +1113,9 @@ export default function StoryEditor({
                         newChoices[index] = e.target.value;
                         setChoices(newChoices);
                       }}
-                      placeholder={`ตัวเลือก ${String.fromCharCode(65 + index)}`}
+                      placeholder={t('question.choicePlaceholder', {
+                        letter: String.fromCharCode(65 + index),
+                      })}
                       className="input-valentine flex-1"
                       maxLength={STORY_TEXT_LIMITS.choice}
                       required
@@ -1127,7 +1127,7 @@ export default function StoryEditor({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                คำตอบที่ถูกต้อง
+                {t('question.correctLabel')}
               </label>
               <div className="flex flex-wrap gap-2">
                 {[0, 1, 2, 3].map((index) => (
@@ -1147,7 +1147,7 @@ export default function StoryEditor({
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                เลือกตัวเลือกที่เป็นคำตอบที่ถูกต้อง
+                {t('question.correctHint')}
               </p>
             </div>
           </div>
@@ -1157,7 +1157,7 @@ export default function StoryEditor({
         {type === 'voice' && (() => {
           // Preview the SHARED VoicePlayer whenever we have a fresh take ('recorded')
           // OR an existing saved audioUrl that's not mid-record/request. When previewing,
-          // the record/upload chooser blocks are hidden (the 'อัดใหม่' button re-opens them).
+          // the record/upload chooser blocks are hidden (the "record again" button re-opens them).
           const voiceShowPreview =
             recMode === 'recorded' ||
             (!!audioUrl && recMode !== 'recording' && recMode !== 'requesting');
@@ -1166,9 +1166,9 @@ export default function StoryEditor({
             {/* a11y live region for recorder status changes */}
             <span className="sr-only" aria-live="polite">
               {recMode === 'recording'
-                ? 'กำลังอัดเสียง'
+                ? t('voice.statusRecording')
                 : recMode === 'recorded'
-                  ? 'อัดเสียงเสร็จแล้ว'
+                  ? t('voice.statusRecorded')
                   : ''}
             </span>
 
@@ -1179,7 +1179,7 @@ export default function StoryEditor({
                   type="button"
                   onClick={startRecording}
                   disabled={recMode === 'requesting'}
-                  aria-label="อัดเสียง"
+                  aria-label={t('voice.recordAria')}
                   className="relative flex items-center justify-center rounded-full text-white transition-transform hover:scale-105 active:scale-95 animate-pulse-heart disabled:opacity-70"
                   style={{
                     width: '88px',
@@ -1191,14 +1191,14 @@ export default function StoryEditor({
                   <Mic size={36} />
                 </button>
                 <p className="text-sm text-gray-500">
-                  {recMode === 'requesting' ? 'กำลังขอสิทธิ์ไมโครโฟน...' : 'แตะเพื่อเริ่มอัดเสียง'}
+                  {recMode === 'requesting' ? t('voice.requesting') : t('voice.tapToRecord')}
                 </p>
                 {/* secondary: upload a file instead */}
                 <label
                   className="text-sm font-semibold cursor-pointer underline"
                   style={{ color: themeColors.dark }}
                 >
-                  หรืออัปโหลดไฟล์เสียง
+                  {t('voice.orUploadFile')}
                   <input
                     type="file"
                     accept="audio/*,.m4a,.mp3,.wav,.aac,.ogg,.webm"
@@ -1215,7 +1215,7 @@ export default function StoryEditor({
                 <button
                   type="button"
                   onClick={stopRecording}
-                  aria-label="หยุด"
+                  aria-label={t('voice.stopAria')}
                   className="flex items-center justify-center rounded-full text-white transition-transform active:scale-95"
                   style={{
                     width: '88px',
@@ -1243,7 +1243,7 @@ export default function StoryEditor({
                     }}
                   />
                 </div>
-                <p className="text-sm text-gray-500">แตะเพื่อหยุดอัดเสียง</p>
+                <p className="text-sm text-gray-500">{t('voice.tapToStop')}</p>
               </div>
             )}
 
@@ -1254,7 +1254,7 @@ export default function StoryEditor({
                 style={{ borderColor: themeColors.primary, backgroundColor: `${themeColors.accent}1A` }}
               >
                 <p className="text-sm text-gray-700">
-                  คุณปิดการเข้าถึงไมโครโฟนไว้ — เปิดสิทธิ์ในการตั้งค่าเบราว์เซอร์แล้วลองใหม่ หรืออัปโหลดไฟล์เสียงแทน
+                  {t('voice.denied')}
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <button
@@ -1265,13 +1265,13 @@ export default function StoryEditor({
                       background: `linear-gradient(135deg, ${themeColors.primary} 0%, ${themeColors.dark} 100%)`,
                     }}
                   >
-                    ลองอีกครั้ง
+                    {tc('actions.retry')}
                   </button>
                   <label
                     className="text-sm font-semibold cursor-pointer underline"
                     style={{ color: themeColors.dark }}
                   >
-                    อัปโหลดไฟล์เสียง
+                    {t('voice.uploadFile')}
                     <input
                       type="file"
                       accept="audio/*,.m4a,.mp3,.wav,.aac,.ogg,.webm"
@@ -1287,7 +1287,7 @@ export default function StoryEditor({
             {!voiceShowPreview && recMode === 'unsupported' && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600">
-                  อุปกรณ์นี้ไม่รองรับการอัดเสียง กรุณาอัปโหลดไฟล์เสียงแทน
+                  {t('voice.unsupported')}
                 </p>
                 <input
                   type="file"
@@ -1317,20 +1317,20 @@ export default function StoryEditor({
                     className="px-4 py-2 rounded-full font-semibold text-sm transition-all border-2"
                     style={{ borderColor: themeColors.primary, color: themeColors.dark }}
                   >
-                    {audioSource === 'upload' ? 'เลือกไฟล์ใหม่' : 'อัดใหม่'}
+                    {audioSource === 'upload' ? t('voice.reselectFile') : t('voice.rerecord')}
                   </button>
                 </div>
 
                 {/* caption — same block as the image caption */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    คำบรรยาย (ไม่จำเป็น)
+                    {t('voice.captionLabel')}
                   </label>
                   <input
                     type="text"
                     value={voiceCaption}
                     onChange={(e) => setVoiceCaption(e.target.value)}
-                    placeholder='เช่น "ฟังเสียงนี้นะ..."'
+                    placeholder={t('voice.captionPlaceholder')}
                     className="input-valentine"
                     maxLength={STORY_TEXT_LIMITS.caption}
                   />
@@ -1347,7 +1347,10 @@ export default function StoryEditor({
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                รูปภาพ (2-5 รูป)
+                {t('slideshow.imagesLabel', {
+                  min: SLIDESHOW_MIN_IMAGES,
+                  max: SLIDESHOW_MAX_IMAGES,
+                })}
               </label>
 
               {slides.length === 0 ? (
@@ -1358,7 +1361,7 @@ export default function StoryEditor({
                 >
                   <ImagePlus size={28} style={{ color: themeColors.dark }} />
                   <span className="text-sm" style={{ color: themeColors.dark }}>
-                    ยังไม่มีรูปภาพ เพิ่มรูปแรกของคุณ
+                    {t('slideshow.empty')}
                   </span>
                   <input
                     type="file"
@@ -1384,7 +1387,7 @@ export default function StoryEditor({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={slide.previewUrl}
-                        alt={`รูปที่ ${index + 1}`}
+                        alt={t('slideshow.slideAlt', { index: index + 1 })}
                         className="w-full h-full object-cover"
                       />
 
@@ -1402,7 +1405,7 @@ export default function StoryEditor({
                       <button
                         type="button"
                         onClick={() => removeSlide(slide.id)}
-                        aria-label="ลบรูป"
+                        aria-label={t('slideshow.removeAria')}
                         className="absolute top-1 right-1 w-6 h-6 rounded-full bg-white flex items-center justify-center border-2"
                         style={{ borderColor: themeColors.dark, color: themeColors.dark }}
                       >
@@ -1415,7 +1418,7 @@ export default function StoryEditor({
                           type="button"
                           onClick={() => moveSlideLeft(index)}
                           disabled={index === 0}
-                          aria-label="ย้ายไปทางซ้าย"
+                          aria-label={t('slideshow.moveLeftAria')}
                           className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center disabled:opacity-30"
                           style={{ color: themeColors.dark }}
                         >
@@ -1425,7 +1428,7 @@ export default function StoryEditor({
                           type="button"
                           onClick={() => moveSlideRight(index)}
                           disabled={index === slides.length - 1}
-                          aria-label="ย้ายไปทางขวา"
+                          aria-label={t('slideshow.moveRightAria')}
                           className="w-7 h-7 rounded-full bg-white/90 flex items-center justify-center disabled:opacity-30"
                           style={{ color: themeColors.dark }}
                         >
@@ -1435,7 +1438,7 @@ export default function StoryEditor({
 
                       {slide.status === 'error' && (
                         <span className="absolute inset-x-0 bottom-0 text-[10px] text-center text-white bg-red-600/80 py-0.5">
-                          อัปโหลดไม่สำเร็จ
+                          {t('slideshow.slideUploadFailed')}
                         </span>
                       )}
                     </div>
@@ -1449,7 +1452,7 @@ export default function StoryEditor({
                     >
                       <ImagePlus size={22} style={{ color: themeColors.dark }} />
                       <span className="text-xs" style={{ color: themeColors.dark }}>
-                        เพิ่มรูป
+                        {t('slideshow.addImage')}
                       </span>
                       <input
                         type="file"
@@ -1464,20 +1467,22 @@ export default function StoryEditor({
               )}
 
               {slides.length >= SLIDESHOW_MAX_IMAGES && (
-                <p className="text-xs text-gray-500 mt-2">ครบ 5 รูปแล้ว</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {t('slideshow.full', { max: SLIDESHOW_MAX_IMAGES })}
+                </p>
               )}
             </div>
 
             {/* caption — same block as the image caption */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                คำบรรยาย (ไม่จำเป็น)
+                {t('slideshow.captionLabel')}
               </label>
               <input
                 type="text"
                 value={slideCaption}
                 onChange={(e) => setSlideCaption(e.target.value)}
-                placeholder="คำบรรยายสำหรับทั้งอัลบั้ม..."
+                placeholder={t('slideshow.captionPlaceholder')}
                 className="input-valentine"
                 maxLength={STORY_TEXT_LIMITS.caption}
               />
@@ -1504,7 +1509,7 @@ export default function StoryEditor({
               e.currentTarget.style.backgroundColor = 'transparent';
             }}
           >
-            ยกเลิก
+            {tc('actions.cancel')}
           </button>
           <button
             type="submit"
@@ -1517,11 +1522,14 @@ export default function StoryEditor({
           >
             {uploading
               ? uploadProgress
-                ? `กำลังอัปโหลด ${uploadProgress.done}/${uploadProgress.total}...`
-                : 'กำลังอัพโหลด...'
+                ? t('uploadingProgress', {
+                    done: uploadProgress.done,
+                    total: uploadProgress.total,
+                  })
+                : t('uploading')
               : isEditing
-                ? 'บันทึก'
-                : 'เพิ่ม'}
+                ? t('submitSave')
+                : t('submitAdd')}
           </button>
         </div>
       </form>

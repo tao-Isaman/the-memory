@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import {
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
 
       if (!referrerRecord) {
         return NextResponse.json(
-          { error: 'Invalid referral code', success: false },
+          { error: 'INVALID_CODE', success: false },
           { status: 400 }
         );
       }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
       // Prevent self-referral
       if (referrerRecord.userId === userId) {
         return NextResponse.json(
-          { error: 'Cannot use your own referral code', success: false },
+          { error: 'OWN_CODE', success: false },
           { status: 400 }
         );
       }
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     if (!newReferral) {
       return NextResponse.json(
-        { error: 'Failed to create referral record', success: false },
+        { error: 'GENERIC', success: false },
         { status: 500 }
       );
     }
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Referral setup error:', error);
     return NextResponse.json(
-      { error: 'Failed to setup referral', success: false },
+      { error: 'GENERIC', success: false },
       { status: 500 }
     );
   }

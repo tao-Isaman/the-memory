@@ -1,0 +1,111 @@
+{
+  "appBar": {
+    "credits": "Credits",
+    "userMenu": "User menu"
+  },
+  "tabs": {
+    "memories": "Memories",
+    "universe": "Universe",
+    "cartoon": "Cartoon maker"
+  },
+  "loading": {
+    "connecting": "Connecting...",
+    "memories": "Loading your memories..."
+  },
+  "actions": {
+    "createNew": "Create a new memory",
+    "referral": "Referral link & earn ฿50",
+    "view": "View memory",
+    "share": "Share",
+    "preview": "Preview",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "empty": {
+    "title": "No memories yet",
+    "description": "Start creating a beautiful memory to share with someone special!",
+    "cta": "Create your first memory"
+  },
+  "card": {
+    "meta": "{count, plural, one {# story} other {# stories}} • created {date}",
+    "shareToUniverse": "Share to Universe"
+  },
+  "confirmDelete": "Are you sure you want to delete this memory?",
+  "footer": "Made with <heart></heart> for your most special moments",
+  "universe": {
+    "intro": "Stories from memories that others have shared. Freshly shuffled every time you drop by ✨",
+    "loading": "Travelling into the universe...",
+    "loadingMore": "Loading more...",
+    "endOfFeed": "✨ You've reached the edge of the universe",
+    "emptyTitle": "The universe is empty",
+    "emptyDescription": "No stories from anyone else just yet. Come back and take another look soon!",
+    "fromMemory": "from “{title}”",
+    "readMore": "Read more",
+    "reaction": "React with {emoji}",
+    "types": {
+      "image": "Photo",
+      "text": "Message",
+      "textImage": "Photo + message"
+    }
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "tabNotifications": "Notifications",
+    "tabUpdates": "Updates",
+    "pushOn": "Notifications on this device: on (tap to turn off)",
+    "pushOff": "Turn on notifications on this device",
+    "clearAll": "Clear all",
+    "loading": "Loading...",
+    "empty": "No notifications yet",
+    "dismiss": "Dismiss notification",
+    "viewAllUpdates": "See all updates →",
+    "patchTypes": {
+      "feature": "New",
+      "improvement": "Improved",
+      "fix": "Fixed",
+      "announcement": "Notice"
+    }
+  },
+  "pushPrompt": {
+    "close": "Close",
+    "title": "Turn on notifications, get free credits!",
+    "description": "Get news, promotions and the important stuff — delivered straight to your device.",
+    "creditsBadge": "{credits} free credits",
+    "later": "Maybe later",
+    "enable": "Turn on",
+    "enabling": "Turning on...",
+    "successWithCredits": "Notifications are on! You got {credits} credits 🎉",
+    "success": "Notifications are on!",
+    "denied": "Notifications are blocked in your browser. You can turn them on later from the bell icon.",
+    "error": "Couldn't turn on notifications. Please try again."
+  },
+  "pwaPrompt": {
+    "title": "Install The Memory app",
+    "description": "Add it to your home screen for faster access — just like a real app, no browser needed.",
+    "close": "Close",
+    "iosStep1": "Tap the share button <share></share> at the bottom of Safari",
+    "iosStep2": "Choose “Add to Home Screen” <plus></plus>",
+    "later": "Not now",
+    "install": "Install"
+  },
+  "profileBanner": {
+    "close": "Close",
+    "title": "Complete your profile, get free credits!",
+    "description": "Tell us a little more about you and take a gift from us.",
+    "creditsBadge": "{credits} free credits",
+    "later": "Maybe later",
+    "goToProfile": "Let's do it"
+  },
+  "shareModal": {
+    "title": "Share this memory",
+    "successTitle": "Your memory is saved!",
+    "successSubtitle": "Send this link to the one you love",
+    "linkLabel": "Share link",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "downloadQr": "Download QR",
+    "share": "Share",
+    "close": "Close",
+    "shareText": "Come see the memory \"{title}\" I made for you"
+  }
+}

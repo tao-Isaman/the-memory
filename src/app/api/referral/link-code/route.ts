@@ -1,3 +1,4 @@
+// Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@/lib/supabase-server';
 import {
@@ -23,14 +24,14 @@ export async function POST(request: NextRequest) {
     const existingReferral = await getUserReferral(supabase, userId);
     if (!existingReferral) {
       return NextResponse.json(
-        { error: 'No referral record found', success: false },
+        { error: 'GENERIC', success: false },
         { status: 400 }
       );
     }
 
     if (existingReferral.referredBy) {
       return NextResponse.json(
-        { error: 'คุณได้ใส่โค้ดแนะนำแล้ว', success: false },
+        { error: 'CODE_ALREADY_LINKED', success: false },
         { status: 400 }
       );
     }
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
     const referrerRecord = await getReferralByCode(supabase, referralCode);
     if (!referrerRecord) {
       return NextResponse.json(
-        { error: 'โค้ดแนะนำไม่ถูกต้อง', success: false },
+        { error: 'INVALID_CODE', success: false },
         { status: 400 }
       );
     }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Prevent self-referral
     if (referrerRecord.userId === userId) {
       return NextResponse.json(
-        { error: 'ไม่สามารถใช้โค้ดของตัวเองได้', success: false },
+        { error: 'OWN_CODE', success: false },
         { status: 400 }
       );
     }
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
     const success = await linkReferralCode(supabase, userId, referrerRecord.userId);
     if (!success) {
       return NextResponse.json(
-        { error: 'Failed to link referral code', success: false },
+        { error: 'GENERIC', success: false },
         { status: 500 }
       );
     }
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Link referral code error:', error);
     return NextResponse.json(
-      { error: 'Failed to link referral code', success: false },
+      { error: 'GENERIC', success: false },
       { status: 500 }
     );
   }

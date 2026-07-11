@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, getBearerUser } from '@/lib/supabase-server';
 import { sendPushToSubscriptions, isPushConfigured } from '@/lib/push-server';
 import { REACTION_EMOJIS } from '@/lib/reactions';
+import { UNIVERSE_NOTIFICATION, ownerLocale } from '@/lib/notification-messages';
 
 export const runtime = 'nodejs';
 
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const { data: memory } = await supabase
       .from('memories')
-      .select('id, user_id, title, status, share_to_universe')
+      .select('id, user_id, title, status, share_to_universe, locale')
       .eq('id', story.memory_id)
       .single();
     if (!memory || memory.status !== 'active' || !memory.share_to_universe) {
@@ -111,12 +112,15 @@ export async function POST(request: NextRequest) {
 
     // 3. Notify the owner (best-effort — failures here never fail the reaction itself).
     if (action === 'added' && shouldNotify) {
+      // Rendered in the OWNER's language (the one they built the memory in), not the
+      // reacting visitor's — a Web Push body is baked at send time.
+      const copy = UNIVERSE_NOTIFICATION[ownerLocale(memory.locale)];
       const reactorName =
         (user.user_metadata?.full_name as string | undefined) ||
         (user.user_metadata?.name as string | undefined) ||
-        'เพื่อนในจักรวาล';
-      const title = `${emoji} มีคนชอบเรื่องราวของคุณในจักรวาล`;
-      const notifBody = `${reactorName} กดรีแอคชันให้เรื่องราวในความทรงจำ "${memory.title}"`;
+        copy.anonymousReactor;
+      const title = copy.title(emoji);
+      const notifBody = copy.body(reactorName, memory.title);
       const url = `/memory/${memory.id}`;
 
       const { error: notifErr } = await supabase.from('notifications').insert({

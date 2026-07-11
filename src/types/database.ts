@@ -22,6 +22,8 @@ export interface Database {
           paid_at: string | null
           theme: string
           share_to_universe: boolean
+          /** Creator's language. Reaction notifications to the owner are rendered in it. */
+          locale: string
         }
         Insert: {
           id?: string
@@ -35,6 +37,7 @@ export interface Database {
           paid_at?: string | null
           theme?: string
           share_to_universe?: boolean
+          locale?: string
         }
         Update: {
           id?: string
@@ -48,6 +51,7 @@ export interface Database {
           paid_at?: string | null
           theme?: string
           share_to_universe?: boolean
+          locale?: string
         }
         Relationships: []
       }

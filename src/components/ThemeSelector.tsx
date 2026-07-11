@@ -1,23 +1,24 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { MemoryTheme } from '@/types/memory';
-import { THEMES, THEME_INFO } from '@/lib/themes';
+import { THEMES, THEME_INFO, THEME_ORDER } from '@/lib/themes';
 
 interface ThemeSelectorProps {
   selected: MemoryTheme;
   onChange: (theme: MemoryTheme) => void;
 }
 
-const themeOptions: MemoryTheme[] = ['love', 'anniversary', 'birthday', 'apology', 'family', 'friend', 'longdistance'];
-
 export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps) {
+  const t = useTranslations('create.themes');
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">
-        เลือกธีมสี
+        {t('label')}
       </label>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {themeOptions.map((theme) => {
+        {THEME_ORDER.map((theme) => {
           const colors = THEMES[theme];
           const info = THEME_INFO[theme];
           const isSelected = selected === theme;
@@ -59,10 +60,10 @@ export default function ThemeSelector({ selected, onChange }: ThemeSelectorProps
                   className="text-sm font-medium mt-1"
                   style={{ color: isSelected ? colors.dark : '#374151' }}
                 >
-                  {info.nameThai}
+                  {t(`${theme}.name`)}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {info.moodThai}
+                  {t(`${theme}.mood`)}
                 </p>
               </div>
 
