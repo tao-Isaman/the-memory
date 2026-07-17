@@ -818,6 +818,37 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      get_insights: {
+        Args: { p_days?: number }
+        Returns: {
+          funnel: { signedUp: number; created: number; paid: number }
+          overallPayRate: number
+          byStoryCount: Array<{ bucket: string; memories: number; paid: number; payRate: number }>
+          byStoryType: Array<{ type: string; memories: number; paid: number; payRate: number }>
+          byTheme: Array<{ theme: string; memories: number; paid: number; payRate: number }>
+          byReferred: {
+            referred: { memories: number; paid: number; payRate: number }
+            organic: { memories: number; paid: number; payRate: number }
+          }
+          byProfileComplete: {
+            complete: { memories: number; paid: number; payRate: number }
+            incomplete: { memories: number; paid: number; payRate: number }
+          }
+          recipient: {
+            sessions: number
+            avgDwellSecs: number
+            completionPct: number
+            dropoff: Array<{ story: number; reached: number }>
+          }
+          revenue: {
+            paidMemories: number
+            memoryRevenueThbEst: number
+            creditRevenueThb: number
+            payingUsers: number
+            daily: Array<{ day: string; paidMemories: number; revenueThbEst: number }>
+          }
+        }
+      }
       get_engagement_stats: {
         Args: { p_days?: number }
         Returns: {
