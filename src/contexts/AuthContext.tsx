@@ -8,7 +8,8 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  /** `next` is a relative path to return to after OAuth (default: dashboard). */
+  signInWithGoogle: (next?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -47,17 +48,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (next?: string) => {
     const supabase = getSupabaseBrowserClient();
     if (!supabase) {
       console.error('Supabase client not initialized');
       return;
     }
 
+    const callback = new URL('/auth/callback', window.location.origin);
+    if (next && next.startsWith('/') && !next.startsWith('//')) callback.searchParams.set('next', next);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callback.toString(),
       },
     });
 

@@ -6,6 +6,9 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const origin = requestUrl.origin;
+  // Optional return path (e.g. the Loy Krathong game). Relative paths only.
+  const nextParam = requestUrl.searchParams.get('next') || '';
+  const next = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : null;
 
   let userId: string | null = null;
 
@@ -37,6 +40,8 @@ export async function GET(request: NextRequest) {
       // Fallback to dashboard if check fails
     }
   }
+
+  if (next) return NextResponse.redirect(`${origin}${next}`);
 
   // Redirect to dashboard after successful auth
   return NextResponse.redirect(`${origin}/dashboard`);

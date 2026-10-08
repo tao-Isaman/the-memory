@@ -1,0 +1,90 @@
+{
+  "metaTitle": "Loy Krathong Online 2026 — Desa Nong Pu by The Memory",
+  "metaDescription": "Lepas krathong online gratis. Dandani kepitingmu, jalan-jalan di desa, pilih krathong di toko, lalu panjatkan harapan di dermaga bareng semua orang. Tanpa instal aplikasi.",
+  "keywords": ["loy krathong online", "loy krathong 2026", "krathong online", "game loy krathong"],
+  "title": "Loy Krathong Online 2026",
+  "village": "Desa Nong Pu",
+  "intro": {
+    "heading": "Beri nama kepitingmu",
+    "sub": "Jalan-jalan di desa, ambil krathong di toko, lalu panjatkan harapan di dermaga",
+    "namePlaceholder": "Nama yang tampil di atas kepala",
+    "color": "Warna cangkang",
+    "accessory": "Aksesori",
+    "start": "Masuk desa",
+    "save": "Simpan"
+  },
+  "acc": {
+    "none": "Tanpa",
+    "flower": "Bunga",
+    "hat": "Topi jerami",
+    "lantern": "Lentera"
+  },
+  "hud": {
+    "online": "{count} orang di desa",
+    "floated": "{count} dilepas",
+    "room": "Ruang {room}",
+    "shop": "Pilih krathong",
+    "float": "Lepas krathong",
+    "needKrathong": "Ambil krathong di toko dulu ya",
+    "goToPier": "Sudah dapat! Jalan ke dermaga",
+    "customize": "Dandan",
+    "moveHint": "Geser joystick untuk jalan",
+    "moveHintDesktop": "Tekan W A S D atau tombol panah untuk jalan",
+    "home": "Beranda"
+  },
+  "shop": {
+    "heading": "Toko krathong",
+    "sub": "Pilih yang kamu suka, semuanya gratis",
+    "pick": "Ambil yang ini",
+    "close": "Tutup",
+    "designs": {
+      "banana": "Krathong daun pisang",
+      "lotus": "Krathong teratai",
+      "donut": "Krathong donat",
+      "coconut": "Krathong kelapa",
+      "icecream": "Krathong es krim",
+      "heart": "Krathong hati"
+    }
+  },
+  "float": {
+    "heading": "Panjatkan harapan",
+    "wish": "Harapanmu",
+    "wishPlaceholder": "Semoga...",
+    "to": "Untuk (opsional)",
+    "toPlaceholder": "Orang yang kamu pikirkan",
+    "submit": "Lepas krathong",
+    "submitting": "Melepas...",
+    "cancel": "Nanti dulu"
+  },
+  "done": {
+    "heading": "Krathong-mu sudah mengapung",
+    "body": "Sekarang hanyut di sungai. Semoga harapanmu terkabul.",
+    "share": "Ajak teman ikut melepas",
+    "copied": "Tautan disalin",
+    "again": "Lepas lagi",
+    "shareText": "Aku baru melepas krathong online di Desa Nong Pu. Ayo ikut!"
+  },
+  "chat": {
+    "placeholder": "Tulis sesuatu...",
+    "login": "Masuk untuk chat",
+    "send": "Kirim"
+  },
+  "closed": {
+    "before": "Desa Nong Pu buka untuk Loy Krathong pada {date}",
+    "countdown": "{days} hari {hours} jam lagi",
+    "after": "Loy Krathong tahun ini sudah selesai. Terima kasih sudah ikut, sampai jumpa tahun depan!",
+    "count": "{count} krathong dilepas tahun ini",
+    "home": "Kembali ke beranda",
+    "openDate": "10 Nov 2026"
+  },
+  "river": {
+    "to": "untuk {name}"
+  },
+  "errors": {
+    "name": "Nama harus 2 sampai 12 karakter",
+    "wish": "Tulis harapan singkat dulu ya",
+    "rate": "Tunggu sebentar sebelum melepas lagi",
+    "closed": "Belum waktunya Loy Krathong",
+    "generic": "Ada yang salah, coba lagi"
+  }
+}

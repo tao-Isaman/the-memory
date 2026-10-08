@@ -19,6 +19,7 @@ export const NAMESPACES = [
   'legal',
   'updates',
   'useCase',
+  'loykrathong',
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

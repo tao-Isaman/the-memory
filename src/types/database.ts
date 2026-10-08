@@ -813,6 +813,48 @@ export interface Database {
           }
         ]
       }
+      krathong_floats: {
+        Row: {
+          id: string
+          user_id: string | null
+          guest_id: string
+          display_name: string
+          design: string
+          wish: string
+          to_name: string | null
+          color: string | null
+          room: number | null
+          year: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          guest_id: string
+          display_name: string
+          design: string
+          wish: string
+          to_name?: string | null
+          color?: string | null
+          room?: number | null
+          year?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          guest_id?: string
+          display_name?: string
+          design?: string
+          wish?: string
+          to_name?: string | null
+          color?: string | null
+          room?: number | null
+          year?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

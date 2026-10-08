@@ -1,0 +1,90 @@
+{
+  "metaTitle": "Loy Krathong Online 2026 — Nong Pu Village by The Memory",
+  "metaDescription": "Float a krathong online for free. Dress up your crab, walk around the village, pick a krathong at the shop and make a wish at the pier with everyone else. No app needed.",
+  "keywords": ["loy krathong online", "loy krathong 2026", "online krathong", "loy krathong game", "float krathong online"],
+  "title": "Loy Krathong Online 2026",
+  "village": "Nong Pu Village",
+  "intro": {
+    "heading": "Name your crab",
+    "sub": "Walk around the village, pick up a krathong at the shop, then make a wish at the pier",
+    "namePlaceholder": "Name shown above your head",
+    "color": "Shell colour",
+    "accessory": "Accessory",
+    "start": "Enter the village",
+    "save": "Save"
+  },
+  "acc": {
+    "none": "None",
+    "flower": "Flower",
+    "hat": "Straw hat",
+    "lantern": "Lantern"
+  },
+  "hud": {
+    "online": "{count} in the village",
+    "floated": "{count} floated",
+    "room": "Room {room}",
+    "shop": "Pick a krathong",
+    "float": "Float it",
+    "needKrathong": "Grab a krathong at the shop first",
+    "goToPier": "Got one! Walk down to the pier",
+    "customize": "Dress up",
+    "moveHint": "Drag the joystick to walk",
+    "moveHintDesktop": "Use W A S D or the arrow keys to walk",
+    "home": "Home"
+  },
+  "shop": {
+    "heading": "Krathong shop",
+    "sub": "Pick any one you like, they are all free",
+    "pick": "Take this one",
+    "close": "Close",
+    "designs": {
+      "banana": "Banana-leaf krathong",
+      "lotus": "Lotus krathong",
+      "donut": "Donut krathong",
+      "coconut": "Coconut krathong",
+      "icecream": "Ice-cream krathong",
+      "heart": "Heart krathong"
+    }
+  },
+  "float": {
+    "heading": "Make a wish",
+    "wish": "Your wish",
+    "wishPlaceholder": "May...",
+    "to": "For (optional)",
+    "toPlaceholder": "Someone you are thinking of",
+    "submit": "Float it",
+    "submitting": "Floating...",
+    "cancel": "Not yet"
+  },
+  "done": {
+    "heading": "Your krathong is floating",
+    "body": "It is drifting down the river now. May your wish come true.",
+    "share": "Invite friends to float with you",
+    "copied": "Link copied",
+    "again": "Float another",
+    "shareText": "I just floated a krathong online at Nong Pu Village. Come float one with me!"
+  },
+  "chat": {
+    "placeholder": "Say something...",
+    "login": "Sign in to chat",
+    "send": "Send"
+  },
+  "closed": {
+    "before": "Nong Pu Village opens for Loy Krathong on {date}",
+    "countdown": "{days} days {hours} hours to go",
+    "after": "Loy Krathong is over for this year. Thank you for floating with us, see you next year!",
+    "count": "{count} krathongs floated this year",
+    "home": "Back to home",
+    "openDate": "10 Nov 2026"
+  },
+  "river": {
+    "to": "for {name}"
+  },
+  "errors": {
+    "name": "Name must be 2 to 12 characters",
+    "wish": "Write a short wish first",
+    "rate": "Please wait a moment before floating another",
+    "closed": "It is not Loy Krathong time yet",
+    "generic": "Something went wrong, please try again"
+  }
+}
