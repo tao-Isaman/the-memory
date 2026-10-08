@@ -123,7 +123,7 @@ src/
 │   ├── HeartFirework.tsx       # Click-triggered particle animation
 │   ├── FloatingHearts.tsx      # Background decoration (10 hearts, 15% opacity)
 │   ├── Mascot.tsx              # Pixel-art crab mascot (emotions + CSS frame animations)
-│   ├── MascotWalker.tsx        # Mascot scuttling along the landing hero, tap for a reaction
+│   ├── MascotWalker.tsx        # Mascot walking around the hero headline (orbit) or along an edge, tap for a reaction
 │   ├── HeartLoader.tsx         # Loading indicator (walking mascot; legacy name)
 │   ├── AppBar.tsx              # Sticky top bar: mascot logo, credit balance, notification, avatar
 │   └── ClientProviders.tsx     # AuthProvider + CreditBalanceProvider + HeartFirework
@@ -230,7 +230,7 @@ A pink pixel-art crab is the brand mark. It is pure data + inline SVG, no image 
 - **Data**: `src/lib/mascot.ts` — 32×32 grid (left half mirrored), brand + mono palettes, `mascotStill(emotion)`, `mascotFrames(emotion, animation)`, `gridToRuns`, `mascotSvg`. Keep this file import-free and free of non-erasable TS (enums); the icon script runs it under plain Node.
 - **Emotions**: `idle`, `happy`, `wink`, `love` (floating heart), `sad` (frown + sweat + lowered claws), `surprised`, `sleepy`.
 - **Animations** (`<Mascot animation=…>`): `idle` (bob + blink), `walk` (2 leg frames, used by `HeartLoader`), `wave` (claw tilt), `bounce`, `none`. Frames are stacked `<g>` elements toggled by CSS keyframes in `globals.css` (`mascot-*`); `prefers-reduced-motion` freezes frame 0.
-- **Where it appears**: AppBar + landing nav (idle), landing hero (`MascotWalker`, walks the hero bottom edge, tap cycles happy/love/surprised/wink), login (wave), dashboard empty state (sleepy), payment success (love/bounce; credits: happy), payment cancel + memory not-ready + payment error (sad), PIN gate (wink), footer (sleepy), every loader (walk).
+- **Where it appears**: AppBar + landing nav (idle), landing hero (`MascotWalker variant="orbit"`, walks around the headline block via CSS `offset-path`, legs on the text; tap cycles happy/love/surprised/wink), login (wave), dashboard empty state (sleepy), payment success (love/bounce; credits: happy), payment cancel + memory not-ready + payment error (sad), PIN gate (wink), footer (sleepy), every loader (walk).
 - **Icons**: `npm run icons` regenerates `public/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` (white crab on brand gradient) and `public/mascot.svg` (SVG favicon, listed first in layout metadata). Re-run after changing the grid.
 - `HeartIcon` is still used as a generic heart glyph (reactions, buttons); only brand-mark usages were replaced.
 

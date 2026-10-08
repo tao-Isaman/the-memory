@@ -7,6 +7,12 @@ import { MascotEmotion } from '@/lib/mascot';
 interface MascotWalkerProps {
   size?: number;
   className?: string;
+  /**
+   * `edge` (default): scuttles left<->right along the bottom edge of the parent.
+   * `orbit`: walks all the way around the parent's box, legs always on the box
+   * (upright on top, sideways on the sides, hanging underneath).
+   */
+  variant?: 'edge' | 'orbit';
 }
 
 // Emotions the crab cycles through when tapped. Each tap moves to the next one,
@@ -15,10 +21,11 @@ const REACTIONS: MascotEmotion[] = ['happy', 'love', 'surprised', 'wink'];
 const REACTION_MS = 1800;
 
 /**
- * The mascot scuttling along the bottom edge of its parent (which must be
- * `position: relative`). Tapping it stops the walk and plays a reaction.
+ * The mascot scuttling along its parent (which must be `position: relative`):
+ * along the bottom edge (`edge`) or all the way around it (`orbit`).
+ * Tapping it stops the walk and plays a reaction.
  */
-export default function MascotWalker({ size = 64, className = '' }: MascotWalkerProps) {
+export default function MascotWalker({ size = 64, className = '', variant = 'edge' }: MascotWalkerProps) {
   const [reaction, setReaction] = useState<MascotEmotion | null>(null);
   const nextIndex = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,7 +41,11 @@ export default function MascotWalker({ size = 64, className = '' }: MascotWalker
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   return (
-    <div className={`mascot-track ${className}`.trim()} aria-hidden="true">
+    <div
+      className={`${variant === 'orbit' ? 'mascot-orbit' : 'mascot-track'} ${className}`.trim()}
+      style={{ '--mascot-size': `${size}px` } as React.CSSProperties}
+      aria-hidden="true"
+    >
       <div
         className="mascot-runner"
         // Pausing the track animation while reacting keeps the crab where it was tapped.

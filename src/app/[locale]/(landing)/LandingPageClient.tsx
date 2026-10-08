@@ -239,21 +239,25 @@ export default function LandingPageClient() {
             }`}
           >
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8F0] border border-[#F5EDE4] rounded-full text-sm text-[#E63946] mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8F0] border border-[#F5EDE4] rounded-full text-sm text-[#E63946] mb-14 md:mb-16">
               <HeartIcon size={16} filled />
               <span>{t('hero.badge')}</span>
             </div>
 
-            {/* Main Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] bg-clip-text text-transparent">
-                {t('hero.titleTop')}
-              </span>
-              <br />
-              <span className="text-[#4A1942] text-3xl md:text-5xl">
-                {t('hero.titleBottom')}
-              </span>
-            </h1>
+            {/* Main Headline — the mascot walks around this block, tap it for a reaction */}
+            <div className="relative w-fit mx-auto px-4 py-2 mb-14 md:mb-16">
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+                <span className="font-leckerli font-normal bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] bg-clip-text text-transparent">
+                  {t('hero.titleTop')}
+                </span>
+                <br />
+                <span className="text-[#4A1942] text-3xl md:text-5xl">
+                  {t('hero.titleBottom')}
+                </span>
+              </h1>
+              <MascotWalker variant="orbit" size={56} className="hidden sm:block" />
+              <MascotWalker variant="orbit" size={40} className="sm:hidden" />
+            </div>
 
             {/* Stats below headline */}
             {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
@@ -328,9 +332,6 @@ export default function LandingPageClient() {
             </p>
           </div>
         </div>
-
-        {/* Mascot scuttling along the bottom of the hero; tap it for a reaction */}
-        <MascotWalker size={64} />
       </section>
 
       {/* Features Section */}

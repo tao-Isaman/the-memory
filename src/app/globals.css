@@ -412,6 +412,39 @@ body {
   will-change: transform;
 }
 
+/* Orbit: the crab walks around the whole box of its parent. The path is the
+   parent's border box pushed out by half the crab, so the legs stay on the
+   box; offset-rotate turns it with the path (sideways on the sides, hanging
+   upside-down underneath). */
+@keyframes mascot-orbit {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+.mascot-orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mascot-orbit > .mascot-runner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  offset-path: inset(calc(var(--mascot-size, 64px) * -0.5) round calc(var(--mascot-size, 64px) * 0.6));
+  offset-rotate: auto;
+  animation: mascot-orbit 32s linear infinite;
+  will-change: offset-distance;
+}
+/* No motion-path support: fall back to pacing along the top edge. */
+@supports not (offset-path: inset(0)) {
+  .mascot-orbit > .mascot-runner {
+    top: auto;
+    bottom: 100%;
+    animation: mascot-cross 28s linear infinite alternate;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mascot-frame-cycle,
   .mascot-frame-blink-open,
@@ -429,5 +462,13 @@ body {
   .mascot-track > .mascot-runner {
     left: 50%;
     transform: translateX(-50%);
+  }
+  .mascot-orbit > .mascot-runner {
+    animation: none;
+    offset-path: none;
+    top: auto;
+    bottom: 100%;
+    right: 0;
+    left: auto;
   }
 }
