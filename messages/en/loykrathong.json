@@ -34,7 +34,7 @@
     "needKrathong": "Grab a krathong at the shop first",
     "goToPier": "Got one! Walk down to the pier",
     "customize": "Dress up",
-    "moveHint": "Drag the joystick to walk",
+    "moveHint": "Touch and hold the left side of the screen, then drag to walk",
     "moveHintDesktop": "Use W A S D or the arrow keys to walk",
     "home": "Home",
     "needKrathongHere": "The krathong shop is in {scene}; grab one there, then float it here"

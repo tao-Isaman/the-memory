@@ -719,6 +719,10 @@ export default function LoyKrathongGame() {
         style={{ opacity: fading ? 1 : 0 }}
       />
 
+      {/* Floating joystick: touch anywhere on the left half to walk. Rendered before the HUD so
+          buttons and inputs stacked on top keep their taps. */}
+      {entered && isTouch && <Joystick onChange={onJoystick} />}
+
       {/* Top bar */}
       <div className="absolute top-0 inset-x-0 p-3 flex items-start justify-between gap-2 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2">
@@ -779,7 +783,7 @@ export default function LoyKrathongGame() {
 
       {/* Action button */}
       {entered && actionLabel && (
-        <div className={`absolute ${isTouch ? 'right-4 bottom-36' : 'inset-x-0 bottom-28 flex justify-center'} pointer-events-none`}>
+        <div className={`absolute ${isTouch ? 'right-4 bottom-36 landscape:bottom-4' : 'inset-x-0 bottom-28 flex justify-center'} pointer-events-none`}>
           <button
             type="button"
             disabled={!canAct}
@@ -793,17 +797,10 @@ export default function LoyKrathongGame() {
         </div>
       )}
 
-      {/* Joystick */}
-      {entered && isTouch && (
-        <div className="absolute left-4 bottom-24">
-          <Joystick onChange={onJoystick} />
-        </div>
-      )}
-
       {/* Chat */}
       {entered && (
-        <div className={`absolute bottom-0 inset-x-0 p-3 ${isTouch ? '' : 'sm:w-96'} pointer-events-none`}>
-          <div className="pointer-events-auto flex flex-col gap-1 mb-2 max-h-28 overflow-hidden justify-end">
+        <div className={`absolute bottom-0 inset-x-0 p-3 ${isTouch ? 'landscape:right-auto landscape:w-[min(22rem,55vw)]' : 'sm:w-96'} pointer-events-none`}>
+          <div className={`flex flex-col gap-1 mb-2 overflow-hidden justify-end ${isTouch ? 'max-h-28 landscape:max-h-12' : 'max-h-28'}`}>
             {room.chat.slice(-5).map((m) => (
               <div key={m.id} className="text-[13px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] truncate">
                 <span className="font-semibold text-[#FFD166]">{m.name}:</span> {m.text}

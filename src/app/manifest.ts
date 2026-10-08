@@ -12,7 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/?source=pwa',
     scope: '/',
     display: 'standalone',
-    orientation: 'portrait',
+    // 'any' so the installed app can rotate — the Loy Krathong mini-game is playable in landscape.
+    orientation: 'any',
     background_color: '#FFFBF7',
     theme_color: '#E63946',
     lang: 'th',
