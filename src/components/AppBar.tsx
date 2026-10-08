@@ -60,7 +60,11 @@ export default function AppBar() {
         {/* Right: Language + Credits + Notification + Avatar */}
         <div className="flex items-center gap-2">
           {/* Language Switcher */}
-          <LanguageSwitcher className="hidden sm:inline-flex" />
+          {/* LanguageSwitcher hardcodes `inline-flex`, which beats `hidden` in the stylesheet order,
+              so the switcher must be hidden by a wrapper on phones (it lives in the avatar menu there). */}
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
 
           {/* Credit Balance */}
           <button
