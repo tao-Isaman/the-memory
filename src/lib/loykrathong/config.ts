@@ -74,49 +74,49 @@ export const SCENES: Record<SceneId, SceneConfig> = {
     dropLane: 0,
     exits: {
       left: { zone: { x: 0, y: 730, w: EDGE, h: 100 }, to: 'chiangmai', entry: { x: LK_MAP_W - ENTRY, y: 830 } },
-      right: { zone: { x: LK_MAP_W - EDGE, y: 495, w: EDGE, h: 80 }, to: 'temple', entry: { x: ENTRY, y: 885 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 495, w: EDGE, h: 80 }, to: 'temple', entry: { x: ENTRY, y: 800 } },
     },
   },
   temple: {
     id: 'temple',
     mapUrl: '/game/loykrathong/temple.webp',
     walkable: [
-      { x: 60, y: 560, w: 900, h: 280 }, // courtyard
-      { x: 0, y: 830, w: 1024, h: 120 }, // walkway with the left/right exits
-      { x: 0, y: 830, w: 54, h: 706 }, // west walk around the pond
-      { x: 970, y: 830, w: 54, h: 706 }, // east walk around the pond
-      { x: 0, y: 1440, w: 1024, h: 96 }, // south walk
-      { x: 440, y: 1250, w: 160, h: 220 }, // the pier (entered from the south walk)
+      { x: 20, y: 560, w: 980, h: 200 }, // courtyard between the lamp posts
+      { x: 0, y: 760, w: 1024, h: 80 }, // the walkway along the pond, edge to edge (exits at both ends)
+      { x: 445, y: 830, w: 130, h: 420 }, // the pier, straight down from the walkway
     ],
-    pier: { x: 440, y: 1250, w: 160, h: 110 },
-    spawn: { x: 512, y: 700 },
-    drop: { x: 512, y: 1190 },
-    lanes: [{ x: -90, y: 1000, w: 1200, h: 200 }],
+    pier: { x: 445, y: 1080, w: 130, h: 170 },
+    spawn: { x: 512, y: 650 },
+    drop: { x: 420, y: 1240 },
+    lanes: [
+      { x: -90, y: 900, w: 520, h: 560 }, // pond left of the pier
+      { x: 590, y: 900, w: 520, h: 560 }, // pond right of the pier
+    ],
     dropLane: 0,
     exits: {
-      left: { zone: { x: 0, y: 840, w: EDGE, h: 100 }, to: 'village', entry: { x: LK_MAP_W - ENTRY, y: 535 } },
-      right: { zone: { x: LK_MAP_W - EDGE, y: 840, w: EDGE, h: 100 }, to: 'bangkok', entry: { x: ENTRY, y: 790 } },
+      left: { zone: { x: 0, y: 765, w: EDGE, h: 75 }, to: 'village', entry: { x: LK_MAP_W - ENTRY, y: 535 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 765, w: EDGE, h: 75 }, to: 'bangkok', entry: { x: ENTRY, y: 980 } },
     },
   },
   bangkok: {
     id: 'bangkok',
     mapUrl: '/game/loykrathong/bangkok.webp',
     walkable: [
-      { x: 0, y: 740, w: 1024, h: 100 }, // promenade
-      { x: 445, y: 835, w: 140, h: 240 }, // pier walkway
-      { x: 400, y: 1050, w: 230, h: 400 }, // pier platform
+      { x: 0, y: 925, w: 1024, h: 110 }, // teak landing deck along the Chao Phraya (exits at both ends)
+      { x: 445, y: 1035, w: 140, h: 470 }, // the pier
     ],
-    pier: { x: 400, y: 1250, w: 230, h: 200 },
-    spawn: { x: 512, y: 790 },
-    drop: { x: 512, y: 1492 },
+    pier: { x: 445, y: 1300, w: 140, h: 205 }, // reaches the walkable tip of the pier
+    spawn: { x: 512, y: 980 },
+    drop: { x: 415, y: 1470 },
     lanes: [
-      { x: -90, y: 360, w: 1200, h: 200 }, // the wide river in front of Wat Arun
-      { x: -90, y: 1472, w: 1200, h: 40 }, // the strip below the pier tip
+      { x: -90, y: 1080, w: 520, h: 420 }, // water left of the pier
+      { x: 600, y: 1080, w: 510, h: 420 }, // water right of the pier
+      { x: -90, y: 380, w: 1200, h: 160 }, // the wide river in front of Wat Arun
     ],
-    dropLane: 1,
+    dropLane: 0,
     exits: {
-      left: { zone: { x: 0, y: 745, w: EDGE, h: 90 }, to: 'temple', entry: { x: LK_MAP_W - ENTRY, y: 885 } },
-      right: { zone: { x: LK_MAP_W - EDGE, y: 745, w: EDGE, h: 90 }, to: 'chiangmai', entry: { x: ENTRY, y: 830 } },
+      left: { zone: { x: 0, y: 930, w: EDGE, h: 100 }, to: 'temple', entry: { x: LK_MAP_W - ENTRY, y: 800 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 930, w: EDGE, h: 100 }, to: 'chiangmai', entry: { x: ENTRY, y: 830 } },
     },
   },
   chiangmai: {
@@ -136,7 +136,7 @@ export const SCENES: Record<SceneId, SceneConfig> = {
     ],
     dropLane: 0,
     exits: {
-      left: { zone: { x: 0, y: 780, w: EDGE, h: 110 }, to: 'bangkok', entry: { x: LK_MAP_W - ENTRY, y: 790 } },
+      left: { zone: { x: 0, y: 780, w: EDGE, h: 110 }, to: 'bangkok', entry: { x: LK_MAP_W - ENTRY, y: 980 } },
       right: { zone: { x: LK_MAP_W - EDGE, y: 780, w: EDGE, h: 110 }, to: 'village', entry: { x: ENTRY, y: 775 } },
     },
   },

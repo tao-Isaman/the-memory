@@ -360,9 +360,10 @@ export default function LoyKrathongGame() {
             o.y = Math.max(0, Math.min(LK_MAP_H, o.y + o.vy * dt));
           }
         }
-        if (o.bubble && o.bubble.until < now) o.bubble = null;
+        // Bubbles expire on wall-clock time (they are stamped with Date.now()).
+        if (o.bubble && o.bubble.until < Date.now()) o.bubble = null;
       }
-      if (myBubble.current && myBubble.current.until < now) myBubble.current = null;
+      if (myBubble.current && myBubble.current.until < Date.now()) myBubble.current = null;
 
       // river
       for (const f of floatsRef.current) {
