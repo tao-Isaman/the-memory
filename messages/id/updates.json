@@ -13,6 +13,15 @@
     "announcement": "Pengumuman"
   },
   "notes": {
+    "v3_1_0": {
+      "title": "Kenalan dengan si kepiting, maskot baru The Memory",
+      "summary": "Kepiting pixel-art berwarna pink kini menjadi wajah The Memory. Kamu akan melihatnya di bar atas, sebagai ikon aplikasi, dan berjalan di halaman depan yang bisa kamu ketuk.",
+      "items": [
+        "Logo dan ikon aplikasi baru: kepiting pixel-art pink. Pasang ulang aplikasi untuk memperbarui ikon di ponselmu.",
+        "Si kepiting punya suasana hati: senang setelah pembayaran berhasil, mengedip di layar PIN, sedih saat pembayaran dibatalkan, dan berjalan di halaman depan. Ketuk untuk melihat reaksinya.",
+        "Layar pemuatan kini menampilkan kepiting berjalan, bukan lagi hati berputar."
+      ]
+    },
     "v3_0_0": {
       "title": "The Memory kini hadir dalam 3 bahasa — Thailand, Inggris, Indonesia",
       "summary": "The Memory sekarang tersedia dalam bahasa Thailand, Inggris, dan Indonesia. Ganti bahasa kapan saja — dan saat kamu mengirim kenangan ke seseorang di luar negeri, tautannya otomatis terbuka dalam bahasa mereka.",

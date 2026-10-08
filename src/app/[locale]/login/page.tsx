@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { storePendingConsent } from '@/lib/consent';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
+import Mascot from '@/components/Mascot';
 
 function UseCaseCapture() {
   const searchParams = useSearchParams();
@@ -61,12 +62,11 @@ export default function LoginPage() {
         <UseCaseCapture />
       </Suspense>
       <div className="memory-card p-12 text-center max-w-md w-full mx-4">
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <HeartIcon size={40} className="animate-pulse-heart" />
+        <div className="flex flex-col items-center justify-center gap-3 mb-6">
+          <Mascot size={96} emotion="idle" animation="wave" />
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
             The Memory
           </h1>
-          <HeartIcon size={40} className="animate-pulse-heart" />
         </div>
 
         <p className="text-gray-600 mb-6">{t('subtitle')}</p>

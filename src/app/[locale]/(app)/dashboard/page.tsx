@@ -8,6 +8,7 @@ import { getMemories, deleteMemory, setMemoryUniverseShare } from '@/lib/storage
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
+import Mascot from '@/components/Mascot';
 import ShareModal from '@/components/ShareModal';
 import PaymentStatus from '@/components/PaymentStatus';
 import PaymentButton from '@/components/PaymentButton';
@@ -175,7 +176,7 @@ export default function DashboardPage() {
               </div>
             ) : memories.length === 0 ? (
               <div className="memory-card p-12 text-center">
-                <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+                <Mascot size={96} emotion="sleepy" animation="idle" className="mx-auto mb-4" />
                 <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">
                   {t('empty.title')}
                 </h2>

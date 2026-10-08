@@ -13,6 +13,15 @@
     "announcement": "News"
   },
   "notes": {
+    "v3_1_0": {
+      "title": "Meet the crab, The Memory’s new mascot",
+      "summary": "A pink pixel-art crab is now the face of The Memory. You will see it in the top bar, as the app icon, and scuttling across the home page where you can tap it.",
+      "items": [
+        "New logo and app icon: the pink pixel-art crab. Reinstall the app to refresh the icon on your phone.",
+        "The crab has moods: happy after a successful payment, a wink on the PIN screen, sad when a payment is cancelled, and it walks across the home page. Tap it for a reaction.",
+        "Loading screens now show the walking crab instead of the spinning heart."
+      ]
+    },
     "v3_0_0": {
       "title": "The Memory now speaks 3 languages — Thai, English, Indonesian",
       "summary": "The Memory is now available in Thai, English and Bahasa Indonesia. Switch language any time — and when you send a memory to someone abroad, the link opens in their language automatically.",

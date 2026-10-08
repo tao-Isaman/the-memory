@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import HeartIcon from './HeartIcon';
 import { User, LogOut, Coins } from 'lucide-react';
+import Mascot from './Mascot';
 import { useCreditBalance } from '@/hooks/useCreditBalance';
 import NotificationBell from './NotificationBell';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -51,7 +51,7 @@ export default function AppBar() {
           href="/"
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <HeartIcon size={22} className="animate-pulse-heart" />
+          <Mascot size={32} emotion="idle" animation="idle" className="-my-1" />
           <span className="font-leckerli text-xl bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
             The Memory
           </span>

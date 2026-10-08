@@ -122,7 +122,10 @@ src/
 │   ├── ThemeSelector.tsx       # 7-theme grid with mood descriptions
 │   ├── HeartFirework.tsx       # Click-triggered particle animation
 │   ├── FloatingHearts.tsx      # Background decoration (10 hearts, 15% opacity)
-│   ├── AppBar.tsx              # Sticky top bar: logo, credit balance, notification, avatar
+│   ├── Mascot.tsx              # Pixel-art crab mascot (emotions + CSS frame animations)
+│   ├── MascotWalker.tsx        # Mascot scuttling along the landing hero, tap for a reaction
+│   ├── HeartLoader.tsx         # Loading indicator (walking mascot; legacy name)
+│   ├── AppBar.tsx              # Sticky top bar: mascot logo, credit balance, notification, avatar
 │   └── ClientProviders.tsx     # AuthProvider + CreditBalanceProvider + HeartFirework
 ├── contexts/                   # AuthContext, CreditBalanceContext, ToastContext
 ├── data/                       # patch-notes.ts, use-cases.ts
@@ -219,6 +222,17 @@ Instagram-like public feed of stories from shared memories — a tab in the dash
 - **Feed rules**: only `active` + shared memories; only `image`/`text-image`/`text` stories; viewer's own stories excluded. PIN-gated stories ARE included — the share checkbox is the owner's explicit consent; PIN gates only the link's viewing sequence (product decision 2026-06-12, migration 025; legal docs bumped to CONSENT_VERSION 1.1 to match).
 - **Reactions**: emoji set reused from `REACTION_EMOJIS` (❤️ 😍 🥹 🔥 🙏). `POST /api/universe/reaction` (bearer auth + service role) toggles: same emoji → off (soft delete via `removed_at`), different emoji → switch. Owner gets in-app notification + Web Push at most once per (story, user) via `notified_at` — re-toggling never re-notifies.
 - **Files**: `components/UniverseFeed.tsx`, `lib/universe.ts`, `types/universe.ts`, `api/universe/reaction/route.ts`, migrations `023-add-universe.sql` + `025-universe-include-pin-gated.sql`.
+
+## Mascot (น้องปู) — Brand CI
+
+A pink pixel-art crab is the brand mark. It is pure data + inline SVG, no image assets.
+
+- **Data**: `src/lib/mascot.ts` — 32×32 grid (left half mirrored), brand + mono palettes, `mascotStill(emotion)`, `mascotFrames(emotion, animation)`, `gridToRuns`, `mascotSvg`. Keep this file import-free and free of non-erasable TS (enums); the icon script runs it under plain Node.
+- **Emotions**: `idle`, `happy`, `wink`, `love` (floating heart), `sad` (frown + sweat + lowered claws), `surprised`, `sleepy`.
+- **Animations** (`<Mascot animation=…>`): `idle` (bob + blink), `walk` (2 leg frames, used by `HeartLoader`), `wave` (claw tilt), `bounce`, `none`. Frames are stacked `<g>` elements toggled by CSS keyframes in `globals.css` (`mascot-*`); `prefers-reduced-motion` freezes frame 0.
+- **Where it appears**: AppBar + landing nav (idle), landing hero (`MascotWalker`, walks the hero bottom edge, tap cycles happy/love/surprised/wink), login (wave), dashboard empty state (sleepy), payment success (love/bounce; credits: happy), payment cancel + memory not-ready + payment error (sad), PIN gate (wink), footer (sleepy), every loader (walk).
+- **Icons**: `npm run icons` regenerates `public/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png` (white crab on brand gradient) and `public/mascot.svg` (SVG favicon, listed first in layout metadata). Re-run after changing the grid.
+- `HeartIcon` is still used as a generic heart glyph (reactions, buttons); only brand-mark usages were replaced.
 
 ## Legal Consent (PDPA)
 

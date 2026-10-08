@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { Memory, MemoryStory, MemoryTheme } from '@/types/memory';
 import { getMemoryById } from '@/lib/storage';
+import Mascot from '@/components/Mascot';
 import { getThemeColors } from '@/lib/themes';
 import { useAuth } from '@/hooks/useAuth';
 import HeartIcon from '@/components/HeartIcon';
@@ -269,7 +270,7 @@ export default function MemoryViewerPage({ params }: PageProps) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center memory-card p-12">
-          <HeartIcon size={64} className="mx-auto mb-4 opacity-50" />
+          <Mascot size={96} emotion="sad" animation="idle" className="mx-auto mb-4" />
           <h2 className="font-kanit text-xl font-semibold text-gray-600 mb-2">{t('notReady.title')}</h2>
           <p className="text-gray-500 mb-6">{t('notReady.description')}</p>
           <Link href="/" className="btn-primary inline-block">

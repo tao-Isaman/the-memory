@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "icons": "node --no-warnings --experimental-strip-types scripts/generate-mascot-icons.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",

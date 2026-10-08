@@ -3,65 +3,39 @@
 import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
-import HeartIcon from './HeartIcon';
+import Mascot from './Mascot';
 
 interface HeartLoaderProps {
   message?: string;
   size?: 'sm' | 'md' | 'lg';
+  /** Kept for API compatibility with existing call sites; tints the label only. */
   themeColors?: ThemeColors;
 }
 
-const defaultColors: ThemeColors = {
-  primary: '#FF6B9D',
-  dark: '#E63946',
-  accent: '#FFB6C1',
-  background: '#FFF0F5',
+// Multiples of the 32px art keep the pixels crisp.
+const SIZES = {
+  sm: { mascot: 32, text: 'text-sm' },
+  md: { mascot: 64, text: 'text-base' },
+  lg: { mascot: 96, text: 'text-lg' },
 };
 
-const HeartLoader = memo(function HeartLoader({ message, size = 'md', themeColors = defaultColors }: HeartLoaderProps) {
+/**
+ * Loading indicator: the mascot walking in place. The name is historical (it used to
+ * be an orbiting heart); it is imported from two dozen places, so it keeps its name.
+ */
+const HeartLoader = memo(function HeartLoader({ message, size = 'md', themeColors }: HeartLoaderProps) {
   const t = useTranslations('common');
-  const sizes = {
-    sm: { heart: 32, text: 'text-sm' },
-    md: { heart: 48, text: 'text-base' },
-    lg: { heart: 64, text: 'text-lg' },
-  };
-
-  const { heart, text } = sizes[size];
+  const { mascot, text } = SIZES[size];
   // Callers may pass their own copy; otherwise fall back to the shared "Loading..." string.
   const label = message === undefined ? t('state.loading') : message;
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div className="relative">
-        {/* Center heart */}
-        <HeartIcon size={heart} className="animate-pulse-heart" filled style={{ color: themeColors.dark }} />
-
-        {/* Orbiting hearts */}
-        <div className="absolute inset-0 animate-spin-slow">
-          <HeartIcon
-            size={heart * 0.4}
-            className="absolute -top-4 left-1/2 -translate-x-1/2 opacity-70"
-            style={{ color: themeColors.primary }}
-          />
-        </div>
-        <div className="absolute inset-0 animate-spin-slow-reverse">
-          <HeartIcon
-            size={heart * 0.3}
-            className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-60"
-            style={{ color: themeColors.accent }}
-          />
-        </div>
-        <div className="absolute inset-0 animate-spin-slower">
-          <HeartIcon
-            size={heart * 0.35}
-            className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-50"
-            style={{ color: themeColors.primary }}
-          />
-        </div>
-      </div>
-
+    <div className="flex flex-col items-center justify-center gap-3" role="status" aria-live="polite">
+      <Mascot size={mascot} emotion="idle" animation="walk" title={label || 'Loading'} />
       {label && (
-        <p className={`text-gray-500 ${text} animate-pulse`}>{label}</p>
+        <p className={`${text} animate-pulse`} style={{ color: themeColors?.dark ?? '#7A6A63' }}>
+          {label}
+        </p>
       )}
     </div>
   );

@@ -330,3 +330,104 @@ body {
   right: 15%;
   animation-delay: 2s;
 }
+
+/* ---------------------------------------------------------------------------
+   Mascot (pixel-art crab) — see src/lib/mascot.ts + src/components/Mascot.tsx
+   Frames are stacked <g> elements; CSS toggles which one is visible.
+   --------------------------------------------------------------------------- */
+.mascot {
+  display: inline-block;
+  vertical-align: middle;
+  shape-rendering: crispEdges;
+  image-rendering: pixelated;
+  overflow: visible;
+}
+
+/* two-frame cycle: frame 1 gets a negative delay of half the duration */
+@keyframes mascot-cycle-2 {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 0; }
+}
+.mascot-frame-cycle {
+  animation: mascot-cycle-2 var(--mascot-duration, 500ms) step-end infinite;
+}
+
+/* blink: frame 0 (eyes open) almost always, frame 1 (eyes shut) for 5% of the loop */
+@keyframes mascot-blink-open {
+  0% { opacity: 1; }
+  95% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes mascot-blink-closed {
+  0% { opacity: 0; }
+  95% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.mascot-frame-blink-open {
+  animation: mascot-blink-open var(--mascot-duration, 4000ms) step-end infinite;
+}
+.mascot-frame-blink-closed {
+  animation: mascot-blink-closed var(--mascot-duration, 4000ms) step-end infinite;
+}
+
+/* whole-body motion */
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4%); }
+}
+@keyframes mascot-step {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5%); }
+}
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-16%) scale(0.97, 1.05); }
+  60% { transform: translateY(0) scale(1.05, 0.95); }
+}
+.mascot-bob { animation: mascot-bob 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
+.mascot-step { animation: mascot-step var(--mascot-duration, 500ms) ease-in-out infinite; transform-origin: 50% 100%; }
+.mascot-bounce { animation: mascot-bounce 0.9s ease-in-out infinite; transform-origin: 50% 100%; }
+
+/* crab scuttling across its track (landing hero); direction alternates so it never teleports */
+@keyframes mascot-cross {
+  from { transform: translateX(-120px); }
+  to { transform: translateX(calc(100vw + 20px)); }
+}
+.mascot-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  pointer-events: none;
+}
+.mascot-track > .mascot-runner {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: mascot-cross 28s linear infinite alternate;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-frame-cycle,
+  .mascot-frame-blink-open,
+  .mascot-frame-blink-closed,
+  .mascot-bob,
+  .mascot-step,
+  .mascot-bounce,
+  .mascot-track > .mascot-runner {
+    animation: none;
+  }
+  .mascot-frame-cycle:not(:first-child),
+  .mascot-frame-blink-closed {
+    display: none;
+  }
+  .mascot-track > .mascot-runner {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

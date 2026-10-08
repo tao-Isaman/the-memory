@@ -7,7 +7,8 @@ import { Link } from '@/i18n/navigation';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import ShareModal from '@/components/ShareModal';
-import { CheckCircle, Coins } from 'lucide-react';
+import Mascot from '@/components/Mascot';
+import { Coins } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 
 function PaymentSuccessContent() {
@@ -97,8 +98,8 @@ function PaymentSuccessContent() {
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
         <div className="memory-card p-8 max-w-md w-full text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-pink-50 rounded-full flex items-center justify-center">
-            <Coins size={40} className="text-[#E63946]" />
+          <div className="mx-auto mb-6 flex items-center justify-center">
+            <Mascot size={128} emotion="happy" animation="bounce" />
           </div>
 
           <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">
@@ -138,8 +139,14 @@ function PaymentSuccessContent() {
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="memory-card p-8 max-w-md w-full text-center">
-        <div className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-          <CheckCircle size={40} className="text-green-600" />
+        <div className="mx-auto mb-6 flex items-center justify-center">
+          {status === 'success' ? (
+            <Mascot size={128} emotion="love" animation="bounce" />
+          ) : status === 'pending' ? (
+            <Mascot size={128} emotion="idle" animation="walk" />
+          ) : (
+            <Mascot size={128} emotion="sad" animation="idle" />
+          )}
         </div>
 
         <h1 className="font-kanit text-2xl font-bold text-[#E63946] mb-4">

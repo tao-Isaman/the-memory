@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { ThemeColors } from '@/lib/themes';
-import HeartIcon from './HeartIcon';
+import Mascot from './Mascot';
 
 interface PasswordGateProps {
   correctPassword: string;
@@ -110,7 +110,7 @@ const PasswordGate = memo(function PasswordGate({ correctPassword, title, onUnlo
     <div className="flex flex-col items-center justify-center min-h-[400px] animate-fade-in-up">
       <div className={`memory-card p-8 max-w-md w-full text-center ${shake ? 'animate-shake' : ''}`}>
         <div className="mb-6">
-          <HeartIcon size={64} className="mx-auto animate-pulse-heart" style={{ color: themeColors.primary }} />
+          <Mascot size={96} emotion="wink" animation="idle" className="mx-auto" />
         </div>
         <h2 className="font-kanit text-2xl font-bold mb-2" style={{ color: themeColors.dark }}>
           {t('password.title')}

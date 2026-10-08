@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import HeartIcon from '@/components/HeartIcon';
+import Mascot from '@/components/Mascot';
+import MascotWalker from '@/components/MascotWalker';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { trackEvent } from '@/lib/analytics';
 import { USE_CASES } from '@/data/use-cases';
@@ -178,7 +180,7 @@ export default function LandingPageClient() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFBF7]/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <HeartIcon size={28} className="animate-pulse-heart" />
+            <Mascot size={36} emotion="idle" animation="idle" />
             <span className="text-2xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
               The Memory
             </span>
@@ -326,6 +328,9 @@ export default function LandingPageClient() {
             </p>
           </div>
         </div>
+
+        {/* Mascot scuttling along the bottom of the hero; tap it for a reaction */}
+        <MascotWalker size={64} />
       </section>
 
       {/* Features Section */}
@@ -551,7 +556,7 @@ export default function LandingPageClient() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-2">
-              <HeartIcon size={24} color="#FF6B9D" />
+              <Mascot size={32} emotion="sleepy" animation="idle" />
               <span className="text-xl font-bold">The Memory</span>
             </div>
             <p className="text-pink-200 text-sm">{t('footer.tagline')}</p>
