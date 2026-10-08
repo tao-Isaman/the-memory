@@ -114,44 +114,46 @@ export default function DashboardPage() {
         {user && <PushNotificationPrompt />}
 
         {/* Tab Bar */}
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex bg-pink-50 rounded-full p-1">
+        {/* Four tabs no longer fit a phone at the desktop padding: share the width on mobile and
+            keep the bar inside the viewport so the page can't scroll sideways. */}
+        <div className="flex justify-center mb-6 max-w-full overflow-x-hidden">
+          <div className="flex w-full sm:w-auto sm:inline-flex bg-pink-50 rounded-full p-1">
             <button
               onClick={() => setActiveTab('memories')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-5 py-2 rounded-full font-kanit text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                 activeTab === 'memories'
                   ? 'bg-white text-[#E63946] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <HeartIcon size={16} filled={activeTab === 'memories'} />
+              <span className="hidden sm:inline-flex"><HeartIcon size={16} filled={activeTab === 'memories'} /></span>
               {t('tabs.memories')}
             </button>
             <button
               onClick={() => setActiveTab('universe')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-5 py-2 rounded-full font-kanit text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                 activeTab === 'universe'
                   ? 'bg-white text-[#E63946] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <Sparkles size={16} />
+              <Sparkles size={16} className="hidden sm:block" />
               {t('tabs.universe')}
             </button>
             <button
               onClick={() => setActiveTab('cartoon')}
-              className={`flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-5 py-2 rounded-full font-kanit text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
                 activeTab === 'cartoon'
                   ? 'bg-white text-[#E63946] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <ImageIcon size={16} />
+              <ImageIcon size={16} className="hidden sm:block" />
               {t('tabs.cartoon')}
             </button>
             <Link
               href="/loykrathong"
-              className="flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all text-gray-500 hover:text-gray-700"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-5 py-2 rounded-full font-kanit text-xs sm:text-sm font-medium whitespace-nowrap transition-all text-gray-500 hover:text-gray-700"
             >
               <span aria-hidden="true">🪷</span>
               {t('tabs.loykrathong')}
