@@ -8,6 +8,7 @@ import {
   LK_ROOM_MAX,
   type Accessory,
   type KrathongDesign,
+  type SceneId,
   type ShellColor,
 } from '@/lib/loykrathong/config';
 import { isAccessory, isShellColor, type PlayerIdentity } from '@/lib/loykrathong/player';
@@ -91,7 +92,7 @@ const BUBBLE_MS = 6000;
  * - Broadcast `chat`: free text (login enforced by the UI).
  * - postgres_changes on `krathong_floats`: every room shares one river.
  */
-export function useRoom(me: PlayerIdentity | null, initialRoom: number | null) {
+export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, scene: SceneId) {
   const supabase = typeof window !== 'undefined' ? getSupabaseBrowserClient() : null;
   const [room, setRoom] = useState<number>(() =>
     initialRoom && initialRoom >= 1 && initialRoom <= LK_ROOM_COUNT ? initialRoom : 1,
@@ -155,7 +156,7 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null) {
   // Room channel: presence + broadcast.
   useEffect(() => {
     if (!supabase || !me) return;
-    const name = `lk-room-${room}`;
+    const name = `lk-${scene}-room-${room}`;
     const ch = supabase.channel(name, {
       config: { presence: { key: me.id }, broadcast: { self: false, ack: false } },
     });
@@ -278,7 +279,7 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null) {
       channel.current = null;
       supabase.removeChannel(ch);
     };
-  }, [supabase, me, room]);
+  }, [supabase, me, room, scene]);
 
   /** Game loop calls this (already throttled) with the current state. */
   const sendMove = useCallback(

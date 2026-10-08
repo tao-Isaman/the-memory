@@ -1,13 +1,11 @@
 // Loy Krathong online 2569 — "หมู่บ้านน้องปู" mini-game configuration.
 //
-// All coordinates are in MAP pixels (the generated map is 1024x1536). The camera
-// scales the map to the viewport, so nothing here depends on screen size.
+// Four scenes in a ring; walking off the left/right edge of a scene moves to the
+// neighbour. All coordinates are in MAP pixels (every map is 1024x1536). The
+// camera scales the map to cover the viewport, so nothing here depends on screen size.
 
-export const LK_MAP = {
-  url: '/game/loykrathong/map.webp',
-  w: 1024,
-  h: 1536,
-} as const;
+export const LK_MAP_W = 1024;
+export const LK_MAP_H = 1536;
 
 export interface Rect {
   x: number;
@@ -16,41 +14,142 @@ export interface Rect {
   h: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export function inRect(r: Rect, x: number, y: number): boolean {
   return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 }
 
-/**
- * Where the crab's feet may stand. Union of rectangles traced over the map art:
- * the plaza + stone path, the strip in front of the shop, the gaps beside the
- * palm clusters, and the pier.
- */
-export const LK_WALKABLE: Rect[] = [
-  { x: 420, y: 370, w: 410, h: 680 }, // plaza + path (between the houses and the river bank)
-  { x: 300, y: 690, w: 130, h: 320 }, // west strip between the palms and the plaza
-  { x: 50, y: 660, w: 390, h: 55 }, // in front of the shop counter
-  { x: 830, y: 630, w: 180, h: 120 }, // east strip below the big tree
-  { x: 462, y: 1040, w: 142, h: 250 }, // the pier
-];
+export const LK_SCENES = ['village', 'temple', 'bangkok', 'chiangmai'] as const;
+export type SceneId = (typeof LK_SCENES)[number];
 
-export function isWalkable(x: number, y: number): boolean {
-  for (const r of LK_WALKABLE) if (inRect(r, x, y)) return true;
+export interface SceneExit {
+  /** Standing inside this zone triggers the scene change. */
+  zone: Rect;
+  to: SceneId;
+  /** Where the player appears in the destination scene. */
+  entry: Point;
+}
+
+export interface SceneConfig {
+  id: SceneId;
+  mapUrl: string;
+  /** Union of rectangles the crab's feet may stand in. */
+  walkable: Rect[];
+  /** Only the village has the krathong shop. */
+  shop?: Rect;
+  /** Standing here with a krathong shows the float button. */
+  pier: Rect;
+  spawn: Point;
+  /** Where a freshly floated krathong appears. */
+  drop: Point;
+  /** Water bands krathongs drift in (right to left, wrapping inside their lane). */
+  lanes: Rect[];
+  /** Lane a fresh krathong belongs to (it starts at `drop`). */
+  dropLane: number;
+  exits: { left: SceneExit; right: SceneExit };
+}
+
+const EDGE = 26; // exit zone depth at the map edge
+const ENTRY = 44; // where you land after crossing an edge
+
+export const SCENES: Record<SceneId, SceneConfig> = {
+  village: {
+    id: 'village',
+    mapUrl: '/game/loykrathong/village.webp',
+    walkable: [
+      { x: 360, y: 430, w: 540, h: 490 }, // plaza + paths, between the houses and the bank
+      { x: 880, y: 495, w: 144, h: 80 }, // path to the right edge
+      { x: 0, y: 720, w: 400, h: 120 }, // in front of the shop, out to the left edge
+      { x: 460, y: 920, w: 110, h: 280 }, // the pier
+    ],
+    shop: { x: 20, y: 715, w: 360, h: 60 },
+    pier: { x: 460, y: 1060, w: 110, h: 140 },
+    spawn: { x: 640, y: 700 },
+    drop: { x: 512, y: 1250 },
+    lanes: [{ x: -90, y: 1240, w: 1200, h: 230 }],
+    dropLane: 0,
+    exits: {
+      left: { zone: { x: 0, y: 730, w: EDGE, h: 100 }, to: 'chiangmai', entry: { x: LK_MAP_W - ENTRY, y: 830 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 495, w: EDGE, h: 80 }, to: 'temple', entry: { x: ENTRY, y: 885 } },
+    },
+  },
+  temple: {
+    id: 'temple',
+    mapUrl: '/game/loykrathong/temple.webp',
+    walkable: [
+      { x: 60, y: 560, w: 900, h: 280 }, // courtyard
+      { x: 0, y: 830, w: 1024, h: 120 }, // walkway with the left/right exits
+      { x: 0, y: 830, w: 54, h: 706 }, // west walk around the pond
+      { x: 970, y: 830, w: 54, h: 706 }, // east walk around the pond
+      { x: 0, y: 1440, w: 1024, h: 96 }, // south walk
+      { x: 440, y: 1250, w: 160, h: 220 }, // the pier (entered from the south walk)
+    ],
+    pier: { x: 440, y: 1250, w: 160, h: 110 },
+    spawn: { x: 512, y: 700 },
+    drop: { x: 512, y: 1190 },
+    lanes: [{ x: -90, y: 1000, w: 1200, h: 200 }],
+    dropLane: 0,
+    exits: {
+      left: { zone: { x: 0, y: 840, w: EDGE, h: 100 }, to: 'village', entry: { x: LK_MAP_W - ENTRY, y: 535 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 840, w: EDGE, h: 100 }, to: 'bangkok', entry: { x: ENTRY, y: 790 } },
+    },
+  },
+  bangkok: {
+    id: 'bangkok',
+    mapUrl: '/game/loykrathong/bangkok.webp',
+    walkable: [
+      { x: 0, y: 740, w: 1024, h: 100 }, // promenade
+      { x: 445, y: 835, w: 140, h: 240 }, // pier walkway
+      { x: 400, y: 1050, w: 230, h: 400 }, // pier platform
+    ],
+    pier: { x: 400, y: 1250, w: 230, h: 200 },
+    spawn: { x: 512, y: 790 },
+    drop: { x: 512, y: 1492 },
+    lanes: [
+      { x: -90, y: 360, w: 1200, h: 200 }, // the wide river in front of Wat Arun
+      { x: -90, y: 1472, w: 1200, h: 40 }, // the strip below the pier tip
+    ],
+    dropLane: 1,
+    exits: {
+      left: { zone: { x: 0, y: 745, w: EDGE, h: 90 }, to: 'temple', entry: { x: LK_MAP_W - ENTRY, y: 885 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 745, w: EDGE, h: 90 }, to: 'chiangmai', entry: { x: ENTRY, y: 830 } },
+    },
+  },
+  chiangmai: {
+    id: 'chiangmai',
+    mapUrl: '/game/loykrathong/chiangmai.webp',
+    walkable: [
+      { x: 40, y: 600, w: 940, h: 170 }, // brick plaza
+      { x: 0, y: 770, w: 1024, h: 130 }, // lower promenade with the exits
+      { x: 440, y: 900, w: 140, h: 600 }, // the pier
+    ],
+    pier: { x: 440, y: 1300, w: 140, h: 200 },
+    spawn: { x: 512, y: 700 },
+    drop: { x: 412, y: 1470 },
+    lanes: [
+      { x: -90, y: 1050, w: 510, h: 430 }, // water left of the pier
+      { x: 600, y: 1050, w: 510, h: 430 }, // water right of the pier
+    ],
+    dropLane: 0,
+    exits: {
+      left: { zone: { x: 0, y: 780, w: EDGE, h: 110 }, to: 'bangkok', entry: { x: LK_MAP_W - ENTRY, y: 790 } },
+      right: { zone: { x: LK_MAP_W - EDGE, y: 780, w: EDGE, h: 110 }, to: 'village', entry: { x: ENTRY, y: 775 } },
+    },
+  },
+};
+
+export function isWalkable(scene: SceneConfig, x: number, y: number): boolean {
+  for (const r of scene.walkable) if (inRect(r, x, y)) return true;
   return false;
 }
 
-/** Standing inside one of these shows the context action button. */
-export const LK_HOTSPOTS = {
-  shop: { x: 50, y: 655, w: 390, h: 65 } as Rect,
-  pier: { x: 448, y: 1140, w: 170, h: 150 } as Rect,
-};
-
-export const LK_SPAWN = { x: 620, y: 820 };
-
-/** Where a freshly floated krathong appears (just past the pier tip). */
-export const LK_DROP = { x: 533, y: 1330 };
-
-/** Water band the krathongs drift in. */
-export const LK_RIVER = { top: 1300, bottom: 1480, left: -90, right: 1110 };
+export function isSceneId(v: unknown): v is SceneId {
+  return typeof v === 'string' && (LK_SCENES as readonly string[]).includes(v);
+}
 
 export const LK_WALK_SPEED = 170; // map px per second
 export const LK_SPRITE_SCALE = 2; // 32px grid -> 64px on the map

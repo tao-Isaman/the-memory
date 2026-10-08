@@ -10,6 +10,7 @@ import {
   LK_TO_MAX,
   LK_WISH_MAX,
   eventPhase,
+  isSceneId,
   type KrathongDesign,
 } from '@/lib/loykrathong/config';
 import { isShellColor } from '@/lib/loykrathong/player';
@@ -24,6 +25,7 @@ interface Body {
   toName?: string;
   color?: string;
   room?: number;
+  scene?: string;
   preview?: boolean;
 }
 
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
       to_name: toName ? maskProfanity(toName) : null,
       color: isShellColor(body.color) ? body.color : null,
       room: typeof body.room === 'number' && Number.isFinite(body.room) ? Math.trunc(body.room) : null,
+      scene: isSceneId(body.scene) ? body.scene : null,
       year: LK_EVENT.year,
     })
     .select('id, display_name, design, wish, to_name, color, created_at')

@@ -1,7 +1,12 @@
 {
   "metaTitle": "Loy Krathong Online 2026 — Desa Nong Pu by The Memory",
   "metaDescription": "Lepas krathong online gratis. Dandani kepitingmu, jalan-jalan di desa, pilih krathong di toko, lalu panjatkan harapan di dermaga bareng semua orang. Tanpa instal aplikasi.",
-  "keywords": ["loy krathong online", "loy krathong 2026", "krathong online", "game loy krathong"],
+  "keywords": [
+    "loy krathong online",
+    "loy krathong 2026",
+    "krathong online",
+    "game loy krathong"
+  ],
   "title": "Loy Krathong Online 2026",
   "village": "Desa Nong Pu",
   "intro": {
@@ -30,7 +35,8 @@
     "customize": "Dandan",
     "moveHint": "Geser joystick untuk jalan",
     "moveHintDesktop": "Tekan W A S D atau tombol panah untuk jalan",
-    "home": "Beranda"
+    "home": "Beranda",
+    "needKrathongHere": "Toko krathong ada di {scene}; ambil dulu di sana, lalu lepas di sini"
   },
   "shop": {
     "heading": "Toko krathong",
@@ -86,5 +92,11 @@
     "rate": "Tunggu sebentar sebelum melepas lagi",
     "closed": "Belum waktunya Loy Krathong",
     "generic": "Ada yang salah, coba lagi"
+  },
+  "scenes": {
+    "village": "Desa Nong Pu",
+    "temple": "Kuil",
+    "bangkok": "Tepi sungai Bangkok",
+    "chiangmai": "Chiang Mai"
   }
 }

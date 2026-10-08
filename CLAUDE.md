@@ -238,11 +238,11 @@ A pink pixel-art crab is the brand mark. It is pure data + inline SVG, no image 
 
 Free marketing feature at `/loykrathong` (no payment, no login to play; login only to chat). Club-Penguin-style 2D village: dress up your crab, walk around, pick a krathong at the shop, float it at the pier, see and chat with other players.
 
-- **Art**: `public/game/loykrathong/map.webp` (1024×1536 top-down pixel map, generated with gpt-image) + 6 `krathong-*.png` sprites. The crab is the brand mascot grid re-coloured per player (`src/lib/loykrathong/sprites.ts`, cached offscreen canvases, accessory overlays).
-- **Config**: `src/lib/loykrathong/config.ts` — walkable rects, hotspots (shop, pier), spawn/drop points, river band, designs, shell colours, accessories, limits, and the event window (`LK_EVENT`, 10–26 Nov 2026; `?preview=1` bypasses the gate; `eventPhase()`).
+- **Scenes**: 4 maps in a ring (village → temple → bangkok → chiangmai → village), each `public/game/loykrathong/<scene>.webp` (1024×1536 top-down pixel art, generated with gpt-image, no krathongs baked in). Walking into the left/right edge zone switches scene; only the village has the shop, every scene has a pier. Plus 6 `krathong-*.png` sprites. The crab is the brand mascot grid re-coloured per player (`src/lib/loykrathong/sprites.ts`, cached offscreen canvases, accessory overlays).
+- **Config**: `src/lib/loykrathong/config.ts` — `SCENES[id]`: walkable rects, shop/pier hotspots, spawn/drop points, drift lanes, exits (zone + destination + entry point); plus designs, shell colours, accessories, limits, and the event window (`LK_EVENT`, 10–26 Nov 2026; `?preview=1` bypasses the gate; `eventPhase()`).
 - **Game**: `src/components/loykrathong/LoyKrathongGame.tsx` (canvas loop + React HUD/modals), `Joystick.tsx` (touch), WASD/arrows on desktop. Dev-only `window.__lk` debug hook (`step(ms)` drives the loop when the tab is hidden; `?touch=1` forces the joystick layout).
-- **Multiplayer**: `useRoom.ts` on Supabase Realtime, no game server. Presence per room (`lk-room-N`, max 40, newest arrivals overflow to the next room), broadcast `mv` (sent on 8-direction change / stop / once per second while moving, dead-reckoned on receivers) and `chat`, plus `postgres_changes` on `krathong_floats` so every room shares one river.
-- **Data**: `krathong_floats` (migration 032) — public SELECT (anon), inserts only via `POST /api/loykrathong/float` (service role; validates, masks profanity via `src/lib/profanity.ts`, 20 s per-guest cooldown). `GET /api/loykrathong/floats` uses the anon key (count + latest 60).
+- **Multiplayer**: `useRoom.ts` on Supabase Realtime, no game server. Presence per scene+room (`lk-<scene>-room-N`, max 40, newest arrivals overflow to the next room), broadcast `mv` (sent on 8-direction change / stop / once per second while moving, dead-reckoned on receivers) and `chat`, plus `postgres_changes` on `krathong_floats` so every room shares one river.
+- **Data**: `krathong_floats` (migrations 032 + 033 `scene`) — public SELECT (anon), inserts only via `POST /api/loykrathong/float` (service role; validates, masks profanity via `src/lib/profanity.ts`, 20 s per-guest cooldown). `GET /api/loykrathong/floats` uses the anon key (count + latest 60).
 - **Identity**: guests get a per-device id + look in localStorage (`src/lib/loykrathong/player.ts`). Chat requires Google login; `signInWithGoogle(next)` + `/auth/callback?next=` return the player to the game.
 - **i18n**: namespace `loykrathong` (th/en/id).
 
@@ -301,7 +301,7 @@ Located in `supabase/migrations/`:
 5. `013-add-user-profiles.sql` → `014-add-age-function.sql` → `015-expand-theme-types.sql`
 6. `016-add-pwa-installs.sql` → `017-add-memory-views.sql` → `018-add-notifications.sql` → `019-add-notification-dismissal.sql` → `020-add-push-credits-claimed.sql`
 7. `021-add-voice-and-slideshow-story-types.sql` → `022-add-memory-reactions.sql` → `023-add-universe.sql` → `024-add-user-consents.sql` → `025-universe-include-pin-gated.sql`
-8. `029-universe-add-slideshow-and-scratch.sql` → `030-add-app-sessions.sql` → `031-add-insights-rpc.sql` → `032-add-loykrathong.sql`
+8. `029-universe-add-slideshow-and-scratch.sql` → `030-add-app-sessions.sql` → `031-add-insights-rpc.sql` → `032-add-loykrathong.sql` → `033-loykrathong-add-scene.sql`
 
 ## Development
 

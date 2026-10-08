@@ -13,23 +13,27 @@ import {
   LK_CHAT_MAX,
   LK_COLORS,
   LK_DESIGNS,
-  LK_DROP,
   LK_EVENT,
-  LK_HOTSPOTS,
-  LK_MAP,
+  LK_MAP_H,
+  LK_MAP_W,
   LK_NAME_MAX,
-  LK_RIVER,
-  LK_SPAWN,
+  LK_SCENES,
   LK_TO_MAX,
   LK_WALK_SPEED,
   LK_WISH_MAX,
+  SCENES,
   eventPhase,
   inRect,
+  isSceneId,
   isWalkable,
   krathongSpriteUrl,
   type Accessory,
   type EventPhase,
   type KrathongDesign,
+  type Point,
+  type SceneConfig,
+  type SceneExit,
+  type SceneId,
   type ShellColor,
 } from '@/lib/loykrathong/config';
 import { isValidName, loadPlayer, savePlayer, type PlayerIdentity } from '@/lib/loykrathong/player';
@@ -47,6 +51,7 @@ interface MeState {
 }
 
 interface FloatAnim {
+  lane: number;
   x: number;
   y: number;
   phase: number;
@@ -58,7 +63,8 @@ const BUBBLE_MS = 6000;
 const CHAT_COOLDOWN_MS = 1500;
 const KRATHONG_RIVER_PX = 56;
 const MIN_ZOOM = 0.8;
-const MAX_ZOOM = 1.5;
+const WALK_FRAME_MS = 140;
+const EXIT_COOLDOWN_MS = 900;
 
 function dir8(vx: number, vy: number): number {
   return Math.round(Math.atan2(vy, vx) / (Math.PI / 4));
@@ -85,11 +91,14 @@ export default function LoyKrathongGame() {
   const params = useSearchParams();
   const preview = params.get('preview') === '1';
   const roomParam = Number(params.get('room')) || null;
+  const sceneParam = params.get('scene');
 
   const [gate, setGate] = useState<EventPhase | null>(null);
   const [player, setPlayer] = useState<PlayerIdentity | null>(null);
   const [entered, setEntered] = useState(false);
   const [assetsReady, setAssetsReady] = useState(false);
+  const [scene, setScene] = useState<SceneId>(() => (isSceneId(sceneParam) ? sceneParam : 'village'));
+  const [fading, setFading] = useState(false);
   const [modal, setModal] = useState<Modal>(null);
   const [krathong, setKrathong] = useState<KrathongDesign | null>(null);
   const [hotspot, setHotspot] = useState<Hotspot>(null);
@@ -115,18 +124,20 @@ export default function LoyKrathongGame() {
 
   const joy = useRef({ x: 0, y: 0 });
   const keys = useRef<Set<string>>(new Set());
-  const me = useRef<MeState>({ x: LK_SPAWN.x + (Math.random() * 80 - 40), y: LK_SPAWN.y + (Math.random() * 40 - 20), vx: 0, vy: 0, moving: false });
+  const me = useRef<MeState>({ x: 0, y: 0, vx: 0, vy: 0, moving: false });
   const myBubble = useRef<{ text: string; until: number } | null>(null);
   const krathongRef = useRef<KrathongDesign | null>(null);
   const modalRef = useRef<Modal>(null);
+  const sceneRef = useRef<SceneConfig>(SCENES[scene]);
   const hotspotRef = useRef<Hotspot>(null);
+  const exitLockUntil = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const floatsRef = useRef<FloatItem[]>([]);
   const floatAnims = useRef<Map<string, FloatAnim>>(new Map());
 
   const activePlayer = entered ? player : null;
-  const room = useRoom(activePlayer, roomParam);
+  const room = useRoom(activePlayer, roomParam, scene);
   const { others, floats, sendMove, setMyState, announce, addFloat } = room;
   useEffect(() => {
     krathongRef.current = krathong;
@@ -148,9 +159,14 @@ export default function LoyKrathongGame() {
     setDraftAcc(p.accessory);
     const forceTouch = process.env.NODE_ENV !== 'production' && params.get('touch') === '1';
     setIsTouch(forceTouch || window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window);
-    Promise.all([loadImage(LK_MAP.url), ...LK_DESIGNS.map((d) => loadImage(krathongSpriteUrl(d)))])
+    const start = sceneRef.current;
+    me.current.x = start.spawn.x + (Math.random() * 80 - 40);
+    me.current.y = start.spawn.y + (Math.random() * 40 - 20);
+    Promise.all([loadImage(start.mapUrl), ...LK_DESIGNS.map((d) => loadImage(krathongSpriteUrl(d)))])
       .then(() => setAssetsReady(true))
       .catch(() => setAssetsReady(true));
+    // Prefetch the other scenes in the background.
+    for (const id of LK_SCENES) if (id !== start.id) void loadImage(SCENES[id].mapUrl).catch(() => {});
   }, [preview, params]);
 
   useEffect(() => {
@@ -163,7 +179,7 @@ export default function LoyKrathongGame() {
     if (!entered) return;
     const id = window.setTimeout(() => setShowHint(false), 9000);
     return () => window.clearTimeout(id);
-  }, [entered]);
+  }, [entered, scene]);
 
   useEffect(() => {
     if (!toast) return;
@@ -208,6 +224,24 @@ export default function LoyKrathongGame() {
     };
   }, []);
 
+  // ---- scene change -------------------------------------------------------
+  const switchScene = useCallback((to: SceneId, entry: Point) => {
+    const next = SCENES[to];
+    sceneRef.current = next;
+    me.current.x = entry.x;
+    me.current.y = entry.y;
+    me.current.vx = 0;
+    me.current.vy = 0;
+    me.current.moving = false;
+    exitLockUntil.current = performance.now() + EXIT_COOLDOWN_MS;
+    floatAnims.current.clear(); // lanes differ per scene
+    setFading(true);
+    setScene(to);
+    setShowHint(true);
+    void loadImage(next.mapUrl).catch(() => {});
+    window.setTimeout(() => setFading(false), 350);
+  }, []);
+
   // ---- game loop ----------------------------------------------------------
   useEffect(() => {
     if (!entered || !assetsReady || !player) return;
@@ -222,22 +256,34 @@ export default function LoyKrathongGame() {
     const lastSend = { dir: -99, moving: false, k: null as KrathongDesign | null, at: 0 };
     const playerLook = () => player;
 
-    const ensureFloatAnim = (f: FloatItem, now: number): FloatAnim => {
+    const ensureFloatAnim = (f: FloatItem, sc: SceneConfig, now: number): FloatAnim => {
       let a = floatAnims.current.get(f.id);
       if (a) return a;
       const ageMs = now - Date.parse(f.created_at);
       const fresh = Number.isFinite(ageMs) && ageMs < 15000;
-      a = {
-        x: fresh ? LK_DROP.x + (Math.random() * 30 - 15) : LK_RIVER.left + Math.random() * (LK_RIVER.right - LK_RIVER.left),
-        y: fresh ? LK_DROP.y + (Math.random() * 20 - 10) : LK_RIVER.top + Math.random() * (LK_RIVER.bottom - LK_RIVER.top),
-        phase: Math.random() * Math.PI * 2,
-        speed: 11 + Math.random() * 6,
-      };
+      const laneIdx = fresh ? sc.dropLane : Math.floor(Math.random() * sc.lanes.length);
+      const lane = sc.lanes[laneIdx];
+      a = fresh
+        ? {
+            lane: laneIdx,
+            x: sc.drop.x + (Math.random() * 30 - 15),
+            y: sc.drop.y + (Math.random() * 16 - 8),
+            phase: Math.random() * Math.PI * 2,
+            speed: 11 + Math.random() * 6,
+          }
+        : {
+            lane: laneIdx,
+            x: lane.x + Math.random() * lane.w,
+            y: lane.y + Math.random() * lane.h,
+            phase: Math.random() * Math.PI * 2,
+            speed: 11 + Math.random() * 6,
+          };
       floatAnims.current.set(f.id, a);
       return a;
     };
 
     const update = (dt: number, now: number) => {
+      const sc = sceneRef.current;
       // input
       let ix = 0;
       let iy = 0;
@@ -263,9 +309,9 @@ export default function LoyKrathongGame() {
       const py = m.y;
       if (len > 0.05) {
         const nx = m.x + ix * LK_WALK_SPEED * dt;
-        if (isWalkable(nx, m.y)) m.x = nx;
+        if (isWalkable(sc, nx, m.y)) m.x = nx;
         const ny = m.y + iy * LK_WALK_SPEED * dt;
-        if (isWalkable(m.x, ny)) m.y = ny;
+        if (isWalkable(sc, m.x, ny)) m.y = ny;
       }
       const dx = m.x - px;
       const dy = m.y - py;
@@ -273,8 +319,18 @@ export default function LoyKrathongGame() {
       m.vx = m.moving ? dx / dt : 0;
       m.vy = m.moving ? dy / dt : 0;
 
+      // scene exits
+      if (now > exitLockUntil.current) {
+        for (const ex of [sc.exits.left, sc.exits.right]) {
+          if (inRect(ex.zone, m.x, m.y)) {
+            switchScene(ex.to, ex.entry);
+            return;
+          }
+        }
+      }
+
       // hotspot
-      const hs: Hotspot = inRect(LK_HOTSPOTS.shop, m.x, m.y) ? 'shop' : inRect(LK_HOTSPOTS.pier, m.x, m.y) ? 'pier' : null;
+      const hs: Hotspot = sc.shop && inRect(sc.shop, m.x, m.y) ? 'shop' : inRect(sc.pier, m.x, m.y) ? 'pier' : null;
       if (hs !== hotspotRef.current) {
         hotspotRef.current = hs;
         setHotspot(hs);
@@ -300,8 +356,8 @@ export default function LoyKrathongGame() {
           if (now - o.updatedAt > 1600) {
             o.moving = false;
           } else {
-            o.x = Math.max(0, Math.min(LK_MAP.w, o.x + o.vx * dt));
-            o.y = Math.max(0, Math.min(LK_MAP.h, o.y + o.vy * dt));
+            o.x = Math.max(0, Math.min(LK_MAP_W, o.x + o.vx * dt));
+            o.y = Math.max(0, Math.min(LK_MAP_H, o.y + o.vy * dt));
           }
         }
         if (o.bubble && o.bubble.until < now) o.bubble = null;
@@ -310,11 +366,12 @@ export default function LoyKrathongGame() {
 
       // river
       for (const f of floatsRef.current) {
-        const a = ensureFloatAnim(f, Date.now());
+        const a = ensureFloatAnim(f, sc, Date.now());
+        const lane = sc.lanes[a.lane] ?? sc.lanes[0];
         a.x -= a.speed * dt;
-        if (a.x < LK_RIVER.left) {
-          a.x = LK_RIVER.right;
-          a.y = LK_RIVER.top + Math.random() * (LK_RIVER.bottom - LK_RIVER.top);
+        if (a.x < lane.x) {
+          a.x = lane.x + lane.w;
+          a.y = lane.y + Math.random() * lane.h;
         }
       }
     };
@@ -368,15 +425,18 @@ export default function LoyKrathongGame() {
       now: number,
       isMe: boolean,
     ) => {
-      const frame: 0 | 1 = moving ? ((Math.floor(now / 220) % 2) as 0 | 1) : now % 4000 < 150 ? 1 : 0;
+      // Walk cycle: legs alternate every WALK_FRAME_MS and the body bobs with them.
+      const step = Math.floor(now / WALK_FRAME_MS) % 2;
+      const frame: 0 | 1 = moving ? (step as 0 | 1) : now % 4000 < 150 ? 1 : 0;
+      const bob = moving ? (step === 0 ? -3 : 0) : 0;
       const sprite = crabSprite(color, accessory, k ? 'happy' : 'idle', moving, frame);
       // soft shadow
       ctx.fillStyle = 'rgba(0,0,0,0.25)';
       ctx.beginPath();
       ctx.ellipse(x, y - 2, 22, 7, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.drawImage(sprite, Math.round(x - SPRITE_PX / 2), Math.round(y - SPRITE_PX), SPRITE_PX, SPRITE_PX);
-      let top = y - SPRITE_PX + 6;
+      ctx.drawImage(sprite, Math.round(x - SPRITE_PX / 2), Math.round(y - SPRITE_PX + bob), SPRITE_PX, SPRITE_PX);
+      let top = y - SPRITE_PX + 6 + bob;
       if (k) {
         const img = getImage(krathongSpriteUrl(k));
         if (img) ctx.drawImage(img, Math.round(x - 16), Math.round(top - 34), 32, 32);
@@ -387,6 +447,7 @@ export default function LoyKrathongGame() {
     };
 
     const render = (now: number) => {
+      const sc = sceneRef.current;
       const dpr = window.devicePixelRatio || 1;
       const W = wrap.clientWidth;
       const H = wrap.clientHeight;
@@ -396,12 +457,13 @@ export default function LoyKrathongGame() {
         canvas.style.width = `${W}px`;
         canvas.style.height = `${H}px`;
       }
-      const zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.max(W / LK_MAP.w, H / LK_MAP.h)));
+      // Cover the viewport (no letterbox); keep the crab readable on small phones.
+      const zoom = Math.max(MIN_ZOOM, Math.max(W / LK_MAP_W, H / LK_MAP_H));
       const viewW = W / zoom;
       const viewH = H / zoom;
       const m = me.current;
-      const camX = viewW >= LK_MAP.w ? (LK_MAP.w - viewW) / 2 : Math.max(0, Math.min(LK_MAP.w - viewW, m.x - viewW / 2));
-      const camY = viewH >= LK_MAP.h ? (LK_MAP.h - viewH) / 2 : Math.max(0, Math.min(LK_MAP.h - viewH, m.y - viewH / 2));
+      const camX = viewW >= LK_MAP_W ? (LK_MAP_W - viewW) / 2 : Math.max(0, Math.min(LK_MAP_W - viewW, m.x - viewW / 2));
+      const camY = viewH >= LK_MAP_H ? (LK_MAP_H - viewH) / 2 : Math.max(0, Math.min(LK_MAP_H - viewH, m.y - viewH / 2));
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.fillStyle = '#0b1230';
@@ -409,8 +471,8 @@ export default function LoyKrathongGame() {
       ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, -camX * zoom * dpr, -camY * zoom * dpr);
       ctx.imageSmoothingEnabled = false;
 
-      const map = getImage(LK_MAP.url);
-      if (map) ctx.drawImage(map, 0, 0, LK_MAP.w, LK_MAP.h);
+      const map = getImage(sc.mapUrl);
+      if (map) ctx.drawImage(map, 0, 0, LK_MAP_W, LK_MAP_H);
 
       // river krathongs (oldest first so the newest draw on top)
       const list = floatsRef.current;
@@ -418,21 +480,20 @@ export default function LoyKrathongGame() {
         const f = list[i];
         const a = floatAnims.current.get(f.id);
         if (!a) continue;
-        const bob = Math.sin(now / 900 + a.phase) * 4;
+        const bobW = Math.sin(now / 900 + a.phase) * 4;
         const img = getImage(krathongSpriteUrl(f.design));
-        // candle glow
         ctx.fillStyle = 'rgba(255, 190, 90, 0.18)';
         ctx.beginPath();
-        ctx.ellipse(a.x, a.y + bob + 6, 34, 14, 0, 0, Math.PI * 2);
+        ctx.ellipse(a.x, a.y + bobW + 6, 34, 14, 0, 0, Math.PI * 2);
         ctx.fill();
-        if (img) ctx.drawImage(img, a.x - KRATHONG_RIVER_PX / 2, a.y + bob - KRATHONG_RIVER_PX / 2, KRATHONG_RIVER_PX, KRATHONG_RIVER_PX);
+        if (img) ctx.drawImage(img, a.x - KRATHONG_RIVER_PX / 2, a.y + bobW - KRATHONG_RIVER_PX / 2, KRATHONG_RIVER_PX, KRATHONG_RIVER_PX);
         if (i < FLOAT_LABELS) {
           const label = f.to_name ? `${f.display_name} → ${f.to_name}` : f.display_name;
-          drawTag(label, a.x, a.y + bob + KRATHONG_RIVER_PX / 2 + 4, '11px Kanit, sans-serif', '#fff', 'rgba(0,0,0,0.45)');
+          drawTag(label, a.x, a.y + bobW + KRATHONG_RIVER_PX / 2 + 4, '11px Kanit, sans-serif', '#fff', 'rgba(0,0,0,0.45)');
         }
       }
 
-      // hotspot markers
+      // hotspot + exit markers
       const pulse = 1 + Math.sin(now / 400) * 0.12;
       const marker = (cx: number, cy: number, active: boolean) => {
         ctx.strokeStyle = active ? 'rgba(255,255,255,0.95)' : 'rgba(255,220,120,0.7)';
@@ -441,8 +502,22 @@ export default function LoyKrathongGame() {
         ctx.ellipse(cx, cy, 26 * pulse, 11 * pulse, 0, 0, Math.PI * 2);
         ctx.stroke();
       };
-      marker(LK_HOTSPOTS.shop.x + LK_HOTSPOTS.shop.w / 2, LK_HOTSPOTS.shop.y + LK_HOTSPOTS.shop.h / 2 + 8, hotspotRef.current === 'shop');
-      marker(LK_HOTSPOTS.pier.x + LK_HOTSPOTS.pier.w / 2, LK_HOTSPOTS.pier.y + LK_HOTSPOTS.pier.h / 2 + 20, hotspotRef.current === 'pier');
+      if (sc.shop) marker(sc.shop.x + sc.shop.w / 2, sc.shop.y + sc.shop.h / 2 + 8, hotspotRef.current === 'shop');
+      marker(sc.pier.x + sc.pier.w / 2, sc.pier.y + sc.pier.h / 2 + 20, hotspotRef.current === 'pier');
+      const arrow = (ex: SceneExit, dir: -1 | 1) => {
+        const cx = ex.zone.x + ex.zone.w / 2 + dir * 10;
+        const cy = ex.zone.y + ex.zone.h / 2;
+        const alpha = 0.55 + Math.sin(now / 350) * 0.3;
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(cx + dir * 14, cy);
+        ctx.lineTo(cx - dir * 6, cy - 12);
+        ctx.lineTo(cx - dir * 6, cy + 12);
+        ctx.closePath();
+        ctx.fill();
+      };
+      arrow(sc.exits.left, -1);
+      arrow(sc.exits.right, 1);
 
       // players, painter's order by feet y
       const look = playerLook();
@@ -470,12 +545,12 @@ export default function LoyKrathongGame() {
     // Dev-only: lets a hidden tab (no rAF) be driven from the console for testing.
     const debug =
       process.env.NODE_ENV !== 'production'
-        ? { frames: 0, me: me.current, keys: keys.current, modal: modalRef, step: (ms: number) => frame(last + ms) }
+        ? { frames: 0, me: me.current, keys: keys.current, modal: modalRef, scene: sceneRef, step: (ms: number) => frame(last + ms) }
         : null;
     if (debug) (window as unknown as { __lk?: unknown }).__lk = debug;
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [entered, assetsReady, player, others, sendMove, setMyState]);
+  }, [entered, assetsReady, player, others, sendMove, setMyState, switchScene]);
 
   // ---- actions ------------------------------------------------------------
   const saveLook = useCallback(
@@ -520,6 +595,7 @@ export default function LoyKrathongGame() {
           toName: cleanText(toName, LK_TO_MAX),
           color: player.color,
           room: room.room,
+          scene,
           preview,
         }),
       });
@@ -539,7 +615,7 @@ export default function LoyKrathongGame() {
     } finally {
       setSubmitting(false);
     }
-  }, [player, krathong, wish, toName, session, room.room, preview, addFloat, t]);
+  }, [player, krathong, wish, toName, session, room.room, scene, preview, addFloat, t]);
 
   const sendChatMessage = useCallback(() => {
     const text = cleanText(maskProfanity(chatText), LK_CHAT_MAX);
@@ -553,7 +629,7 @@ export default function LoyKrathongGame() {
   }, [chatText, room]);
 
   const share = useCallback(async () => {
-    const url = `${window.location.origin}${window.location.pathname}?room=${room.room}`;
+    const url = `${window.location.origin}${window.location.pathname}?room=${room.room}&scene=${scene}`;
     const text = t('done.shareText');
     try {
       if (navigator.share) {
@@ -570,7 +646,7 @@ export default function LoyKrathongGame() {
     } catch {
       setToast(url);
     }
-  }, [room.room, t]);
+  }, [room.room, scene, t]);
 
   const loginForChat = useCallback(() => {
     void signInWithGoogle(`${window.location.pathname}${window.location.search}`);
@@ -589,7 +665,7 @@ export default function LoyKrathongGame() {
       <div className="fixed inset-0 bg-[#0b1230] text-white flex items-center justify-center p-6">
         <div
           className="absolute inset-0 bg-cover bg-center opacity-40"
-          style={{ backgroundImage: `url(${LK_MAP.url})`, imageRendering: 'pixelated' }}
+          style={{ backgroundImage: `url(${SCENES.village.mapUrl})`, imageRendering: 'pixelated' }}
         />
         <div className="relative max-w-md w-full text-center bg-black/50 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
           <p className="font-leckerli text-3xl mb-1 bg-gradient-to-r from-[#FF8FB3] to-[#FFD166] bg-clip-text text-transparent">{t('village')}</p>
@@ -614,6 +690,7 @@ export default function LoyKrathongGame() {
   }
 
   const colorKeys = Object.keys(LK_COLORS) as ShellColor[];
+  const sc = SCENES[scene];
   const actionLabel = hotspot === 'shop' ? t('hud.shop') : hotspot === 'pier' ? (krathong ? t('hud.float') : t('hud.needKrathong')) : null;
   const canAct = hotspot === 'shop' || (hotspot === 'pier' && !!krathong);
   const onAction = () => {
@@ -623,10 +700,23 @@ export default function LoyKrathongGame() {
       setModal('float');
     }
   };
+  const hintText = krathong
+    ? t('hud.goToPier')
+    : scene === 'village'
+      ? isTouch
+        ? t('hud.moveHint')
+        : t('hud.moveHintDesktop')
+      : t('hud.needKrathongHere', { scene: t('scenes.village') });
 
   return (
     <div ref={wrapRef} className="fixed inset-0 bg-[#0b1230] overflow-hidden select-none" style={{ touchAction: 'none' }}>
       <canvas ref={canvasRef} className="block w-full h-full" />
+
+      {/* Scene transition */}
+      <div
+        className="absolute inset-0 bg-[#0b1230] pointer-events-none transition-opacity duration-300"
+        style={{ opacity: fading ? 1 : 0 }}
+      />
 
       {/* Top bar */}
       <div className="absolute top-0 inset-x-0 p-3 flex items-start justify-between gap-2 pointer-events-none">
@@ -635,8 +725,10 @@ export default function LoyKrathongGame() {
             <span aria-hidden="true">←</span>
             <span className="hidden sm:inline">{t('hud.home')}</span>
           </Link>
-          <div className="hidden sm:block rounded-full bg-black/45 text-white px-3 h-9 flex-col justify-center backdrop-blur-sm border border-white/10">
-            <div className="text-sm leading-tight pt-2">{t('title')}</div>
+          <div className="h-9 px-3 rounded-full bg-black/45 text-white text-sm flex items-center gap-2 backdrop-blur-sm border border-white/10 whitespace-nowrap">
+            <span className="hidden sm:inline text-white/70">{t('title')}</span>
+            <span className="hidden sm:inline text-white/40">·</span>
+            <span className="font-medium">📍 {t(`scenes.${scene}`)}</span>
           </div>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
@@ -669,11 +761,12 @@ export default function LoyKrathongGame() {
         </div>
       </div>
 
-      {/* Hint */}
+      {/* Hint + neighbours */}
       {entered && showHint && !hotspot && (
-        <div className="absolute top-16 inset-x-0 flex justify-center pointer-events-none">
-          <div className="bg-black/50 text-white text-sm px-4 py-2 rounded-full backdrop-blur-sm">
-            {krathong ? t('hud.goToPier') : isTouch ? t('hud.moveHint') : t('hud.moveHintDesktop')}
+        <div className="absolute top-16 inset-x-0 flex flex-col items-center gap-2 pointer-events-none">
+          <div className="bg-black/50 text-white text-sm px-4 py-2 rounded-full backdrop-blur-sm">{hintText}</div>
+          <div className="bg-black/40 text-white/85 text-xs px-3 py-1.5 rounded-full backdrop-blur-sm">
+            ← {t(`scenes.${sc.exits.left.to}`)} · {t(`scenes.${sc.exits.right.to}`)} →
           </div>
         </div>
       )}
@@ -866,7 +959,10 @@ export default function LoyKrathongGame() {
             <div className="flex items-center gap-3 mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={krathongSpriteUrl(krathong)} alt="" className="w-14 h-14" style={{ imageRendering: 'pixelated' }} />
-              <h2 className="text-xl font-bold text-[#4A1942]">{t('float.heading')}</h2>
+              <div>
+                <h2 className="text-xl font-bold text-[#4A1942]">{t('float.heading')}</h2>
+                <p className="text-xs text-[#6B5E57]">📍 {t(`scenes.${scene}`)}</p>
+              </div>
             </div>
             <label className="block text-xs font-medium text-[#6B5E57] mb-1">{t('float.wish')}</label>
             <textarea

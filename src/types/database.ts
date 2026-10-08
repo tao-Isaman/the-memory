@@ -824,6 +824,7 @@ export interface Database {
           to_name: string | null
           color: string | null
           room: number | null
+          scene: string | null
           year: number
           created_at: string
         }
@@ -837,6 +838,7 @@ export interface Database {
           to_name?: string | null
           color?: string | null
           room?: number | null
+          scene?: string | null
           year?: number
           created_at?: string
         }
@@ -850,6 +852,7 @@ export interface Database {
           to_name?: string | null
           color?: string | null
           room?: number | null
+          scene?: string | null
           year?: number
           created_at?: string
         }

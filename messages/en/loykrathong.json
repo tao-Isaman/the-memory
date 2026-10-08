@@ -1,7 +1,13 @@
 {
   "metaTitle": "Loy Krathong Online 2026 — Nong Pu Village by The Memory",
   "metaDescription": "Float a krathong online for free. Dress up your crab, walk around the village, pick a krathong at the shop and make a wish at the pier with everyone else. No app needed.",
-  "keywords": ["loy krathong online", "loy krathong 2026", "online krathong", "loy krathong game", "float krathong online"],
+  "keywords": [
+    "loy krathong online",
+    "loy krathong 2026",
+    "online krathong",
+    "loy krathong game",
+    "float krathong online"
+  ],
   "title": "Loy Krathong Online 2026",
   "village": "Nong Pu Village",
   "intro": {
@@ -30,7 +36,8 @@
     "customize": "Dress up",
     "moveHint": "Drag the joystick to walk",
     "moveHintDesktop": "Use W A S D or the arrow keys to walk",
-    "home": "Home"
+    "home": "Home",
+    "needKrathongHere": "The krathong shop is in {scene}; grab one there, then float it here"
   },
   "shop": {
     "heading": "Krathong shop",
@@ -86,5 +93,11 @@
     "rate": "Please wait a moment before floating another",
     "closed": "It is not Loy Krathong time yet",
     "generic": "Something went wrong, please try again"
+  },
+  "scenes": {
+    "village": "Nong Pu Village",
+    "temple": "Temple",
+    "bangkok": "Bangkok riverside",
+    "chiangmai": "Chiang Mai"
   }
 }
