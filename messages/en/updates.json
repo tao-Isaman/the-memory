@@ -13,6 +13,16 @@
     "announcement": "News"
   },
   "notes": {
+    "v3_2_0": {
+      "title": "Loy Krathong Online 2026 — Nong Pu Village is open",
+      "summary": "A free Loy Krathong mini-game, open from today until 26 Nov. Dress up your crab, walk around the village, pick a krathong at the shop and make a wish at the pier with everyone else. Find it under the \"Loy Krathong\" tab on your dashboard.",
+      "items": [
+        "Name your crab, pick a shell colour and an accessory; walk with a joystick on mobile or W A S D on desktop",
+        "Pick one of six free krathongs at the shop and float it with a wish at the pier; everyone shares one river",
+        "Four scenes to explore: Nong Pu Village, the temple, Bangkok riverside and Chiang Mai; walk off the left or right edge to change scene",
+        "See other players in real time and chat once signed in"
+      ]
+    },
     "v3_1_0": {
       "title": "Meet the crab, The Memory’s new mascot",
       "summary": "A pink pixel-art crab is now the face of The Memory. You will see it in the top bar, as the app icon, and scuttling across the home page where you can tap it.",

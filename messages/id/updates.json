@@ -13,6 +13,16 @@
     "announcement": "Pengumuman"
   },
   "notes": {
+    "v3_2_0": {
+      "title": "Loy Krathong Online 2026 — Desa Nong Pu sudah buka",
+      "summary": "Mini-game Loy Krathong gratis, buka mulai hari ini sampai 26 Nov. Dandani kepitingmu, jalan-jalan di desa, ambil krathong di toko, lalu panjatkan harapan di dermaga bareng semua orang. Ada di tab \"Loy Krathong\" di dasbor.",
+      "items": [
+        "Beri nama kepitingmu, pilih warna cangkang dan aksesori; jalan dengan joystick di ponsel atau W A S D di komputer",
+        "Pilih satu dari enam krathong gratis di toko dan lepas dengan harapan di dermaga; semua orang berbagi satu sungai",
+        "Empat lokasi: Desa Nong Pu, kuil, tepi sungai Bangkok, dan Chiang Mai; jalan keluar dari tepi kiri atau kanan untuk pindah lokasi",
+        "Lihat pemain lain secara real time dan ngobrol setelah masuk"
+      ]
+    },
     "v3_1_0": {
       "title": "Kenalan dengan si kepiting, maskot baru The Memory",
       "summary": "Kepiting pixel-art berwarna pink kini menjadi wajah The Memory. Kamu akan melihatnya di bar atas, sebagai ikon aplikasi, dan berjalan di halaman depan yang bisa kamu ketuk.",

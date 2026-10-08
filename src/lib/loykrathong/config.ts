@@ -190,13 +190,13 @@ export const LK_CHAT_MAX = 120;
 export const LK_FLOAT_COOLDOWN_S = 20;
 
 /**
- * Event window (Bangkok time). Loy Krathong 2569 is 24 Nov 2026.
- * Outside the window the page shows a countdown / thank-you screen.
- * `?preview=1` bypasses the gate for testing.
+ * Event window (Bangkok time). Loy Krathong 2569 is 24 Nov 2026; the village is
+ * open early (from 8 Oct 2026) as a marketing run-up. After the window the page
+ * shows a thank-you screen. `?preview=1` bypasses the gate for testing.
  */
 export const LK_EVENT = {
   year: 2569,
-  opensAt: Date.parse('2026-11-10T00:00:00+07:00'),
+  opensAt: Date.parse('2026-10-08T00:00:00+07:00'),
   closesAt: Date.parse('2026-11-26T00:00:00+07:00'),
   dayAt: Date.parse('2026-11-24T00:00:00+07:00'),
 };

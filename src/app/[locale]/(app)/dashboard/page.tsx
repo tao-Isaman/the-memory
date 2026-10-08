@@ -149,6 +149,13 @@ export default function DashboardPage() {
               <ImageIcon size={16} />
               {t('tabs.cartoon')}
             </button>
+            <Link
+              href="/loykrathong"
+              className="flex items-center gap-2 px-5 py-2 rounded-full font-kanit text-sm font-medium transition-all text-gray-500 hover:text-gray-700"
+            >
+              <span aria-hidden="true">🪷</span>
+              {t('tabs.loykrathong')}
+            </Link>
           </div>
         </div>
 
