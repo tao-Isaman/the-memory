@@ -7,6 +7,7 @@ import HeartIcon from '@/components/HeartIcon';
 import Mascot from '@/components/Mascot';
 import MascotWalker from '@/components/MascotWalker';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import DemoMemoryModal from '@/components/DemoMemoryModal';
 import { trackEvent } from '@/lib/analytics';
 import { USE_CASES } from '@/data/use-cases';
 import {
@@ -148,6 +149,7 @@ const CTA_HEARTS = [
 
 export default function LandingPageClient() {
   const t = useTranslations('landing');
+  const [demoOpen, setDemoOpen] = useState(false);
   const tc = useTranslations('useCase.useCases');
 
   const [isVisible, setIsVisible] = useState(false);
@@ -176,6 +178,8 @@ export default function LandingPageClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFFBF7] via-white to-[#FFF8F0]">
+      {/* "See a sample memory" demo (hero secondary CTA) */}
+      <DemoMemoryModal open={demoOpen} onClose={() => setDemoOpen(false)} />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFBF7]/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -304,9 +308,9 @@ export default function LandingPageClient() {
                 <span>{t('hero.ctaPrimary')}</span>
                 <HeartIcon size={20} filled />
               </Link>
-              <a href="#how-it-works" className="btn-secondary text-lg py-4 px-10">
+              <button type="button" onClick={() => setDemoOpen(true)} className="btn-secondary text-lg py-4 px-10">
                 {t('hero.ctaSecondary')}
-              </a>
+              </button>
             </div>
 
             {/* Trust Badges */}

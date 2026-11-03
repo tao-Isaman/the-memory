@@ -19,6 +19,8 @@ type EventName =
   | 'view_memory'
   | 'complete_memory'
   | 'click_create_cta'
+  | 'view_demo'
+  | 'complete_demo'
   | 'replay_memory'
   | 'send_reaction'
   | 'view_universe_feed'

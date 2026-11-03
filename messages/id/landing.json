@@ -26,7 +26,7 @@
     "tagline": "Foto, pesan, dan lagu yang berarti — semuanya dalam satu tautan.",
     "occasions": "Cocok untuk semua momen: <b>anniversary, ulang tahun, minta maaf, LDR, keluarga</b>",
     "ctaPrimary": "Mulai gratis",
-    "ctaSecondary": "Lihat cara kerjanya",
+    "ctaSecondary": "Lihat contoh kenangan",
     "pricingHint": "Gratis dibuat | Aktifkan hanya <price>99 THB</price>"
   },
   "trust": {
@@ -162,5 +162,38 @@
     "trustLine": "Pembayaran aman lewat Stripe | Dibuat dalam menit, langsung dibagikan | Disimpan selamanya",
     "seoLine": "The Memory — kado kejutan dan kenangan online untuk anniversary, ulang tahun, minta maaf, LDR, dan keluarga.",
     "keywordLine": "kado kejutan untuk pacar | ide kado anniversary | kado ulang tahun pacar | cara minta maaf ke pacar | kado LDR | kado untuk keluarga | hadiah romantis | kado kenangan digital"
+  },
+  "demo": {
+    "title": "Contoh kenangan",
+    "badge": "Coba",
+    "close": "Tutup",
+    "prev": "Kembali",
+    "next": "Lanjut",
+    "finish": "Lihat akhirnya",
+    "counter": "{current} / {total}",
+    "answerFirst": "Jawab dengan benar dulu untuk lanjut",
+    "s1": {
+      "title": "Untuk orang yang paling berarti",
+      "text": "Terima kasih sudah selalu ada di sampingku.\nSetiap hari bersamamu adalah hari terbaik.\n\nTautan ini kubuat khusus untukmu. Lanjutkan ya 💌"
+    },
+    "s2": {
+      "title": "Kita versi kartun",
+      "text": "Ingat hari ini? Foto berdua pertama kita,\ndiubah jadi kartun oleh AI dalam sekali klik."
+    },
+    "s3": {
+      "title": "Tebak…",
+      "question": "Di mana kita pertama kali bertemu?",
+      "c1": "Di kedai kopi",
+      "c2": "Di kampus",
+      "c3": "Di konser",
+      "c4": "Di taman"
+    },
+    "end": {
+      "heading": "Contoh selesai 🎉",
+      "text": "Buat kenangan seperti ini untuk orang tersayang: foto, pesan, musik, PIN rahasia, dan kuis dalam satu tautan.",
+      "cta": "Masuk dan mulai gratis",
+      "hint": "Masuk dengan Google. Tanpa instal aplikasi.",
+      "replay": "Lihat lagi"
+    }
   }
 }

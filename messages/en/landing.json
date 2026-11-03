@@ -26,7 +26,7 @@
     "tagline": "Photos, messages and the song that means something — all in one link.",
     "occasions": "Made for every occasion: <b>anniversaries, birthdays, apologies, long distance, family</b>",
     "ctaPrimary": "Start for free",
-    "ctaSecondary": "See how it works",
+    "ctaSecondary": "See a sample memory",
     "pricingHint": "Free to build | Activate for just <price>฿99</price>"
   },
   "trust": {
@@ -162,5 +162,38 @@
     "trustLine": "Secure payments via Stripe | Built in minutes, shared instantly | Yours to keep forever",
     "seoLine": "The Memory — surprise gifts and online memories for anniversaries, birthdays, apologies, long distance and family.",
     "keywordLine": "surprise gift for girlfriend | surprise gift for boyfriend | anniversary gift idea | birthday gift idea | apology gift | long distance relationship gift | family gift idea | digital memory gift"
+  },
+  "demo": {
+    "title": "Sample memory",
+    "badge": "Try it",
+    "close": "Close",
+    "prev": "Back",
+    "next": "Next",
+    "finish": "See the ending",
+    "counter": "{current} / {total}",
+    "answerFirst": "Answer correctly to continue",
+    "s1": {
+      "title": "To the one who matters most",
+      "text": "Thank you for always being by my side.\nEvery day with you is the best day.\n\nI made this link just for you. Keep going 💌"
+    },
+    "s2": {
+      "title": "Us, cartoon style",
+      "text": "Remember this day? Our very first photo together,\nturned into a cartoon by AI in one click."
+    },
+    "s3": {
+      "title": "Guess what…",
+      "question": "Where did we first meet?",
+      "c1": "At a coffee shop",
+      "c2": "At university",
+      "c3": "At a concert",
+      "c4": "At the park"
+    },
+    "end": {
+      "heading": "That's the end of the sample 🎉",
+      "text": "Make one like this for someone you love: photos, messages, music, a secret PIN and quizzes, all in one link.",
+      "cta": "Sign in and start for free",
+      "hint": "Sign in with Google. No app to install.",
+      "replay": "Watch again"
+    }
   }
 }
