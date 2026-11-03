@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Joystick from './Joystick';
+import Mascot from '@/components/Mascot';
 import { useRoom, type FloatItem, type RemotePlayer } from './useRoom';
 import { crabSprite, getImage, loadImage, SPRITE_PX } from '@/lib/loykrathong/sprites';
 import {
@@ -105,6 +106,17 @@ export default function LoyKrathongGame() {
   const [isTouch, setIsTouch] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(true);
+  // "Back to the app" menu in the top bar
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [menuOpen]);
 
   // Look editor state (intro + customize)
   const [draftName, setDraftName] = useState('');
@@ -726,10 +738,43 @@ export default function LoyKrathongGame() {
       {/* Top bar */}
       <div className="absolute top-0 inset-x-0 p-3 flex items-start justify-between gap-2 pointer-events-none">
         <div className="pointer-events-auto flex items-center gap-2">
-          <Link href="/" className="h-9 px-3 rounded-full bg-black/45 text-white text-sm flex items-center gap-1 backdrop-blur-sm border border-white/10 whitespace-nowrap">
-            <span aria-hidden="true">←</span>
-            <span className="hidden sm:inline">{t('hud.home')}</span>
-          </Link>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label={t('hud.menu')}
+              className="h-9 pl-1.5 pr-3 rounded-full bg-white/90 text-[#4A1942] text-sm font-medium flex items-center gap-1.5 backdrop-blur-sm whitespace-nowrap"
+            >
+              <Mascot size={26} emotion="idle" animation="none" />
+              <span aria-hidden="true">☰</span>
+              <span className="hidden sm:inline">{t('hud.menu')}</span>
+            </button>
+            {menuOpen && (
+              <div role="menu" className="absolute left-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-pink-100 overflow-hidden animate-fade-in-up">
+                <div className="px-4 py-2 text-[11px] uppercase tracking-wide text-gray-400 border-b border-pink-50">{t('hud.backToApp')}</div>
+                <Link href="/" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
+                  <span aria-hidden="true">🏠</span> {t('hud.home')}
+                </Link>
+                {user ? (
+                  <Link href="/dashboard" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
+                    <span aria-hidden="true">📂</span> {t('hud.dashboard')}
+                  </Link>
+                ) : (
+                  <Link href="/login" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
+                    <span aria-hidden="true">🔑</span> {t('hud.login')}
+                  </Link>
+                )}
+                <Link href="/create" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
+                  <span aria-hidden="true">✨</span> {t('hud.create')}
+                </Link>
+                <Link href="/credits" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 border-t border-pink-50" onClick={() => setMenuOpen(false)}>
+                  <span aria-hidden="true">🪙</span> {t('hud.credits')}
+                </Link>
+              </div>
+            )}
+          </div>
           <div className="h-9 px-3 rounded-full bg-black/45 text-white text-sm flex items-center gap-2 backdrop-blur-sm border border-white/10 whitespace-nowrap">
             <span className="hidden sm:inline text-white/70">{t('title')}</span>
             <span className="hidden sm:inline text-white/40">·</span>

@@ -36,7 +36,13 @@
     "moveHint": "Sentuh dan tahan sisi kiri layar, lalu geser untuk jalan",
     "moveHintDesktop": "Tekan W A S D atau tombol panah untuk jalan",
     "home": "Beranda",
-    "needKrathongHere": "Toko krathong ada di {scene}; ambil dulu di sana, lalu lepas di sini"
+    "needKrathongHere": "Toko krathong ada di {scene}; ambil dulu di sana, lalu lepas di sini",
+    "menu": "Menu",
+    "backToApp": "Kembali ke The Memory",
+    "dashboard": "Dasbor saya",
+    "login": "Masuk",
+    "create": "Buat kenangan",
+    "credits": "Kredit"
   },
   "shop": {
     "heading": "Toko krathong",

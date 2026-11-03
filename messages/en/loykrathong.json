@@ -37,7 +37,13 @@
     "moveHint": "Touch and hold the left side of the screen, then drag to walk",
     "moveHintDesktop": "Use W A S D or the arrow keys to walk",
     "home": "Home",
-    "needKrathongHere": "The krathong shop is in {scene}; grab one there, then float it here"
+    "needKrathongHere": "The krathong shop is in {scene}; grab one there, then float it here",
+    "menu": "Menu",
+    "backToApp": "Back to The Memory",
+    "dashboard": "My dashboard",
+    "login": "Sign in",
+    "create": "Create a memory",
+    "credits": "Credits"
   },
   "shop": {
     "heading": "Krathong shop",
