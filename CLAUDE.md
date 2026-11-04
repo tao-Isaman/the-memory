@@ -73,7 +73,7 @@ src/
 ├── app/
 │   ├── (landing)/              # Marketing landing page
 │   │   ├── layout.tsx          # Metadata + FloatingHearts
-│   │   ├── page.tsx            # Hero, features, social proof, use case navigator, FAQ, CTA
+│   │   ├── page.tsx            # Hero (phone demo + rotating occasion), occasions, features, steps + pricing, social proof, FAQ, CTA
 │   │   └── use-case/[slug]/    # SSG use case pages (6 slugs)
 │   ├── (app)/                  # Authenticated app pages (shared AppBar layout)
 │   │   ├── layout.tsx          # AppBar wrapper layout
@@ -126,7 +126,9 @@ src/
 │   ├── MascotWalker.tsx        # Mascot walking around the hero headline (orbit) or along an edge, tap for a reaction
 │   ├── HeartLoader.tsx         # Loading indicator (walking mascot; legacy name)
 │   ├── AppBar.tsx              # Sticky top bar: mascot logo, credit balance, notification, avatar
-│   └── ClientProviders.tsx     # AuthProvider + CreditBalanceProvider + HeartFirework
+│   ├── ClientProviders.tsx     # AuthProvider + CreditBalanceProvider + HeartFirework
+│   ├── DemoMemoryModal.tsx     # Landing "see a sample memory": 3 demo stories via the real StoryViewer, ends on a login CTA
+│   └── landing/HeroPhoneDemo.tsx # Hero phone mockup looping PIN/text/photo/quiz (CSS-timed, globals.css `lp-*`)
 ├── contexts/                   # AuthContext, CreditBalanceContext, ToastContext
 ├── data/                       # patch-notes.ts, use-cases.ts
 ├── hooks/                      # useAuth, useCreditBalance, useToast
