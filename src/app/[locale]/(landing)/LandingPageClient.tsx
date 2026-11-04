@@ -1,33 +1,39 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import HeartIcon from '@/components/HeartIcon';
 import Mascot from '@/components/Mascot';
-import MascotWalker from '@/components/MascotWalker';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import DemoMemoryModal from '@/components/DemoMemoryModal';
+import HeroPhoneDemo from '@/components/landing/HeroPhoneDemo';
 import { trackEvent } from '@/lib/analytics';
+import { getThemeColors } from '@/lib/themes';
+import { eventPhase } from '@/lib/loykrathong/config';
 import { USE_CASES } from '@/data/use-cases';
 import {
-  Camera,
-  MessageCircleHeart,
-  Music,
-  Lock,
-  ImagePlus,
-  Share2,
-  Sparkles,
-  Gift,
-  PartyPopper,
-  Users,
+  ArrowRight,
   BookHeart,
-  Layers,
-  Puzzle,
-  MousePointerClick,
-  Shield,
-  Clock,
+  Camera,
+  Check,
   ChevronDown,
+  Clock,
+  Gift,
+  ImagePlus,
+  Layers,
+  Lock,
+  MessageCircleHeart,
+  MousePointerClick,
+  Music,
+  PartyPopper,
+  Puzzle,
+  Quote,
+  Share2,
+  Shield,
+  Smartphone,
+  Sparkles,
+  Users,
 } from 'lucide-react';
 
 interface SiteStats {
@@ -36,10 +42,9 @@ interface SiteStats {
   stories: number;
 }
 
-// Animated counter hook
-function useCountUp(end: number, duration: number = 2000, start: boolean = true) {
+/** Counts from 0 to `end` with an ease-out curve once `start` flips to true. */
+function useCountUp(end: number, duration = 1800, start = true) {
   const [count, setCount] = useState(0);
-  const countRef = useRef(0);
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -47,31 +52,18 @@ function useCountUp(end: number, duration: number = 2000, start: boolean = true)
       setCount(end);
       return;
     }
-
+    let frame = 0;
     const animate = (timestamp: number) => {
-      if (!startTimeRef.current) startTimeRef.current = timestamp;
-      const progress = timestamp - startTimeRef.current;
-      const percentage = Math.min(progress / duration, 1);
-
-      // Easing function for smooth animation
-      const easeOut = 1 - Math.pow(1 - percentage, 3);
-      const currentCount = Math.floor(easeOut * end);
-
-      if (currentCount !== countRef.current) {
-        countRef.current = currentCount;
-        setCount(currentCount);
-      }
-
-      if (percentage < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-      }
+      if (startTimeRef.current === null) startTimeRef.current = timestamp;
+      const progress = Math.min((timestamp - startTimeRef.current) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * end));
+      if (progress < 1) frame = requestAnimationFrame(animate);
+      else setCount(end);
     };
-
-    requestAnimationFrame(animate);
-
+    frame = requestAnimationFrame(animate);
     return () => {
+      cancelAnimationFrame(frame);
       startTimeRef.current = null;
     };
   }, [end, duration, start]);
@@ -79,535 +71,451 @@ function useCountUp(end: number, duration: number = 2000, start: boolean = true)
   return count;
 }
 
-// Animated stat component
-function AnimatedStat({
+function StatInline({
   value,
   label,
   icon: Icon,
-  startAnimation,
+  start,
 }: {
   value: number;
   label: string;
   icon: React.ElementType;
-  startAnimation: boolean;
+  start: boolean;
 }) {
-  const count = useCountUp(value, 2000, startAnimation);
-
+  const count = useCountUp(value, 1800, start);
   return (
-    <div className="text-center">
-      <Icon size={20} className="text-[#E63946] mx-auto mb-1" />
-      <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
-        {count.toLocaleString()}+
-      </p>
-      <p className="text-gray-500 text-xs mt-0.5">{label}</p>
+    <span className="flex items-center gap-1.5">
+      <Icon size={15} className="text-[#E63946]" />
+      <strong className="font-kanit font-semibold text-[#4A1942]">{count.toLocaleString()}+</strong>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function SectionHeading({ heading, sub }: { heading: string; sub?: string }) {
+  return (
+    <div className="mb-10 text-center sm:mb-14">
+      <h2 className="font-kanit text-3xl font-extrabold leading-tight text-[#4A1942] sm:text-4xl lg:text-5xl">{heading}</h2>
+      {sub && <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6B5E57] sm:text-lg">{sub}</p>}
     </div>
   );
 }
 
-const FEATURE_KEYS = [
-  { key: 'image', icon: Camera, color: 'from-pink-500 to-rose-500' },
-  { key: 'message', icon: MessageCircleHeart, color: 'from-rose-500 to-red-500' },
-  { key: 'music', icon: Music, color: 'from-red-500 to-pink-500' },
-  { key: 'pin', icon: Lock, color: 'from-pink-500 to-purple-500' },
-  { key: 'textImage', icon: ImagePlus, color: 'from-purple-500 to-pink-500' },
-  { key: 'scratch', icon: MousePointerClick, color: 'from-amber-500 to-orange-500' },
-  { key: 'question', icon: Puzzle, color: 'from-violet-500 to-purple-500' },
-  { key: 'share', icon: Share2, color: 'from-sky-500 to-blue-500' },
+const FEATURES = [
+  { key: 'image', icon: Camera, tint: '#FFE1EA', ink: '#E63946' },
+  { key: 'message', icon: MessageCircleHeart, tint: '#FFE4DE', ink: '#D64545' },
+  { key: 'music', icon: Music, tint: '#EEE6FF', ink: '#7C5CBF' },
+  { key: 'pin', icon: Lock, tint: '#F3E3EE', ink: '#4A1942' },
+  { key: 'textImage', icon: ImagePlus, tint: '#FFE9D6', ink: '#D9742B' },
+  { key: 'scratch', icon: MousePointerClick, tint: '#FFF1CC', ink: '#B7791F' },
+  { key: 'question', icon: Puzzle, tint: '#E9E3FF', ink: '#6B4FD8' },
+  { key: 'share', icon: Share2, tint: '#DCEFFF', ink: '#2B7FD9' },
 ] as const;
 
-const STEP_KEYS = [
+const STEPS = [
   { key: 'one', step: '1', icon: Sparkles },
   { key: 'two', step: '2', icon: Gift },
   { key: 'three', step: '3', icon: PartyPopper },
 ] as const;
 
-const TESTIMONIAL_BORDERS = ['border-pink-200', 'border-amber-200', 'border-blue-200'];
-
-/** Scattered decoration behind the final CTA. Fixed so SSG HTML and hydration agree. */
-const CTA_HEARTS = [
-  { left: 4, top: 12, size: 62 },
-  { left: 13, top: 68, size: 44 },
-  { left: 21, top: 33, size: 88 },
-  { left: 28, top: 84, size: 52 },
-  { left: 34, top: 7, size: 70 },
-  { left: 41, top: 52, size: 46 },
-  { left: 47, top: 91, size: 96 },
-  { left: 53, top: 24, size: 58 },
-  { left: 60, top: 63, size: 42 },
-  { left: 66, top: 15, size: 78 },
-  { left: 72, top: 45, size: 54 },
-  { left: 77, top: 88, size: 66 },
-  { left: 83, top: 29, size: 48 },
-  { left: 88, top: 71, size: 92 },
-  { left: 93, top: 9, size: 56 },
-  { left: 97, top: 55, size: 40 },
-  { left: 9, top: 44, size: 74 },
-  { left: 17, top: 96, size: 50 },
-  { left: 57, top: 78, size: 84 },
-  { left: 69, top: 97, size: 60 },
-];
-
 export default function LandingPageClient() {
   const t = useTranslations('landing');
-  const [demoOpen, setDemoOpen] = useState(false);
   const tc = useTranslations('useCase.useCases');
 
-  const [isVisible, setIsVisible] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
   const [stats, setStats] = useState<SiteStats | null>(null);
-  const [startCountAnimation, setStartCountAnimation] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [countStart, setCountStart] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  // Decided on the client so the prerendered HTML never disagrees with the current date.
+  const [showSeason, setShowSeason] = useState(false);
 
+  const rotate = t.raw('hero.rotate') as string[];
+  const pricingItems = t.raw('pricing.items') as string[];
   const testimonials = t.raw('socialProof.items') as { quote: string; occasion: string }[];
   const faqs = t.raw('faq.items') as { q: string; a: string }[];
 
   useEffect(() => {
-    setIsVisible(true);
     trackEvent('view_home');
-
-    // Fetch site stats
+    setShowSeason(eventPhase() === 'open');
     fetch('/api/stats')
       .then((res) => res.json())
       .then((data) => {
         if (data.users !== undefined) {
           setStats(data);
-          setTimeout(() => setStartCountAnimation(true), 500);
+          setTimeout(() => setCountStart(true), 300);
         }
       })
       .catch((err) => console.error('Failed to fetch stats:', err));
   }, []);
 
+  const createCta = (source: string) => () => trackEvent('click_create_cta', { source });
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FFFBF7] via-white to-[#FFF8F0]">
-      {/* "See a sample memory" demo (hero secondary CTA) */}
+    <div className="min-h-screen bg-[#FFFBF7] text-[#4A1942]">
       <DemoMemoryModal open={demoOpen} onClose={() => setDemoOpen(false)} />
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FFFBF7]/90 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Mascot size={36} emotion="idle" animation="idle" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent">
-              The Memory
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-[#E63946] hover:text-[#FF6B9D] transition-colors font-medium"
-            >
+
+      {/* ───────────────── Header ───────────────── */}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[#F5EDE4]/80 bg-[#FFFBF7]/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+          <Link href="/" className="flex items-center gap-2" aria-label="The Memory">
+            <Mascot size={32} emotion="idle" animation="idle" />
+            <span className="font-leckerli text-2xl text-[#E63946]">The Memory</span>
+          </Link>
+          <nav className="flex items-center gap-3 sm:gap-6">
+            <a href="#use-cases" className="hidden text-sm text-[#6B5E57] transition-colors hover:text-[#E63946] md:inline">
+              {t('footer.occasions')}
+            </a>
+            <a href="#faq" className="hidden text-sm text-[#6B5E57] transition-colors hover:text-[#E63946] md:inline">
+              {t('footer.faq')}
+            </a>
+            <Link href="/login" className="hidden text-sm font-medium transition-colors hover:text-[#E63946] sm:inline">
               {t('nav.signIn')}
             </Link>
-            <Link href="/login" className="btn-primary text-sm py-2 px-6">
+            <Link href="/login" onClick={createCta('nav')} className="btn-primary px-5 py-2 text-sm">
               {t('nav.start')}
             </Link>
-          </div>
+          </nav>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        {/* Animated Background Hearts */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[
-            { left: 8, top: 15, delay: 0.2, duration: 5.5, size: 28 },
-            { left: 22, top: 70, delay: 1.4, duration: 6.8, size: 40 },
-            { left: 35, top: 35, delay: 2.1, duration: 4.5, size: 22 },
-            { left: 48, top: 82, delay: 0.8, duration: 7.2, size: 34 },
-            { left: 60, top: 12, delay: 3.0, duration: 5.0, size: 48 },
-            { left: 72, top: 55, delay: 1.1, duration: 6.0, size: 26 },
-            { left: 85, top: 28, delay: 2.6, duration: 7.8, size: 38 },
-            { left: 92, top: 75, delay: 0.5, duration: 4.8, size: 30 },
-            { left: 15, top: 48, delay: 3.4, duration: 6.5, size: 44 },
-            { left: 55, top: 60, delay: 1.8, duration: 5.3, size: 24 },
-            { left: 78, top: 88, delay: 2.3, duration: 7.0, size: 36 },
-            { left: 40, top: 5, delay: 0.9, duration: 6.2, size: 32 },
-          ].map((h, i) => (
-            <div
-              key={i}
-              className="absolute animate-float opacity-[0.06]"
-              style={{
-                left: `${h.left}%`,
-                top: `${h.top}%`,
-                animationDelay: `${h.delay}s`,
-                animationDuration: `${h.duration}s`,
-              }}
+      {/* ───────────────── Hero ───────────────── */}
+      <section className="relative overflow-hidden pt-16">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#FFB6C1]/45 blur-3xl" />
+          <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-[#FFD9C4]/60 blur-3xl" />
+          <div className="absolute left-1/3 top-[36rem] h-64 w-64 rounded-full bg-[#F3E3EE]/70 blur-3xl lg:top-[28rem]" />
+        </div>
+
+        {showSeason && (
+          <div className="relative z-10 mx-auto mt-3 max-w-6xl px-4">
+            <Link
+              href="/loykrathong"
+              className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-2.5 text-sm text-[#4A1942] shadow-sm transition-colors hover:bg-amber-100/80"
             >
-              <HeartIcon size={h.size} color="#E8A0B5" />
-            </div>
-          ))}
-        </div>
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="text-lg" aria-hidden>
+                  🪷
+                </span>
+                <span className="line-clamp-2">{t('season.loykrathong.text')}</span>
+              </span>
+              <span className="shrink-0 rounded-full bg-[#4A1942] px-3 py-1 font-kanit text-xs font-medium text-white">
+                {t('season.loykrathong.cta')}
+              </span>
+            </Link>
+          </div>
+        )}
 
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-          <div
-            className={`transition-all duration-1000 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
-          >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF8F0] border border-[#F5EDE4] rounded-full text-sm text-[#E63946] mb-14 md:mb-16">
-              <HeartIcon size={16} filled />
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:pt-14 lg:grid-cols-12 lg:gap-8 lg:pb-24 lg:pt-20">
+          <div className="lg:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#F5EDE4] bg-white/80 px-3.5 py-1.5 text-xs text-[#E63946] shadow-sm sm:text-sm">
+              <HeartIcon size={14} filled />
               <span>{t('hero.badge')}</span>
             </div>
 
-            {/* Main Headline — the mascot walks around this block, tap it for a reaction */}
-            <div className="relative w-fit mx-auto px-4 py-2 mb-14 md:mb-16">
-              <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-                <span className="font-leckerli font-normal bg-gradient-to-r from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] bg-clip-text text-transparent">
-                  {t('hero.titleTop')}
+            <h1 className="mt-5 font-kanit text-[2.6rem] font-extrabold leading-[1.08] sm:text-6xl lg:text-[4.1rem]">
+              {t('hero.titleBottom')}
+              <span className="mt-1 block text-[1.7rem] font-bold leading-[1.2] sm:text-4xl lg:text-5xl">
+                {t('hero.forPrefix')}{' '}
+                <span className="lp-rotate">
+                  {rotate.map((word, i) => (
+                    <span
+                      key={word}
+                      className="lp-word bg-gradient-to-r from-[#FF6B9D] to-[#E63946] bg-clip-text text-transparent"
+                      style={{ animationDelay: `${i * 2.5}s` }}
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </span>
-                <br />
-                <span className="text-[#4A1942] text-3xl md:text-5xl">
-                  {t('hero.titleBottom')}
-                </span>
-              </h1>
-              <MascotWalker variant="orbit" size={56} className="hidden sm:block" />
-              <MascotWalker variant="orbit" size={40} className="sm:hidden" />
-            </div>
+              </span>
+            </h1>
 
-            {/* Stats below headline */}
-            {stats && (stats.users > 0 || stats.memories > 0 || stats.stories > 0) && (
-              <div className="inline-flex items-center justify-center gap-6 md:gap-10 mb-8 bg-white/60 backdrop-blur-sm rounded-2xl px-8 py-4 border border-gray-100">
-                <AnimatedStat
-                  value={stats.users}
-                  label={t('stats.users')}
-                  icon={Users}
-                  startAnimation={startCountAnimation}
-                />
-                <div className="h-12 w-px bg-gray-200" />
-                <AnimatedStat
-                  value={stats.memories}
-                  label={t('stats.memories')}
-                  icon={BookHeart}
-                  startAnimation={startCountAnimation}
-                />
-                <div className="h-12 w-px bg-gray-200" />
-                <AnimatedStat
-                  value={stats.stories}
-                  label={t('stats.stories')}
-                  icon={Layers}
-                  startAnimation={startCountAnimation}
-                />
-              </div>
-            )}
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-[#6B5E57] sm:text-xl">{t('hero.tagline')}</p>
 
-            {/* Subheadline */}
-            <p className="text-xl md:text-2xl text-gray-600 mb-4 max-w-2xl mx-auto leading-relaxed">
-              {t('hero.tagline')}
-            </p>
-            <p className="text-lg text-[#6B5E57] mb-10">
-              {t.rich('hero.occasions', {
-                b: (chunks) => <strong>{chunks}</strong>,
-              })}
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Link
                 href="/login"
-                className="btn-primary text-lg py-4 px-10 flex items-center gap-3 shadow-2xl shadow-pink-500/20"
+                onClick={createCta('hero')}
+                className="btn-primary flex items-center justify-center gap-2 px-8 py-4 text-lg shadow-xl shadow-pink-500/20"
               >
                 <span>{t('hero.ctaPrimary')}</span>
-                <HeartIcon size={20} filled />
+                <HeartIcon size={20} color="white" />
               </Link>
-              <button type="button" onClick={() => setDemoOpen(true)} className="btn-secondary text-lg py-4 px-10">
+              <button type="button" onClick={() => setDemoOpen(true)} className="btn-secondary px-8 py-4 text-lg">
                 {t('hero.ctaSecondary')}
               </button>
             </div>
 
-            {/* Trust Badges */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-[#6B5E57]">
-              <span className="flex items-center gap-1">
-                <Shield size={14} className="text-green-500" /> {t('trust.secure')}
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[#6B5E57] sm:text-sm">
+              <span className="flex items-center gap-1.5">
+                <Shield size={15} className="text-emerald-500" />
+                {t('trust.secure')}
               </span>
-              <span>&#183;</span>
-              <span>{t('trust.noApp')}</span>
-              <span>&#183;</span>
-              <span>{t('trust.easy')}</span>
-              <span>&#183;</span>
-              <span className="flex items-center gap-1">
-                <Clock size={14} className="text-[#E63946]" /> {t('trust.forever')}
+              <span className="flex items-center gap-1.5">
+                <Smartphone size={15} className="text-[#E63946]" />
+                {t('trust.noApp')}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Clock size={15} className="text-[#E63946]" />
+                {t('trust.forever')}
               </span>
             </div>
 
-            {/* Pricing hint */}
-            <p className="mt-4 text-sm text-gray-400">
-              {t.rich('hero.pricingHint', {
-                price: (chunks) => <span className="font-bold text-[#E63946]">{chunks}</span>,
-              })}
-            </p>
+            {stats && (stats.users > 0 || stats.memories > 0) && (
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#F5EDE4] pt-5 text-xs text-[#6B5E57] sm:text-sm">
+                <StatInline value={stats.users} label={t('stats.users')} icon={Users} start={countStart} />
+                <StatInline value={stats.memories} label={t('stats.memories')} icon={BookHeart} start={countStart} />
+                <StatInline value={stats.stories} label={t('stats.stories')} icon={Layers} start={countStart} />
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-center pt-8 lg:col-span-5 lg:justify-end lg:pt-0">
+            <HeroPhoneDemo onOpen={() => setDemoOpen(true)} />
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-white" id="features">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              {t('features.heading')}
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              {t('features.subheading')}
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURE_KEYS.map((feature) => {
-              const IconComponent = feature.icon;
+      {/* ───────────────── Occasions ───────────────── */}
+      <section id="use-cases" className="py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading heading={t('useCases.heading')} sub={t('useCases.subheading')} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+            {USE_CASES.map((uc) => {
+              const c = getThemeColors(uc.theme);
               return (
-                <div
-                  key={feature.key}
-                  className="group relative bg-white rounded-2xl p-6 shadow-sm shadow-gray-100 hover:shadow-lg hover:shadow-gray-200 transition-all duration-300 hover:-translate-y-1 border border-gray-100"
+                <Link
+                  key={uc.slug}
+                  href={`/use-case/${uc.slug}`}
+                  onClick={() => trackEvent('click_usecase_tile', { use_case: uc.slug })}
+                  className="group flex flex-col gap-3 rounded-3xl border border-white bg-white/80 p-4 shadow-[0_10px_30px_-14px_rgba(74,25,66,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-16px_rgba(74,25,66,0.28)] sm:p-6"
                 >
-                  <div
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                  <span
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl sm:h-14 sm:w-14 sm:text-3xl"
+                    style={{ backgroundColor: c.background }}
                   >
-                    <IconComponent size={28} className="text-white" />
+                    {uc.emoji}
+                  </span>
+                  <div>
+                    <h3 className="font-kanit text-base font-bold leading-snug text-[#4A1942] sm:text-xl">{tc(`${uc.slug}.title`)}</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-[#6B5E57] sm:text-sm">{tc(`${uc.slug}.subtitle`)}</p>
                   </div>
-                  <h3 className="text-lg font-bold text-[#4A1942] mb-2">
-                    {t(`features.${feature.key}.title`)}
-                  </h3>
-                  <p className="text-gray-500 text-sm">
-                    {t(`features.${feature.key}.desc`)}
-                  </p>
-                </div>
+                  <span className="mt-auto inline-flex items-center gap-1 font-kanit text-xs font-medium sm:text-sm" style={{ color: c.dark }}>
+                    {t('nav.start')}
+                    <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
               );
             })}
           </div>
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section className="py-20 bg-[#FFFBF7]">
-        <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#4A1942] mb-4 text-center">
-            {t('socialProof.heading')}
-          </h2>
-          <p className="text-gray-500 text-center mb-12">
-            {t('socialProof.subheading')}
-          </p>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
+      {/* ───────────────── Features ───────────────── */}
+      <section id="features" className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading heading={t('features.heading')} sub={t('features.subheading')} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+            {FEATURES.map(({ key, icon: Icon, tint, ink }) => (
               <div
-                key={index}
-                className={`bg-white p-6 rounded-2xl shadow-sm border ${
-                  TESTIMONIAL_BORDERS[index % TESTIMONIAL_BORDERS.length]
-                }`}
+                key={key}
+                className="rounded-3xl border border-[#F5EDE4] bg-[#FFFBF7] p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_-18px_rgba(74,25,66,0.25)] sm:p-6"
               >
-                <p className="text-gray-600 mb-4 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
-                <div className="text-sm text-gray-400">{testimonial.occasion}</div>
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl sm:h-12 sm:w-12" style={{ backgroundColor: tint, color: ink }}>
+                  <Icon size={22} />
+                </span>
+                <h3 className="mt-4 font-kanit text-base font-bold text-[#4A1942] sm:text-lg">{t(`features.${key}.title`)}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-[#6B5E57] sm:text-sm">{t(`features.${key}.desc`)}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 bg-gradient-to-b from-white to-[#FFF8F0]">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              {t('howItWorks.heading')}
-            </h2>
-            <p className="text-gray-600 text-lg">{t('howItWorks.subheading')}</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {STEP_KEYS.map((item, index) => {
-              const IconComponent = item.icon;
-              return (
-                <div key={item.key} className="relative text-center">
-                  {/* Connector Line */}
-                  {index < 2 && (
-                    <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-[#FF6B9D] to-[#E63946] opacity-20" />
-                  )}
-
-                  {/* Step Number */}
-                  <div className="relative inline-flex items-center justify-center w-32 h-32 mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B9D] to-[#E63946] rounded-full opacity-10 animate-pulse" />
-                    <div className="relative w-24 h-24 bg-white rounded-full shadow-md shadow-gray-200 flex items-center justify-center">
-                      <IconComponent size={48} className="text-[#E63946]" />
-                    </div>
-                    <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-[#FF6B9D] to-[#E63946] rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                      {item.step}
-                    </div>
+      {/* ───────────────── How it works + pricing ───────────────── */}
+      <section id="how-it-works" className="py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading heading={t('howItWorks.heading')} sub={t('howItWorks.subheading')} />
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-14">
+            <ol className="lg:col-span-7">
+              {STEPS.map(({ key, step, icon: Icon }, i) => (
+                <li key={key} className="relative flex gap-4 sm:gap-6">
+                  <div className="flex flex-col items-center">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#E63946] font-kanit text-lg font-bold text-white shadow-lg shadow-pink-500/25">
+                      {step}
+                    </span>
+                    {i < STEPS.length - 1 && <span className="my-2 w-px flex-1 bg-gradient-to-b from-[#FFB6C1] to-transparent" />}
                   </div>
+                  <div className={i < STEPS.length - 1 ? 'pb-9' : ''}>
+                    <div className="flex items-center gap-2">
+                      <Icon size={18} className="text-[#E63946]" />
+                      <h3 className="font-kanit text-lg font-bold text-[#4A1942] sm:text-xl">{t(`howItWorks.${key}.title`)}</h3>
+                    </div>
+                    <p className="mt-1.5 text-sm leading-relaxed text-[#6B5E57] sm:text-base">{t(`howItWorks.${key}.desc`)}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
 
-                  <h3 className="text-xl font-bold text-[#4A1942] mb-3">
-                    {t(`howItWorks.${item.key}.title`)}
-                  </h3>
-                  <p className="text-gray-600 max-w-xs mx-auto">
-                    {t(`howItWorks.${item.key}.desc`)}
-                  </p>
+            <div className="lg:col-span-5">
+              <div className="relative overflow-hidden rounded-[2rem] bg-[#4A1942] p-7 text-white shadow-[0_30px_60px_-24px_rgba(74,25,66,0.6)] sm:p-8">
+                <HeartIcon size={160} color="#FF6B9D" className="absolute -right-8 -top-10 opacity-20" />
+                <p className="font-kanit text-sm font-medium text-pink-200">{t('pricing.heading')}</p>
+                <div className="mt-2 flex items-end gap-2">
+                  <span className="font-kanit text-6xl font-extrabold leading-none">{t('pricing.price')}</span>
+                  <span className="pb-1 text-pink-200">{t('pricing.unit')}</span>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Pricing mention */}
-          <p className="mt-12 text-center text-gray-500">
-            {t.rich('howItWorks.pricingNote', {
-              price: (chunks) => <span className="font-bold text-[#E63946]">{chunks}</span>,
-            })}
-          </p>
-        </div>
-      </section>
-
-      {/* Use Case Navigator */}
-      <section className="py-24 bg-white" id="use-cases">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              {t('useCases.heading')}
-            </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              {t('useCases.subheading')}
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {USE_CASES.map((useCase) => (
-              <Link
-                key={useCase.slug}
-                href={`/use-case/${useCase.slug}`}
-                onClick={() => trackEvent('click_usecase_tile', { use_case: useCase.slug })}
-                className="group p-6 rounded-2xl bg-white border border-gray-100 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300"
-              >
-                <span className="text-4xl mb-4 block">{useCase.emoji}</span>
-                <h3 className="text-xl font-bold text-[#4A1942] mb-2 group-hover:text-[#E63946] transition-colors">
-                  {tc(`${useCase.slug}.title`)}
-                </h3>
-                <p className="text-gray-500 text-sm">{tc(`${useCase.slug}.subtitle`)}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-[#FFF8F0]" id="faq">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-[#4A1942] mb-4">
-              {t('faq.heading')}
-            </h2>
-            <p className="text-gray-600 text-lg">{t('faq.subheading')}</p>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4"
+                <p className="mt-3 text-sm text-pink-100/90">{t('pricing.sub')}</p>
+                <ul className="mt-5 space-y-2.5">
+                  {pricingItems.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FF6B9D]/30">
+                        <Check size={12} />
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/login"
+                  onClick={createCta('pricing')}
+                  className="btn-primary mt-6 flex w-full items-center justify-center gap-2 py-3.5 text-base"
                 >
-                  <h3 className="text-lg font-bold text-[#4A1942]">{faq.q}</h3>
-                  <ChevronDown
-                    size={20}
-                    className={`text-gray-400 shrink-0 transition-transform duration-200 ${
-                      openFaq === index ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {openFaq === index && (
-                  <div className="px-6 pb-6">
-                    <p className="text-gray-600 leading-relaxed">{faq.a}</p>
-                  </div>
-                )}
+                  <span>{t('pricing.cta')}</span>
+                  <HeartIcon size={18} color="white" />
+                </Link>
+                <p className="mt-3 text-center text-xs text-pink-200/80">{t('pricing.note')}</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── Social proof ───────────────── */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading heading={t('socialProof.heading')} sub={t('socialProof.subheading')} />
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-5 sm:overflow-visible sm:px-0">
+            {testimonials.map((item, i) => (
+              <figure
+                key={i}
+                className="flex min-w-[82%] snap-center flex-col rounded-3xl border border-[#F5EDE4] bg-[#FFFBF7] p-6 sm:min-w-0"
+              >
+                <Quote size={26} className="text-[#FFB6C1]" />
+                <blockquote className="mt-3 flex-1 text-base leading-relaxed text-[#4A1942]">{item.quote}</blockquote>
+                <figcaption className="mt-5 flex items-center justify-between text-xs text-[#6B5E57]">
+                  <span>{item.occasion}</span>
+                  <span className="flex gap-0.5" aria-hidden>
+                    {Array.from({ length: 5 }).map((_, k) => (
+                      <HeartIcon key={k} size={12} />
+                    ))}
+                  </span>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-[#FF6B9D] via-[#E63946] to-[#FF6B9D] relative overflow-hidden">
-        {/* Background Pattern — fixed positions, not Math.random(): this page is
-            statically prerendered, so random values would differ between the server
-            HTML and the client render and trip a hydration mismatch. */}
-        <div className="absolute inset-0 opacity-10">
-          {CTA_HEARTS.map((h, i) => (
-            <HeartIcon
-              key={i}
-              size={h.size}
-              color="white"
-              className="absolute"
-              style={{
-                left: `${h.left}%`,
-                top: `${h.top}%`,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6">{t('finalCta.heading')}</h2>
-          <p className="text-xl md:text-2xl mb-4 opacity-90">{t('finalCta.subheading')}</p>
-          <p className="text-lg mb-10 opacity-75">{t('finalCta.note')}</p>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-3 bg-white text-[#E63946] font-bold text-lg py-4 px-10 rounded-full hover:bg-[#FFF8F0] transition-colors shadow-2xl"
-          >
-            <span>{t('finalCta.button')}</span>
-            <HeartIcon size={24} color="#E63946" />
-          </Link>
+      {/* ───────────────── FAQ ───────────────── */}
+      <section id="faq" className="py-16 sm:py-24">
+        <div className="mx-auto max-w-3xl px-4">
+          <SectionHeading heading={t('faq.heading')} sub={t('faq.subheading')} />
+          <div className="space-y-3">
+            {faqs.map((faq, index) => {
+              const open = openFaq === index;
+              return (
+                <div key={index} className={`rounded-2xl border bg-white transition-colors ${open ? 'border-[#FFB6C1]' : 'border-[#F5EDE4]'}`}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(open ? null : index)}
+                    aria-expanded={open}
+                    className="flex w-full items-center justify-between gap-4 p-5 text-left"
+                  >
+                    <h3 className="font-kanit text-base font-semibold text-[#4A1942] sm:text-lg">{faq.q}</h3>
+                    <ChevronDown size={20} className={`shrink-0 text-[#E63946] transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+                  </button>
+                  {open && <p className="px-5 pb-5 text-sm leading-relaxed text-[#6B5E57] sm:text-base">{faq.a}</p>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 bg-[#4A1942] text-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+      {/* ───────────────── Final CTA ───────────────── */}
+      <section className="px-4 pb-20 pt-4 sm:pb-28">
+        <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#FF6B9D] via-[#E63946] to-[#FF8FB1] px-6 py-14 text-center text-white shadow-[0_30px_70px_-30px_rgba(230,57,70,0.7)] sm:px-12 sm:py-20">
+          <HeartIcon size={220} color="white" className="absolute -left-16 -top-16 opacity-10" />
+          <HeartIcon size={160} color="white" className="absolute -bottom-12 -right-10 opacity-10" />
+          <div className="relative z-10">
+            <div className="mb-4 flex justify-center">
+              <Mascot size={72} emotion="love" animation="bounce" mono />
+            </div>
+            <h2 className="font-kanit text-3xl font-extrabold leading-tight sm:text-5xl">{t('finalCta.heading')}</h2>
+            <p className="mt-4 text-base text-white/90 sm:text-xl">{t('finalCta.subheading')}</p>
+            <p className="mt-2 text-sm text-white/75 sm:text-base">{t('finalCta.note')}</p>
+            <Link
+              href="/login"
+              onClick={createCta('final')}
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-white px-9 py-4 font-kanit text-lg font-bold text-[#E63946] shadow-2xl transition-transform hover:-translate-y-0.5"
+            >
+              <span>{t('finalCta.button')}</span>
+              <HeartIcon size={22} color="#E63946" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────── Footer ───────────────── */}
+      <footer className="bg-[#4A1942] py-12 text-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
             <div className="flex items-center gap-2">
               <Mascot size={32} emotion="sleepy" animation="idle" />
-              <span className="text-xl font-bold">The Memory</span>
+              <span className="font-leckerli text-2xl">The Memory</span>
             </div>
-            <p className="text-pink-200 text-sm">{t('footer.tagline')}</p>
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-pink-200">
-              <Link href="/login" className="hover:text-white transition-colors">
+            <p className="text-sm text-pink-200">{t('footer.tagline')}</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-pink-200">
+              <Link href="/login" className="transition-colors hover:text-white">
                 {t('footer.signIn')}
               </Link>
-              <a href="#features" className="hover:text-white transition-colors">
+              <a href="#features" className="transition-colors hover:text-white">
                 {t('footer.features')}
               </a>
-              <a href="#use-cases" className="hover:text-white transition-colors">
+              <a href="#use-cases" className="transition-colors hover:text-white">
                 {t('footer.occasions')}
               </a>
-              <a href="#faq" className="hover:text-white transition-colors">
+              <a href="#faq" className="transition-colors hover:text-white">
                 {t('footer.faq')}
               </a>
-              <Link href="/terms" className="hover:text-white transition-colors">
+              <Link href="/terms" className="transition-colors hover:text-white">
                 {t('footer.terms')}
               </Link>
-              <Link href="/privacy" className="hover:text-white transition-colors">
+              <Link href="/privacy" className="transition-colors hover:text-white">
                 {t('footer.privacy')}
               </Link>
               <LanguageSwitcher />
             </div>
           </div>
 
-          {/* Use case links */}
-          <div className="border-t border-pink-900/50 pt-6 pb-4">
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-pink-300">
+          <div className="mt-8 border-t border-pink-900/50 pt-6">
+            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-pink-300">
               {USE_CASES.map((uc) => (
-                <Link
-                  key={uc.slug}
-                  href={`/use-case/${uc.slug}`}
-                  className="hover:text-white transition-colors"
-                >
+                <Link key={uc.slug} href={`/use-case/${uc.slug}`} className="transition-colors hover:text-white">
                   {tc(`${uc.slug}.title`)}
                 </Link>
               ))}
+              <Link href="/loykrathong" className="transition-colors hover:text-white">
+                🪷 {t('season.loykrathong.cta')}
+              </Link>
             </div>
           </div>
 
-          {/* Trust & SEO Footer */}
-          <div className="border-t border-pink-900/50 pt-6 text-center">
-            <p className="text-pink-300 text-sm mb-2">{t('footer.trustLine')}</p>
-            <p className="text-pink-300 text-sm mb-4">{t('footer.seoLine')}</p>
-            <p className="text-pink-400 text-xs">{t('footer.keywordLine')}</p>
+          <div className="mt-6 border-t border-pink-900/50 pt-6 text-center">
+            <p className="mb-2 text-sm text-pink-300">{t('footer.trustLine')}</p>
+            <p className="mb-4 text-sm text-pink-300">{t('footer.seoLine')}</p>
+            <p className="text-xs text-pink-400">{t('footer.keywordLine')}</p>
           </div>
         </div>
       </footer>

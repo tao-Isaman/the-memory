@@ -475,3 +475,69 @@ body {
     left: auto;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Landing page — see src/app/[locale]/(landing)/LandingPageClient.tsx and
+   src/components/landing/HeroPhoneDemo.tsx. Everything is CSS-timed so the
+   prerendered HTML needs no timers and nothing can mismatch on hydration.
+   --------------------------------------------------------------------------- */
+
+/* Headline: five occasion words stacked in one grid cell, shown one at a time
+   (12.5 s loop, each word gets a 2.5 s animation-delay step). */
+.lp-rotate {
+  display: inline-grid;
+  vertical-align: baseline;
+}
+.lp-rotate > .lp-word {
+  grid-area: 1 / 1;
+  opacity: 0;
+  animation: lp-word 12.5s ease-in-out infinite;
+}
+@keyframes lp-word {
+  0% { opacity: 0; transform: translateY(0.45em); }
+  4%, 17% { opacity: 1; transform: translateY(0); }
+  21%, 100% { opacity: 0; transform: translateY(-0.45em); }
+}
+
+/* Phone mockup: four slides on a 12 s loop (3 s each, delay = index × 3 s). */
+.lp-slide {
+  opacity: 0;
+  animation: lp-slide 12s ease-in-out infinite;
+}
+@keyframes lp-slide {
+  0% { opacity: 0; transform: scale(0.97); }
+  5%, 24% { opacity: 1; transform: scale(1); }
+  26%, 100% { opacity: 0; transform: scale(0.97); }
+}
+
+/* Progress bars above the slides: each fills during its own slide, stays full
+   until the loop restarts, then empties. Because every bar carries the same
+   delay as its slide, the "stay full" stretch has to shrink per index. */
+.lp-slide-dot > span {
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: lp-dot-0 12s linear infinite;
+}
+.lp-slide-dot:nth-child(2) > span { animation-name: lp-dot-1; }
+.lp-slide-dot:nth-child(3) > span { animation-name: lp-dot-2; }
+.lp-slide-dot:nth-child(4) > span { animation-name: lp-dot-3; }
+@keyframes lp-dot-0 { 0% { transform: scaleX(0); } 25%, 100% { transform: scaleX(1); } }
+@keyframes lp-dot-1 { 0% { transform: scaleX(0); } 25%, 75% { transform: scaleX(1); } 75.01%, 100% { transform: scaleX(0); } }
+@keyframes lp-dot-2 { 0% { transform: scaleX(0); } 25%, 50% { transform: scaleX(1); } 50.01%, 100% { transform: scaleX(0); } }
+@keyframes lp-dot-3 { 0% { transform: scaleX(0); } 25% { transform: scaleX(1); } 25.01%, 100% { transform: scaleX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-rotate > .lp-word,
+  .lp-slide,
+  .lp-slide-dot > span {
+    animation: none;
+  }
+  .lp-rotate > .lp-word:first-child,
+  .lp-slide:first-of-type {
+    opacity: 1;
+    transform: none;
+  }
+  .lp-slide-dot:first-child > span {
+    transform: scaleX(1);
+  }
+}

@@ -20,14 +20,28 @@
     "start": "Mulai buat"
   },
   "hero": {
-    "badge": "Cara paling berkesan buat bikin dia kaget",
+    "badge": "Website kejutan No. 1 di Thailand",
     "titleTop": "The Memory",
     "titleBottom": "Website kejutan buat orang tersayang",
-    "tagline": "Foto, pesan, dan lagu yang berarti — semuanya dalam satu tautan.",
+    "tagline": "Foto, pesan, lagu, dan PIN rahasia dalam satu tautan yang bisa langsung dibuka. Tanpa instal aplikasi.",
     "occasions": "Cocok untuk semua momen: <b>anniversary, ulang tahun, minta maaf, LDR, keluarga</b>",
     "ctaPrimary": "Mulai gratis",
     "ctaSecondary": "Lihat contoh kenangan",
-    "pricingHint": "Gratis dibuat | Aktifkan hanya <price>99 THB</price>"
+    "pricingHint": "Gratis dibuat | Aktifkan hanya <price>99 THB</price>",
+    "forPrefix": "untuk",
+    "rotate": [
+      "anniversary",
+      "ulang tahun",
+      "minta maaf",
+      "Tahun Baru",
+      "Valentine"
+    ],
+    "phone": {
+      "pinTitle": "Masukkan PIN rahasia",
+      "pinHint": "Enam angka yang cuma kalian berdua tahu",
+      "photoCaption": "Foto kalian diubah jadi kartun oleh AI",
+      "tap": "Ketuk untuk mencoba"
+    }
   },
   "trust": {
     "secure": "100% aman",
@@ -195,5 +209,25 @@
       "hint": "Masuk dengan Google. Tanpa instal aplikasi.",
       "replay": "Lihat lagi"
     }
+  },
+  "season": {
+    "loykrathong": {
+      "text": "Loy Krathong Online 2026 sudah dibuka. Ajak orang spesial melarung krathong di desa kepiting",
+      "cta": "Main sekarang"
+    }
+  },
+  "pricing": {
+    "heading": "Satu harga. Selesai.",
+    "sub": "Buat dan lihat pratinjau gratis. Bayar hanya saat siap dikirim.",
+    "price": "฿99",
+    "unit": "per kenangan",
+    "items": [
+      "Gratis dibuat dan dilihat",
+      "Bayar sekali, tanpa langganan",
+      "Tautan jadi milikmu selamanya",
+      "Kirim ke siapa pun, kapan pun"
+    ],
+    "cta": "Mulai gratis",
+    "note": "PromptPay atau kartu, aman dengan Stripe"
   }
 }

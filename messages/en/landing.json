@@ -20,14 +20,28 @@
     "start": "Start creating"
   },
   "hero": {
-    "badge": "The #1 way to surprise the person you love",
+    "badge": "Thailand's #1 surprise website",
     "titleTop": "The Memory",
     "titleBottom": "The surprise website for the one you love",
-    "tagline": "Photos, messages and the song that means something — all in one link.",
+    "tagline": "Photos, messages, a song and a secret PIN, all in one link they can open right away. No app needed.",
     "occasions": "Made for every occasion: <b>anniversaries, birthdays, apologies, long distance, family</b>",
     "ctaPrimary": "Start for free",
     "ctaSecondary": "See a sample memory",
-    "pricingHint": "Free to build | Activate for just <price>฿99</price>"
+    "pricingHint": "Free to build | Activate for just <price>฿99</price>",
+    "forPrefix": "for",
+    "rotate": [
+      "anniversaries",
+      "birthdays",
+      "saying sorry",
+      "New Year",
+      "Valentine's"
+    ],
+    "phone": {
+      "pinTitle": "Enter the secret PIN",
+      "pinHint": "Six digits only the two of you know",
+      "photoCaption": "Your photo, turned into a cartoon by AI",
+      "tap": "Tap to try it"
+    }
   },
   "trust": {
     "secure": "100% secure",
@@ -195,5 +209,25 @@
       "hint": "Sign in with Google. No app to install.",
       "replay": "Watch again"
     }
+  },
+  "season": {
+    "loykrathong": {
+      "text": "Loy Krathong Online 2026 is open. Bring someone special to float a krathong in the crab village",
+      "cta": "Play now"
+    }
+  },
+  "pricing": {
+    "heading": "One price. That's it.",
+    "sub": "Build and preview for free. Pay only when you're ready to send it.",
+    "price": "฿99",
+    "unit": "per memory",
+    "items": [
+      "Free to build and preview",
+      "One-time payment, no subscription",
+      "The link is yours to keep",
+      "Send it to anyone, as often as you like"
+    ],
+    "cta": "Start for free",
+    "note": "PromptPay or card, secured by Stripe"
   }
 }
