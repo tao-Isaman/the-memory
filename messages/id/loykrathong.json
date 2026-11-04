@@ -16,7 +16,8 @@
     "color": "Warna cangkang",
     "accessory": "Aksesori",
     "start": "Masuk desa",
-    "save": "Simpan"
+    "save": "Simpan",
+    "back": "Kembali"
   },
   "acc": {
     "none": "Tanpa",

@@ -945,6 +945,11 @@ export default function LoyKrathongGame() {
               ))}
             </div>
             <div className="flex gap-2">
+              {modal === 'intro' && (
+                <Link href="/" className="btn-secondary flex-1 py-3 text-center">
+                  {t('intro.back')}
+                </Link>
+              )}
               {modal === 'customize' && (
                 <button type="button" onClick={() => setModal(null)} className="btn-secondary flex-1 py-3">
                   {t('shop.close')}

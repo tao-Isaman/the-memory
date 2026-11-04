@@ -10,7 +10,6 @@ import DemoMemoryModal from '@/components/DemoMemoryModal';
 import HeroPhoneDemo from '@/components/landing/HeroPhoneDemo';
 import { trackEvent } from '@/lib/analytics';
 import { getThemeColors } from '@/lib/themes';
-import { eventPhase } from '@/lib/loykrathong/config';
 import { USE_CASES } from '@/data/use-cases';
 import {
   ArrowRight,
@@ -126,8 +125,6 @@ export default function LandingPageClient() {
   const [stats, setStats] = useState<SiteStats | null>(null);
   const [countStart, setCountStart] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  // Decided on the client so the prerendered HTML never disagrees with the current date.
-  const [showSeason, setShowSeason] = useState(false);
 
   const rotate = t.raw('hero.rotate') as string[];
   const pricingItems = t.raw('pricing.items') as string[];
@@ -136,7 +133,6 @@ export default function LandingPageClient() {
 
   useEffect(() => {
     trackEvent('view_home');
-    setShowSeason(eventPhase() === 'open');
     fetch('/api/stats')
       .then((res) => res.json())
       .then((data) => {
@@ -185,25 +181,6 @@ export default function LandingPageClient() {
           <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-[#FFD9C4]/60 blur-3xl" />
           <div className="absolute left-1/3 top-[36rem] h-64 w-64 rounded-full bg-[#F3E3EE]/70 blur-3xl lg:top-[28rem]" />
         </div>
-
-        {showSeason && (
-          <div className="relative z-10 mx-auto mt-3 max-w-6xl px-4">
-            <Link
-              href="/loykrathong"
-              className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-4 py-2.5 text-sm text-[#4A1942] shadow-sm transition-colors hover:bg-amber-100/80"
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="text-lg" aria-hidden>
-                  🪷
-                </span>
-                <span className="line-clamp-2">{t('season.loykrathong.text')}</span>
-              </span>
-              <span className="shrink-0 rounded-full bg-[#4A1942] px-3 py-1 font-kanit text-xs font-medium text-white">
-                {t('season.loykrathong.cta')}
-              </span>
-            </Link>
-          </div>
-        )}
 
         <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:pt-14 lg:grid-cols-12 lg:gap-8 lg:pb-24 lg:pt-20">
           <div className="lg:col-span-7">
@@ -506,9 +483,6 @@ export default function LandingPageClient() {
                   {tc(`${uc.slug}.title`)}
                 </Link>
               ))}
-              <Link href="/loykrathong" className="transition-colors hover:text-white">
-                🪷 {t('season.loykrathong.cta')}
-              </Link>
             </div>
           </div>
 

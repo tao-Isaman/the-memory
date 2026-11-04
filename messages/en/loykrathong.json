@@ -17,7 +17,8 @@
     "color": "Shell colour",
     "accessory": "Accessory",
     "start": "Enter the village",
-    "save": "Save"
+    "save": "Save",
+    "back": "Back"
   },
   "acc": {
     "none": "None",
