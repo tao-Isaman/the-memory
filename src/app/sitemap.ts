@@ -2,8 +2,7 @@ import type { MetadataRoute } from 'next';
 import { USE_CASES } from '@/data/use-cases';
 import { SEO_LANDINGS } from '@/data/seo-landings';
 import { locales, routing, type Locale } from '@/i18n/routing';
-
-const SITE_URL = 'https://thememory.app';
+import { SITE_URL } from '@/lib/site-url';
 
 /** Thai is unprefixed (localePrefix: 'as-needed'); en/id live under /en and /id. */
 function urlFor(locale: Locale, path = ''): string {

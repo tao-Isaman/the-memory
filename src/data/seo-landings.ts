@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { routing, type Locale } from '@/i18n/routing';
 import type { UseCaseConfig } from './use-cases';
+import { SITE_URL } from '@/lib/site-url';
 
 /**
  * Locale-independent config for the standalone SEO landing pages (/valentine, /birthday, …).
@@ -68,8 +69,6 @@ export const SEO_LANDINGS: UseCaseConfig[] = [
 export function getSeoLandingBySlug(slug: string): UseCaseConfig | undefined {
   return SEO_LANDINGS.find((uc) => uc.slug === slug);
 }
-
-const SITE_URL = 'https://thememory.app';
 
 const OG_LOCALE: Record<Locale, string> = {
   th: 'th_TH',
