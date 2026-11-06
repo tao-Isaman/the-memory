@@ -7,7 +7,7 @@ type EventName =
   | 'view_preview'
   | 'start_checkout'
   | 'payment_success'
-  | 'payment_fail'
+  | 'checkout_cancel'
   | 'share_link_click'
   | 'copy_link'
   | 'returning_user_session'

@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
 
       case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        await recordCheckoutFailure(supabase, event.id, session, 'async_payment_failed');
         if (session.metadata?.type === 'credits') {
           console.log('Credit purchase async payment failed for session:', session.id);
         } else {
@@ -76,6 +77,14 @@ export async function POST(request: NextRequest) {
               .eq('id', memoryId);
           }
         }
+        break;
+      }
+
+      case 'checkout.session.expired': {
+        // Unpaid session timed out (e.g. PromptPay QR never scanned). Record only —
+        // the memory stays 'pending' so the user can still pay from the dashboard.
+        const session = event.data.object as Stripe.Checkout.Session;
+        await recordCheckoutFailure(supabase, event.id, session, 'expired');
         break;
       }
 
@@ -270,5 +279,58 @@ async function handleReferralPayment(
     console.log(`Referral conversion recorded via webhook: referrer=${referral.referredBy}, referred=${userId}, memory=${memoryId}`);
   } catch (error) {
     console.error('Error handling referral payment:', error);
+  }
+}
+
+/**
+ * Insert-only analytics record for a checkout that ended without payment.
+ * Never throws: a tracking problem (e.g. migration 034 not applied yet) must not make
+ * Stripe retry the webhook or block the payment-state handling around it.
+ */
+async function recordCheckoutFailure(
+  supabase: ReturnType<typeof getSupabaseServiceClient>,
+  eventId: string,
+  session: Stripe.Checkout.Session,
+  outcome: 'async_payment_failed' | 'expired'
+) {
+  try {
+    let paymentMethod: string | null = null;
+    let failureCode: string | null = null;
+    let failureMessage: string | null = null;
+
+    const paymentIntentId = typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : session.payment_intent?.id;
+
+    if (paymentIntentId) {
+      // Read-only lookup for the decline/failure reason.
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const err = pi.last_payment_error;
+      paymentMethod = err?.payment_method?.type ?? pi.payment_method_types?.[0] ?? null;
+      failureCode = err?.decline_code ?? err?.code ?? null;
+      failureMessage = err?.message ?? null;
+    }
+
+    const { error } = await supabase.from('checkout_failures').upsert(
+      {
+        stripe_event_id: eventId,
+        checkout_session_id: session.id,
+        outcome,
+        purchase_type: session.metadata?.type === 'credits' ? 'credits' : 'memory',
+        memory_id: session.metadata?.memory_id || null,
+        user_id: session.metadata?.user_id || null,
+        payment_method: paymentMethod,
+        failure_code: failureCode,
+        failure_message: failureMessage,
+        amount_total: session.amount_total,
+        currency: session.currency,
+        locale: session.locale ?? null,
+        session_created_at: new Date(session.created * 1000).toISOString(),
+      },
+      { onConflict: 'stripe_event_id', ignoreDuplicates: true }
+    );
+    if (error) console.error('recordCheckoutFailure insert failed:', error.message);
+  } catch (err) {
+    console.error('recordCheckoutFailure error:', err);
   }
 }

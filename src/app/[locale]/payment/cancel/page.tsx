@@ -17,9 +17,20 @@ function PaymentCancelContent() {
   const memoryId = searchParams.get('memory_id');
   const { user } = useAuth();
 
+  // Landing here means the user backed out of Stripe Checkout — an abandonment, not a
+  // failed payment (declines are retried inside Checkout; real failures are recorded
+  // server-side by the Stripe webhook). Fire once per memory per tab so reloads and
+  // back/forward navigation don't inflate the count.
   useEffect(() => {
-    trackEvent('payment_fail');
-  }, []);
+    const key = `checkout_cancel_tracked:${memoryId ?? 'unknown'}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // sessionStorage unavailable (private mode / blocked) — still track once per mount.
+    }
+    trackEvent('checkout_cancel', memoryId ? { memory_id: memoryId } : undefined);
+  }, [memoryId]);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">

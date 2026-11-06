@@ -372,6 +372,60 @@ export interface Database {
         }
         Relationships: []
       }
+      checkout_failures: {
+        Row: {
+          id: number
+          stripe_event_id: string
+          checkout_session_id: string
+          outcome: 'async_payment_failed' | 'expired'
+          purchase_type: string
+          memory_id: string | null
+          user_id: string | null
+          payment_method: string | null
+          failure_code: string | null
+          failure_message: string | null
+          amount_total: number | null
+          currency: string | null
+          locale: string | null
+          session_created_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          stripe_event_id: string
+          checkout_session_id: string
+          outcome: 'async_payment_failed' | 'expired'
+          purchase_type?: string
+          memory_id?: string | null
+          user_id?: string | null
+          payment_method?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          amount_total?: number | null
+          currency?: string | null
+          locale?: string | null
+          session_created_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          stripe_event_id?: string
+          checkout_session_id?: string
+          outcome?: 'async_payment_failed' | 'expired'
+          purchase_type?: string
+          memory_id?: string | null
+          user_id?: string | null
+          payment_method?: string | null
+          failure_code?: string | null
+          failure_message?: string | null
+          amount_total?: number | null
+          currency?: string | null
+          locale?: string | null
+          session_created_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       cartoon_generations: {
         Row: {
           id: string
