@@ -607,6 +607,284 @@
           "a": "Creating and previewing are free. You pay only when you activate it to share."
         }
       ]
+    },
+    "online-gift": {
+      "title": "Online Gift",
+      "subtitle": "An online gift for your partner you can send instantly, even from far away",
+      "heroHeadline": "A DIY online gift for your partner, sent as a link",
+      "heroSubtext": "Put your photos, heartfelt words, your own voice and a song that matters into one gift. Share it as a link or QR code, no shipping needed.",
+      "ctaText": "Create an online gift",
+      "ctaHeading": "Ready to send your gift?",
+      "metaTitle": "Online Gift for Your Partner: Free to Create, Shared as a Link | The Memory",
+      "metaDescription": "Make an online gift for your partner with photos, messages, a voice note, music and a hidden scratch card. Free to create and preview, 99 THB to activate. Share as a link or QR code.",
+      "keywords": [
+        "online gift for girlfriend",
+        "online gift for boyfriend",
+        "digital gift for partner",
+        "send a gift online"
+      ],
+      "guide": {
+        "heading": "How to make an online gift for your partner",
+        "intro": "No coding, no shipping, and a free preview before you send.",
+        "steps": [
+          {
+            "title": "Start a memory",
+            "desc": "Sign in and start from this page; the Love theme is picked for you."
+          },
+          {
+            "title": "Add a photo album",
+            "desc": "Choose Photo album for 2–5 photos played as a slideshow, or Message + photo to tell it one moment at a time."
+          },
+          {
+            "title": "Add your voice",
+            "desc": "Add a Voice message (record or upload, up to 1 minute) and paste a YouTube link to a song that matters."
+          },
+          {
+            "title": "Hide a surprise at the end",
+            "desc": "Use Our little secret to hide a photo behind clouds for them to scratch away, like the real gift or the tickets you booked."
+          },
+          {
+            "title": "Preview, then send",
+            "desc": "Preview for free. When you're happy, activate for 99 THB and share the link or QR code."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "I can't send you a parcel, so I'm sending you our memories instead",
+        "Listen to this before you sleep",
+        "Scratch here, your real gift is hiding underneath"
+      ],
+      "faqItems": [
+        {
+          "q": "What is an online gift?",
+          "a": "A page that puts your photos, messages, voice and music together for them to open one step at a time, shared as a link or QR code instead of a parcel."
+        },
+        {
+          "q": "Is it free?",
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
+        },
+        {
+          "q": "What can I add?",
+          "a": "Photos, a photo album (2–5 photos), messages, a voice note (up to 1 minute), a YouTube video, a 4-choice question, a hidden scratch card and a 6-digit PIN."
+        },
+        {
+          "q": "Can I send it to someone far away?",
+          "a": "Yes. It's a link, so you can send it in any chat and they can open it on their phone."
+        },
+        {
+          "q": "Can I attach it to a real gift?",
+          "a": "Yes. Print the QR code and put it in the gift box or card so they can scan it."
+        }
+      ]
+    },
+    "how-to": {
+      "title": "How to Make a Surprise Page",
+      "subtitle": "Make a surprise website for your partner yourself: no hiring, no coding",
+      "heroHeadline": "How to make a surprise website for your partner, step by step",
+      "heroSubtext": "No need to hire anyone or write code. Pick your story, then add photos, messages, music or a question one page at a time. Preview it free before you send.",
+      "ctaText": "Start your surprise page",
+      "ctaHeading": "Ready to try it?",
+      "metaTitle": "How to Make a Surprise Website for Your Partner, Step by Step | The Memory",
+      "metaDescription": "A 5-step guide to making a surprise website for your partner with photos, messages, music and a question. No coding, no hiring. Free to create and preview, 99 THB to activate.",
+      "keywords": [
+        "how to make a website gift for girlfriend",
+        "website gift for gf",
+        "DIY surprise website"
+      ],
+      "guide": {
+        "heading": "Make a surprise website for your partner in 5 steps",
+        "intro": "It takes a few minutes, works on your phone, and you can preview every step for free.",
+        "steps": [
+          {
+            "title": "Pick the occasion and theme",
+            "desc": "Sign in and choose a colour theme such as Love, Anniversary, Birthday or Sorry; the colours and mood follow the theme."
+          },
+          {
+            "title": "Set an unlock code (optional)",
+            "desc": "Add a 6-digit PIN code, like the date you got together, that they enter before seeing what comes next."
+          },
+          {
+            "title": "Tell it page by page",
+            "desc": "Add Photo, Message or Message + photo pages in the order things happened, and give each page an easy name like \"The day we met\"."
+          },
+          {
+            "title": "Add a twist",
+            "desc": "Add a 4-choice Question for them to guess, Our little secret for a photo they scratch to reveal, or a YouTube video of your song."
+          },
+          {
+            "title": "Preview, activate and send",
+            "desc": "Preview for free. When you're happy, activate for 99 THB and share the link or QR code."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Remember where we first met? Take a guess",
+        "Something's waiting on the next page, enter the code first",
+        "All my favourite photos of us, right here"
+      ],
+      "faqItems": [
+        {
+          "q": "Do I need to code or hire someone?",
+          "a": "No. Pick a theme and add content page by page; the layout is done for you."
+        },
+        {
+          "q": "How long does it take?",
+          "a": "Most people finish in a few minutes, depending on how many photos and messages they add."
+        },
+        {
+          "q": "Can I make it on my phone?",
+          "a": "Yes. Every step, including the preview, works on mobile."
+        },
+        {
+          "q": "Does it cost anything?",
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
+        },
+        {
+          "q": "What makes the best surprise?",
+          "a": "End with something they won't expect, like a voice note from you or a hidden photo they scratch to reveal."
+        },
+        {
+          "q": "How do I send it?",
+          "a": "Send the link in a chat, or print the QR code and attach it to a card or gift."
+        }
+      ]
+    },
+    "newyear": {
+      "title": "New Year Wishes",
+      "subtitle": "Send New Year and Christmas wishes with the memories of the year behind you",
+      "heroHeadline": "Send New Year wishes made from your year together",
+      "heroSubtext": "Gather the photos and moments of the past year, add your wishes and your voice, and share it as a link or QR code to open at the countdown.",
+      "ctaText": "Create a New Year page",
+      "ctaHeading": "Ready to send your New Year wishes?",
+      "metaTitle": "New Year 2027 Wishes for Your Partner as a Memory Link | The Memory",
+      "metaDescription": "Make an online New Year or Christmas card with the photos and moments of your year, your wishes and a voice note. Free to create and preview, 99 THB to activate.",
+      "keywords": [
+        "new year card online",
+        "new year gift for girlfriend",
+        "christmas gift for boyfriend online"
+      ],
+      "guide": {
+        "heading": "Make an online New Year card in 4 steps",
+        "intro": "Done well before the countdown, with a free preview.",
+        "steps": [
+          {
+            "title": "Start a memory",
+            "desc": "Sign in, start from this page and pick a theme that suits who it's for (Love, Friendship or Family)."
+          },
+          {
+            "title": "Look back on your year",
+            "desc": "Use Photo album for 2–5 highlights of the year, or Message + photo to tell it month by month."
+          },
+          {
+            "title": "Add your wishes",
+            "desc": "Add a Message with your New Year wishes and a Voice message in your own voice (up to 1 minute)."
+          },
+          {
+            "title": "Send before midnight",
+            "desc": "Preview for free, activate for 99 THB, then share the link or print the QR code for a card or gift box."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Thank you for being with me all year",
+        "Here's to another year of laughing together",
+        "Open this at the countdown"
+      ],
+      "faqItems": [
+        {
+          "q": "Can I send it to friends or family?",
+          "a": "Yes. Choose the Friendship or Family theme; you write all the content yourself."
+        },
+        {
+          "q": "Is it free?",
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
+        },
+        {
+          "q": "Can I finish it before midnight on the 31st?",
+          "a": "Yes. It takes a few minutes, and the link is ready to share as soon as it's activated."
+        },
+        {
+          "q": "Can I add New Year music?",
+          "a": "Yes, by pasting a YouTube link to the song."
+        },
+        {
+          "q": "Can it replace a paper card?",
+          "a": "Yes, or print the QR code and attach it to a real card."
+        }
+      ]
+    },
+    "love-letter": {
+      "title": "Online Love Letter",
+      "subtitle": "A love letter they open page by page, in your own voice",
+      "heroHeadline": "An online love letter, sealed with a secret code",
+      "heroSubtext": "Write your letter page by page, add the photos that matter, read it aloud in a voice note, and seal it with a PIN only they know. Share as a link or QR code.",
+      "ctaText": "Write a love letter",
+      "ctaHeading": "Ready to write to them?",
+      "metaTitle": "Online Love Letter: Write Your Own Letter to Your Partner, Free to Create | The Memory",
+      "metaDescription": "Write an online letter to your partner page by page, with photos, a voice note and a PIN seal. Free to create and preview, 99 THB to activate. Share as a link or QR code.",
+      "keywords": [
+        "online love letter",
+        "write a love letter online",
+        "digital love letter",
+        "letter to girlfriend online"
+      ],
+      "guide": {
+        "heading": "How to write an online love letter",
+        "intro": "Write freely, split it into pages they read one at a time, and preview free before you send.",
+        "steps": [
+          {
+            "title": "Seal the envelope",
+            "desc": "Start with a 6-digit PIN code, such as their birthday. They enter it before reading, like opening an envelope."
+          },
+          {
+            "title": "Write page by page",
+            "desc": "Split the letter into several Message pages (hello, a memory, what you want to say, a promise), which is easier to read than one long block."
+          },
+          {
+            "title": "Add photos",
+            "desc": "Use Message + photo to pair each part of the letter with a photo."
+          },
+          {
+            "title": "Read it to them",
+            "desc": "Add a Voice message reading the most important paragraph yourself (up to 1 minute)."
+          },
+          {
+            "title": "Preview, then send",
+            "desc": "Preview free, activate for 99 THB, then share the link or print the QR code into a real envelope."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "To the person who makes every day special",
+        "There's something I've wanted to tell you for a long time",
+        "When you finish reading, listen to this"
+      ],
+      "faqItems": [
+        {
+          "q": "How is this different from a chat message?",
+          "a": "They open it page by page with photos, your voice and a code to unseal it, so it feels like a real letter instead of a message lost in the chat."
+        },
+        {
+          "q": "Can I lock it with a code?",
+          "a": "Put a 6-digit PIN on the first page; anyone opening the link needs it to read on. To keep the letter out of other users' Universe feed, turn off \"Share to the Universe\" when you create it."
+        },
+        {
+          "q": "How long can it be?",
+          "a": "Each Message page holds up to 800 characters, and you can add several pages."
+        },
+        {
+          "q": "Can I read it aloud?",
+          "a": "Yes. Record or upload up to 1 minute of audio per page."
+        },
+        {
+          "q": "Is it free?",
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
+        },
+        {
+          "q": "Can I send it with a paper letter?",
+          "a": "Yes. Print the QR code and put it in the envelope or card."
+        }
+      ]
     }
   }
 }
