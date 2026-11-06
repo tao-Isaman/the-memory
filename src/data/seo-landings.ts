@@ -45,6 +45,18 @@ export const SEO_LANDINGS: UseCaseConfig[] = [
     color: 'from-emerald-400 to-green-500',
   },
   {
+    slug: 'ask-out',
+    theme: 'love',
+    emoji: '💌',
+    color: 'from-rose-400 to-pink-500',
+  },
+  {
+    slug: 'confess',
+    theme: 'love',
+    emoji: '💗',
+    color: 'from-pink-400 to-rose-500',
+  },
+  {
     slug: 'missyou',
     theme: 'longdistance',
     emoji: '💭',

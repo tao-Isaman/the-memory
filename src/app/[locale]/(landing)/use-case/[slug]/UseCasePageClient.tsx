@@ -36,6 +36,11 @@ export default function UseCasePageClient({ config, contentKey }: UseCaseContent
 
   const samplePrompts = t.raw('samplePrompts') as string[];
   const faqItems = t.raw('faqItems') as { q: string; a: string }[];
+  // Optional step-by-step guide (SEO landings for "how to" queries). Only pages that
+  // define `guide` in their messages render it.
+  const guide = t.has('guide')
+    ? (t.raw('guide') as { heading: string; intro?: string; steps: { title: string; desc: string }[] })
+    : null;
 
   useEffect(() => {
     trackEvent('view_usecase_page', { use_case: config.slug });
@@ -141,6 +146,29 @@ export default function UseCasePageClient({ config, contentKey }: UseCaseContent
           </div>
         </div>
       </section>
+
+      {/* Step-by-step guide (optional) */}
+      {guide && (
+        <section className="py-16 bg-[#FFFBF7]">
+          <div className="max-w-3xl mx-auto px-4">
+            <h2 className="text-3xl font-bold text-[#4A1942] mb-4 text-center">{guide.heading}</h2>
+            {guide.intro && <p className="text-gray-600 text-center mb-10 leading-relaxed">{guide.intro}</p>}
+            <ol className="space-y-4">
+              {guide.steps.map((step, index) => (
+                <li key={index} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex gap-4">
+                  <span className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-[#FF6B9D] to-[#E63946] text-white font-bold flex items-center justify-center">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-[#4A1942] mb-1">{step.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{step.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
 
       {/* Sample Prompts Section */}
       {samplePrompts.length > 0 && (

@@ -485,6 +485,128 @@
           "a": "Anyone you miss. An old school friend, a relative overseas, whoever's been on your mind."
         }
       ]
+    },
+    "ask-out": {
+      "title": "Ask Them Out",
+      "subtitle": "An ask-out page they will remember",
+      "heroHeadline": "Ask them out with a link they answer themselves",
+      "heroSubtext": "Put together your photos, the words you want to say and a song that matters, then finish with a \"Will you be mine?\" question they tap to answer. Share it as a link or QR code.",
+      "ctaText": "Create an ask-out page",
+      "ctaHeading": "Ready to ask?",
+      "metaTitle": "Ask Someone Out Online: Make Your Own Ask-Out Page, Free to Create | The Memory",
+      "metaDescription": "Make an ask-out page in minutes with photos, messages, music and a multiple-choice \"Will you be mine?\" question. Free to create and preview. Share as a link or QR code.",
+      "keywords": [
+        "ask out website",
+        "ask someone out online",
+        "will you be my girlfriend website",
+        "ask out link",
+        "promposal online"
+      ],
+      "guide": {
+        "heading": "How to make an ask-out page, step by step",
+        "intro": "No code needed, and you can preview it for free before you send it.",
+        "steps": [
+          {
+            "title": "Create a new memory",
+            "desc": "Sign in and start from this page. The love theme is selected for you."
+          },
+          {
+            "title": "Add a secret code (optional)",
+            "desc": "Ask them to enter a code first, like the date you met, for a bit of suspense."
+          },
+          {
+            "title": "Tell your story",
+            "desc": "Add photos together, the words you want to say and a meaningful song, one page at a time."
+          },
+          {
+            "title": "Finish with the question",
+            "desc": "Add a Question page: \"Will you be mine?\" with 4 choices, and set \"Yes\" as the correct answer. If they tap another choice, they are asked to try again."
+          },
+          {
+            "title": "Preview, then send",
+            "desc": "Preview for free, activate when you are happy, then send the link or QR code."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Since the day we started talking, every day has had something to smile about",
+        "I've kept these photos for a while. Today I want to look at them with you",
+        "Last question. Answer from the heart"
+      ],
+      "faqItems": [
+        {
+          "q": "Can they say no?",
+          "a": "You write all 4 choices and pick which one is correct. If they tap another one, they are asked to try again. Keep it sincere or make it playful."
+        },
+        {
+          "q": "Do I need to code?",
+          "a": "No. Pick a theme and add photos, messages, music and the question page by page."
+        },
+        {
+          "q": "Is it free?",
+          "a": "Creating and previewing are free. You pay only when you activate it to share."
+        },
+        {
+          "q": "How do I send it?",
+          "a": "Share the link in chat, or print the QR code and attach it to a gift or card."
+        }
+      ]
+    },
+    "confess": {
+      "title": "Confess Your Love",
+      "subtitle": "A love-confession link they can open anytime",
+      "heroHeadline": "Say \"I love you\" with everything in one link",
+      "heroSubtext": "Some words are hard to say face to face. Put photos, messages and music into one memory and send a link they can open themselves.",
+      "ctaText": "Create a love link",
+      "ctaHeading": "Time to tell them",
+      "metaTitle": "Love Confession Website: Make an \"I Love You\" Link, Free to Create | The Memory",
+      "metaDescription": "Make a love-confession page with photos, messages, music and a secret code. Share as a link or QR code. Free to create and preview.",
+      "keywords": [
+        "love confession website",
+        "i love you link",
+        "confess love online",
+        "love letter website"
+      ],
+      "guide": {
+        "heading": "How to make a love link",
+        "steps": [
+          {
+            "title": "Pick the love theme",
+            "desc": "Start from this page; the theme is selected for you."
+          },
+          {
+            "title": "Add what you want to say",
+            "desc": "Photos, messages and songs that remind you of them, one page at a time."
+          },
+          {
+            "title": "Add a twist",
+            "desc": "Set a secret code to open it, or add a multiple-choice question along the way."
+          },
+          {
+            "title": "Send the link",
+            "desc": "Preview for free, activate, then send the link or QR code."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "I never dared to say it out loud, so I'm writing it here",
+        "Every time I hear this song, I think of you",
+        "Thank you for always being there. I love you"
+      ],
+      "faqItems": [
+        {
+          "q": "Can I use it for someone I'm not dating yet?",
+          "a": "Yes. Use it for a partner, a crush or family."
+        },
+        {
+          "q": "How long can they open it?",
+          "a": "They can open it again anytime with the same link."
+        },
+        {
+          "q": "Is it free?",
+          "a": "Creating and previewing are free. You pay only when you activate it to share."
+        }
+      ]
     }
   }
 }
