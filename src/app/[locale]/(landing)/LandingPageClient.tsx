@@ -18,7 +18,11 @@ import {
   Check,
   ChevronDown,
   Clock,
+  Cake,
+  Flower2,
+  Gem,
   Gift,
+  HeartHandshake,
   ImagePlus,
   Layers,
   Lock,
@@ -26,6 +30,7 @@ import {
   MousePointerClick,
   Music,
   PartyPopper,
+  Plane,
   Puzzle,
   Quote,
   Share2,
@@ -110,6 +115,17 @@ const FEATURES = [
   { key: 'question', icon: Puzzle, tint: '#E9E3FF', ink: '#6B4FD8' },
   { key: 'share', icon: Share2, tint: '#DCEFFF', ink: '#2B7FD9' },
 ] as const;
+
+// Occasion tiles use the same line icons as the feature cards (emoji render
+// differently on every platform). Unknown slugs fall back to the heart gift.
+const OCCASION_ICONS: Record<string, React.ElementType> = {
+  'surprise-gift': Gift,
+  anniversary: Gem,
+  birthday: Cake,
+  apology: Flower2,
+  'long-distance': Plane,
+  family: HeartHandshake,
+};
 
 const STEPS = [
   { key: 'one', step: '1', icon: Sparkles },
@@ -260,22 +276,24 @@ export default function LandingPageClient() {
           <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
             {USE_CASES.map((uc) => {
               const c = getThemeColors(uc.theme);
+              const OccasionIcon = OCCASION_ICONS[uc.slug] ?? Gift;
               return (
                 <Link
                   key={uc.slug}
                   href={`/use-case/${uc.slug}`}
                   onClick={() => trackEvent('click_usecase_tile', { use_case: uc.slug })}
-                  className="group flex flex-col gap-3 rounded-3xl border border-white bg-white/80 p-4 shadow-[0_10px_30px_-14px_rgba(74,25,66,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-16px_rgba(74,25,66,0.28)] sm:p-6"
+                  className="group flex flex-col gap-3 rounded-3xl border border-white bg-white/80 p-4 shadow-[0_10px_30px_-14px_rgba(74,25,66,0.18)] transition-[transform,box-shadow] duration-300 motion-reduce:hover:translate-y-0 hover:-translate-y-1 hover:shadow-[0_18px_40px_-16px_rgba(74,25,66,0.28)] sm:p-6"
                 >
                   <span
-                    className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl sm:h-14 sm:w-14 sm:text-3xl"
-                    style={{ backgroundColor: c.background }}
+                    aria-hidden
+                    className="flex h-12 w-12 items-center justify-center rounded-2xl sm:h-14 sm:w-14"
+                    style={{ backgroundColor: c.background, color: c.dark }}
                   >
-                    {uc.emoji}
+                    <OccasionIcon size={24} strokeWidth={2} />
                   </span>
                   <div>
                     <h3 className="font-kanit text-base font-bold leading-snug text-[#4A1942] sm:text-xl">{tc(`${uc.slug}.title`)}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-[#6B5E57] sm:text-sm">{tc(`${uc.slug}.subtitle`)}</p>
+                    <p className="mt-1 text-[13px] leading-relaxed text-[#6B5E57] sm:text-sm">{tc(`${uc.slug}.subtitle`)}</p>
                   </div>
                   <span className="mt-auto inline-flex items-center gap-1 font-kanit text-xs font-medium sm:text-sm" style={{ color: c.dark }}>
                     {t('nav.start')}
@@ -296,13 +314,13 @@ export default function LandingPageClient() {
             {FEATURES.map(({ key, icon: Icon, tint, ink }) => (
               <div
                 key={key}
-                className="rounded-3xl border border-[#F5EDE4] bg-[#FFFBF7] p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_-18px_rgba(74,25,66,0.25)] sm:p-6"
+                className="rounded-3xl border border-[#F5EDE4] bg-[#FFFBF7] p-4 transition-[transform,box-shadow,background-color] duration-300 hover:-translate-y-1 hover:bg-white motion-reduce:hover:translate-y-0 hover:shadow-[0_18px_40px_-18px_rgba(74,25,66,0.25)] sm:p-6"
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl sm:h-12 sm:w-12" style={{ backgroundColor: tint, color: ink }}>
                   <Icon size={22} />
                 </span>
                 <h3 className="mt-4 font-kanit text-base font-bold text-[#4A1942] sm:text-lg">{t(`features.${key}.title`)}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-[#6B5E57] sm:text-sm">{t(`features.${key}.desc`)}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-[#6B5E57] sm:text-sm">{t(`features.${key}.desc`)}</p>
               </div>
             ))}
           </div>
