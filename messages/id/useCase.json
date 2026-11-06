@@ -485,6 +485,107 @@
           "a": "Bisa buat siapa pun. Teman lama, keluarga yang di perantauan, atau siapa saja yang kamu rindukan."
         }
       ]
+    },
+    "ask-out": {
+      "title": "Nembak Online",
+      "subtitle": "Halaman nembak yang tak terlupakan",
+      "heroHeadline": "Nembak lewat link yang dia jawab sendiri",
+      "heroSubtext": "Kumpulkan foto berdua, kata-kata yang ingin kamu sampaikan, dan lagu yang berarti, lalu tutup dengan pertanyaan \"Mau jadi pacarku?\" yang dia jawab dengan memilih. Bagikan lewat link atau kode QR.",
+      "ctaText": "Buat halaman nembak",
+      "ctaHeading": "Siap bertanya?",
+      "metaTitle": "Website Nembak Pacar: Buat Link Nembak Sendiri, Gratis Dibuat | The Memory",
+      "metaDescription": "Buat halaman nembak dalam beberapa menit dengan foto, pesan, musik, dan pertanyaan pilihan ganda \"Mau jadi pacarku?\". Gratis dibuat dan dilihat pratinjaunya.",
+      "keywords": [
+        "website nembak",
+        "link nembak pacar",
+        "cara nembak online",
+        "nembak cewek online"
+      ],
+      "guide": {
+        "heading": "Cara membuat halaman nembak",
+        "steps": [
+          {
+            "title": "Buat kenangan baru",
+            "desc": "Masuk dan mulai dari halaman ini. Tema cinta dipilih otomatis."
+          },
+          {
+            "title": "Pasang kode rahasia (opsional)",
+            "desc": "Minta dia memasukkan kode dulu, misalnya tanggal pertama kali bertemu."
+          },
+          {
+            "title": "Ceritakan kisah kalian",
+            "desc": "Tambahkan foto, pesan, dan lagu, satu halaman demi satu halaman."
+          },
+          {
+            "title": "Tutup dengan pertanyaan",
+            "desc": "Tambahkan halaman Pertanyaan \"Mau jadi pacarku?\" dengan 4 pilihan dan tetapkan \"Mau\" sebagai jawaban benar. Jika dia memilih yang lain, dia diminta mencoba lagi."
+          },
+          {
+            "title": "Pratinjau, lalu kirim",
+            "desc": "Pratinjau gratis, aktifkan, lalu kirim link atau kode QR."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Sejak kita mulai ngobrol, setiap hari selalu ada alasan untuk tersenyum",
+        "Pertanyaan terakhir, jawab dari hati ya"
+      ],
+      "faqItems": [
+        {
+          "q": "Apakah dia bisa menolak?",
+          "a": "Kamu yang menulis 4 pilihan dan menentukan jawaban yang benar. Jika dia memilih yang lain, dia diminta mencoba lagi."
+        },
+        {
+          "q": "Apakah gratis?",
+          "a": "Membuat dan melihat pratinjau gratis. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        }
+      ]
+    },
+    "confess": {
+      "title": "Ungkapkan Cinta",
+      "subtitle": "Link pernyataan cinta yang bisa dibuka kapan saja",
+      "heroHeadline": "Ungkapkan cinta dalam satu link",
+      "heroSubtext": "Beberapa kata sulit diucapkan langsung. Kumpulkan foto, pesan, dan musik dalam satu kenangan lalu kirim link-nya.",
+      "ctaText": "Buat link cinta",
+      "ctaHeading": "Saatnya bilang",
+      "metaTitle": "Website Ungkapkan Cinta: Buat Link \"Aku Sayang Kamu\", Gratis Dibuat | The Memory",
+      "metaDescription": "Buat halaman pernyataan cinta dengan foto, pesan, musik, dan kode rahasia. Bagikan lewat link atau kode QR. Gratis dibuat dan dilihat pratinjaunya.",
+      "keywords": [
+        "website ungkapkan cinta",
+        "link aku sayang kamu",
+        "nyatakan cinta online"
+      ],
+      "guide": {
+        "heading": "Cara membuat link cinta",
+        "steps": [
+          {
+            "title": "Pilih tema cinta",
+            "desc": "Mulai dari halaman ini; tema dipilih otomatis."
+          },
+          {
+            "title": "Tambahkan yang ingin kamu katakan",
+            "desc": "Foto, pesan, dan lagu, satu halaman demi satu halaman."
+          },
+          {
+            "title": "Kirim link",
+            "desc": "Pratinjau gratis, aktifkan, lalu kirim link atau kode QR."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Aku tidak pernah berani mengatakannya langsung, jadi aku tulis di sini",
+        "Terima kasih sudah selalu ada. Aku sayang kamu"
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa untuk orang yang belum jadi pacar?",
+          "a": "Bisa, untuk pasangan, gebetan, atau keluarga."
+        },
+        {
+          "q": "Apakah gratis?",
+          "a": "Membuat dan melihat pratinjau gratis. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        }
+      ]
     }
   }
 }
