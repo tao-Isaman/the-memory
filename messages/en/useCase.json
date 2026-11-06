@@ -661,7 +661,7 @@
         },
         {
           "q": "Is it free?",
-          "a": "Free to create and preview. Pay 99 THB when you're ready to activate and share the link."
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
         },
         {
           "q": "What can I add?",
@@ -737,7 +737,7 @@
         },
         {
           "q": "Does it cost anything?",
-          "a": "Free to create and preview. Pay 99 THB when you're ready to activate and share the link."
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
         },
         {
           "q": "What makes the best surprise?",
@@ -797,7 +797,7 @@
         },
         {
           "q": "Is it free?",
-          "a": "Free to create and preview. Pay 99 THB when you're ready to activate and share the link."
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
         },
         {
           "q": "Can I finish it before midnight on the 31st?",
@@ -865,8 +865,12 @@
           "a": "They open it page by page with photos, your voice and a code to unseal it, so it feels like a real letter instead of a message lost in the chat."
         },
         {
-          "q": "Can I make it private to them?",
-          "a": "Put a 6-digit PIN on the first page; they need it to read the rest."
+          "q": "Can I lock it with a code?",
+          "a": "Put a 6-digit PIN on the first page; anyone opening the link needs it to read on. To keep the letter out of other users' Universe feed, turn off \"Share to the Universe\" when you create it."
+        },
+        {
+          "q": "How long can it be?",
+          "a": "Each Message page holds up to 800 characters, and you can add several pages."
         },
         {
           "q": "Can I read it aloud?",
@@ -874,7 +878,7 @@
         },
         {
           "q": "Is it free?",
-          "a": "Free to create and preview. Pay 99 THB when you're ready to activate and share the link."
+          "a": "Free to create and preview. Pay 99 THB once to activate; the link doesn't expire, and you can still edit it at no extra cost."
         },
         {
           "q": "Can I send it with a paper letter?",

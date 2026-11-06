@@ -641,7 +641,7 @@
         },
         {
           "q": "Apakah gratis?",
-          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar sekali saat mengaktifkan. Link-nya tidak kedaluwarsa dan isinya tetap bisa diedit tanpa biaya tambahan."
         },
         {
           "q": "Apa saja yang bisa dimasukkan?",
@@ -719,7 +719,7 @@
         },
         {
           "q": "Ada biayanya?",
-          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar sekali saat mengaktifkan. Link-nya tidak kedaluwarsa dan isinya tetap bisa diedit tanpa biaya tambahan."
         },
         {
           "q": "Kejutan apa yang paling berkesan?",
@@ -781,7 +781,7 @@
         },
         {
           "q": "Apakah gratis?",
-          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar sekali saat mengaktifkan. Link-nya tidak kedaluwarsa dan isinya tetap bisa diedit tanpa biaya tambahan."
         },
         {
           "q": "Sempat selesai sebelum tanggal 31?",
@@ -849,8 +849,12 @@
           "a": "Dia membukanya halaman demi halaman dengan foto, suaramu, dan kode pembuka, terasa seperti surat sungguhan, bukan pesan yang tenggelam di chat."
         },
         {
-          "q": "Bisa dikunci hanya untuk dia?",
-          "a": "Pasang PIN 6 digit di halaman pertama, dia harus memasukkannya untuk membaca sisanya."
+          "q": "Bisa dikunci dengan kode?",
+          "a": "Pasang Kode PIN 6 digit di halaman pertama, siapa pun yang membuka link harus memasukkannya untuk membaca. Agar surat tidak muncul di feed Universe pengguna lain, matikan \"Bagikan ke Universe\" saat membuat."
+        },
+        {
+          "q": "Seberapa panjang suratnya?",
+          "a": "Setiap halaman Pesan bisa berisi hingga 800 karakter, dan kamu bisa menambah beberapa halaman."
         },
         {
           "q": "Bisa membacakannya dengan suaraku?",
@@ -858,7 +862,7 @@
         },
         {
           "q": "Apakah gratis?",
-          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar sekali saat mengaktifkan. Link-nya tidak kedaluwarsa dan isinya tetap bisa diedit tanpa biaya tambahan."
         },
         {
           "q": "Bisa dikirim bersama surat kertas?",
