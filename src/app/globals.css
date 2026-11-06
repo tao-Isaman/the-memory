@@ -34,6 +34,10 @@
   --font-leckerli: var(--font-leckerli), "Leckerli One", cursive;
 }
 
+html {
+  overflow-x: clip;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -236,7 +240,7 @@ body {
   padding: 0.75rem 1.5rem;
   border-radius: 9999px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
 }
 
@@ -252,7 +256,7 @@ body {
   border-radius: 9999px;
   font-weight: 600;
   border: 2px solid #FF6B9D;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .btn-secondary:hover {
@@ -266,7 +270,7 @@ body {
   border-radius: 1rem;
   box-shadow: 0 4px 20px rgba(107, 94, 87, 0.08);
   border: 1px solid rgba(245, 237, 228, 0.8);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .memory-card:hover {
@@ -539,5 +543,29 @@ body {
   }
   .lp-slide-dot:first-child > span {
     transform: scaleX(1);
+  }
+}
+
+/* Keyboard focus: one visible ring for every link, button and control.
+   :focus-visible only, so mouse and touch users never see it. */
+:where(a, button, [role="button"], summary, input, select, textarea):focus-visible {
+  outline: 3px solid var(--primary-dark);
+  outline-offset: 3px;
+}
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible {
+  outline-offset: 4px;
+}
+
+/* Entrance fades start at opacity 0; with reduced motion show the content at once. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: none;
   }
 }
