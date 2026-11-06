@@ -586,6 +586,285 @@
           "a": "Membuat dan melihat pratinjau gratis. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
         }
       ]
+    },
+    "online-gift": {
+      "title": "Kado Online",
+      "subtitle": "Kado online untuk pacar yang bisa langsung dikirim, sejauh apa pun jaraknya",
+      "heroHeadline": "Kado online untuk pacar, buat sendiri dan kirim lewat link",
+      "heroSubtext": "Gabungkan foto kalian, pesan dari hati, suaramu sendiri, dan lagu yang berarti dalam satu kado. Kirim lewat link atau kode QR, tanpa perlu ongkir.",
+      "ctaText": "Buat kado online",
+      "ctaHeading": "Siap kirim kadonya?",
+      "metaTitle": "Kado Online untuk Pacar: Gratis Dibuat, Dikirim Lewat Link | The Memory",
+      "metaDescription": "Buat kado online untuk pacar dengan foto, pesan, pesan suara, musik, dan kartu gosok rahasia. Gratis dibuat dan dilihat pratinjaunya, bayar hanya saat mengaktifkan. Kirim lewat link atau kode QR.",
+      "keywords": [
+        "kado online untuk pacar",
+        "kado digital untuk pacar",
+        "kirim kado online",
+        "kado untuk pacar LDR",
+        "hadiah online untuk pacar"
+      ],
+      "guide": {
+        "heading": "Cara membuat kado online untuk pacar",
+        "intro": "Tanpa coding, tanpa ongkir, pratinjau gratis sebelum dikirim.",
+        "steps": [
+          {
+            "title": "Mulai buat kenangan",
+            "desc": "Masuk dan mulai dari halaman ini. Tema Cinta dipilih otomatis."
+          },
+          {
+            "title": "Masukkan album foto",
+            "desc": "Pilih \"Album foto\" untuk 2–5 foto yang diputar sebagai slideshow, atau \"Pesan + foto\" untuk bercerita satu per satu."
+          },
+          {
+            "title": "Tambahkan suaramu",
+            "desc": "Tambahkan \"Pesan suara\" (rekam atau unggah, maksimal 1 menit) dan tempel link YouTube lagu kalian."
+          },
+          {
+            "title": "Sembunyikan kejutan di akhir",
+            "desc": "Gunakan \"Rahasia kita\" untuk menyembunyikan foto di balik awan yang harus dia gosok."
+          },
+          {
+            "title": "Lihat pratinjau, lalu kirim",
+            "desc": "Pratinjau gratis. Setelah puas, aktifkan lalu kirim link atau kode QR."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Walau nggak bisa kirim barang, aku kirim kenangan ini buat kamu",
+        "Dengar suara ini sebelum tidur, ya",
+        "Coba gosok, kado aslinya ada di sini"
+      ],
+      "faqItems": [
+        {
+          "q": "Apa itu kado online?",
+          "a": "Halaman berisi foto, pesan, suara, dan musik yang dia buka satu per satu, dikirim lewat link atau kode QR, bukan paket."
+        },
+        {
+          "q": "Apakah gratis?",
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        },
+        {
+          "q": "Apa saja yang bisa dimasukkan?",
+          "a": "Foto, album foto (2–5 foto), pesan, pesan suara (maksimal 1 menit), video YouTube, pertanyaan 4 pilihan, kartu gosok rahasia, dan PIN 6 digit."
+        },
+        {
+          "q": "Pacarku jauh, bisa dikirim?",
+          "a": "Bisa. Karena berupa link, kamu bisa mengirimnya lewat chat dan dia bisa membukanya di HP."
+        },
+        {
+          "q": "Bisa digabung dengan kado asli?",
+          "a": "Bisa. Cetak kode QR-nya dan selipkan di kotak kado atau kartu."
+        }
+      ]
+    },
+    "how-to": {
+      "title": "Cara Membuat Website Kejutan",
+      "subtitle": "Bikin website kejutan untuk pacar sendiri, tanpa jasa, tanpa coding",
+      "heroHeadline": "Cara membuat website kejutan untuk pacar, langkah demi langkah",
+      "heroSubtext": "Nggak perlu bayar jasa atau bisa coding. Pilih ceritanya, lalu tambahkan foto, pesan, musik, atau pertanyaan satu halaman demi satu halaman. Pratinjau gratis sebelum dikirim.",
+      "ctaText": "Mulai buat website kejutan",
+      "ctaHeading": "Mau coba sekarang?",
+      "metaTitle": "Cara Membuat Website Kejutan untuk Pacar, Langkah demi Langkah | The Memory",
+      "metaDescription": "Panduan 5 langkah membuat website kejutan untuk pacar dengan foto, pesan, musik, dan pertanyaan. Tanpa coding, tanpa jasa. Gratis dibuat dan dilihat pratinjaunya.",
+      "keywords": [
+        "cara membuat website untuk pacar",
+        "website kejutan untuk pacar",
+        "cara bikin web ulang tahun pacar",
+        "website hadiah untuk pacar",
+        "bikin kejutan untuk pacar"
+      ],
+      "guide": {
+        "heading": "5 langkah membuat website kejutan",
+        "intro": "Cuma beberapa menit, bisa dari HP, pratinjau gratis di setiap langkah.",
+        "steps": [
+          {
+            "title": "Pilih momen dan tema",
+            "desc": "Masuk, lalu pilih tema warna seperti Cinta, Anniversary, Ulang tahun, atau Minta maaf."
+          },
+          {
+            "title": "Pasang kode pembuka (opsional)",
+            "desc": "Tambahkan \"Kode PIN\" 6 digit, misalnya tanggal jadian, yang harus dia masukkan sebelum melihat isi berikutnya."
+          },
+          {
+            "title": "Ceritakan satu per satu",
+            "desc": "Tambahkan \"Foto\", \"Pesan\", atau \"Pesan + foto\" sesuai urutan cerita kalian."
+          },
+          {
+            "title": "Tambahkan kejutan",
+            "desc": "\"Pertanyaan\" 4 pilihan untuk dia tebak, \"Rahasia kita\" yang harus digosok, atau \"Video YouTube\" lagu kalian."
+          },
+          {
+            "title": "Pratinjau, aktifkan, kirim",
+            "desc": "Pratinjau gratis. Setelah puas, aktifkan lalu kirim link atau kode QR."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Masih ingat di mana kita pertama ketemu? Tebak dulu",
+        "Masukkan kode dulu, ada yang menunggu di halaman berikutnya",
+        "Foto-foto favorit kita ada di sini"
+      ],
+      "faqItems": [
+        {
+          "q": "Harus bisa coding atau bayar jasa?",
+          "a": "Nggak. Pilih tema lalu tambahkan isi per halaman, tampilannya diatur otomatis."
+        },
+        {
+          "q": "Berapa lama membuatnya?",
+          "a": "Biasanya beberapa menit saja, tergantung jumlah foto dan pesan."
+        },
+        {
+          "q": "Bisa dibuat dari HP?",
+          "a": "Bisa, semua langkah termasuk pratinjau bisa dari HP."
+        },
+        {
+          "q": "Ada biayanya?",
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        },
+        {
+          "q": "Kejutan apa yang paling berkesan?",
+          "a": "Tutup dengan hal yang tidak dia duga, misalnya pesan suaramu atau foto rahasia yang harus digosok."
+        },
+        {
+          "q": "Bagaimana cara mengirimnya?",
+          "a": "Kirim link lewat chat, atau cetak kode QR dan selipkan di kartu atau kado."
+        }
+      ]
+    },
+    "newyear": {
+      "title": "Ucapan Tahun Baru",
+      "subtitle": "Kirim ucapan Tahun Baru dan Natal dengan kenangan setahun terakhir",
+      "heroHeadline": "Kirim ucapan Tahun Baru untuk orang tersayang, dari kenangan setahun kalian",
+      "heroSubtext": "Kumpulkan foto dan momen setahun terakhir, tambahkan ucapan dan suaramu, lalu kirim lewat link atau kode QR untuk dibuka saat hitung mundur.",
+      "ctaText": "Buat kartu Tahun Baru",
+      "ctaHeading": "Siap kirim ucapan Tahun Baru?",
+      "metaTitle": "Ucapan Tahun Baru 2027 untuk Pacar Lewat Link Kenangan | The Memory",
+      "metaDescription": "Buat kartu Tahun Baru atau Natal online dengan foto dan momen setahun, ucapan, dan pesan suara. Gratis dibuat dan dilihat pratinjaunya. Kirim lewat link atau kode QR.",
+      "keywords": [
+        "ucapan tahun baru untuk pacar",
+        "kartu tahun baru online",
+        "kado tahun baru untuk pacar",
+        "kado natal untuk pacar",
+        "ucapan tahun baru 2027"
+      ],
+      "guide": {
+        "heading": "Membuat kartu Tahun Baru online dalam 4 langkah",
+        "intro": "Selesai jauh sebelum hitung mundur, pratinjau gratis.",
+        "steps": [
+          {
+            "title": "Mulai buat kenangan",
+            "desc": "Masuk dan pilih tema yang cocok (Cinta, Persahabatan, atau Keluarga)."
+          },
+          {
+            "title": "Kilas balik setahun",
+            "desc": "Pakai \"Album foto\" untuk 2–5 foto terbaik tahun ini, atau \"Pesan + foto\" untuk bercerita per bulan."
+          },
+          {
+            "title": "Tambahkan ucapan",
+            "desc": "\"Pesan\" berisi ucapan Tahun Baru dan \"Pesan suara\" dengan suaramu sendiri (maksimal 1 menit)."
+          },
+          {
+            "title": "Kirim sebelum tengah malam",
+            "desc": "Pratinjau gratis, aktifkan, lalu kirim link atau cetak kode QR untuk kartu atau kado."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Makasih sudah menemani sepanjang tahun ini",
+        "Semoga tahun depan kita makin banyak tertawa bareng",
+        "Buka pas hitung mundur, ya"
+      ],
+      "faqItems": [
+        {
+          "q": "Bisa dikirim ke teman atau keluarga?",
+          "a": "Bisa. Pilih tema Persahabatan atau Keluarga, isinya kamu tulis sendiri."
+        },
+        {
+          "q": "Apakah gratis?",
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        },
+        {
+          "q": "Sempat selesai sebelum tanggal 31?",
+          "a": "Sempat. Cuma butuh beberapa menit dan link bisa langsung dikirim setelah diaktifkan."
+        },
+        {
+          "q": "Bisa pakai lagu Tahun Baru?",
+          "a": "Bisa, dengan menempelkan link YouTube lagunya."
+        },
+        {
+          "q": "Bisa menggantikan kartu kertas?",
+          "a": "Bisa, atau cetak kode QR dan selipkan di kartu aslinya."
+        }
+      ]
+    },
+    "love-letter": {
+      "title": "Surat Cinta Online",
+      "subtitle": "Surat cinta yang dibuka halaman demi halaman, dengan suaramu sendiri",
+      "heroHeadline": "Surat cinta online untuk pacar, disegel dengan kode rahasia",
+      "heroSubtext": "Tulis surat untuk pacar halaman demi halaman, sertakan foto yang berarti, bacakan lewat pesan suara, lalu segel dengan PIN yang hanya dia tahu. Kirim lewat link atau kode QR.",
+      "ctaText": "Tulis surat cinta",
+      "ctaHeading": "Siap menulis untuknya?",
+      "metaTitle": "Surat Cinta Online: Tulis Surat untuk Pacar, Gratis Dibuat | The Memory",
+      "metaDescription": "Tulis surat online untuk pacar halaman demi halaman, dengan foto, pesan suara, dan segel PIN. Gratis dibuat dan dilihat pratinjaunya. Kirim lewat link atau kode QR.",
+      "keywords": [
+        "surat cinta online",
+        "surat untuk pacar",
+        "surat cinta untuk pacar",
+        "surat digital untuk pacar"
+      ],
+      "guide": {
+        "heading": "Cara menulis surat cinta online",
+        "intro": "Tulis sesukamu, bagi per halaman agar dibaca pelan-pelan, pratinjau gratis sebelum dikirim.",
+        "steps": [
+          {
+            "title": "Segel amplopnya",
+            "desc": "Mulai dengan \"Kode PIN\" 6 digit, misalnya tanggal lahirnya. Dia harus memasukkannya sebelum membaca, seperti membuka amplop."
+          },
+          {
+            "title": "Tulis per halaman",
+            "desc": "Bagi surat menjadi beberapa halaman \"Pesan\" (sapaan, kenangan, isi hati, janji), lebih enak dibaca daripada satu paragraf panjang."
+          },
+          {
+            "title": "Sertakan foto",
+            "desc": "Gunakan \"Pesan + foto\" untuk setiap bagian surat."
+          },
+          {
+            "title": "Bacakan untuknya",
+            "desc": "Tambahkan \"Pesan suara\" berisi paragraf terpenting dengan suaramu sendiri (maksimal 1 menit)."
+          },
+          {
+            "title": "Pratinjau, lalu kirim",
+            "desc": "Pratinjau gratis, aktifkan, lalu kirim link atau cetak kode QR dan masukkan ke amplop asli."
+          }
+        ]
+      },
+      "samplePrompts": [
+        "Untuk orang yang bikin setiap hariku istimewa",
+        "Ada yang sudah lama ingin aku sampaikan",
+        "Selesai baca, dengarkan suaraku sebentar, ya"
+      ],
+      "faqItems": [
+        {
+          "q": "Apa bedanya dengan pesan di chat?",
+          "a": "Dia membukanya halaman demi halaman dengan foto, suaramu, dan kode pembuka, terasa seperti surat sungguhan, bukan pesan yang tenggelam di chat."
+        },
+        {
+          "q": "Bisa dikunci hanya untuk dia?",
+          "a": "Pasang PIN 6 digit di halaman pertama, dia harus memasukkannya untuk membaca sisanya."
+        },
+        {
+          "q": "Bisa membacakannya dengan suaraku?",
+          "a": "Bisa. Rekam atau unggah audio maksimal 1 menit per halaman."
+        },
+        {
+          "q": "Apakah gratis?",
+          "a": "Gratis dibuat dan dilihat pratinjaunya. Kamu hanya membayar saat mengaktifkan untuk dibagikan."
+        },
+        {
+          "q": "Bisa dikirim bersama surat kertas?",
+          "a": "Bisa. Cetak kode QR-nya dan masukkan ke amplop atau kartu."
+        }
+      ]
     }
   }
 }

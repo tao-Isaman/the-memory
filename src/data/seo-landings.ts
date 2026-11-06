@@ -61,6 +61,29 @@ export const SEO_LANDINGS: UseCaseConfig[] = [
     theme: 'longdistance',
     emoji: '💭',
     color: 'from-sky-400 to-blue-500',
+  },  {
+    slug: 'online-gift',
+    theme: 'love',
+    emoji: '🎁',
+    color: 'from-pink-400 to-fuchsia-500',
+  },
+  {
+    slug: 'how-to',
+    theme: 'love',
+    emoji: '🛠️',
+    color: 'from-violet-400 to-purple-500',
+  },
+  {
+    slug: 'newyear',
+    theme: 'love',
+    emoji: '🎆',
+    color: 'from-indigo-500 to-amber-400',
+  },
+  {
+    slug: 'love-letter',
+    theme: 'love',
+    emoji: '✉️',
+    color: 'from-rose-300 to-red-400',
   },
 ];
 
