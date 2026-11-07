@@ -4,7 +4,7 @@
 // story owner can be notified (in-app + Web Push).
 import { getSupabaseBrowserClient } from './supabase';
 import { MemoryTheme } from '@/types/memory';
-import { UniverseStory, UniverseStoryType } from '@/types/universe';
+import { UniverseStory, UniverseStoryType, isUniverseStoryType } from '@/types/universe';
 
 /** Page size for the lazy-loaded feed (matches the spec: 10 per scroll). */
 export const UNIVERSE_PAGE_SIZE = 10;
@@ -33,6 +33,17 @@ type FeedRow = {
   my_emoji: string | null;
 };
 
+/** Keep only the content fields the feed cards render (image/text/caption/slides). */
+function pickFeedContent(raw: unknown): UniverseStory['content'] {
+  const c = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const out: UniverseStory['content'] = {};
+  if (typeof c.imageUrl === 'string') out.imageUrl = c.imageUrl;
+  if (Array.isArray(c.imageUrls)) out.imageUrls = c.imageUrls.filter((u): u is string => typeof u === 'string');
+  if (typeof c.caption === 'string') out.caption = c.caption;
+  if (typeof c.text === 'string') out.text = c.text;
+  return out;
+}
+
 /** Fetch one page of the universe feed. Returns [] on any error (feed is best-effort). */
 export async function getUniverseFeed(
   seed: string,
@@ -53,11 +64,16 @@ export async function getUniverseFeed(
     return [];
   }
 
-  return (data as FeedRow[]).map((row) => ({
+  // Defence in depth: the RPC already filters by type, but never render anything outside
+  // the allowed types (above all the PIN story), and only pass through the content fields
+  // the feed cards use, so a PIN value can never reach the page even if a row slips through.
+  return (data as FeedRow[])
+    .filter((row) => isUniverseStoryType(row.story_type))
+    .map((row) => ({
     storyId: row.story_id,
     type: row.story_type as UniverseStoryType,
     title: row.story_title || undefined,
-    content: (row.story_content || {}) as UniverseStory['content'],
+    content: pickFeedContent(row.story_content),
     createdAt: row.story_created_at,
     memoryId: row.memory_id,
     memoryTitle: row.memory_title,

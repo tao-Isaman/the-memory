@@ -3,11 +3,9 @@ import { getSupabaseServiceClient, getBearerUser } from '@/lib/supabase-server';
 import { sendPushToSubscriptions, isPushConfigured } from '@/lib/push-server';
 import { REACTION_EMOJIS } from '@/lib/reactions';
 import { UNIVERSE_NOTIFICATION, ownerLocale } from '@/lib/notification-messages';
+import { isUniverseStoryType } from '@/types/universe';
 
 export const runtime = 'nodejs';
-
-/** Story types that appear in the universe feed (kept in sync with get_universe_feed). */
-const FEED_STORY_TYPES = ['image', 'text-image', 'text'];
 
 /**
  * Universe (จักรวาล) reaction toggle — a logged-in user reacts to a feed story with an
@@ -38,7 +36,7 @@ export async function POST(request: NextRequest) {
       .select('id, memory_id, type')
       .eq('id', storyId)
       .single();
-    if (!story || !FEED_STORY_TYPES.includes(story.type)) {
+    if (!story || !isUniverseStoryType(story.type)) {
       return NextResponse.json({ error: 'Story not available' }, { status: 404 });
     }
 
