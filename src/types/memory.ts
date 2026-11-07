@@ -85,9 +85,10 @@ export interface Memory {
   /**
    * Universe (จักรวาล): include this memory's stories in the public feed.
    * Opt-out — defaults to true; the owner unticks to hide the memory.
-   * Applies to ALL image/text stories, including those behind a PIN story
-   * (the checkbox is the owner's explicit consent; PIN gates only the link's
-   * viewing sequence — product decision 2026-06-12, migration 025).
+   * Applies to the universe story types (UNIVERSE_STORY_TYPES), including stories that sit
+   * after a PIN story (the checkbox is the owner's explicit consent; the PIN gates only the
+   * link's viewing sequence — product decision 2026-06-12, migration 025, confirmed by the
+   * boss 2026-11-07). The PIN story itself and its content are never shown in the feed.
    */
   shareToUniverse: boolean;
 }
