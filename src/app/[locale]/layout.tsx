@@ -9,6 +9,7 @@ import FloatingHearts from "@/components/FloatingHearts";
 import ClientProviders from "@/components/ClientProviders";
 import { Analytics } from "@vercel/analytics/next";
 import { routing, type Locale } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site-url";
 
 // Kanit/Itim already ship the `latin` subset, so English and Indonesian render
 // correctly with no font change.
@@ -29,8 +30,6 @@ const leckerliOne = Leckerli_One({
   subsets: ["latin"],
   variable: "--font-leckerli",
 });
-
-const SITE_URL = "https://thememory.app";
 
 /** Canonical + hreflang. Thai is unprefixed (localePrefix: 'as-needed'). */
 function urlFor(locale: Locale) {
