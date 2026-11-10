@@ -195,5 +195,20 @@
         }
       }
     }
+  },
+  "tabs": {
+    "settings": "Pengaturan",
+    "stories": "Cerita",
+    "review": "Periksa & simpan",
+    "next": "Lanjut",
+    "saving": "Menyimpan…",
+    "missingHeading": "Masih ada yang kurang sebelum menyimpan",
+    "missingShort": "Kurang:",
+    "ready": "Sudah lengkap. Siap disimpan.",
+    "preview": "Pratinjau satu per satu",
+    "previewPrev": "Cerita sebelumnya",
+    "previewNext": "Cerita berikutnya",
+    "previewPin": "Ini halaman PIN. Penerima memasukkan PIN yang kamu atur sebelum melihat cerita berikutnya.",
+    "closeEditor": "Tutup"
   }
 }

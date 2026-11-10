@@ -19,6 +19,8 @@ import {
   type TemplateCopy,
 } from '@/lib/memory-templates';
 import { storePendingTemplate } from '@/lib/pending-template';
+import { missingItems, resolveLayout, type MissingItem } from '@/lib/create-steps';
+import CreateTabsLayout from './CreateTabsLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import HeartIcon from '@/components/HeartIcon';
@@ -35,6 +37,7 @@ function CreatePageContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
   const templateSlug = searchParams.get('template');
+  const layout = resolveLayout(searchParams.get('layout'));
   const { user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const t = useTranslations('create');
@@ -159,23 +162,28 @@ function CreatePageContent() {
     });
   }, []);
 
+  // What still blocks saving (see lib/create-steps), and the message for each item.
+  const missing = missingItems({
+    title,
+    storyCount: stories.length,
+    requiredSlotKeys: openSlots(templateSequence, stories)
+      .filter((slot) => slot.required)
+      .map((slot) => slot.key),
+  });
+  const missingLabel = (item: MissingItem): string =>
+    item === 'title'
+      ? t('page.errorTitleRequired')
+      : item === 'stories'
+        ? t('page.errorStoryRequired')
+        : t(`templates.ui.required.${item.slice('slot:'.length)}`);
+
   const handleSave = async () => {
     if (!user) return;
 
-    if (!title.trim()) {
-      showToast(t('page.errorTitleRequired'), 'error');
-      return;
-    }
-
-    if (stories.length === 0) {
-      showToast(t('page.errorStoryRequired'), 'error');
-      return;
-    }
-
-    // A template's required step (the couple's own PIN) must be added before saving.
-    const missing = openSlots(templateSequence, stories).find((slot) => slot.required);
-    if (missing) {
-      showToast(t(`templates.ui.required.${missing.key}`), 'error');
+    // Title, at least one story, and a template's required step (the couple's own PIN).
+    const blocker = missing[0];
+    if (blocker) {
+      showToast(missingLabel(blocker), 'error');
       return;
     }
 
@@ -236,6 +244,142 @@ function CreatePageContent() {
     '--theme-background': themeColors.background,
     '--theme-focus-shadow': `${themeColors.primary}33`,
   } as React.CSSProperties;
+
+  // Shown after saving, in either layout: share (active memories) or the payment prompt.
+  const modals = (
+    <>
+      {/* Share Modal */}
+      {savedMemoryId && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={handleCloseShareModal}
+          memoryId={savedMemoryId}
+          memoryTitle={title}
+        />
+      )}
+
+      {/* Payment Prompt Modal */}
+      {showPaymentPrompt && savedMemoryId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="memory-card p-8 max-w-md w-full text-center"
+            style={{ backgroundColor: themeColors.background, ...cssVariables }}
+          >
+            <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" color={themeColors.primary} />
+            <h2
+              className="font-kanit text-2xl font-bold mb-2"
+              style={{ color: themeColors.dark }}
+            >
+              {t('paymentPrompt.title')}
+            </h2>
+            <p className="text-gray-600 mb-2">
+              {t('paymentPrompt.subtitle')}
+            </p>
+            <p className="text-sm text-gray-500 mb-2">
+              {t('paymentPrompt.note')}
+            </p>
+            <p className="text-sm font-medium text-[#E63946] mb-6">
+              {t('paymentPrompt.price')}
+            </p>
+            <div className="flex flex-col gap-3">
+              <PaymentButton
+                memoryId={savedMemoryId}
+                memoryTitle={title}
+                userId={user!.id}
+                className="w-full"
+              />
+              <button
+                onClick={() => {
+                  setShowPaymentPrompt(false);
+                  router.push(`/memory/${savedMemoryId}`);
+                }}
+                className="w-full font-semibold py-3 px-6 rounded-full transition-all border-2"
+                style={{
+                  borderColor: themeColors.primary,
+                  color: themeColors.dark,
+                  backgroundColor: 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = themeColors.accent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                {t('paymentPrompt.preview')}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentPrompt(false);
+                  router.push('/dashboard');
+                }}
+                className="text-sm transition-colors"
+                style={{ color: themeColors.dark }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = '0.7';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = '1';
+                }}
+              >
+                {t('paymentPrompt.backToDashboard')}
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-gray-500">
+              {t('paymentPrompt.footnote')}
+            </p>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  if (layout === 'tabs') {
+    return (
+      <main
+        className="min-h-screen relative z-10 transition-colors duration-300"
+        style={{ backgroundColor: themeColors.background, ...cssVariables }}
+      >
+        <CreateTabsLayout
+          isEditMode={isEditMode}
+          title={title}
+          onTitleChange={setTitle}
+          theme={theme}
+          onThemeChange={setTheme}
+          shareToUniverse={shareToUniverse}
+          onToggleShare={() => setShareToUniverse((v) => !v)}
+          stories={stories}
+          onReorder={handleReorder}
+          onDeleteStory={handleDelete}
+          onEditStory={handleEditStory}
+          editorOpen={showEditor}
+          editingStory={editingStory}
+          editorInitialType={fillingSlot?.type}
+          editorKey={editingStory?.id ?? fillingSlot?.key ?? 'new'}
+          onOpenEditor={(slot) => {
+            setEditingStory(null);
+            setFillingSlot(slot);
+            setShowEditor(true);
+          }}
+          onCloseEditor={() => {
+            setShowEditor(false);
+            setEditingStory(null);
+            setFillingSlot(null);
+          }}
+          onSaveStory={handleSaveStory}
+          templateName={templateName}
+          templateSlots={templateSlots}
+          missing={missing}
+          missingLabel={missingLabel}
+          saving={saving}
+          onSave={handleSave}
+          themeColors={themeColors}
+          cssVariables={cssVariables}
+        />
+        {modals}
+      </main>
+    );
+  }
 
   return (
     <main
@@ -435,89 +579,7 @@ function CreatePageContent() {
         </div>
       </div>
 
-      {/* Share Modal */}
-      {savedMemoryId && (
-        <ShareModal
-          isOpen={showShareModal}
-          onClose={handleCloseShareModal}
-          memoryId={savedMemoryId}
-          memoryTitle={title}
-        />
-      )}
-
-      {/* Payment Prompt Modal */}
-      {showPaymentPrompt && savedMemoryId && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div
-            className="memory-card p-8 max-w-md w-full text-center"
-            style={{ backgroundColor: themeColors.background, ...cssVariables }}
-          >
-            <HeartIcon size={48} className="mx-auto mb-4 animate-pulse-heart" color={themeColors.primary} />
-            <h2
-              className="font-kanit text-2xl font-bold mb-2"
-              style={{ color: themeColors.dark }}
-            >
-              {t('paymentPrompt.title')}
-            </h2>
-            <p className="text-gray-600 mb-2">
-              {t('paymentPrompt.subtitle')}
-            </p>
-            <p className="text-sm text-gray-500 mb-2">
-              {t('paymentPrompt.note')}
-            </p>
-            <p className="text-sm font-medium text-[#E63946] mb-6">
-              {t('paymentPrompt.price')}
-            </p>
-            <div className="flex flex-col gap-3">
-              <PaymentButton
-                memoryId={savedMemoryId}
-                memoryTitle={title}
-                userId={user!.id}
-                className="w-full"
-              />
-              <button
-                onClick={() => {
-                  setShowPaymentPrompt(false);
-                  router.push(`/memory/${savedMemoryId}`);
-                }}
-                className="w-full font-semibold py-3 px-6 rounded-full transition-all border-2"
-                style={{
-                  borderColor: themeColors.primary,
-                  color: themeColors.dark,
-                  backgroundColor: 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = themeColors.accent;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                {t('paymentPrompt.preview')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPaymentPrompt(false);
-                  router.push('/dashboard');
-                }}
-                className="text-sm transition-colors"
-                style={{ color: themeColors.dark }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.opacity = '0.7';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = '1';
-                }}
-              >
-                {t('paymentPrompt.backToDashboard')}
-              </button>
-            </div>
-            <p className="mt-4 text-sm text-gray-500">
-              {t('paymentPrompt.footnote')}
-            </p>
-          </div>
-        </div>
-      )}
+      {modals}
 
       {/* Edit Story Modal */}
       {editingStory && (
