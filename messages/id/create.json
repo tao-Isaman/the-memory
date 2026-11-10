@@ -173,19 +173,20 @@
   "templates": {
     "ui": {
       "heading": "Templat: {name}",
-      "intro": "PIN dan pesan awal sudah diisi. Ketuk halaman mana pun untuk mengubahnya. Halaman PIN diisi tanggal Loy Krathong tahun ini (hari, bulan, tahun era Buddha); ganti dengan angka kalian sendiri.",
+      "intro": "Pesan awal sudah diisi; ketuk halaman mana pun untuk mengubahnya. Atur PIN kalian sendiri, lalu tambah foto dan lagu kalau mau.",
       "slots": {
+        "pin": "Atur PIN 6 digit kalian (mis. tanggal pertama bertemu, atau 241169 untuk Loy Krathong)",
         "photo": "Tambah foto kalian berdua",
         "song": "Tambah lagu dari YouTube"
+      },
+      "required": {
+        "pin": "Atur PIN 6 digit kalian sebelum menyimpan"
       }
     },
     "loykrathong": {
       "name": "Tautan Loy Krathong untuk pasangan",
       "title": "Ayo melarung krathong bersama 🪷",
       "stories": {
-        "pin": {
-          "title": "Petunjuk: tanggal Loy Krathong tahun ini (hari, bulan, tahun era Buddha, masing-masing 2 digit)"
-        },
         "wish": {
           "text": "Di malam bulan purnama ini aku ingin berdoa bersamamu.\n\nSemoga kita tetap berdampingan untuk waktu yang sangat lama.\nSemoga kamu sehat, bahagia, dan tersenyum setiap hari.\nDan apa pun yang pernah membuatmu sedih, biarlah hanyut bersama krathong ini."
         },

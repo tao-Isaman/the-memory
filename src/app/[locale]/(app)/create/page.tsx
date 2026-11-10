@@ -172,6 +172,13 @@ function CreatePageContent() {
       return;
     }
 
+    // A template's required step (the couple's own PIN) must be added before saving.
+    const missing = openSlots(templateSequence, stories).find((slot) => slot.required);
+    if (missing) {
+      showToast(t(`templates.ui.required.${missing.key}`), 'error');
+      return;
+    }
+
     setSaving(true);
 
     const memoryId = editId || generateId();
