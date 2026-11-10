@@ -195,5 +195,20 @@
         }
       }
     }
+  },
+  "tabs": {
+    "settings": "Settings",
+    "stories": "Stories",
+    "review": "Review & save",
+    "next": "Next",
+    "saving": "Saving…",
+    "missingHeading": "A few things are missing before you can save",
+    "missingShort": "Missing:",
+    "ready": "All set. Ready to save.",
+    "preview": "Preview one story at a time",
+    "previewPrev": "Previous story",
+    "previewNext": "Next story",
+    "previewPin": "This is the PIN page. The recipient enters the PIN you set before seeing the next story.",
+    "closeEditor": "Close"
   }
 }
