@@ -960,7 +960,7 @@ export default function LoyKrathongGame() {
                 {modal === 'intro' ? t('intro.start') : t('intro.save')}
               </button>
             </div>
-            {modal === 'intro' && <LoyTemplateCta placement="landing" />}
+            {modal === 'intro' && <LoyTemplateCta source="landing" variant="link" />}
           </div>
         </div>
       )}
@@ -1051,7 +1051,7 @@ export default function LoyKrathongGame() {
             <div className="text-5xl mb-2">🪷</div>
             <h2 className="text-xl font-bold text-[#4A1942] mb-1">{t('done.heading')}</h2>
             <p className="text-sm text-[#6B5E57] mb-5">{t('done.body')}</p>
-            <LoyTemplateCta placement="done" />
+            <LoyTemplateCta source="done" variant="card" />
             <button type="button" onClick={share} className="btn-secondary w-full py-3 mb-2">
               {t('done.share')}
             </button>

@@ -5,32 +5,35 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { trackEvent } from '@/lib/analytics';
 
-/** Where the CTA is shown: after a krathong is floated, or on the game's entry screen. */
-type Placement = 'done' | 'landing';
+interface Props {
+  /** GA `source`: 'done' (after floating), 'landing' (game entry), 'seo_<slug>' (content pages). */
+  source: string;
+  variant: 'card' | 'link';
+}
 
 /**
- * Sends free-game visitors to the paid product: the Loy Krathong starter template.
- * One component for both placements so the destination and the GA events
- * (loy_cta_view / loy_cta_click, split by `source`) are defined once.
+ * Sends free-game and content-page visitors to the paid product: the Loy Krathong
+ * starter template. One component for every placement so the destination and the GA
+ * events (loy_cta_view / loy_cta_click, split by `source`) are defined once.
  */
-export default function LoyTemplateCta({ placement }: { placement: Placement }) {
+export default function LoyTemplateCta({ source, variant }: Props) {
   const t = useTranslations('loykrathong.cta');
 
   useEffect(() => {
-    trackEvent('loy_cta_view', { source: placement });
-  }, [placement]);
+    trackEvent('loy_cta_view', { source });
+  }, [source]);
 
   const link = (className: string, label: string) => (
     <Link
       href="/create?template=loykrathong"
       className={className}
-      onClick={() => trackEvent('loy_cta_click', { source: placement })}
+      onClick={() => trackEvent('loy_cta_click', { source })}
     >
       {label}
     </Link>
   );
 
-  if (placement === 'landing') {
+  if (variant === 'link') {
     return (
       <p className="mt-4 text-center text-sm">
         {link('text-[#E63946] underline underline-offset-2 hover:opacity-80', t('landing'))}

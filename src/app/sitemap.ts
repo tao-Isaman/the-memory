@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { USE_CASES } from '@/data/use-cases';
 import { SEO_LANDINGS } from '@/data/seo-landings';
+import { LOY_PAGES } from '@/data/loy-pages';
 import { locales, routing, type Locale } from '@/i18n/routing';
 import { SITE_URL } from '@/lib/site-url';
 
@@ -29,6 +30,7 @@ const PUBLIC_PATHS: Array<{
     priority: 0.8,
     changeFrequency: 'monthly' as const,
   })),
+  { path: '/loykrathong', priority: 0.8, changeFrequency: 'weekly' },
   { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' },
   { path: '/terms', priority: 0.3, changeFrequency: 'yearly' },
 ];
@@ -41,7 +43,15 @@ const PUBLIC_PATHS: Array<{
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
-  return PUBLIC_PATHS.flatMap(({ path, priority, changeFrequency }) =>
+  // Thai-only campaign pages: one URL each, no hreflang set (there is no en/id version).
+  const thaiOnly: MetadataRoute.Sitemap = LOY_PAGES.map((page) => ({
+    url: urlFor(routing.defaultLocale, `/loykrathong/${page.slug}`),
+    lastModified,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
+
+  const localized = PUBLIC_PATHS.flatMap(({ path, priority, changeFrequency }) =>
     locales.map((locale) => ({
       url: urlFor(locale, path),
       lastModified,
@@ -55,4 +65,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     })),
   );
+
+  return [...localized, ...thaiOnly];
 }
