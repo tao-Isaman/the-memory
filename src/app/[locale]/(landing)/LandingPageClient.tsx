@@ -9,6 +9,8 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import DemoMemoryModal from '@/components/DemoMemoryModal';
 import HeroPhoneDemo from '@/components/landing/HeroPhoneDemo';
 import { trackEvent } from '@/lib/analytics';
+import LoyTemplateCta from '@/components/loykrathong/LoyTemplateCta';
+import { useLoySeason } from '@/lib/loykrathong/season';
 import { getThemeColors } from '@/lib/themes';
 import { USE_CASES } from '@/data/use-cases';
 import {
@@ -135,6 +137,7 @@ const STEPS = [
 
 export default function LandingPageClient() {
   const t = useTranslations('landing');
+  const loySeason = useLoySeason();
   const tc = useTranslations('useCase.useCases');
 
   const [demoOpen, setDemoOpen] = useState(false);
@@ -192,6 +195,12 @@ export default function LandingPageClient() {
 
       {/* ───────────────── Hero ───────────────── */}
       <section className="relative overflow-hidden pt-16">
+        {/* Seasonal: Loy Krathong entry, shown only while the event window is open */}
+        {loySeason && (
+          <div className="relative z-10">
+            <LoyTemplateCta source="home" variant="strip" />
+          </div>
+        )}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-24 top-16 h-72 w-72 rounded-full bg-[#FFB6C1]/45 blur-3xl" />
           <div className="absolute -right-24 top-48 h-96 w-96 rounded-full bg-[#FFD9C4]/60 blur-3xl" />

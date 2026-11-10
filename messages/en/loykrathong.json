@@ -110,8 +110,18 @@
   "cta": {
     "heading": "🪷 Send a krathong and a wish to someone special",
     "body": "Make a Loy Krathong link for your partner with your wish, a photo of you two and a favourite song, then send it for them to open.",
-    "button": "Make a Loy Krathong link",
+    "button": "Invite your partner to Loy Krathong",
     "price": "Free to create and preview. 99 THB to activate and share the link.",
-    "landing": "🪷 Make a Loy Krathong link for your partner"
+    "landing": "🪷 Invite your partner to Loy Krathong",
+    "strip": "🪷 Loy Krathong is 24 Nov · Invite your partner",
+    "stripGame": "or float a krathong online for free"
+  },
+  "popup": {
+    "title": "🪷 Loy Krathong is 24 Nov",
+    "headline": "Invite your partner to Loy Krathong",
+    "body": "Make a Loy Krathong link for your partner with your wish, a photo of you two and a favourite song. Free to create and preview. 99 THB to activate and share the link.",
+    "button": "Invite now",
+    "later": "Maybe later",
+    "close": "Close"
   }
 }

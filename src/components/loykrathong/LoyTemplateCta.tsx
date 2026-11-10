@@ -6,9 +6,9 @@ import { Link } from '@/i18n/navigation';
 import { trackEvent } from '@/lib/analytics';
 
 interface Props {
-  /** GA `source`: 'done' (after floating), 'landing' (game entry), 'menu' (game menu), 'seo_<slug>' (content pages). */
+  /** GA `source`: 'home', 'done' (after floating), 'landing' (game entry), 'menu' / 'hud' (in game), 'seo_<slug>'. */
   source: string;
-  variant: 'card' | 'link' | 'menu';
+  variant: 'card' | 'link' | 'menu' | 'pill' | 'strip';
 }
 
 /**
@@ -33,14 +33,37 @@ export default function LoyTemplateCta({ source, variant }: Props) {
     </Link>
   );
 
+  if (variant === 'strip') {
+    return (
+      <div className="border-b border-pink-100 bg-gradient-to-r from-[#FFF1F5] via-[#FFF8F0] to-[#FFF1F5] px-4 py-2.5 text-center text-sm">
+        {link('font-semibold text-[#E63946] underline-offset-2 hover:underline', t('strip'))}
+        <span className="mx-2 text-[#E63946]/40">·</span>
+        <Link
+          href="/loykrathong"
+          className="text-[#6B5E57] underline underline-offset-2 hover:opacity-80"
+          onClick={() => trackEvent('loy_cta_click', { source: `${source}_game` })}
+        >
+          {t('stripGame')}
+        </Link>
+      </div>
+    );
+  }
+
+  if (variant === 'pill') {
+    return link(
+      'h-9 px-3 rounded-full bg-[#E63946] text-white text-sm font-medium flex items-center whitespace-nowrap shadow-lg hover:opacity-90',
+      t('landing'),
+    );
+  }
+
   if (variant === 'menu') {
     return link('flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#E63946] hover:bg-pink-50', t('landing'));
   }
 
   if (variant === 'link') {
     return (
-      <p className="mt-4 text-center text-sm">
-        {link('text-[#E63946] underline underline-offset-2 hover:opacity-80', t('landing'))}
+      <p className="mb-4 rounded-2xl border border-pink-200 bg-white px-4 py-3 text-center text-sm">
+        {link('font-semibold text-[#E63946] underline underline-offset-2 hover:opacity-80', t('landing'))}
       </p>
     );
   }
