@@ -767,6 +767,8 @@ export default function LoyKrathongGame() {
                     <span aria-hidden="true">🔑</span> {t('hud.login')}
                   </Link>
                 )}
+                {/* Returning players skip the intro screen, so the template CTA also lives here. */}
+                <LoyTemplateCta source="menu" variant="menu" />
                 <Link href="/create" role="menuitem" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50" onClick={() => setMenuOpen(false)}>
                   <span aria-hidden="true">✨</span> {t('hud.create')}
                 </Link>

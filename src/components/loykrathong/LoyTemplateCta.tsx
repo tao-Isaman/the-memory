@@ -6,9 +6,9 @@ import { Link } from '@/i18n/navigation';
 import { trackEvent } from '@/lib/analytics';
 
 interface Props {
-  /** GA `source`: 'done' (after floating), 'landing' (game entry), 'seo_<slug>' (content pages). */
+  /** GA `source`: 'done' (after floating), 'landing' (game entry), 'menu' (game menu), 'seo_<slug>' (content pages). */
   source: string;
-  variant: 'card' | 'link';
+  variant: 'card' | 'link' | 'menu';
 }
 
 /**
@@ -32,6 +32,10 @@ export default function LoyTemplateCta({ source, variant }: Props) {
       {label}
     </Link>
   );
+
+  if (variant === 'menu') {
+    return link('flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#E63946] hover:bg-pink-50', t('landing'));
+  }
 
   if (variant === 'link') {
     return (
