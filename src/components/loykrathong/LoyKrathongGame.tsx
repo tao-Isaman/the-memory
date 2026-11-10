@@ -783,6 +783,10 @@ export default function LoyKrathongGame() {
             <span className="hidden sm:inline text-white/40">·</span>
             <span className="font-medium">📍 {t(`scenes.${scene}`)}</span>
           </div>
+          {/* Wide screens only: the phone top bar has no room; phones get it in the menu. */}
+          <div className="hidden lg:block">
+            <LoyTemplateCta source="hud" variant="pill" />
+          </div>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
           <div className="h-9 px-3 rounded-full bg-black/45 text-white text-xs sm:text-sm flex items-center gap-2 sm:gap-3 backdrop-blur-sm border border-white/10 whitespace-nowrap">
@@ -947,6 +951,7 @@ export default function LoyKrathongGame() {
                 </button>
               ))}
             </div>
+            {modal === 'intro' && <LoyTemplateCta source="landing" variant="link" />}
             <div className="flex gap-2">
               {modal === 'intro' && (
                 <Link href="/" className="btn-secondary flex-1 py-3 text-center">
@@ -962,7 +967,6 @@ export default function LoyKrathongGame() {
                 {modal === 'intro' ? t('intro.start') : t('intro.save')}
               </button>
             </div>
-            {modal === 'intro' && <LoyTemplateCta source="landing" variant="link" />}
           </div>
         </div>
       )}

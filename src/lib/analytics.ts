@@ -28,7 +28,10 @@ type EventName =
   | 'toggle_universe_share'
   | 'loy_cta_view'
   | 'loy_cta_click'
-  | 'loy_template_start';
+  | 'loy_template_start'
+  | 'loy_popup_view'
+  | 'loy_popup_click'
+  | 'loy_popup_dismiss';
 
 interface EventParams {
   use_case?: string;
