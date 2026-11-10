@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, Suspense, useEffect } from 'react';
+import { useState, useCallback, Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -13,7 +13,7 @@ import { trackEvent } from '@/lib/analytics';
 import {
   getMemoryTemplate,
   buildTemplateDraft,
-  fillTemplateSlot,
+  placeTemplateStory,
   openSlots,
   type SequenceEntry,
   type TemplateCopy,
@@ -55,8 +55,8 @@ function CreatePageContent() {
   const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
   const [savedMemoryId, setSavedMemoryId] = useState<string | null>(null);
   const [savedMemoryStatus, setSavedMemoryStatus] = useState<MemoryStatus>('pending');
-  // Starter template (/create?template=<slug>): which template steps map to which stories,
-  // and which slot (photo, song) the open editor is filling.
+  // Starter template (/create?template=<slug>): the template's steps, and the slot whose
+  // button opened the editor (only used to pre-select the story type).
   const [templateName, setTemplateName] = useState<string | null>(null);
   const [templateSequence, setTemplateSequence] = useState<SequenceEntry[]>([]);
   const [fillingSlot, setFillingSlot] = useState<{ key: string; type: StoryType } | null>(null);
@@ -72,6 +72,10 @@ function CreatePageContent() {
       router.push('/login');
     }
   }, [authLoading, user, router, templateSlug]);
+
+  // The form is filled once per page open. Without this guard the effect below re-ran every
+  // time the auth session refreshed (new `user` object) and wiped whatever the user had typed.
+  const loadedFor = useRef<string | null>(null);
 
   // Load existing memory for edit mode
   useEffect(() => {
@@ -116,6 +120,9 @@ function CreatePageContent() {
     }
 
     if (!authLoading && user) {
+      const key = `${editId ?? ''}|${templateSlug ?? ''}`;
+      if (loadedFor.current === key) return;
+      loadedFor.current = key;
       loadMemory();
     }
   }, [editId, templateSlug, authLoading, user, t]);
@@ -126,22 +133,15 @@ function CreatePageContent() {
       setStories((prev) =>
         prev.map((s) => (s.id === story.id ? story : s))
       );
-    } else if (fillingSlot) {
-      // New story for a template slot: place it where the template has that step.
-      const filled = fillTemplateSlot(stories, templateSequence, fillingSlot.key, story);
-      setStories(filled.stories);
-      setTemplateSequence(filled.sequence);
     } else {
-      // Add new story
-      setStories((prev) => {
-        const newStory = { ...story, priority: prev.length };
-        return [...prev, newStory];
-      });
+      // Add new story. With a starter template, a story whose type fills an open template
+      // step goes to that step's position; everything else (and no template) is appended.
+      setStories((prev) => placeTemplateStory(prev, templateSequence, story));
     }
     setShowEditor(false);
     setEditingStory(null);
     setFillingSlot(null);
-  }, [editingStory, fillingSlot, stories, templateSequence]);
+  }, [editingStory, templateSequence]);
 
   const handleEditStory = useCallback((story: MemoryStory) => {
     setEditingStory(story);
