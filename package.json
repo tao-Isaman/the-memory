@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "icons": "node --no-warnings --experimental-strip-types scripts/generate-mascot-icons.ts"
+    "icons": "node --no-warnings --experimental-strip-types scripts/generate-mascot-icons.ts",
+    "test": "node --no-warnings --experimental-strip-types src/lib/memory-templates.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",

@@ -25,7 +25,10 @@ type EventName =
   | 'send_reaction'
   | 'view_universe_feed'
   | 'universe_reaction'
-  | 'toggle_universe_share';
+  | 'toggle_universe_share'
+  | 'loy_cta_view'
+  | 'loy_cta_click'
+  | 'loy_template_start';
 
 interface EventParams {
   use_case?: string;
