@@ -169,5 +169,31 @@
     "editStory": "Edit story",
     "deleteStory": "Delete story",
     "imageCount": "{count, plural, one {# photo} other {# photos}}"
+  },
+  "templates": {
+    "ui": {
+      "heading": "Template: {name}",
+      "intro": "The starter messages are filled in; tap any page to edit it. Set your own PIN, then add a photo and a song if you like.",
+      "slots": {
+        "pin": "Set your own 6-digit PIN (e.g. the day you met, or 241169 for Loy Krathong)",
+        "photo": "Add a photo of you two",
+        "song": "Add a song from YouTube"
+      },
+      "required": {
+        "pin": "Set your own 6-digit PIN before saving"
+      }
+    },
+    "loykrathong": {
+      "name": "Loy Krathong link for your partner",
+      "title": "Let's float a krathong together 🪷",
+      "stories": {
+        "wish": {
+          "text": "On this full-moon night I want to make a wish with you.\n\nMay we stay side by side for a long, long time.\nMay you be healthy, happy, and smiling every day.\nAnd whatever I did that hurt you, let it float away with this krathong."
+        },
+        "closing": {
+          "text": "Float a krathong with me this year 🪷\n\nAnywhere is fine, as long as you are next to me."
+        }
+      }
+    }
   }
 }

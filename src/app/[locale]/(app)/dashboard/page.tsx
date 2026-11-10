@@ -18,6 +18,7 @@ import { Plus, Share2, Pencil, Trash2, Eye, Users, ImageIcon, Sparkles } from 'l
 import CartoonCreator from '@/components/CartoonCreator';
 import UniverseFeed from '@/components/UniverseFeed';
 import { trackEvent } from '@/lib/analytics';
+import { takePendingTemplate } from '@/lib/pending-template';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -47,6 +48,14 @@ export default function DashboardPage() {
       trackEvent('returning_user_session');
     }
   }, [user]);
+
+  // A visitor who picked a starter template before signing in lands here after OAuth:
+  // send them on to the create page they asked for.
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const slug = takePendingTemplate();
+    if (slug) router.replace(`/create?template=${encodeURIComponent(slug)}`);
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (!authLoading && !user) {

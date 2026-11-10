@@ -4,12 +4,21 @@ import { useState, useCallback, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import { Memory, MemoryStory, MemoryStatus, MemoryTheme } from '@/types/memory';
+import { Memory, MemoryStory, MemoryStatus, MemoryTheme, StoryType } from '@/types/memory';
 import { saveMemory, getMemoryById, generateId } from '@/lib/storage';
 import { getThemeColors } from '@/lib/themes';
 import { getUseCaseBySlug } from '@/data/use-cases';
 import { getSeoLandingBySlug } from '@/data/seo-landings';
 import { trackEvent } from '@/lib/analytics';
+import {
+  getMemoryTemplate,
+  buildTemplateDraft,
+  fillTemplateSlot,
+  openSlots,
+  type SequenceEntry,
+  type TemplateCopy,
+} from '@/lib/memory-templates';
+import { storePendingTemplate } from '@/lib/pending-template';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import HeartIcon from '@/components/HeartIcon';
@@ -25,6 +34,7 @@ function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
+  const templateSlug = searchParams.get('template');
   const { user, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const t = useTranslations('create');
@@ -45,6 +55,11 @@ function CreatePageContent() {
   const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
   const [savedMemoryId, setSavedMemoryId] = useState<string | null>(null);
   const [savedMemoryStatus, setSavedMemoryStatus] = useState<MemoryStatus>('pending');
+  // Starter template (/create?template=<slug>): which template steps map to which stories,
+  // and which slot (photo, song) the open editor is filling.
+  const [templateName, setTemplateName] = useState<string | null>(null);
+  const [templateSequence, setTemplateSequence] = useState<SequenceEntry[]>([]);
+  const [fillingSlot, setFillingSlot] = useState<{ key: string; type: StoryType } | null>(null);
 
   // Get theme colors
   const themeColors = getThemeColors(theme);
@@ -52,9 +67,11 @@ function CreatePageContent() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
+      // Keep the chosen template across sign-in; the dashboard hands it back.
+      if (templateSlug && getMemoryTemplate(templateSlug)) storePendingTemplate(templateSlug);
       router.push('/login');
     }
-  }, [authLoading, user, router]);
+  }, [authLoading, user, router, templateSlug]);
 
   // Load existing memory for edit mode
   useEffect(() => {
@@ -70,6 +87,17 @@ function CreatePageContent() {
           setOriginalCreatedAt(existingMemory.createdAt);
           setSavedMemoryStatus(existingMemory.status);
         }
+      } else if (getMemoryTemplate(templateSlug)) {
+        const template = getMemoryTemplate(templateSlug)!;
+        const copy = t.raw(`templates.${template.slug}`) as TemplateCopy & { name: string };
+        const draft = buildTemplateDraft(template, copy, generateId, new Date().toISOString());
+        setTitle(draft.title);
+        setTheme(draft.theme);
+        setStories(draft.stories);
+        setTemplateSequence(draft.sequence);
+        setTemplateName(copy.name);
+        trackEvent('start_create', { source: `template_${template.slug}`, theme: draft.theme });
+        if (template.slug === 'loykrathong') trackEvent('loy_template_start');
       } else {
         // Check for use case from sessionStorage (set by login page)
         const pendingUseCase = sessionStorage.getItem('pending_usecase');
@@ -90,7 +118,7 @@ function CreatePageContent() {
     if (!authLoading && user) {
       loadMemory();
     }
-  }, [editId, authLoading, user]);
+  }, [editId, templateSlug, authLoading, user, t]);
 
   const handleSaveStory = useCallback((story: MemoryStory) => {
     if (editingStory) {
@@ -98,6 +126,11 @@ function CreatePageContent() {
       setStories((prev) =>
         prev.map((s) => (s.id === story.id ? story : s))
       );
+    } else if (fillingSlot) {
+      // New story for a template slot: place it where the template has that step.
+      const filled = fillTemplateSlot(stories, templateSequence, fillingSlot.key, story);
+      setStories(filled.stories);
+      setTemplateSequence(filled.sequence);
     } else {
       // Add new story
       setStories((prev) => {
@@ -107,7 +140,8 @@ function CreatePageContent() {
     }
     setShowEditor(false);
     setEditingStory(null);
-  }, [editingStory]);
+    setFillingSlot(null);
+  }, [editingStory, fillingSlot, stories, templateSequence]);
 
   const handleEditStory = useCallback((story: MemoryStory) => {
     setEditingStory(story);
@@ -135,6 +169,13 @@ function CreatePageContent() {
 
     if (stories.length === 0) {
       showToast(t('page.errorStoryRequired'), 'error');
+      return;
+    }
+
+    // A template's required step (the couple's own PIN) must be added before saving.
+    const missing = openSlots(templateSequence, stories).find((slot) => slot.required);
+    if (missing) {
+      showToast(t(`templates.ui.required.${missing.key}`), 'error');
       return;
     }
 
@@ -184,6 +225,8 @@ function CreatePageContent() {
   if (!user) {
     return null;
   }
+
+  const templateSlots = openSlots(templateSequence, stories);
 
   // CSS variables for themed inputs
   const cssVariables = {
@@ -295,13 +338,45 @@ function CreatePageContent() {
           />
         </div>
 
+        {/* Starter template: what is pre-filled, and the steps only the user can add */}
+        {templateName && !showEditor && (
+          <div className="memory-card p-4 mb-6" data-testid="template-card">
+            <p className="font-kanit font-semibold" style={{ color: themeColors.dark }}>
+              {t('templates.ui.heading', { name: templateName })}
+            </p>
+            <p className="text-sm text-gray-600 mt-1">{t('templates.ui.intro')}</p>
+            {templateSlots.length > 0 && (
+              <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                {templateSlots.map((slot) => (
+                  <button
+                    key={slot.key}
+                    type="button"
+                    onClick={() => {
+                      setFillingSlot(slot);
+                      setShowEditor(true);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-full border-2 border-dashed py-2.5 px-4 text-sm font-medium transition-colors"
+                    style={{ borderColor: themeColors.primary, color: themeColors.dark }}
+                  >
+                    <Plus size={16} />
+                    {t(`templates.ui.slots.${slot.key}`)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Add Story Button / Editor (for new stories) */}
         {showEditor && !editingStory ? (
           <StoryEditor
+            key={fillingSlot?.key ?? 'new'}
+            initialType={fillingSlot?.type}
             onSave={handleSaveStory}
             onCancel={() => {
               setShowEditor(false);
               setEditingStory(null);
+              setFillingSlot(null);
             }}
             themeColors={themeColors}
           />

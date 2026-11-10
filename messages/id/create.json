@@ -169,5 +169,31 @@
     "editStory": "Ubah cerita",
     "deleteStory": "Hapus cerita",
     "imageCount": "{count, plural, other {# foto}}"
+  },
+  "templates": {
+    "ui": {
+      "heading": "Templat: {name}",
+      "intro": "Pesan awal sudah diisi; ketuk halaman mana pun untuk mengubahnya. Atur PIN kalian sendiri, lalu tambah foto dan lagu kalau mau.",
+      "slots": {
+        "pin": "Atur PIN 6 digit kalian (mis. tanggal pertama bertemu, atau 241169 untuk Loy Krathong)",
+        "photo": "Tambah foto kalian berdua",
+        "song": "Tambah lagu dari YouTube"
+      },
+      "required": {
+        "pin": "Atur PIN 6 digit kalian sebelum menyimpan"
+      }
+    },
+    "loykrathong": {
+      "name": "Tautan Loy Krathong untuk pasangan",
+      "title": "Ayo melarung krathong bersama 🪷",
+      "stories": {
+        "wish": {
+          "text": "Di malam bulan purnama ini aku ingin berdoa bersamamu.\n\nSemoga kita tetap berdampingan untuk waktu yang sangat lama.\nSemoga kamu sehat, bahagia, dan tersenyum setiap hari.\nDan apa pun yang pernah membuatmu sedih, biarlah hanyut bersama krathong ini."
+        },
+        "closing": {
+          "text": "Tahun ini melarung krathong bersamaku ya 🪷\n\nDi mana saja boleh, asal kamu ada di sampingku."
+        }
+      }
+    }
   }
 }
