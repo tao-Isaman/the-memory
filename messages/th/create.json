@@ -168,6 +168,8 @@
     "moveDown": "เลื่อนลง",
     "editStory": "แก้ไขเรื่องราว",
     "deleteStory": "ลบเรื่องราว",
+    "confirmDelete": "ลบเลย",
+    "cancelDelete": "ไม่ลบ",
     "imageCount": "{count, plural, other {# รูป}}"
   },
   "templates": {

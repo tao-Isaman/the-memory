@@ -168,6 +168,8 @@
     "moveDown": "Move down",
     "editStory": "Edit story",
     "deleteStory": "Delete story",
+    "confirmDelete": "Delete",
+    "cancelDelete": "Keep",
     "imageCount": "{count, plural, one {# photo} other {# photos}}"
   },
   "templates": {

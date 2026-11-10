@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MemoryStory } from '@/types/memory';
 import { ThemeColors } from '@/lib/themes';
@@ -30,6 +31,7 @@ export default function StoryList({
   onEdit,
   themeColors = defaultColors,
 }: StoryListProps) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const t = useTranslations('create.list');
   const tType = useTranslations('create.storyTypes');
 
@@ -53,6 +55,10 @@ export default function StoryList({
         return (
           story.content.caption || t('imageCount', { count: story.content.imageUrls.length })
         );
+      case 'question':
+        return story.content.question;
+      case 'scratch':
+        return story.content.caption || tType('scratch.label');
       default:
         return '';
     }
@@ -99,7 +105,7 @@ export default function StoryList({
         return (
         <div
           key={story.id}
-          className="memory-card p-4 flex items-center gap-4"
+          className="memory-card p-3 sm:p-4 flex items-center gap-2 sm:gap-4"
         >
           {/* Priority Number */}
           <div
@@ -111,8 +117,8 @@ export default function StoryList({
             {index + 1}
           </div>
 
-          {/* Story Icon */}
-          <div className="flex-shrink-0">
+          {/* Story Icon (dropped on narrow phones to leave room for the preview text) */}
+          <div className="flex-shrink-0 hidden sm:block">
             {(() => {
               const IconComponent = storyTypeIcons[story.type];
               return <IconComponent size={24} style={{ color: themeColors.dark }} />;
@@ -124,78 +130,104 @@ export default function StoryList({
             <p className="font-kanit font-medium text-sm" style={{ color: themeColors.dark }}>
               {story.title || typeLabel}
             </p>
-            <p className="text-gray-600 text-sm truncate">
+            <p className="text-gray-600 text-sm line-clamp-2 break-words">
               {story.title ? `${typeLabel} • ${getStoryPreview(story)}` : getStoryPreview(story)}
             </p>
           </div>
 
-          {/* Reorder Buttons */}
-          <div className="flex-shrink-0 flex flex-col gap-1">
-            <button
-              onClick={() => moveUp(index)}
-              disabled={index === 0}
-              className="w-8 h-8 rounded flex items-center justify-center transition-colors"
-              style={{
-                backgroundColor: index === 0 ? '#f3f4f6' : `${themeColors.accent}66`,
-                color: index === 0 ? '#d1d5db' : themeColors.dark,
-              }}
-              title={t('moveUp')}
-            >
-              <ChevronUp size={18} />
-            </button>
-            <button
-              onClick={() => moveDown(index)}
-              disabled={index === stories.length - 1}
-              className="w-8 h-8 rounded flex items-center justify-center transition-colors"
-              style={{
-                backgroundColor: index === stories.length - 1 ? '#f3f4f6' : `${themeColors.accent}66`,
-                color: index === stories.length - 1 ? '#d1d5db' : themeColors.dark,
-              }}
-              title={t('moveDown')}
-            >
-              <ChevronDown size={18} />
-            </button>
-          </div>
+          {confirmDeleteId === story.id ? (
+            /* Deleting is immediate and cannot be undone, so it takes a second tap. */
+            <div className="flex-shrink-0 flex flex-col items-stretch gap-1.5 text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDeleteId(null);
+                  onDelete(story.id);
+                }}
+                className="rounded-full px-3 py-1.5 font-medium text-white"
+                style={{ backgroundColor: themeColors.dark }}
+              >
+                {t('confirmDelete')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteId(null)}
+                className="rounded-full border px-3 py-1.5 text-gray-600"
+              >
+                {t('cancelDelete')}
+              </button>
+            </div>
+          ) : (
+            <>
+            {/* Reorder Buttons */}
+            <div className="flex-shrink-0 flex flex-col gap-1">
+              <button
+                onClick={() => moveUp(index)}
+                disabled={index === 0}
+                className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+                style={{
+                  backgroundColor: index === 0 ? '#f3f4f6' : `${themeColors.accent}66`,
+                  color: index === 0 ? '#d1d5db' : themeColors.dark,
+                }}
+                title={t('moveUp')}
+              >
+                <ChevronUp size={18} />
+              </button>
+              <button
+                onClick={() => moveDown(index)}
+                disabled={index === stories.length - 1}
+                className="w-8 h-8 rounded flex items-center justify-center transition-colors"
+                style={{
+                  backgroundColor: index === stories.length - 1 ? '#f3f4f6' : `${themeColors.accent}66`,
+                  color: index === stories.length - 1 ? '#d1d5db' : themeColors.dark,
+                }}
+                title={t('moveDown')}
+              >
+                <ChevronDown size={18} />
+              </button>
+            </div>
 
-          {/* Edit Button */}
-          <button
-            onClick={() => onEdit(story)}
-            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
-            style={{
-              borderColor: themeColors.primary,
-              color: themeColors.dark,
-              backgroundColor: 'transparent',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = themeColors.accent;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-            title={t('editStory')}
-          >
-            <Pencil size={16} />
-          </button>
+            {/* Edit Button */}
+            <button
+              onClick={() => onEdit(story)}
+              className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
+              style={{
+                borderColor: themeColors.primary,
+                color: themeColors.dark,
+                backgroundColor: 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = themeColors.accent;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+              title={t('editStory')}
+            >
+              <Pencil size={16} />
+            </button>
 
-          {/* Delete Button */}
-          <button
-            onClick={() => onDelete(story.id)}
-            className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
-            style={{
-              borderColor: themeColors.dark,
-              color: themeColors.dark,
-              backgroundColor: 'transparent',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = `${themeColors.dark}20`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-            title={t('deleteStory')}
-          >
-            <X size={18} />
-          </button>
+            {/* Delete Button */}
+            <button
+              onClick={() => setConfirmDeleteId(story.id)}
+              className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center transition-colors border-2"
+              style={{
+                borderColor: themeColors.dark,
+                color: themeColors.dark,
+                backgroundColor: 'transparent',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = `${themeColors.dark}20`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+              title={t('deleteStory')}
+            >
+              <X size={18} />
+            </button>
+            </>
+          )}
         </div>
         );
       })}

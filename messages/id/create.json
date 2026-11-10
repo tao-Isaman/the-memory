@@ -168,6 +168,8 @@
     "moveDown": "Turunkan",
     "editStory": "Ubah cerita",
     "deleteStory": "Hapus cerita",
+    "confirmDelete": "Hapus",
+    "cancelDelete": "Batal",
     "imageCount": "{count, plural, other {# foto}}"
   },
   "templates": {

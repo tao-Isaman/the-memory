@@ -103,7 +103,7 @@ function CreatePageContent() {
         setStories(draft.stories);
         setTemplateSequence(draft.sequence);
         setTemplateName(copy.name);
-        trackEvent('start_create', { source: `template_${template.slug}`, theme: draft.theme });
+        trackEvent('start_create', { source: `template_${template.slug}`, theme: draft.theme, layout });
         if (template.slug === 'loykrathong') trackEvent('loy_template_start');
       } else {
         // Check for use case from sessionStorage (set by login page)
@@ -113,10 +113,10 @@ function CreatePageContent() {
           const useCase = getUseCaseBySlug(pendingUseCase) ?? getSeoLandingBySlug(pendingUseCase);
           if (useCase) {
             setTheme(useCase.theme);
-            trackEvent('start_create', { use_case: pendingUseCase, theme: useCase.theme });
+            trackEvent('start_create', { use_case: pendingUseCase, theme: useCase.theme, layout });
           }
         } else {
-          trackEvent('start_create');
+          trackEvent('start_create', { layout });
         }
       }
       setInitialLoading(false);
@@ -128,7 +128,7 @@ function CreatePageContent() {
       loadedFor.current = key;
       loadMemory();
     }
-  }, [editId, templateSlug, authLoading, user, t]);
+  }, [editId, templateSlug, authLoading, user, t, layout]);
 
   const handleSaveStory = useCallback((story: MemoryStory) => {
     if (editingStory) {
@@ -207,7 +207,7 @@ function CreatePageContent() {
     await saveMemory(memory, user.id, locale);
     setSaving(false);
     setSavedMemoryId(memoryId);
-    trackEvent('complete_create', { memory_id: memoryId, theme, universe: shareToUniverse });
+    trackEvent('complete_create', { memory_id: memoryId, theme, universe: shareToUniverse, layout });
 
     // Show payment prompt for new/pending memories, share modal for active ones
     if (currentStatus === 'active') {
