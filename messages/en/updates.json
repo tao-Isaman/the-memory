@@ -13,6 +13,17 @@
     "announcement": "News"
   },
   "notes": {
+    "v3_3_0": {
+      "title": "Easier memory creation on mobile + a Loy Krathong template",
+      "summary": "The create page is now three steps: settings, stories, and review before saving. There is a \"Take your partner to Loy Krathong\" template you can start from the game or the homepage, and a redesigned homepage where you can try a sample memory right away.",
+      "items": [
+        "Three-tab create page on mobile: settings, stories, review & save. The bottom bar shows what is still missing and jumps you there",
+        "\"Take your partner to Loy Krathong\" template: a memory with starter stories, your own PIN, ready to send. Reach it from the game or the homepage",
+        "Redesigned homepage: a phone mockup plays a real sample memory, and you can open the full demo before signing in",
+        "Loy Krathong game plays in landscape, the joystick appears where you touch, plus a back button on the name screen and a menu back to the app",
+        "Confirm before deleting a story, and a new memory needs at least one story besides the PIN"
+      ]
+    },
     "v3_2_0": {
       "title": "Loy Krathong Online 2026 — Nong Pu Village is open",
       "summary": "A free Loy Krathong mini-game, open from today until 26 Nov. Dress up your crab, walk around the village, pick a krathong at the shop and make a wish at the pier with everyone else. Find it under the \"Loy Krathong\" tab on your dashboard.",

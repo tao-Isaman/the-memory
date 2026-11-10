@@ -52,6 +52,17 @@ export function versionKey(version: string): string {
  */
 export const patchNotes: PatchNote[] = [
   {
+    version: '3.3.0',
+    date: '2026-11-10',
+    items: [
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'feature' },
+      { type: 'improvement' },
+      { type: 'fix' },
+    ],
+  },
+  {
     version: '3.2.0',
     date: '2026-10-08',
     items: [

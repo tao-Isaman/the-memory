@@ -13,6 +13,17 @@
     "announcement": "Pengumuman"
   },
   "notes": {
+    "v3_3_0": {
+      "title": "Bikin kenangan lebih mudah di ponsel + template Loy Krathong",
+      "summary": "Halaman buat kenangan kini tiga langkah: pengaturan, cerita, dan periksa sebelum simpan. Ada template \"Ajak pasangan ke Loy Krathong\" yang bisa dimulai dari game atau beranda, dan beranda baru yang bisa langsung mencoba contoh kenangan.",
+      "items": [
+        "Halaman buat kenangan tiga tab di ponsel: pengaturan, cerita, periksa & simpan. Bilah bawah menunjukkan apa yang masih kurang dan langsung mengarahkanmu ke sana",
+        "Template \"Ajak pasangan ke Loy Krathong\": kenangan dengan cerita awal, PIN pilihanmu sendiri, siap dikirim. Masuk dari game atau beranda",
+        "Beranda baru: mockup ponsel memutar contoh kenangan sungguhan, dan demo lengkap bisa dibuka sebelum masuk",
+        "Game Loy Krathong bisa dimainkan lanskap, joystick muncul di tempat jari menyentuh, ada tombol kembali di layar nama dan menu kembali ke aplikasi",
+        "Konfirmasi sebelum menghapus cerita, dan kenangan baru butuh minimal satu cerita selain PIN"
+      ]
+    },
     "v3_2_0": {
       "title": "Loy Krathong Online 2026 — Desa Nong Pu sudah buka",
       "summary": "Mini-game Loy Krathong gratis, buka mulai hari ini sampai 26 Nov. Dandani kepitingmu, jalan-jalan di desa, ambil krathong di toko, lalu panjatkan harapan di dermaga bareng semua orang. Ada di tab \"Loy Krathong\" di dasbor.",
