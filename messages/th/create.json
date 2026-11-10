@@ -10,7 +10,8 @@
     "saveMemory": "บันทึกความทรงจำ",
     "updateMemory": "อัพเดทความทรงจำ",
     "errorTitleRequired": "กรุณาใส่ชื่อความทรงจำ",
-    "errorStoryRequired": "กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว"
+    "errorStoryRequired": "กรุณาเพิ่มอย่างน้อยหนึ่งเรื่องราว",
+    "errorContentRequired": "เพิ่มเรื่องราวอย่างน้อย 1 อย่าง นอกจากรหัส"
   },
   "universe": {
     "title": "แชร์ไปจักรวาล",

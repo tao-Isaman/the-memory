@@ -10,7 +10,8 @@
     "saveMemory": "Simpan kenangan",
     "updateMemory": "Perbarui kenangan",
     "errorTitleRequired": "Beri nama dulu untuk kenanganmu ya",
-    "errorStoryRequired": "Tambahkan minimal satu cerita"
+    "errorStoryRequired": "Tambahkan minimal satu cerita",
+    "errorContentRequired": "Tambahkan setidaknya satu cerita selain PIN"
   },
   "universe": {
     "title": "Bagikan ke Universe",

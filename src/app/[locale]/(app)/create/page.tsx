@@ -166,6 +166,8 @@ function CreatePageContent() {
   const missing = missingItems({
     title,
     storyCount: stories.length,
+    contentStoryCount: stories.filter((s) => s.type !== 'password').length,
+    requireContent: !isEditMode,
     requiredSlotKeys: openSlots(templateSequence, stories)
       .filter((slot) => slot.required)
       .map((slot) => slot.key),
@@ -175,7 +177,9 @@ function CreatePageContent() {
       ? t('page.errorTitleRequired')
       : item === 'stories'
         ? t('page.errorStoryRequired')
-        : t(`templates.ui.required.${item.slice('slot:'.length)}`);
+        : item === 'content'
+          ? t('page.errorContentRequired')
+          : t(`templates.ui.required.${item.slice('slot:'.length)}`);
 
   const handleSave = async () => {
     if (!user) return;

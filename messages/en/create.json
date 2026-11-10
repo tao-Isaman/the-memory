@@ -10,7 +10,8 @@
     "saveMemory": "Save memory",
     "updateMemory": "Update memory",
     "errorTitleRequired": "Please give your memory a name",
-    "errorStoryRequired": "Please add at least one story"
+    "errorStoryRequired": "Please add at least one story",
+    "errorContentRequired": "Add at least one story besides the PIN"
   },
   "universe": {
     "title": "Share to the Universe",

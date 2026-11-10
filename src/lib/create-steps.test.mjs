@@ -2,15 +2,21 @@
 import assert from 'node:assert/strict';
 import { missingItems, tabForMissing, nextTab, resolveLayout, CREATE_TABS, DEFAULT_CREATE_LAYOUT } from './create-steps.ts';
 
-const ok = { title: 'ลอยกระทง', storyCount: 2, requiredSlotKeys: [] };
+const ok = { title: 'ลอยกระทง', storyCount: 2, contentStoryCount: 1, requireContent: true, requiredSlotKeys: [] };
 
 // Nothing missing: the memory can be saved.
 assert.deepEqual(missingItems(ok), []);
 // Same checks, same order, as the page has always enforced: title, then stories, then
 // a template's required step.
-assert.deepEqual(missingItems({ title: '   ', storyCount: 0, requiredSlotKeys: ['pin'] }), ['title', 'stories', 'slot:pin']);
+assert.deepEqual(missingItems({ ...ok, title: '   ', storyCount: 0, contentStoryCount: 0, requiredSlotKeys: ['pin'] }), ['title', 'stories', 'slot:pin']);
 assert.deepEqual(missingItems({ ...ok, title: '' }), ['title']);
-assert.deepEqual(missingItems({ ...ok, storyCount: 0 }), ['stories']);
+assert.deepEqual(missingItems({ ...ok, storyCount: 0, contentStoryCount: 0 }), ['stories']);
+// A new memory with only PIN pages has nothing to show the recipient: blocked.
+assert.deepEqual(missingItems({ ...ok, storyCount: 1, contentStoryCount: 0 }), ['content']);
+assert.deepEqual(missingItems({ ...ok, storyCount: 2, contentStoryCount: 1 }), []);
+// An existing PIN-only memory (saved before this rule) can still be edited and saved.
+assert.deepEqual(missingItems({ ...ok, storyCount: 1, contentStoryCount: 0, requireContent: false }), []);
+assert.equal(tabForMissing('content'), 'stories');
 // A template memory with stories but no PIN yet is still blocked.
 assert.deepEqual(missingItems({ ...ok, requiredSlotKeys: ['pin'] }), ['slot:pin']);
 

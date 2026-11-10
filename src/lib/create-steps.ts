@@ -7,11 +7,19 @@ export const CREATE_TABS = ['settings', 'stories', 'review'] as const;
 export type CreateTab = (typeof CREATE_TABS)[number];
 
 /** `slot:<key>` is a required step of a starter template (e.g. the couple's own PIN). */
-export type MissingItem = 'title' | 'stories' | `slot:${string}`;
+/** `content`: there are stories, but only PIN pages; nothing for the recipient to see. */
+export type MissingItem = 'title' | 'stories' | 'content' | `slot:${string}`;
 
 export interface CreateDraftState {
   title: string;
   storyCount: number;
+  /** Stories other than PIN pages. */
+  contentStoryCount: number;
+  /**
+   * New memories need at least one content story. Off when editing a memory that was
+   * saved before this rule, so an existing PIN-only memory can still be opened and saved.
+   */
+  requireContent: boolean;
   /** Keys of required template slots that have no story yet. */
   requiredSlotKeys: string[];
 }
@@ -21,6 +29,7 @@ export function missingItems(d: CreateDraftState): MissingItem[] {
   return [
     ...(d.title.trim() ? [] : (['title'] as const)),
     ...(d.storyCount > 0 ? [] : (['stories'] as const)),
+    ...(d.requireContent && d.storyCount > 0 && d.contentStoryCount === 0 ? (['content'] as const) : []),
     ...d.requiredSlotKeys.map((key) => `slot:${key}` as const),
   ];
 }
