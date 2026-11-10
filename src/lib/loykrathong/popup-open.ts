@@ -1,25 +1,27 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * Whether the Loy Krathong popup is on screen right now. Other prompts read it so that
- * only one modal shows at a time: they wait until this one is closed.
+ * Whether the Loy Krathong popup has taken this page load's "one modal" turn.
+ * Other prompts (push-notification modal) read it and stay away for the rest of the page
+ * load, so a user never has to close two dialogs in a row; they get their turn on the
+ * next visit. It latches: closing the popup does not release the turn.
  */
-let open = false;
+let taken = false;
 const listeners = new Set<() => void>();
 
-export function setLoyPopupOpen(next: boolean): void {
-  if (open === next) return;
-  open = next;
+export function takeLoyPopupTurn(): void {
+  if (taken) return;
+  taken = true;
   listeners.forEach((l) => l());
 }
 
-export function useLoyPopupOpen(): boolean {
+export function useLoyPopupTookTurn(): boolean {
   return useSyncExternalStore(
     (l) => {
       listeners.add(l);
       return () => listeners.delete(l);
     },
-    () => open,
+    () => taken,
     () => false,
   );
 }

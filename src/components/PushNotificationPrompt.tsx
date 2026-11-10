@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLoyPopupOpen } from '@/lib/loykrathong/popup-open';
+import { useLoyPopupTookTurn } from '@/lib/loykrathong/popup-open';
 import { useTranslations } from 'next-intl';
 import { Bell, X, Sparkles } from 'lucide-react';
 import { NOTIFICATION_CREDITS } from '@/lib/constants';
@@ -20,7 +20,7 @@ const SNOOZE_MS = 24 * 60 * 60 * 1000; // re-ask tomorrow
 export default function PushNotificationPrompt() {
   const t = useTranslations('dashboard.pushPrompt');
   const [isVisible, setIsVisible] = useState(false);
-  const loyPopupOpen = useLoyPopupOpen();
+  const loyPopupTookTurn = useLoyPopupTookTurn();
   const [busy, setBusy] = useState(false);
   const { refresh } = useCreditBalance();
   const { showToast } = useToast();
@@ -80,8 +80,8 @@ export default function PushNotificationPrompt() {
     }
   };
 
-  // One modal at a time: wait while the seasonal Loy Krathong popup is on screen.
-  if (!isVisible || loyPopupOpen) return null;
+  // One modal per page load: if the seasonal Loy Krathong popup showed, wait for the next visit.
+  if (!isVisible || loyPopupTookTurn) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

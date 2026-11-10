@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
 import { trackEvent } from '@/lib/analytics';
 import { eventPhase } from '@/lib/loykrathong/config';
 import { localDay, loyPopupKey, shouldShowLoyPopup } from '@/lib/loykrathong/popup';
-import { setLoyPopupOpen } from '@/lib/loykrathong/popup-open';
+import { takeLoyPopupTurn } from '@/lib/loykrathong/popup-open';
 
 function readLastShown(userId: string): string | null {
   try {
@@ -32,15 +32,10 @@ export default function LoyLoginPopup({ userId }: { userId: string }) {
     }),
   );
 
-  // Tell other prompts (push-notification modal) to wait until this one is closed.
-  useEffect(() => {
-    setLoyPopupOpen(open);
-    return () => setLoyPopupOpen(false);
-  }, [open]);
-
   // Showing it counts for today, whether or not the user reacts.
   useEffect(() => {
     if (!open) return;
+    takeLoyPopupTurn(); // other prompts wait for the next visit
     trackEvent('loy_popup_view');
     try {
       localStorage.setItem(loyPopupKey(userId), localDay(new Date()));
