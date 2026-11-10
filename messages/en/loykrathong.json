@@ -106,5 +106,12 @@
     "temple": "Temple",
     "bangkok": "Chao Phraya, Bangkok",
     "chiangmai": "Chiang Mai"
+  },
+  "cta": {
+    "heading": "🪷 Send a krathong and a wish to someone special",
+    "body": "Make a Loy Krathong link for your partner with your wish, a photo of you two and a favourite song, then send it for them to open.",
+    "button": "Make a Loy Krathong link",
+    "price": "Free to create and preview. 99 THB to activate and share the link.",
+    "landing": "🪷 Make a Loy Krathong link for your partner"
   }
 }

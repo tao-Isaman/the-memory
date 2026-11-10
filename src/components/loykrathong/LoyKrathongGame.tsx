@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import LoyTemplateCta from './LoyTemplateCta';
 import { useAuth } from '@/hooks/useAuth';
 import Joystick from './Joystick';
 import Mascot from '@/components/Mascot';
@@ -959,6 +960,7 @@ export default function LoyKrathongGame() {
                 {modal === 'intro' ? t('intro.start') : t('intro.save')}
               </button>
             </div>
+            {modal === 'intro' && <LoyTemplateCta placement="landing" />}
           </div>
         </div>
       )}
@@ -1049,7 +1051,8 @@ export default function LoyKrathongGame() {
             <div className="text-5xl mb-2">🪷</div>
             <h2 className="text-xl font-bold text-[#4A1942] mb-1">{t('done.heading')}</h2>
             <p className="text-sm text-[#6B5E57] mb-5">{t('done.body')}</p>
-            <button type="button" onClick={share} className="btn-primary w-full py-3 mb-2">
+            <LoyTemplateCta placement="done" />
+            <button type="button" onClick={share} className="btn-secondary w-full py-3 mb-2">
               {t('done.share')}
             </button>
             <button type="button" onClick={() => setModal(null)} className="btn-secondary w-full py-3">
