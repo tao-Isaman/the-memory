@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import { MemoryStory, MemoryTheme, StoryType } from '@/types/memory';
 import type { ThemeColors } from '@/lib/themes';
@@ -56,7 +57,12 @@ export interface CreateTabsLayoutProps {
 
 export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
   const t = useTranslations('create');
-  const [tab, setTab] = useState<CreateTab>('settings');
+  const [tab, setTabState] = useState<CreateTab>('settings');
+  // Each tab starts at its top; otherwise the scroll position of the previous tab carries over.
+  const setTab = (next: CreateTab) => {
+    setTabState(next);
+    window.scrollTo(0, 0);
+  };
   const [previewIndex, setPreviewIndex] = useState(0);
   const { themeColors } = p;
 
@@ -324,10 +330,12 @@ export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
         </div>
       </div>
 
-      {/* Story editor: one story at a time, full screen */}
-      {p.editorOpen && (
+      {/* Story editor: one story at a time, full screen. Rendered on <body>: the page's
+          <main> is its own stacking layer below the sticky app bar, so a sheet inside it
+          would sit under the app bar and its close button could not be tapped. */}
+      {p.editorOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 overflow-y-auto"
+          className="fixed inset-0 z-[70] overflow-y-auto"
           style={{ backgroundColor: themeColors.background, ...p.cssVariables }}
           role="dialog"
           aria-modal="true"
@@ -357,7 +365,8 @@ export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
               themeColors={themeColors}
             />
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
