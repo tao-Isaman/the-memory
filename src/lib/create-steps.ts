@@ -37,10 +37,11 @@ export function nextTab(tab: CreateTab): CreateTab | null {
 
 /**
  * Which layout to render. `?layout=tabs` / `?layout=classic` always win; otherwise the
- * default. Unknown values fall back to the default, so a bad link never breaks the page.
+ * default (tabs since a full signed-in run passed on 2026-11-10; classic stays reachable
+ * with `?layout=classic` as a fallback). Unknown values fall back to the default, so a bad link never breaks the page.
  */
 export type CreateLayout = 'classic' | 'tabs';
-export const DEFAULT_CREATE_LAYOUT: CreateLayout = 'classic';
+export const DEFAULT_CREATE_LAYOUT: CreateLayout = 'tabs';
 
 export function resolveLayout(param: string | null | undefined): CreateLayout {
   return param === 'tabs' || param === 'classic' ? param : DEFAULT_CREATE_LAYOUT;

@@ -70,9 +70,15 @@ export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
   const firstMissing = p.missing[0];
   const previewStory = p.stories[Math.min(previewIndex, p.stories.length - 1)];
 
+  // Jump to where a missing item is fixed; for the title, put the cursor in the field.
+  const goFix = (item: MissingItem) => {
+    setTab(tabForMissing(item));
+    if (item === 'title') requestAnimationFrame(() => document.getElementById('memory-title')?.focus());
+  };
+
   const save = () => {
     // Take the user to whatever is missing; the page's own save check shows the message.
-    if (firstMissing) setTab(tabForMissing(firstMissing));
+    if (firstMissing) goFix(firstMissing);
     p.onSave();
   };
 
@@ -232,7 +238,7 @@ export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
                   <li key={item}>
                     <button
                       type="button"
-                      onClick={() => setTab(tabForMissing(item))}
+                      onClick={() => goFix(item)}
                       className="flex w-full items-center justify-between gap-2 rounded-xl bg-amber-50 px-3 py-2 text-left text-sm text-[#92400E]"
                     >
                       <span>{p.missingLabel(item)}</span>
@@ -293,7 +299,7 @@ export default function CreateTabsLayout(p: CreateTabsLayoutProps) {
         <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-3">
           <button
             type="button"
-            onClick={() => firstMissing && setTab(tabForMissing(firstMissing))}
+            onClick={() => firstMissing && goFix(firstMissing)}
             disabled={!firstMissing}
             className="min-w-0 flex-1 text-left text-xs leading-snug"
             style={{ color: firstMissing ? '#B45309' : '#047857' }}

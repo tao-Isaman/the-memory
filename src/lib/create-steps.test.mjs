@@ -30,5 +30,7 @@ assert.equal(resolveLayout('tabs'), 'tabs');
 assert.equal(resolveLayout('classic'), 'classic');
 assert.equal(resolveLayout(null), DEFAULT_CREATE_LAYOUT);
 assert.equal(resolveLayout('weird'), DEFAULT_CREATE_LAYOUT);
+// Tabs is the default; the classic page stays one flag away.
+assert.equal(DEFAULT_CREATE_LAYOUT, 'tabs');
 
 console.log('create-steps.test: all assertions passed');
