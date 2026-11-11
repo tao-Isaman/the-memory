@@ -145,7 +145,6 @@ export async function GET(request: NextRequest) {
   const userId = auth.user.id;
 
   try {
-    const { searchParams } = new URL(request.url);
 
 
     const supabase = getSupabaseServiceClient();

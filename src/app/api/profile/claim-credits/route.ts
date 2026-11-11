@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
   const userId = auth.user.id;
 
   try {
-    const body = await request.json();
     
 
     const supabase = getSupabaseServiceClient();
