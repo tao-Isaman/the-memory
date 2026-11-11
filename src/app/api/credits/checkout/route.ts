@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { getPackageById } from '@/lib/credits';
 import { isEligibleForReferralDiscount } from '@/lib/referral';
 import {
@@ -21,11 +21,15 @@ const PACKAGE_DESCRIPTION: Record<Locale, (credits: number) => string> = {
 };
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
-    const { packageId, userId, locale: rawLocale } = await request.json();
+    const { packageId, locale: rawLocale } = await request.json();
     const locale = normalizeLocale(rawLocale);
 
-    if (!packageId || !userId) {
+    if (!packageId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }

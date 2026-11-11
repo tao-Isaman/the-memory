@@ -1,23 +1,19 @@
 // Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { getUserReferral } from '@/lib/referral';
 import { ClaimRequest } from '@/types/referral';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const body = await request.json();
-    const { userId, paymentMethod, paymentInfo, bankName, accountName } = body as {
-      userId: string;
-    } & ClaimRequest;
+    const { paymentMethod, paymentInfo, bankName, accountName } = body as ClaimRequest;
 
     // Validate required fields
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'Missing userId' },
-        { status: 400 }
-      );
-    }
 
     if (!paymentMethod || !paymentInfo) {
       return NextResponse.json(
@@ -144,16 +140,13 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to fetch user's claim history
 export async function GET(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      );
-    }
 
     const supabase = getSupabaseServiceClient();
 

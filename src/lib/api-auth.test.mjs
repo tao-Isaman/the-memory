@@ -48,4 +48,36 @@ for (const file of admin) {
   }
 }
 
-console.log(`api-auth.test: ${admin.length} admin routes guarded`);
+// 2. Per-user routes: requireUser is the first thing each handler awaits, and the
+//    user id comes from the token (auth.user.id), never from the request.
+const USER_ROUTES = [
+  'cartoon/delete', 'cartoon/generate', 'cartoon/history',
+  'checkout', 'credits/checkout', 'credits/balance', 'credits/transactions',
+  'profile', 'profile/claim-credits',
+  'referral/status', 'referral/check-discount', 'referral/referred-users',
+  'referral/link-code', 'referral/claim-discount', 'referral/setup',
+];
+for (const r of USER_ROUTES) {
+  const file = join(API, r, 'route.ts');
+  const src = readFileSync(file, 'utf8');
+  for (const h of handlers(src)) {
+    assert.equal(firstAwait(h.body), 'requireUser', `${r} ${h.method} must start with requireUser(request)`);
+  }
+  assert.match(src, /const userId = auth\.user\.id;/, `${r} must take userId from the token`);
+}
+
+// 3. No route anywhere reads a user id from the query string, form or JSON body.
+const CLIENT_USER_ID = [
+  /searchParams\.get\(\s*['"]userId['"]\s*\)/,
+  /formData\.get\(\s*['"]userId['"]\s*\)/,
+  /const\s*\{[^}=']*\buserId\b[^}=']*\}\s*=\s*(await\s+request\.json\(\)|body)/,
+  /body\??\.userId/,
+];
+for (const file of all) {
+  const src = readFileSync(file, 'utf8');
+  for (const re of CLIENT_USER_ID) {
+    assert.doesNotMatch(src, re, `${relative(API, file)} reads userId from the request; use requireUser`);
+  }
+}
+
+console.log(`api-auth.test: ${admin.length} admin + ${USER_ROUTES.length} user routes guarded, ${all.length} routes free of client user ids`);

@@ -1,14 +1,18 @@
 // Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/credits.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
-  try {
-    const { generationId, userId } = await request.json();
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
 
-    if (!generationId || !userId) {
+  try {
+    const { generationId } = await request.json();
+
+    if (!generationId) {
       return NextResponse.json(
-        { error: 'Missing generationId or userId' },
+        { error: 'Missing generationId' },
         { status: 400 }
       );
     }

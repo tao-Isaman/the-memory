@@ -1,6 +1,6 @@
 // Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/profile.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { ensureUserCreditsRow } from '@/lib/credits';
 import { PROFILE_COMPLETION_CREDITS } from '@/lib/constants';
 import { Database } from '@/types/database';
@@ -41,16 +41,13 @@ function isProfileComplete(profile: UserProfile): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const body = await request.json();
-    const { userId } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      );
-    }
+    
 
     const supabase = getSupabaseServiceClient();
 

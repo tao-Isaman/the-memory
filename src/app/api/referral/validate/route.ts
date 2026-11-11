@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, getBearerUser } from '@/lib/supabase-server';
 import { getReferralByCode } from '@/lib/referral';
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, userId } = await request.json();
+    const { code } = await request.json();
+    const userId = (await getBearerUser(request))?.id;
 
     if (!code) {
       return NextResponse.json(

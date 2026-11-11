@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { UserProfile } from '@/types/profile';
 import { Database } from '@/types/database';
 
@@ -38,16 +38,13 @@ function isProfileComplete(profile: UserProfile): boolean {
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      );
-    }
 
     const supabase = getSupabaseServiceClient();
     const { data: profile, error } = await supabase
@@ -81,10 +78,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const body = await request.json();
     const {
-      userId,
       phone,
       birthday,
       gender,
@@ -93,12 +93,6 @@ export async function POST(request: NextRequest) {
       occasionType,
     } = body;
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Missing userId' },
-        { status: 400 }
-      );
-    }
 
     const supabase = getSupabaseServiceClient();
 

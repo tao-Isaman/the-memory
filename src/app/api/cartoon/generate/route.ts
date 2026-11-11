@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { generateCartoonImage } from '@/lib/openai';
 import {
   deductCreditsForCartoon,
@@ -14,14 +14,17 @@ import { CARTOON_CREDIT_COST } from '@/lib/constants';
 export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
     const formData = await request.formData();
-    const userId = formData.get('userId') as string;
     const imageFile = formData.get('image') as File;
 
-    if (!userId || !imageFile) {
+    if (!imageFile) {
       return NextResponse.json(
-        { error: 'Missing userId or image' },
+        { error: 'Missing image' },
         { status: 400 }
       );
     }

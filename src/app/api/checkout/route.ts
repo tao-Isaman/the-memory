@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import { isEligibleForReferralDiscount } from '@/lib/referral';
 import {
   normalizeLocale,
@@ -12,11 +12,15 @@ import {
 import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
+
   try {
-    const { memoryId, memoryTitle, userId, locale: rawLocale } = await request.json();
+    const { memoryId, memoryTitle, locale: rawLocale } = await request.json();
     const locale = normalizeLocale(rawLocale);
 
-    if (!memoryId || !userId) {
+    if (!memoryId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }

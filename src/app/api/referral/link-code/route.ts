@@ -1,6 +1,6 @@
 // Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
 import {
   getUserReferral,
   getReferralByCode,
@@ -8,12 +8,16 @@ import {
 } from '@/lib/referral';
 
 export async function POST(request: NextRequest) {
-  try {
-    const { userId, referralCode } = await request.json();
+  const auth = await requireUser(request);
+  if (auth.response) return auth.response;
+  const userId = auth.user.id;
 
-    if (!userId || !referralCode) {
+  try {
+    const { referralCode } = await request.json();
+
+    if (!referralCode) {
       return NextResponse.json(
-        { error: 'Missing userId or referralCode', success: false },
+        { error: 'Missing referralCode', success: false },
         { status: 400 }
       );
     }
