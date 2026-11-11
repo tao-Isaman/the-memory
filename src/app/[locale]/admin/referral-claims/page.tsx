@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 import { useToast } from '@/hooks/useToast';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface ReferralClaim {
   id: string;
@@ -65,7 +66,7 @@ export default function AdminReferralClaimsPage() {
   // Fetch stats
   useEffect(() => {
     setStatsLoading(true);
-    fetch('/api/admin/referral-stats')
+    authFetch('/api/admin/referral-stats')
       .then((res) => res.json())
       .then((data) => {
         setStats(data);
@@ -80,7 +81,7 @@ export default function AdminReferralClaimsPage() {
   // Fetch claims
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/admin/referral-claims?status=${statusFilter}`)
+    authFetch(`/api/admin/referral-claims?status=${statusFilter}`)
       .then((res) => res.json())
       .then((data) => {
         setAllClaims(Array.isArray(data) ? data : []);
@@ -134,7 +135,7 @@ export default function AdminReferralClaimsPage() {
     setProcessingId(claimId);
 
     try {
-      const response = await fetch(`/api/admin/referral-claims/${claimId}`, {
+      const response = await authFetch(`/api/admin/referral-claims/${claimId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, admin_note: adminNote }),
@@ -159,7 +160,7 @@ export default function AdminReferralClaimsPage() {
       });
 
       // Refresh stats
-      fetch('/api/admin/referral-stats')
+      authFetch('/api/admin/referral-stats')
         .then((res) => res.json())
         .then((data) => setStats(data))
         .catch(console.error);

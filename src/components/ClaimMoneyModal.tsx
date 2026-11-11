@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, Wallet, Loader2, Smartphone, Building, CheckCircle } from 'lucide-react';
 import { PaymentMethod } from '@/types/referral';
+import { authFetch } from '@/lib/auth-fetch';
 
 // Fixed payout, in THB for every locale (deliberate product decision).
 const CLAIM_AMOUNT_THB = 50;
@@ -96,7 +97,7 @@ export default function ClaimMoneyModal({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/referral/claim-discount', {
+      const response = await authFetch('/api/referral/claim-discount', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

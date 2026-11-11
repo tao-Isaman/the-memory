@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface CreditBalanceContextType {
   balance: number;
@@ -24,7 +25,7 @@ export function CreditBalanceProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch(`/api/credits/balance?userId=${user.id}`);
+      const response = await authFetch(`/api/credits/balance?userId=${user.id}`);
       const data = await response.json();
       setBalance(data.balance ?? 0);
     } catch (error) {

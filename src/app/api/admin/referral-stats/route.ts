@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 interface TopReferrer {
   userId: string;
@@ -21,7 +21,10 @@ interface ReferralStats {
  * GET /api/admin/referral-stats
  * Fetch referral system analytics
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const supabase = getSupabaseServiceClient();
 

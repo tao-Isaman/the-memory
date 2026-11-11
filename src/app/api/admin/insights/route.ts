@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 /**
  * Admin insights: what drives payment, the signup->create->pay funnel, recipient
@@ -7,6 +7,9 @@ import { getSupabaseServiceClient } from '@/lib/supabase-server';
  * never fetch-all-and-reduce-in-JS, which PostgREST silently caps at ~1000 rows.
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
     const days = Math.min(Math.max(parseInt(searchParams.get('days') || '90', 10) || 90, 1), 365);

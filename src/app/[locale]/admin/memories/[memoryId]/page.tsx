@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, Clock, XCircle, Lock, Image as ImageIcon, FileText, Music, Layers, Sparkles, HelpCircle, Mic, Images } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface Story {
   id: string;
@@ -42,7 +43,7 @@ export default function MemoryDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/admin/memories/${memoryId}`)
+    authFetch(`/api/admin/memories/${memoryId}`)
       .then((res) => res.json())
       .then((data) => {
         setMemory(data.memory);

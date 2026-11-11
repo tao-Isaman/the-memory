@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 /**
  * Time-in-app stats for the admin dashboard.
@@ -10,6 +10,9 @@ import { getSupabaseServiceClient } from '@/lib/supabase-server';
  * up reporting wrong numbers.
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
     const days = Math.min(Math.max(parseInt(searchParams.get('days') || '30', 10) || 30, 1), 365);

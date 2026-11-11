@@ -9,6 +9,7 @@ import HeartLoader from './HeartLoader';
 import { Upload, X, Download, ImageIcon, Coins, RefreshCw, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { CARTOON_CREDIT_COST } from '@/lib/constants';
 import { CartoonGeneration } from '@/types/cartoon';
+import { authFetch } from '@/lib/auth-fetch';
 
 const PAGE_SIZE = 9;
 
@@ -60,7 +61,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
     setLoadingGallery(true);
     try {
       const offset = page * PAGE_SIZE;
-      const response = await fetch(
+      const response = await authFetch(
         `/api/cartoon/history?userId=${userId}&limit=${PAGE_SIZE}&offset=${offset}`
       );
       const data = await response.json();
@@ -125,7 +126,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
       formData.append('userId', userId);
       formData.append('image', selectedFile);
 
-      const response = await fetch('/api/cartoon/generate', {
+      const response = await authFetch('/api/cartoon/generate', {
         method: 'POST',
         body: formData,
       });
@@ -151,7 +152,7 @@ export default function CartoonCreator({ userId }: CartoonCreatorProps) {
   const handleDelete = async (gen: CartoonGeneration) => {
     setDeleting(true);
     try {
-      const response = await fetch('/api/cartoon/delete', {
+      const response = await authFetch('/api/cartoon/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ generationId: gen.id, userId }),

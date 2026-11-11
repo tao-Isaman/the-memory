@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 /**
  * PATCH /api/admin/referral-claims/[claimId]
@@ -10,6 +10,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ claimId: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const { claimId } = await params;
     const body = await request.json();

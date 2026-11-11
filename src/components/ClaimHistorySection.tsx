@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useFormatter } from 'next-intl';
 import { Clock, CheckCircle, XCircle, History, Loader2, Wallet } from 'lucide-react';
 import { ClaimStatus } from '@/types/referral';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface ClaimRecord {
   id: string;
@@ -35,7 +36,7 @@ export default function ClaimHistorySection({
     const fetchClaims = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/referral/claim-discount?userId=${userId}`);
+        const response = await authFetch(`/api/referral/claim-discount?userId=${userId}`);
         const data = await response.json();
         setClaims(data.claims || []);
       } catch (error) {

@@ -6,6 +6,7 @@ import { Copy, Check, Users, Gift, CheckCircle, Clock, Wallet } from 'lucide-rea
 import { ReferralStats } from '@/types/referral';
 import ClaimMoneyModal from './ClaimMoneyModal';
 import ClaimHistorySection from './ClaimHistorySection';
+import { authFetch } from '@/lib/auth-fetch';
 
 // Fixed reward/discount, in THB for every locale (deliberate product decision).
 const REFERRAL_AMOUNT_THB = 50;
@@ -56,7 +57,7 @@ export default function ReferralCodeDisplay({
   useEffect(() => {
     const fetchReferredUsers = async () => {
       try {
-        const response = await fetch(`/api/referral/referred-users?userId=${userId}`);
+        const response = await authFetch(`/api/referral/referred-users?userId=${userId}`);
         const data = await response.json();
         if (data.users) {
           setReferredUsers(data.users);

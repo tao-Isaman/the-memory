@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const MEMORY_PRICE_THB = 99; // Price per memory activation
@@ -36,7 +36,10 @@ interface RecentActivity {
   createdAt: string;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const supabase = getSupabaseServiceClient();
 

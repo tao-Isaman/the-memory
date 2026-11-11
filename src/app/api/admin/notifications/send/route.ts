@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient, getBearerUser, isAdminEmail } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 import { sendPushToSubscriptions, isPushConfigured } from '@/lib/push-server';
 
 export const runtime = 'nodejs';
@@ -11,10 +11,9 @@ export const maxDuration = 60;
  * every user, so it must not rely on the client-side AdminLayout guard alone.
  */
 export async function POST(request: NextRequest) {
-  const user = await getBearerUser(request);
-  if (!user || !isAdminEmail(user.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+  const user = auth.user;
 
   const body = await request.json().catch(() => null);
   const title = typeof body?.title === 'string' ? body.title.trim().slice(0, 100) : '';

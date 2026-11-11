@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient, getBearerUser, isAdminEmail } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 export const runtime = 'nodejs';
 
@@ -12,10 +12,9 @@ interface SubscriberRow {
 
 /** Admin-only: who has enabled push notifications (grouped by user). */
 export async function GET(request: NextRequest) {
-  const admin = await getBearerUser(request);
-  if (!admin || !isAdminEmail(admin.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+  const admin = auth.user;
 
   const supabase = getSupabaseServiceClient();
   const { data: subs, error } = await supabase

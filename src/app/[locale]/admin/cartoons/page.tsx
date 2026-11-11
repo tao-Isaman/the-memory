@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { CheckCircle, XCircle, Clock, Image as ImageIcon, Sparkles, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface CartoonGeneration {
   id: string;
@@ -41,7 +42,7 @@ export default function AdminCartoonsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetch('/api/admin/cartoons')
+    authFetch('/api/admin/cartoons')
       .then((res) => res.json())
       .then((data) => {
         setData(data);

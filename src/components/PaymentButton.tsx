@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { CreditCard, Tag } from 'lucide-react';
 import HeartIcon from './HeartIcon';
 import { trackEvent } from '@/lib/analytics';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface PaymentButtonProps {
   memoryId: string;
@@ -38,7 +39,7 @@ export default function PaymentButton({
   useEffect(() => {
     const checkDiscount = async () => {
       try {
-        const response = await fetch(`/api/referral/check-discount?userId=${userId}`);
+        const response = await authFetch(`/api/referral/check-discount?userId=${userId}`);
         const data = await response.json();
 
         setDiscountInfo({
@@ -62,7 +63,7 @@ export default function PaymentButton({
     trackEvent('start_checkout', { memory_id: memoryId });
 
     try {
-      const response = await fetch('/api/checkout', {
+      const response = await authFetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

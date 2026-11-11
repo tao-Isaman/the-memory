@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Users, CreditCard, Eye } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface RateRow {
   label: string;
@@ -110,7 +111,7 @@ export default function AdminInsightsPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/admin/insights?days=${days}`)
+    authFetch(`/api/admin/insights?days=${days}`)
       .then((r) => r.json())
       .then((d) => {
         setData(d);

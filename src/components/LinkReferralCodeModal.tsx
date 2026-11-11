@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import HeartIcon from './HeartIcon';
 import { X, Users, Loader2 } from 'lucide-react';
+import { authFetch } from '@/lib/auth-fetch';
 
 // Fixed discount, in THB for every locale (deliberate product decision).
 const REFERRAL_AMOUNT_THB = 50;
@@ -53,7 +54,7 @@ export default function LinkReferralCodeModal({
     setErrorCode(null);
 
     try {
-      const response = await fetch('/api/referral/link-code', {
+      const response = await authFetch('/api/referral/link-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, referralCode: code }),

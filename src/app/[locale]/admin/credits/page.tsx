@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Coins, TrendingUp, TrendingDown, RotateCcw, DollarSign, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface PackageWithSales {
   id: string;
@@ -119,7 +120,7 @@ export default function AdminCreditsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    fetch('/api/admin/credits')
+    authFetch('/api/admin/credits')
       .then((res) => res.json())
       .then((responseData) => {
         setData(responseData);

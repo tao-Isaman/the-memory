@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface Totals {
   sessions: number;
@@ -68,7 +69,7 @@ export default function AdminEngagementPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/admin/engagement?days=${days}`)
+    authFetch(`/api/admin/engagement?days=${days}`)
       .then((r) => r.json())
       .then((d) => {
         setData(d);

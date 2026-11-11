@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/useToast';
 import HeartLoader from '@/components/HeartLoader';
 import { ArrowLeft, Mail, Calendar, User, Phone, Cake, Briefcase, Heart, Gift } from 'lucide-react';
 import { JOB_OPTIONS, PROFILE_COMPLETION_CREDITS } from '@/lib/constants';
+import { authFetch } from '@/lib/auth-fetch';
 
 // The DB stores the Thai job string (JOB_OPTIONS is the canonical value list); only the
 // LABEL is translated, index-for-index, via profile.jobs. "Other" is the last entry — it
@@ -61,7 +62,7 @@ export default function ProfilePage() {
 
     try {
       setProfileLoading(true);
-      const response = await fetch(`/api/profile?userId=${user.id}`);
+      const response = await authFetch(`/api/profile?userId=${user.id}`);
       const data = await response.json();
 
       if (data.profile) {
@@ -105,7 +106,7 @@ export default function ProfilePage() {
 
     try {
       setSaving(true);
-      const response = await fetch('/api/profile', {
+      const response = await authFetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -141,7 +142,7 @@ export default function ProfilePage() {
 
     try {
       setClaiming(true);
-      const response = await fetch('/api/profile/claim-credits', {
+      const response = await authFetch('/api/profile/claim-credits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),

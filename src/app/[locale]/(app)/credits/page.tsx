@@ -10,6 +10,7 @@ import { ArrowLeft, Coins, Star, ShoppingCart, Clock, Plus, Minus } from 'lucide
 import { CreditPackage } from '@/types/credits';
 import { CreditTransaction } from '@/types/credits';
 import { Link, useRouter } from '@/i18n/navigation';
+import { authFetch } from '@/lib/auth-fetch';
 
 export default function CreditsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -60,7 +61,7 @@ export default function CreditsPage() {
     if (!user) return;
     setLoadingHistory(true);
     try {
-      const response = await fetch(`/api/credits/transactions?userId=${user.id}&limit=20`);
+      const response = await authFetch(`/api/credits/transactions?userId=${user.id}&limit=20`);
       const data = await response.json();
       setTransactions(data.transactions || []);
     } catch (error) {
@@ -82,7 +83,7 @@ export default function CreditsPage() {
     setPurchaseLoading(packageId);
 
     try {
-      const response = await fetch('/api/credits/checkout', {
+      const response = await authFetch('/api/credits/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // locale drives PromptPay availability (Thailand-only) + Stripe's checkout UI language.

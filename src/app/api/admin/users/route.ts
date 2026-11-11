@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const PAGE_SIZE = 1000;
@@ -32,7 +32,10 @@ async function fetchAllRows(
   return allData;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const supabase = getSupabaseServiceClient();
 

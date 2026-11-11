@@ -11,6 +11,7 @@ import ReferralCodeDisplay from '@/components/ReferralCodeDisplay';
 import LinkReferralCodeModal from '@/components/LinkReferralCodeModal';
 import { ArrowLeft, Users, UserPlus } from 'lucide-react';
 import { ReferralStats } from '@/types/referral';
+import { authFetch } from '@/lib/auth-fetch';
 
 // Fixed reward/discount, in THB for every locale (deliberate product decision).
 const REFERRAL_AMOUNT_THB = 50;
@@ -36,7 +37,7 @@ export default function ReferralPage() {
     if (!user) return;
     setReferralLoading(true);
     try {
-      const response = await fetch(`/api/referral/status?userId=${user.id}`);
+      const response = await authFetch(`/api/referral/status?userId=${user.id}`);
       const data = await response.json();
       setReferralStatus(data);
 
@@ -54,7 +55,7 @@ export default function ReferralPage() {
   const handleReferralSetup = async (code: string | null) => {
     if (!user) return;
 
-    const response = await fetch('/api/referral/setup', {
+    const response = await authFetch('/api/referral/setup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

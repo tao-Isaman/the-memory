@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseServiceClient } from '@/lib/supabase-server';
+import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
 
 /**
  * GET /api/admin/referral-claims
@@ -7,6 +7,9 @@ import { getSupabaseServiceClient } from '@/lib/supabase-server';
  * Query params: ?status=pending|completed|rejected|all (default: all)
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request);
+  if (auth.response) return auth.response;
+
   try {
     const supabase = getSupabaseServiceClient();
     const searchParams = request.nextUrl.searchParams;

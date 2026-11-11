@@ -30,6 +30,7 @@ import HeartLoader from '@/components/HeartLoader';
 import UserGrowthChart from '@/components/admin/UserGrowthChart';
 import RevenueChart from '@/components/admin/RevenueChart';
 import DemographyCharts from '@/components/admin/DemographyCharts';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface CreditStats {
   totalSold: number;
@@ -89,7 +90,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/admin/stats');
+        const response = await authFetch('/api/admin/stats');
         const data = await response.json();
         setStats(data);
         setChartData(data.registrationData || []);

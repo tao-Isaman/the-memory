@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Gift, X, Sparkles } from 'lucide-react';
 import { PROFILE_COMPLETION_CREDITS } from '@/lib/constants';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface ProfileCompletionBannerProps {
   userId: string;
@@ -25,7 +26,7 @@ export default function ProfileCompletionBanner({ userId }: ProfileCompletionBan
       }
 
       try {
-        const response = await fetch(`/api/profile?userId=${userId}`);
+        const response = await authFetch(`/api/profile?userId=${userId}`);
         const data = await response.json();
 
         if (data.isComplete && data.creditsClaimed) {

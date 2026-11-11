@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, Layers, CheckCircle, Clock, XCircle, Search, Filter } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface Memory {
   id: string;
@@ -38,7 +39,7 @@ export default function UserMemoriesPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'active' | 'failed'>('all');
 
   useEffect(() => {
-    fetch(`/api/admin/users/${userId}/memories`)
+    authFetch(`/api/admin/users/${userId}/memories`)
       .then((res) => res.json())
       .then((data) => {
         setUser(data.user);

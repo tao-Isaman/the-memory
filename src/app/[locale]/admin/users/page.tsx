@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Eye, BookHeart, CreditCard, Coins, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 import SortModal, { SortConfig, SortField, SortOrder, FilterConfig } from '@/components/admin/SortModal';
+import { authFetch } from '@/lib/auth-fetch';
 
 interface User {
   id: string;
@@ -41,7 +42,7 @@ export default function AdminUsersPage() {
   ]);
 
   useEffect(() => {
-    fetch('/api/admin/users')
+    authFetch('/api/admin/users')
       .then((res) => res.json())
       .then((data) => {
         setAllUsers(Array.isArray(data) ? data : []);
