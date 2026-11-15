@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "drive": "node --no-warnings scripts/drive.mjs",
     "icons": "node --no-warnings --experimental-strip-types scripts/generate-mascot-icons.ts",
-    "test": "node --no-warnings --experimental-strip-types src/lib/memory-templates.test.mjs && node --no-warnings --experimental-strip-types src/lib/loykrathong/popup.test.mjs && node --no-warnings --experimental-strip-types src/lib/create-steps.test.mjs && node --no-warnings src/lib/api-auth.test.mjs"
+    "test": "node --no-warnings --experimental-strip-types --test src/guardrails/guardrails.test.mjs && node --no-warnings --experimental-strip-types src/lib/memory-templates.test.mjs && node --no-warnings --experimental-strip-types src/lib/loykrathong/popup.test.mjs && node --no-warnings --experimental-strip-types src/lib/create-steps.test.mjs && node --no-warnings src/lib/api-auth.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",
@@ -33,6 +34,7 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "puppeteer-core": "25.17.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
