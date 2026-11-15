@@ -27,7 +27,6 @@ Also in `npm test` already: `src/lib/api-auth.test.mjs` checks every API handler
 | Gap | Why it is allowed | To close it |
 |---|---|---|
 | G1 migrations `001`–`034` and `supabase-setup.sql` have no `.down.sql` | written before the rollback rule | write rollbacks when one of them is next touched |
-| G2 `messages/id/useCase.json` lacks `seoLandings.ask-out.guide.intro` | found by R7 on day one; it needs an Indonesian sentence, which is content, not code | add the translation, remove the entry |
 
 ## Not checked yet (Gap)
 

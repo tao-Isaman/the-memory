@@ -17,8 +17,7 @@ export const ALLOW = {
   rollbackBefore: 35,
   rollbackOther: new Set(["supabase-setup.sql", "supabase-migration-001-add-node-title.sql"]),
   rls: new Set<string>(),
-  // translation missing in Indonesian; the page shows the raw key there
-  i18n: new Set(["id/useCase.json:seoLandings.ask-out.guide.intro"]),
+  i18n: new Set<string>(),
 };
 
 /** R1: every migration from 035 on has a NNN-name.down.sql in supabase/rollback/. */
