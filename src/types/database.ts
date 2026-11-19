@@ -480,6 +480,7 @@ export interface Database {
           admin_note: string | null
           created_at: string
           processed_at: string | null
+          slip_url: string | null
         }
         Insert: {
           id?: string
@@ -494,6 +495,7 @@ export interface Database {
           admin_note?: string | null
           created_at?: string
           processed_at?: string | null
+          slip_url?: string | null
         }
         Update: {
           id?: string
@@ -508,6 +510,7 @@ export interface Database {
           admin_note?: string | null
           created_at?: string
           processed_at?: string | null
+          slip_url?: string | null
         }
         Relationships: [
           {

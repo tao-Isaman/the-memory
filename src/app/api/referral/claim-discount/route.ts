@@ -1,7 +1,8 @@
 // Returns stable error CODES, not prose — the UI is localised (see messages/<locale>/referral.json "errors").
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
-import { getUserReferral } from '@/lib/referral';
+import { getUserReferral, getClaimState } from '@/lib/referral';
+import { CLAIM_UNIT_THB, overClaimed } from '@/lib/referral-claims';
 import { ClaimRequest } from '@/types/referral';
 
 export async function POST(request: NextRequest) {
@@ -41,42 +42,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate pending claims dynamically: paid referred users - claimed conversions
-    // Get referred users who have paid
-    const { data: referredUsers } = await supabase
-      .from('user_referrals')
-      .select('user_id')
-      .eq('referred_by', userId);
-
-    let paidCount = 0;
-    if (referredUsers && referredUsers.length > 0) {
-      const userIds = referredUsers.map(u => u.user_id);
-      const { data: paidMemories } = await supabase
-        .from('memories')
-        .select('user_id')
-        .in('user_id', userIds)
-        .eq('status', 'active');
-
-      if (paidMemories) {
-        const uniquePaidUsers = new Set(paidMemories.map(m => m.user_id));
-        paidCount = uniquePaidUsers.size;
-      }
-    }
-
-    // Count already claimed
-    const { count: claimedCount } = await supabase
-      .from('referral_claims')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
-
-    const pendingClaims = Math.max(0, paidCount - (claimedCount || 0));
-
-    if (pendingClaims <= 0) {
+    // Every right left is claimed in this one request (amount = 50 × N). Rights used = sum(amount) / 50.
+    const before = await getClaimState(supabase, userId);
+    if (before.remaining <= 0) {
       return NextResponse.json(
         { success: false, error: 'NO_PENDING_CLAIMS', remainingClaims: 0 },
         { status: 400 }
       );
     }
+    const units = before.remaining;
 
     // Get user email from auth.users
     const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
@@ -88,15 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userEmail = userData.user.email;
-
     // Create claim record for admin
     const { data: claim, error: claimError } = await supabase
       .from('referral_claims')
       .insert({
         user_id: userId,
-        user_email: userEmail,
-        amount: 50,
+        user_email: userData.user.email,
+        amount: units * CLAIM_UNIT_THB,
         payment_method: paymentMethod,
         payment_info: paymentInfo,
         bank_name: bankName || null,
@@ -114,20 +86,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Remaining claims after this one
-    const remainingClaims = pendingClaims - 1;
+    // Double click / two tabs: both requests may pass the check above. Re-read after inserting; if the rows now
+    // claim more than was earned, this request backs out (never both: the later insert always sees the earlier row).
+    const after = await getClaimState(supabase, userId);
+    if (overClaimed(after.paidCount, after.rows)) {
+      await supabase.from('referral_claims').delete().eq('id', claim.id).eq('status', 'pending');
+      return NextResponse.json(
+        { success: false, error: 'CLAIM_IN_PROGRESS', remainingClaims: 0 },
+        { status: 409 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'ส่งคำขอรับเงิน 50 บาท สำเร็จ กรุณารอแอดมินโอนเงินให้',
       claim: {
         id: claim.id,
         status: claim.status,
         amount: claim.amount,
+        units,
         paymentMethod: claim.payment_method,
         createdAt: claim.created_at,
       },
-      remainingClaims,
+      remainingClaims: after.remaining,
     });
   } catch (error) {
     console.error('Claim discount error:', error);
@@ -174,6 +154,7 @@ export async function GET(request: NextRequest) {
         adminNote: c.admin_note,
         createdAt: c.created_at,
         processedAt: c.processed_at,
+        hasSlip: c.status === 'completed' && !!c.slip_url, // the image itself only through /api/referral/claims/<id>/slip
       })),
     });
   } catch (error) {

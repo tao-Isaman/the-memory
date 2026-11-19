@@ -50,7 +50,10 @@
     "account": "Account no.: {value}",
     "sentAt": "Requested: {date}",
     "processedAt": "Processed: {date}",
-    "noteLabel": "Note:"
+    "noteLabel": "Note:",
+    "viewSlip": "View transfer slip",
+    "slipLoading": "Loading slip...",
+    "slipError": "Couldn't open the slip. Please try again."
   },
   "status": {
     "pending": "Pending",
@@ -65,7 +68,7 @@
     "title": "Request payout",
     "amountLabel": "You'll receive",
     "amount": "฿{amount}",
-    "rightsNote": "(1 of your {pending} available payouts)",
+    "rightsNote": "(all {pending} payouts, {unit} THB each)",
     "methodLabel": "How should we pay you?",
     "phoneLabel": "Phone number (PromptPay)",
     "phonePlaceholder": "0812345678",
@@ -129,6 +132,7 @@
     "INVALID_CODE": "That referral code isn't valid.",
     "OWN_CODE": "You can't use your own code.",
     "NO_PENDING_CLAIMS": "You don't have any payouts waiting.",
-    "CLAIM_FAILED": "We couldn't create your request."
+    "CLAIM_FAILED": "We couldn't create your request.",
+    "CLAIM_IN_PROGRESS": "A request is already being sent. Please refresh and try again."
   }
 }

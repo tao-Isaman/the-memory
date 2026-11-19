@@ -17,6 +17,9 @@ import {
 import HeartLoader from '@/components/HeartLoader';
 import { useToast } from '@/hooks/useToast';
 import { authFetch } from '@/lib/auth-fetch';
+import PayoutGroups, { sendTransfer } from '@/components/admin/PayoutGroups';
+import SlipButton from '@/components/SlipButton';
+import { payoutKey, slipProblem } from '@/lib/referral-claims';
 
 interface ReferralClaim {
   id: string;
@@ -31,6 +34,7 @@ interface ReferralClaim {
   admin_note: string | null;
   created_at: string;
   processed_at: string | null;
+  slip_url: string | null;
 }
 
 interface ReferralStats {
@@ -62,6 +66,35 @@ export default function AdminReferralClaimsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [adminNoteInput, setAdminNoteInput] = useState<{ [key: string]: string }>({});
+  // Every pending request, whatever the table shows: the payout groups are built from these.
+  const [pendingRows, setPendingRows] = useState<ReferralClaim[]>([]);
+  const [reloadKey, setReloadKey] = useState(0);
+  const reload = () => setReloadKey((k) => k + 1);
+
+  useEffect(() => {
+    authFetch('/api/admin/referral-claims?status=pending')
+      .then((res) => res.json())
+      .then((data) => setPendingRows(Array.isArray(data) ? data : []))
+      .catch((err) => console.error('Failed to fetch pending claims:', err));
+  }, [reloadKey]);
+
+  const attachSlip = async (claimId: string, file: File | null) => {
+    if (!file) return;
+    const problem = slipProblem(file);
+    if (problem) return showToast('สลิปต้องเป็น jpg/png/webp ไม่เกิน 5 MB', 'error');
+    // The slip of one transfer belongs to every request paid in it: same person + account, same processed_at.
+    const row = allClaims.find((c) => c.id === claimId);
+    const ids = row
+      ? allClaims.filter((c) => c.status === 'completed' && !c.slip_url && c.processed_at === row.processed_at
+          && payoutKey(c) === payoutKey(row)).map((c) => c.id)
+      : [claimId];
+    setProcessingId(claimId);
+    const err = await sendTransfer(ids, file);
+    setProcessingId(null);
+    if (err) return showToast(err, 'error');
+    showToast('แนบสลิปแล้ว', 'success');
+    reload();
+  };
 
   // Fetch stats
   useEffect(() => {
@@ -76,7 +109,7 @@ export default function AdminReferralClaimsPage() {
         console.error('Failed to fetch referral stats:', err);
         setStatsLoading(false);
       });
-  }, []);
+  }, [reloadKey]);
 
   // Fetch claims
   useEffect(() => {
@@ -91,7 +124,7 @@ export default function AdminReferralClaimsPage() {
         console.error('Failed to fetch referral claims:', err);
         setLoading(false);
       });
-  }, [statusFilter]);
+  }, [statusFilter, reloadKey]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -151,6 +184,7 @@ export default function AdminReferralClaimsPage() {
       setAllClaims((prev) =>
         prev.map((claim) => (claim.id === claimId ? updatedClaim : claim))
       );
+      setPendingRows((prev) => prev.filter((claim) => claim.id !== claimId));
 
       // Clear admin note input
       setAdminNoteInput((prev) => {
@@ -320,6 +354,9 @@ export default function AdminReferralClaimsPage() {
         </div>
       )}
 
+      {/* One payout per person and account: transfer once, mark every request, attach the slip */}
+      <PayoutGroups pendingRows={pendingRows} onDone={reload} notify={showToast} />
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-wrap gap-4 items-center">
@@ -434,14 +471,6 @@ export default function AdminReferralClaimsPage() {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleProcessClaim(claim.id, 'completed')}
-                          disabled={processingId === claim.id}
-                          className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium disabled:opacity-50"
-                        >
-                          <CheckCircle size={14} />
-                          Approve
-                        </button>
-                        <button
                           onClick={() => handleProcessClaim(claim.id, 'rejected')}
                           disabled={processingId === claim.id}
                           className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
@@ -451,6 +480,17 @@ export default function AdminReferralClaimsPage() {
                         </button>
                       </div>
                     </div>
+                  ) : claim.status === 'completed' ? (
+                    claim.slip_url ? (
+                      <SlipButton claimId={claim.id} label="ดูสลิป" loadingLabel="กำลังโหลด..." errorLabel="เปิดไม่ได้" />
+                    ) : (
+                      <label className="inline-flex items-center gap-1 text-xs text-gray-600 cursor-pointer hover:underline">
+                        {processingId === claim.id ? 'กำลังแนบ...' : 'แนบสลิป'}
+                        <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                          disabled={processingId !== null}
+                          onChange={(e) => attachSlip(claim.id, e.target.files?.[0] || null)} />
+                      </label>
+                    )
                   ) : (
                     <span className="text-xs text-gray-400">-</span>
                   )}

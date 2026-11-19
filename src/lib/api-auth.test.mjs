@@ -56,6 +56,7 @@ const USER_ROUTES = [
   'profile', 'profile/claim-credits',
   'referral/status', 'referral/check-discount', 'referral/referred-users',
   'referral/link-code', 'referral/claim-discount', 'referral/setup',
+  'referral/claims/[claimId]/slip',
 ];
 for (const r of USER_ROUTES) {
   const file = join(API, r, 'route.ts');

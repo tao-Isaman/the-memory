@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database';
 import { UserReferral, ReferralConversion } from '@/types/referral';
+import { remainingUnits, claimedUnits } from '@/lib/referral-claims';
 
 // Characters for referral code (no confusing chars: 0, O, 1, I, L)
 const CHARSET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -326,4 +327,25 @@ export async function markReferralDiscountUsed(
   }
 
   return true;
+}
+
+
+// Referred users who paid (an active memory) = rights earned. Shared by claim-discount and status so both count the same.
+export async function countPaidReferrals(supabase: SupabaseClient<Database>, userId: string): Promise<number> {
+  const { data: referredUsers } = await supabase.from('user_referrals').select('user_id').eq('referred_by', userId);
+  if (!referredUsers || referredUsers.length === 0) return 0;
+  const { data: paidMemories } = await supabase
+    .from('memories')
+    .select('user_id')
+    .in('user_id', referredUsers.map((u) => u.user_id))
+    .eq('status', 'active');
+  return new Set((paidMemories || []).map((m) => m.user_id)).size;
+}
+
+/** Rights earned, used (sum of claim amounts / 50, every status) and left for this user. */
+export async function getClaimState(supabase: SupabaseClient<Database>, userId: string) {
+  const paidCount = await countPaidReferrals(supabase, userId);
+  const { data: rows, error } = await supabase.from('referral_claims').select('amount').eq('user_id', userId);
+  if (error) throw error;
+  return { paidCount, rows: rows || [], claimed: claimedUnits(rows || []), remaining: remainingUnits(paidCount, rows || []) };
 }
