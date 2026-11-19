@@ -9,7 +9,7 @@
     "lint": "eslint",
     "drive": "node --no-warnings scripts/drive.mjs",
     "icons": "node --no-warnings --experimental-strip-types scripts/generate-mascot-icons.ts",
-    "test": "node --no-warnings --experimental-strip-types --test src/guardrails/guardrails.test.mjs && node --no-warnings --experimental-strip-types src/lib/memory-templates.test.mjs && node --no-warnings --experimental-strip-types src/lib/loykrathong/popup.test.mjs && node --no-warnings --experimental-strip-types src/lib/create-steps.test.mjs && node --no-warnings src/lib/api-auth.test.mjs && node --no-warnings --experimental-strip-types src/lib/referral-claims.test.mjs && node --no-warnings --experimental-strip-types src/lib/auth-users.test.mjs"
+    "test": "node --no-warnings --experimental-strip-types --test src/guardrails/guardrails.test.mjs && node --no-warnings --experimental-strip-types src/lib/memory-templates.test.mjs && node --no-warnings --experimental-strip-types src/lib/loykrathong/popup.test.mjs && node --no-warnings --experimental-strip-types src/lib/create-steps.test.mjs && node --no-warnings src/lib/api-auth.test.mjs && node --no-warnings --experimental-strip-types src/lib/referral-claims.test.mjs && node --no-warnings --experimental-strip-types src/lib/auth-users.test.mjs && node --no-warnings --experimental-strip-types src/lib/admin-users-query.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.93.3",

@@ -1,108 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
-import { SupabaseClient } from '@supabase/supabase-js';
-
-const PAGE_SIZE = 1000;
+import { parseUsersQuery } from '@/lib/admin-users-query';
 
 /**
- * Paginate through ALL rows of a table to bypass Supabase's
- * server-side max-rows limit (default 1000).
+ * GET /api/admin/users?page=&pageSize=&q=&memories=&paid=&referral=&sort=field:order,...
+ * One page of users with their counts, searched, filtered and sorted in the database (admin_users_overview, 039).
+ * Returns { users, total } — total is the count after filters, for the pager.
  */
-async function fetchAllRows(
-  supabase: SupabaseClient,
-  table: string,
-  select: string,
-): Promise<Record<string, unknown>[]> {
-  const allData: Record<string, unknown>[] = [];
-  let from = 0;
-
-  while (true) {
-    const { data, error } = await supabase
-      .from(table)
-      .select(select)
-      .range(from, from + PAGE_SIZE - 1);
-
-    if (error) throw error;
-    if (!data || data.length === 0) break;
-    allData.push(...(data as unknown as Record<string, unknown>[]));
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
-  }
-
-  return allData;
-}
-
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
   if (auth.response) return auth.response;
 
   try {
     const supabase = getSupabaseServiceClient();
+    const q = parseUsersQuery(request.nextUrl.searchParams);
 
-    // ONE page of auth users, as before 6506560: walking all 23k+ is too slow for a request. Real paging (only the
-    // page on screen) comes with the planned DB function; until then the list stops at this page.
-    const { data: authData, error: authError } = await supabase.auth.admin.listUsers({ perPage: 10000 });
-    if (authError) throw authError;
-    const authUsers = authData?.users || [];
+    let query = supabase.rpc('admin_users_overview', undefined, { count: 'exact' }).select('*');
+    if (q.search) query = query.or(`user_email.ilike.*${q.search}*,referral_code.ilike.*${q.search}*`);
+    if (q.memories === 'with') query = query.gt('memory_count', 0);
+    if (q.memories === 'without') query = query.eq('memory_count', 0);
+    if (q.paid === 'paid') query = query.gt('paid_memory_count', 0);
+    if (q.paid === 'unpaid') query = query.eq('paid_memory_count', 0);
+    if (q.referral === 'with') query = query.eq('has_referral_code', true);
+    if (q.referral === 'without') query = query.eq('has_referral_code', false);
+    for (const s of q.sort) query = query.order(s.column, { ascending: s.ascending });
+    query = query.order('id', { ascending: true }); // stable pages when the sort has ties
 
-    // Fetch all rows from each table in parallel (paginated to bypass 1000-row limit)
-    const [referrals, memories, userCredits, profiles] = await Promise.all([
-      fetchAllRows(supabase, 'user_referrals', 'user_id, referral_code, referred_by'),
-      fetchAllRows(supabase, 'memories', 'user_id, status'),
-      fetchAllRows(supabase, 'user_credits', 'user_id, balance'),
-      fetchAllRows(supabase, 'user_profiles', 'user_id, profile_credits_claimed'),
-    ]);
+    const from = (q.page - 1) * q.pageSize;
+    const { data, count, error } = await query.range(from, from + q.pageSize - 1);
+    if (error) throw error;
 
-    const referralMap = new Map(
-      referrals.map((r) => [r.user_id as string, r])
-    );
+    const users = (data || []).map((u) => ({
+      id: u.id,
+      user_id: u.id,
+      user_email: u.user_email,
+      referral_code: u.referral_code,
+      referred_by: u.referred_by,
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at,
+      memoryCount: Number(u.memory_count),
+      paidMemoryCount: Number(u.paid_memory_count),
+      creditBalance: u.credit_balance,
+      hasReferralCode: u.has_referral_code,
+      isProfileComplete: u.is_profile_complete,
+    }));
 
-    const creditsMap = new Map(
-      userCredits.map((c) => [c.user_id as string, c.balance as number])
-    );
-
-    const profileMap = new Map(
-      profiles.map((p) => [p.user_id as string, p.profile_credits_claimed as boolean])
-    );
-
-    // Aggregate memory counts in JS instead of per-user DB queries
-    const memoryCounts = new Map<string, { total: number; paid: number }>();
-    for (const memory of memories) {
-      const userId = memory.user_id as string;
-      const entry = memoryCounts.get(userId) || { total: 0, paid: 0 };
-      entry.total++;
-      if (memory.status === 'active') entry.paid++;
-      memoryCounts.set(userId, entry);
-    }
-
-    const usersWithCounts = authUsers.map((user) => {
-      const referral = referralMap.get(user.id);
-      const counts = memoryCounts.get(user.id) || { total: 0, paid: 0 };
-      const creditBalance = creditsMap.get(user.id) || 0;
-      const isProfileComplete = profileMap.get(user.id) || false;
-
-      return {
-        id: user.id,
-        user_id: user.id,
-        user_email: user.email || 'No email',
-        referral_code: (referral?.referral_code as string) || null,
-        referred_by: (referral?.referred_by as string) || null,
-        created_at: user.created_at,
-        last_sign_in_at: user.last_sign_in_at,
-        memoryCount: counts.total,
-        paidMemoryCount: counts.paid,
-        creditBalance,
-        hasReferralCode: !!referral,
-        isProfileComplete,
-      };
-    });
-
-    // Sort by created_at descending
-    usersWithCounts.sort((a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
-
-    return NextResponse.json(usersWithCounts);
+    return NextResponse.json({ users, total: count ?? users.length, page: q.page, pageSize: q.pageSize });
   } catch (error) {
     console.error('Admin users error:', error);
     return NextResponse.json(

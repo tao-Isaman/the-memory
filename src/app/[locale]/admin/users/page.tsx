@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Eye, BookHeart, CreditCard, Coins, Search, Filter, SortAsc, SortDesc, ChevronLeft, ChevronRight } from 'lucide-react';
 import HeartLoader from '@/components/HeartLoader';
 import SortModal, { SortConfig, SortField, SortOrder, FilterConfig } from '@/components/admin/SortModal';
 import { authFetch } from '@/lib/auth-fetch';
+import { usersQueryString } from '@/lib/admin-users-query';
 
 interface User {
   id: string;
@@ -25,7 +26,6 @@ interface User {
 const ITEMS_PER_PAGE = 20;
 
 export default function AdminUsersPage() {
-  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [isSortModalOpen, setIsSortModalOpen] = useState(false);
@@ -41,101 +41,46 @@ export default function AdminUsersPage() {
     { field: 'created_at', order: 'desc' },
   ]);
 
+  // One page from the server: search, filters and sort run in the database (admin_users_overview, migration 039).
+  const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [loaded, setLoaded] = useState(false); // full-page loader only before the first page arrives
+
   useEffect(() => {
-    authFetch('/api/admin/users')
-      .then((res) => res.json())
-      .then((data) => {
-        setAllUsers(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to fetch users:', err);
-        setLoading(false);
-      });
-  }, []);
+    const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterMemories, filterPaid, filterReferral, sortConfig]);
+  }, [debouncedSearch, filterMemories, filterPaid, filterReferral, sortConfig]);
 
-  // Filter and sort all users
-  const filteredUsers = useMemo(() => {
-    let result = [...allUsers];
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (user) =>
-          user.user_email.toLowerCase().includes(query) ||
-          (user.referral_code && user.referral_code.toLowerCase().includes(query))
-      );
-    }
-
-    // Memory filter
-    if (filterMemories === 'with') {
-      result = result.filter((user) => user.memoryCount > 0);
-    } else if (filterMemories === 'without') {
-      result = result.filter((user) => user.memoryCount === 0);
-    }
-
-    // Paid filter
-    if (filterPaid === 'paid') {
-      result = result.filter((user) => user.paidMemoryCount > 0);
-    } else if (filterPaid === 'unpaid') {
-      result = result.filter((user) => user.paidMemoryCount === 0);
-    }
-
-    // Referral filter
-    if (filterReferral === 'with') {
-      result = result.filter((user) => user.hasReferralCode);
-    } else if (filterReferral === 'without') {
-      result = result.filter((user) => !user.hasReferralCode);
-    }
-
-    // Sort
-    result.sort((a, b) => {
-      for (const { field, order } of sortConfig) {
-        let comparison = 0;
-
-        switch (field) {
-          case 'created_at':
-            comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-            break;
-          case 'memoryCount':
-            comparison = a.memoryCount - b.memoryCount;
-            break;
-          case 'paidMemoryCount':
-            comparison = a.paidMemoryCount - b.paidMemoryCount;
-            break;
-          case 'creditBalance':
-            comparison = a.creditBalance - b.creditBalance;
-            break;
-          case 'profile':
-            comparison = (a.isProfileComplete ? 1 : 0) - (b.isProfileComplete ? 1 : 0);
-            break;
-          case 'user_email':
-            comparison = a.user_email.localeCompare(b.user_email);
-            break;
-        }
-
-        if (comparison !== 0) {
-          return order === 'asc' ? comparison : -comparison;
-        }
-      }
-      return 0;
-    });
-
-    return result;
-  }, [allUsers, searchQuery, filterMemories, filterPaid, filterReferral, sortConfig]);
+  useEffect(() => {
+    let stale = false;
+    setLoading(true);
+    const qs = usersQueryString({ page: currentPage, search: debouncedSearch, memories: filterMemories,
+      paid: filterPaid, referral: filterReferral, sort: sortConfig });
+    authFetch(`/api/admin/users?${qs}&pageSize=${ITEMS_PER_PAGE}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (stale) return;
+        setUsers(Array.isArray(data?.users) ? data.users : []);
+        setTotal(Number(data?.total) || 0);
+        setLoading(false);
+        setLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch users:', err);
+        if (!stale) setLoading(false);
+      });
+    return () => { stale = true; };
+  }, [currentPage, debouncedSearch, filterMemories, filterPaid, filterReferral, sortConfig]);
 
   // Pagination
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredUsers.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredUsers, currentPage]);
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+  const paginatedUsers = users;
 
   const toggleSort = (field: SortField, multi: boolean) => {
     setSortConfig((prevConfig) => {
@@ -189,7 +134,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !loaded) {
     return (
       <div className="flex items-center justify-center h-64">
         <HeartLoader message="กำลังโหลด..." size="md" />
@@ -202,7 +147,7 @@ export default function AdminUsersPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Users</h1>
         <p className="text-gray-500">
-          {filteredUsers.length} filtered / {allUsers.length} total users
+          {total.toLocaleString()} users
         </p>
       </div>
 
@@ -370,7 +315,7 @@ export default function AdminUsersPage() {
 
         {paginatedUsers.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            {allUsers.length === 0 ? 'No users found' : 'No users match your filters'}
+            {total === 0 && !debouncedSearch ? 'No users found' : 'No users match your filters'}
           </div>
         )}
       </div>
@@ -379,7 +324,7 @@ export default function AdminUsersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-6">
           <p className="text-sm text-gray-500">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)} of {filteredUsers.length}
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total}
           </p>
           <div className="flex items-center gap-2">
             <button

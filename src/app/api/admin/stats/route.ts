@@ -57,9 +57,10 @@ export async function GET(request: NextRequest) {
     const { data: userCountData } = await supabase.rpc('get_user_count');
     const totalUsers = Number(userCountData) || 0;
 
-    // Growth chart: ONE page of auth users, as before 6506560 — walking every page (23k+ users) timed the route out
-    // at 300 s. The chart undercounts past that page until the daily counts come from a DB function (planned).
-    const { data: allUsers } = await supabase.auth.admin.listUsers({ perPage: 10000 });
+    // Growth chart: sign-ups per Bangkok day counted in the database (039 admin_user_growth) — every user, ~30 ms.
+    // (Paging the Auth API was either one page only or, walking all 23k+ users, past the 300 s timeout.)
+    const { data: growthRows, error: growthError } = await supabase.rpc('admin_user_growth', { p_days: 30 });
+    if (growthError) throw growthError;
 
     // Helper to get date string in UTC+7 (Asia/Bangkok)
     const getThaiDateString = (dateString: string | Date) => {
@@ -247,15 +248,10 @@ export async function GET(request: NextRequest) {
 
     // 1. User Growth Data
     const userGrowthMap = new Map(dateMap);
-    allUsers?.users?.forEach((user) => {
-      const createdAt = new Date(user.created_at);
-      if (createdAt >= thirtyDaysAgo) {
-        const dateString = getThaiDateString(createdAt);
-        if (userGrowthMap.has(dateString)) {
-          userGrowthMap.set(dateString, userGrowthMap.get(dateString)! + 1);
-        }
-      }
-    });
+    for (const row of (growthRows || []) as { day: string; signups: number }[]) {
+      const label = getThaiDateString(new Date(`${row.day}T00:00:00+07:00`)); // the day starts at 00:00 Bangkok
+      if (userGrowthMap.has(label)) userGrowthMap.set(label, Number(row.signups) || 0);
+    }
 
     const userGrowth = Array.from(userGrowthMap.entries())
       .map(([date, count]) => ({ date, count }));
