@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
-import { listAllAuthUsers } from '@/lib/auth-users';
-import type { User } from '@supabase/supabase-js';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const PAGE_SIZE = 1000;
@@ -41,8 +39,11 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Every auth user, page by page (listUsers alone returns one page: the list stopped at the first 10000).
-    const authUsers = await listAllAuthUsers<User>(supabase);
+    // ONE page of auth users, as before 6506560: walking all 23k+ is too slow for a request. Real paging (only the
+    // page on screen) comes with the planned DB function; until then the list stops at this page.
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers({ perPage: 10000 });
+    if (authError) throw authError;
+    const authUsers = authData?.users || [];
 
     // Fetch all rows from each table in parallel (paginated to bypass 1000-row limit)
     const [referrals, memories, userCredits, profiles] = await Promise.all([

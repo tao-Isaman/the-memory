@@ -31,8 +31,9 @@ export async function listAllAuthUsers<U extends AuthUserLite>(supabase: AdminAu
   for (let page = 1; page <= MAX_PAGES; ) {
     const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: PAGE_SIZE });
     if (error) throw error;
-    out.push(...((data?.users ?? []) as U[]));
-    if (!data?.nextPage) return out;
+    const users = (data?.users ?? []) as U[];
+    out.push(...users);
+    if (!data?.nextPage || users.length === 0) return out;
     page = data.nextPage;
   }
   throw new Error('listAllAuthUsers: too many pages');
@@ -59,7 +60,7 @@ export async function findUserIdByEmail(supabase: AdminAuth, email: string): Pro
     if (error) throw error;
     const hit = (data?.users ?? []).find((u) => u.email?.toLowerCase() === want);
     if (hit) return hit.id;
-    if (!data?.nextPage) return null;
+    if (!data?.nextPage || (data?.users ?? []).length === 0) return null;
     page = data.nextPage;
   }
   return null;

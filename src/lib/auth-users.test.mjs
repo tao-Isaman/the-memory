@@ -48,4 +48,11 @@ assert.equal(await findUserIdByEmail(fake, 'P2300@X.com'), 'u2300');
 assert.equal(calls.list, 3);
 assert.equal(await findUserIdByEmail(fake, 'nobody@x.com'), null);
 
+// A server that keeps saying "next page" past the end must not loop: an empty page ends the walk.
+let endless = 0;
+const liar = { auth: { admin: { async listUsers({ page }) { endless++; return { data: { users: page <= 2 ? [{ id: `x${page}`, email: null, created_at: '' }] : [], nextPage: page + 1 }, error: null }; } } } };
+assert.equal((await listAllAuthUsers(liar)).length, 2);
+assert.equal(endless, 3);
+assert.equal(await findUserIdByEmail(liar, 'none@x.com'), null);
+
 console.log('auth-users: ok');

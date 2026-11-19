@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
-import { listAllAuthUsers } from '@/lib/auth-users';
+import { emailsByIds } from '@/lib/auth-users';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const MEMORY_PRICE_THB = 99; // Price per memory activation
@@ -37,9 +37,18 @@ interface RecentActivity {
   createdAt: string;
 }
 
+// The dashboard numbers are the same for every admin and minutes-old is fine: keep them 5 minutes per instance so a
+// reload (or a second admin) doesn't redo ~20 queries. ?fresh=1 skips it.
+const CACHE_MS = 5 * 60 * 1000;
+let cached: { at: number; body: unknown } | null = null;
+
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
   if (auth.response) return auth.response;
+
+  if (cached && Date.now() - cached.at < CACHE_MS && request.nextUrl.searchParams.get('fresh') !== '1') {
+    return NextResponse.json(cached.body, { headers: { 'X-Stats-Cache': 'hit' } });
+  }
 
   try {
     const supabase = getSupabaseServiceClient();
@@ -48,15 +57,9 @@ export async function GET(request: NextRequest) {
     const { data: userCountData } = await supabase.rpc('get_user_count');
     const totalUsers = Number(userCountData) || 0;
 
-    // Every auth user, page by page: the 30-day growth chart counts them, and the activity list needs emails
-    // (listUsers alone returns one page — everyone past it was "Unknown" and missing from the chart).
-    const allUsers = { users: await listAllAuthUsers(supabase) };
-    const userEmailMap = new Map<string, string>();
-    allUsers.users.forEach((user) => {
-      if (user.id && user.email) {
-        userEmailMap.set(user.id, user.email);
-      }
-    });
+    // Growth chart: ONE page of auth users, as before 6506560 — walking every page (23k+ users) timed the route out
+    // at 300 s. The chart undercounts past that page until the daily counts come from a DB function (planned).
+    const { data: allUsers } = await supabase.auth.admin.listUsers({ perPage: 10000 });
 
     // Helper to get date string in UTC+7 (Asia/Bangkok)
     const getThaiDateString = (dateString: string | Date) => {
@@ -193,6 +196,11 @@ export async function GET(request: NextRequest) {
     const failedCartoons = cartoons.data?.filter((c) => c.status === 'failed').length || 0;
     const pendingCartoons = cartoons.data?.filter((c) => c.status === 'pending').length || 0;
 
+    // Emails for the recent-activity rows only (by id: works for every user, not just the first page).
+    const userEmailMap = await emailsByIds(supabase, [
+      ...(recentMemories.data || []), ...(recentCredits.data || []), ...(recentCartoons.data || []),
+    ].map((r) => r.user_id));
+
     // Build recent activity
     const activities: RecentActivity[] = [];
 
@@ -239,7 +247,7 @@ export async function GET(request: NextRequest) {
 
     // 1. User Growth Data
     const userGrowthMap = new Map(dateMap);
-    allUsers.users.forEach((user) => {
+    allUsers?.users?.forEach((user) => {
       const createdAt = new Date(user.created_at);
       if (createdAt >= thirtyDaysAgo) {
         const dateString = getThaiDateString(createdAt);
@@ -383,7 +391,7 @@ export async function GET(request: NextRequest) {
       profileCompletion,
     };
 
-    return NextResponse.json({
+    const body = {
       totalUsers,
       totalMemories: memories.count || 0,
       totalStories: stories.count || 0,
@@ -407,7 +415,9 @@ export async function GET(request: NextRequest) {
       userGrowth,
       revenueData,
       demographics,
-    });
+    };
+    cached = { at: Date.now(), body };
+    return NextResponse.json(body);
   } catch (error) {
     console.error('Admin stats error:', error);
     return NextResponse.json(
