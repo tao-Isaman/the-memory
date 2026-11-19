@@ -133,6 +133,6 @@
     "OWN_CODE": "Kode sendiri tidak bisa dipakai.",
     "NO_PENDING_CLAIMS": "Belum ada hak pencairan yang menunggu.",
     "CLAIM_FAILED": "Permintaannya gagal dibuat.",
-    "CLAIM_IN_PROGRESS": "Permintaan sedang dikirim. Muat ulang lalu coba lagi."
+    "CLAIM_IN_PROGRESS": "Ada permintaan lain yang dikirim bersamaan. Silakan coba lagi."
   }
 }

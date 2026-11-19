@@ -133,6 +133,6 @@
     "OWN_CODE": "You can't use your own code.",
     "NO_PENDING_CLAIMS": "You don't have any payouts waiting.",
     "CLAIM_FAILED": "We couldn't create your request.",
-    "CLAIM_IN_PROGRESS": "A request is already being sent. Please refresh and try again."
+    "CLAIM_IN_PROGRESS": "Another request was sent at the same time. Please try again."
   }
 }

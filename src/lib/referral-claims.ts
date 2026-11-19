@@ -97,3 +97,14 @@ export function slipProblem(f: { type: string; size: number }): null | 'SLIP_EMP
 export function slipExtension(type: string): string {
   return SLIP_TYPES[type] || 'bin';
 }
+
+/** True only for an https URL on our Vercel Blob store — what the slip route may fetch (no SSRF via a changed row). */
+export function isSlipUrl(value: string): boolean {
+  try {
+    const u = new URL(value);
+    return u.protocol === 'https:' && !u.username && !u.password && !u.port
+      && u.hostname.endsWith('.public.blob.vercel-storage.com');
+  } catch {
+    return false;
+  }
+}

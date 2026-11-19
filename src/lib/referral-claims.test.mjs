@@ -50,3 +50,14 @@ assert.equal(slipProblem({ type: 'image/jpeg', size: 0 }), 'SLIP_EMPTY');
 assert.equal(slipExtension('image/jpeg'), 'jpg');
 
 console.log('referral-claims: ok');
+
+// The slip route only ever fetches our own Blob store over https (a URL changed in the DB must not make it fetch anything else).
+import { isSlipUrl } from './referral-claims.ts';
+assert.equal(isSlipUrl('https://abc123.public.blob.vercel-storage.com/referral-slips/x-Ab12.png'), true);
+assert.equal(isSlipUrl('http://abc123.public.blob.vercel-storage.com/x.png'), false);
+assert.equal(isSlipUrl('https://169.254.169.254/latest/meta-data'), false);
+assert.equal(isSlipUrl('https://evil.com/?public.blob.vercel-storage.com'), false);
+assert.equal(isSlipUrl('https://public.blob.vercel-storage.com.evil.com/x.png'), false);
+assert.equal(isSlipUrl('https://user@evil.com#.public.blob.vercel-storage.com'), false);
+assert.equal(isSlipUrl('not a url'), false);
+console.log('referral-claims slip url: ok');

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, isAdminEmail, requireUser } from '@/lib/supabase-server';
+import { isSlipUrl } from '@/lib/referral-claims';
 
 /**
  * GET /api/referral/claims/[claimId]/slip
@@ -24,7 +25,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Not found' }, { status: 404 }); // same answer for "not yours" and "no slip"
   }
 
-  const blob = await fetch(claim.slip_url, { cache: 'no-store' });
+  if (!isSlipUrl(claim.slip_url)) {
+    // Only our own Blob store, over https: a row changed in the DB must not make the server fetch anything else.
+    console.error('Refusing a slip URL outside the Blob store for claim', claimId);
+    return NextResponse.json({ error: 'Slip unavailable' }, { status: 502 });
+  }
+  const blob = await fetch(claim.slip_url, { cache: 'no-store', redirect: 'error' });
   if (!blob.ok || !blob.body) {
     return NextResponse.json({ error: 'Slip unavailable' }, { status: 502 });
   }
