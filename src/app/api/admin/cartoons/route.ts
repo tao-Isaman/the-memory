@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { emailsByIds } from '@/lib/auth-users';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
@@ -9,19 +10,14 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseServiceClient();
 
     // Batch: Get all cartoon generations and user data in parallel
-    const [{ data: cartoons }, { data: authData }] = await Promise.all([
-      supabase
-        .from('cartoon_generations')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50),
-      supabase.auth.admin.listUsers({
-        perPage: 10000,
-      }),
-    ]);
+    const { data: cartoons } = await supabase
+      .from('cartoon_generations')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-    const authUsers = authData?.users || [];
-    const userEmailMap = new Map(authUsers.map(u => [u.id, u.email || 'Unknown']));
+    // Emails for these 50 only (listUsers returns one page: everyone past it showed "Unknown").
+    const userEmailMap = await emailsByIds(supabase, (cartoons || []).map((c) => c.user_id));
 
     // Calculate stats
     const stats = {

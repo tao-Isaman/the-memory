@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { emailsByIds } from '@/lib/auth-users';
 
 export const runtime = 'nodejs';
 
@@ -26,11 +27,8 @@ export async function GET(request: NextRequest) {
   }
 
   // Map user_id → email.
-  const { data: usersList } = await supabase.auth.admin.listUsers({ perPage: 10000 });
-  const emailById = new Map<string, string>();
-  usersList?.users?.forEach((u) => {
-    if (u.id) emailById.set(u.id, u.email ?? '—');
-  });
+  // Only the subscribers' own emails (listUsers returns one page: everyone past it showed "unknown").
+  const emailById = await emailsByIds(supabase, (subs ?? []).map((s) => s.user_id));
 
   // Group subscriptions by user (a user may have several devices).
   const byUser = new Map<string, SubscriberRow>();
