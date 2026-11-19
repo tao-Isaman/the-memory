@@ -992,6 +992,26 @@ export interface Database {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      admin_user_growth: {
+        Args: { p_days?: number }
+        Returns: { day: string; signups: number }[]
+      }
+      admin_users_overview: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_email: string
+          created_at: string
+          last_sign_in_at: string | null
+          referral_code: string | null
+          referred_by: string | null
+          memory_count: number
+          paid_memory_count: number
+          credit_balance: number
+          has_referral_code: boolean
+          is_profile_complete: boolean
+        }[]
+      }
       get_universe_feed: {
         Args: {
           p_seed: string
