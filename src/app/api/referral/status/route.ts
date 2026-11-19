@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireUser } from '@/lib/supabase-server';
-import { getUserReferral, getReferralSignupCount } from '@/lib/referral';
+import { getUserReferral, getReferralSignupCount, getClaimState } from '@/lib/referral';
 
 export async function GET(request: NextRequest) {
   const auth = await requireUser(request);
@@ -32,42 +32,8 @@ export async function GET(request: NextRequest) {
 
     const totalSignups = await getReferralSignupCount(supabase, userId);
 
-    // Count actual paid users (users who used this code and have active memories)
-    const { data: referredUsers } = await supabase
-      .from('user_referrals')
-      .select('user_id')
-      .eq('referred_by', userId);
-
-    let paidCount = 0;
-    let paidUserIds: string[] = [];
-    if (referredUsers && referredUsers.length > 0) {
-      const userIds = referredUsers.map(u => u.user_id);
-
-      // Count unique users who have paid
-      const { data: paidMemories } = await supabase
-        .from('memories')
-        .select('user_id')
-        .in('user_id', userIds)
-        .eq('status', 'active');
-
-      if (paidMemories) {
-        const uniquePaidUsers = new Set(paidMemories.map(m => m.user_id));
-        paidCount = uniquePaidUsers.size;
-        paidUserIds = Array.from(uniquePaidUsers);
-      }
-    }
-
-    // Count claims from referral_claims table
-    const { count: claimedCount } = await supabase
-      .from('referral_claims')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
-
-    const claimedDiscounts = claimedCount || 0;
-
-    // Calculate pending discounts: paid users minus claims submitted
-    // This works even if conversion records don't exist yet
-    const pendingDiscounts = Math.max(0, paidCount - claimedDiscounts);
+    // Rights earned (paid referred users), used (sum of claim amounts / 50) and left — same count as claim-discount.
+    const { paidCount, claimed: claimedDiscounts, remaining: pendingDiscounts } = await getClaimState(supabase, userId);
 
     // Build referral link
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://thememory.app';

@@ -50,7 +50,10 @@
     "account": "เลขบัญชี: {value}",
     "sentAt": "ส่งคำขอ: {date}",
     "processedAt": "ดำเนินการ: {date}",
-    "noteLabel": "หมายเหตุ:"
+    "noteLabel": "หมายเหตุ:",
+    "viewSlip": "ดูสลิปการโอน",
+    "slipLoading": "กำลังโหลดสลิป...",
+    "slipError": "เปิดสลิปไม่ได้ กรุณาลองใหม่"
   },
   "status": {
     "pending": "รอดำเนินการ",
@@ -65,7 +68,7 @@
     "title": "ขอรับเงิน",
     "amountLabel": "จำนวนเงินที่จะได้รับ",
     "amount": "{amount} บาท",
-    "rightsNote": "(1 สิทธิ์จาก {pending} สิทธิ์ที่มี)",
+    "rightsNote": "(รวม {pending} สิทธิ์ สิทธิ์ละ {unit} บาท)",
     "methodLabel": "เลือกวิธีรับเงิน",
     "phoneLabel": "เบอร์โทรศัพท์ (พร้อมเพย์)",
     "phonePlaceholder": "0812345678",
@@ -129,6 +132,7 @@
     "INVALID_CODE": "โค้ดแนะนำไม่ถูกต้อง",
     "OWN_CODE": "ไม่สามารถใช้โค้ดของตัวเองได้",
     "NO_PENDING_CLAIMS": "ไม่มีสิทธิ์รับเงินที่รอดำเนินการ",
-    "CLAIM_FAILED": "ไม่สามารถสร้างคำขอได้"
+    "CLAIM_FAILED": "ไม่สามารถสร้างคำขอได้",
+    "CLAIM_IN_PROGRESS": "มีอีกคำขอส่งเข้ามาพร้อมกัน กรุณาลองใหม่อีกครั้ง"
   }
 }

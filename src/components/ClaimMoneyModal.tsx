@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 import { X, Wallet, Loader2, Smartphone, Building, CheckCircle } from 'lucide-react';
 import { PaymentMethod } from '@/types/referral';
 import { authFetch } from '@/lib/auth-fetch';
-
-// Fixed payout, in THB for every locale (deliberate product decision).
-const CLAIM_AMOUNT_THB = 50;
+import { CLAIM_UNIT_THB } from '@/lib/referral-claims';
 
 // Bank codes only — the label comes from referral.banks.<code>. The label (not the code)
 // is what gets submitted as `bankName`, so admins still read a human bank name.
@@ -38,6 +36,9 @@ export default function ClaimMoneyModal({
   // Holds an error CODE (see messages/<locale>/referral.json → "errors"), never prose.
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  // One request claims every right left: 50 THB (every locale, a product decision) × the rights.
+  const totalAmount = CLAIM_UNIT_THB * pendingClaims;
+  const [claimedAmount, setClaimedAmount] = useState(0);
 
   if (!isOpen) return null;
 
@@ -115,6 +116,7 @@ export default function ClaimMoneyModal({
         throw new Error(data.error || 'CLAIM_FAILED');
       }
 
+      setClaimedAmount(data.claim?.amount ?? totalAmount);
       setShowSuccess(true);
       onSuccess(data.remainingClaims);
     } catch (err) {
@@ -163,7 +165,7 @@ export default function ClaimMoneyModal({
               {t('modal.successTitle')}
             </h3>
             <p className="text-gray-600 mb-4">
-              {t('modal.successBody', { amount: CLAIM_AMOUNT_THB })}
+              {t('modal.successBody', { amount: claimedAmount })}
               <br />
               {t('modal.successWait')}
             </p>
@@ -186,10 +188,10 @@ export default function ClaimMoneyModal({
               <Wallet size={32} className="mx-auto mb-2 text-green-600" />
               <p className="text-gray-700 font-medium">{t('modal.amountLabel')}</p>
               <p className="text-3xl font-bold text-green-700 mt-1">
-                {t('modal.amount', { amount: CLAIM_AMOUNT_THB })}
+                {t('modal.amount', { amount: totalAmount })}
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                {t('modal.rightsNote', { pending: pendingClaims })}
+                {t('modal.rightsNote', { pending: pendingClaims, unit: CLAIM_UNIT_THB })}
               </p>
             </div>
 
@@ -329,7 +331,7 @@ export default function ClaimMoneyModal({
               ) : (
                 <>
                   <Wallet size={18} />
-                  {t('modal.submit', { amount: CLAIM_AMOUNT_THB })}
+                  {t('modal.submit', { amount: totalAmount })}
                 </>
               )}
             </button>

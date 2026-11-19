@@ -5,6 +5,7 @@ import { useTranslations, useFormatter } from 'next-intl';
 import { Clock, CheckCircle, XCircle, History, Loader2, Wallet } from 'lucide-react';
 import { ClaimStatus } from '@/types/referral';
 import { authFetch } from '@/lib/auth-fetch';
+import SlipButton from '@/components/SlipButton';
 
 interface ClaimRecord {
   id: string;
@@ -16,6 +17,7 @@ interface ClaimRecord {
   adminNote: string | null;
   createdAt: string;
   processedAt: string | null;
+  hasSlip?: boolean;
 }
 
 interface ClaimHistorySectionProps {
@@ -137,6 +139,10 @@ export default function ClaimHistorySection({
                 <p className="mt-1">{t('history.sentAt', { date: formatDate(claim.createdAt) })}</p>
                 {claim.processedAt && (
                   <p>{t('history.processedAt', { date: formatDate(claim.processedAt) })}</p>
+                )}
+                {claim.status === 'completed' && claim.hasSlip && (
+                  <SlipButton claimId={claim.id} className="mt-1" label={t('history.viewSlip')}
+                    loadingLabel={t('history.slipLoading')} errorLabel={t('history.slipError')} />
                 )}
               </div>
 

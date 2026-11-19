@@ -50,7 +50,10 @@
     "account": "No. rekening: {value}",
     "sentAt": "Diajukan: {date}",
     "processedAt": "Diproses: {date}",
-    "noteLabel": "Catatan:"
+    "noteLabel": "Catatan:",
+    "viewSlip": "Lihat bukti transfer",
+    "slipLoading": "Memuat bukti transfer...",
+    "slipError": "Bukti transfer tidak bisa dibuka. Coba lagi."
   },
   "status": {
     "pending": "Menunggu diproses",
@@ -65,7 +68,7 @@
     "title": "Cairkan uang",
     "amountLabel": "Uang yang kamu terima",
     "amount": "฿{amount}",
-    "rightsNote": "(1 dari {pending} hak pencairan yang kamu punya)",
+    "rightsNote": "(semua {pending} hak pencairan, masing-masing {unit} THB)",
     "methodLabel": "Mau dicairkan ke mana?",
     "phoneLabel": "Nomor HP (PromptPay)",
     "phonePlaceholder": "0812345678",
@@ -129,6 +132,7 @@
     "INVALID_CODE": "Kode referralnya tidak valid.",
     "OWN_CODE": "Kode sendiri tidak bisa dipakai.",
     "NO_PENDING_CLAIMS": "Belum ada hak pencairan yang menunggu.",
-    "CLAIM_FAILED": "Permintaannya gagal dibuat."
+    "CLAIM_FAILED": "Permintaannya gagal dibuat.",
+    "CLAIM_IN_PROGRESS": "Ada permintaan lain yang dikirim bersamaan. Silakan coba lagi."
   }
 }
