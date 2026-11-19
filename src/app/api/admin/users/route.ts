@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { listAllAuthUsers } from '@/lib/auth-users';
+import type { User } from '@supabase/supabase-js';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const PAGE_SIZE = 1000;
@@ -39,16 +41,8 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Get all users from Supabase Auth (auth.users table)
-    const { data: authData, error: authError } = await supabase.auth.admin.listUsers({
-      perPage: 10000,
-    });
-
-    if (authError) {
-      throw authError;
-    }
-
-    const authUsers = authData?.users || [];
+    // Every auth user, page by page (listUsers alone returns one page: the list stopped at the first 10000).
+    const authUsers = await listAllAuthUsers<User>(supabase);
 
     // Fetch all rows from each table in parallel (paginated to bypass 1000-row limit)
     const [referrals, memories, userCredits, profiles] = await Promise.all([

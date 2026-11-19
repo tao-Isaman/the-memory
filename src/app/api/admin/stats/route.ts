@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { listAllAuthUsers } from '@/lib/auth-users';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 const MEMORY_PRICE_THB = 99; // Price per memory activation
@@ -43,21 +44,15 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseServiceClient();
 
-    // Exact total via RPC (listUsers caps at one page). The list below is still
-    // used for the email map — see note: it truncates past 10000 users.
+    // Exact total via RPC (one query instead of counting the pages below).
     const { data: userCountData } = await supabase.rpc('get_user_count');
     const totalUsers = Number(userCountData) || 0;
 
-    // Get users for email lookup
-    // ponytail: email map truncates at 10000 users (one listUsers page) — paginate
-    // this (and the other admin listUsers calls) if accurate per-user lookup past 10k matters.
-    const { data: allUsers } = await supabase.auth.admin.listUsers({
-      perPage: 10000,
-    });
-
-    // Create user ID to email map
+    // Every auth user, page by page: the 30-day growth chart counts them, and the activity list needs emails
+    // (listUsers alone returns one page — everyone past it was "Unknown" and missing from the chart).
+    const allUsers = { users: await listAllAuthUsers(supabase) };
     const userEmailMap = new Map<string, string>();
-    allUsers?.users?.forEach((user) => {
+    allUsers.users.forEach((user) => {
       if (user.id && user.email) {
         userEmailMap.set(user.id, user.email);
       }
@@ -244,7 +239,7 @@ export async function GET(request: NextRequest) {
 
     // 1. User Growth Data
     const userGrowthMap = new Map(dateMap);
-    allUsers?.users?.forEach((user) => {
+    allUsers.users.forEach((user) => {
       const createdAt = new Date(user.created_at);
       if (createdAt >= thirtyDaysAgo) {
         const dateString = getThaiDateString(createdAt);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { emailsByIds } from '@/lib/auth-users';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request);
@@ -14,14 +15,12 @@ export async function GET(request: NextRequest) {
     // PostgREST truncates that (default 1000 rows, and there are thousands), so real
     // purchases — a tiny fraction of rows next to free 'bonus' grants — went missing.
     const [
-      { data: authData, error: authError },
       { data: packages },
       { data: transactions },
       { data: recentPurchaseRows },
       { data: userCredits },
       { data: stats, error: statsError },
     ] = await Promise.all([
-      supabase.auth.admin.listUsers({ perPage: 10000 }),
       supabase.from('credit_packages').select('*').order('sort_order'),
       supabase
         .from('credit_transactions')
@@ -40,12 +39,13 @@ export async function GET(request: NextRequest) {
       supabase.rpc('get_credit_stats'),
     ]);
 
-    if (authError) throw authError;
     if (statsError) throw statsError;
 
     // Build user email map
-    const authUsers = authData?.users || [];
-    const userEmailMap = new Map(authUsers.map((u) => [u.id, u.email || 'No email']));
+    // Emails for the users on this page only (listUsers returns one page: everyone past it showed "Unknown").
+    const userEmailMap = await emailsByIds(supabase, [
+      ...(transactions || []), ...(recentPurchaseRows || []), ...(userCredits || []),
+    ].map((r) => r.user_id));
 
     const packageSales = stats?.packageSales ?? {};
 

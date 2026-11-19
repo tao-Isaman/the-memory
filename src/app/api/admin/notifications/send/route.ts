@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, requireAdmin } from '@/lib/supabase-server';
+import { findUserIdByEmail } from '@/lib/auth-users';
 import { sendPushToSubscriptions, isPushConfigured } from '@/lib/push-server';
 
 export const runtime = 'nodejs';
@@ -33,10 +34,9 @@ export async function POST(request: NextRequest) {
   let targetUserId: string | null = null;
   if (target === 'user') {
     if (!email) return NextResponse.json({ error: 'กรุณาระบุอีเมลผู้รับ' }, { status: 400 });
-    const { data: list } = await supabase.auth.admin.listUsers({ perPage: 10000 });
-    const found = list?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-    if (!found) return NextResponse.json({ error: 'ไม่พบผู้ใช้อีเมลนี้' }, { status: 404 });
-    targetUserId = found.id;
+    // Every page: listUsers alone returns one page, so most users were "not found".
+    targetUserId = await findUserIdByEmail(supabase, email);
+    if (!targetUserId) return NextResponse.json({ error: 'ไม่พบผู้ใช้อีเมลนี้' }, { status: 404 });
   }
 
   // 1. Persist the notification (shows in the in-app inbox immediately).
