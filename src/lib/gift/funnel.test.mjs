@@ -1,6 +1,22 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { safeInternalPath, giftCreateUrl } from './funnel.ts';
+import { safeInternalPath, giftCreateUrl, loginDestination, onboardDestination } from './funnel.ts';
+
+test('loginDestination: no/invalid next → /dashboard (existing users unchanged); valid next honoured', () => {
+  assert.equal(loginDestination(null), '/dashboard');
+  assert.equal(loginDestination(undefined), '/dashboard');
+  assert.equal(loginDestination(''), '/dashboard');
+  assert.equal(loginDestination('//evil.com'), '/dashboard'); // open-redirect → ignored, default
+  assert.equal(loginDestination('https://evil.com'), '/dashboard');
+  assert.equal(loginDestination('/create?to=x'), '/create?to=x');
+});
+
+test('onboardDestination: no gift context → /dashboard (normal new user unchanged); context → /create', () => {
+  assert.equal(onboardDestination(null), '/dashboard');
+  const dest = onboardDestination({ name: 'ชมพู่', src: 'qr' });
+  assert.ok(dest.startsWith('/create?'));
+  assert.equal(new URLSearchParams(dest.split('?')[1]).get('to'), 'ชมพู่');
+});
 
 test('safeInternalPath accepts only internal paths (open-redirect guard)', () => {
   assert.equal(safeInternalPath('/create?to=x'), '/create?to=x');

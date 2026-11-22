@@ -11,7 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import { Phone, Cake, User, Briefcase, Heart, Gift } from 'lucide-react';
 import { PROFILE_COMPLETION_CREDITS, JOB_OPTIONS } from '@/lib/constants';
 import { authFetch } from '@/lib/auth-fetch';
-import { readGiftCtx, clearGiftCtx, giftCreateUrl } from '@/lib/gift/funnel';
+import { readGiftCtx, clearGiftCtx, onboardDestination } from '@/lib/gift/funnel';
 
 // The DB stores the Thai job string (JOB_OPTIONS is the canonical value list); only the
 // LABEL is translated, index-for-index, via profile.jobs. "Other" is the last entry — it
@@ -31,11 +31,14 @@ export default function OnboardingPage() {
   // above is untouched. The gift URL is a full literal path, so navigate hard.
   const afterOnboarding = () => {
     const ctx = readGiftCtx();
+    const dest = onboardDestination(ctx);
     if (ctx) {
+      // Gift funnel: hand off to /create (full literal path) and consume the context.
       clearGiftCtx();
-      window.location.assign(giftCreateUrl(ctx));
+      window.location.assign(dest);
     } else {
-      router.push('/dashboard');
+      // Unchanged default — a normal new user still lands on the dashboard.
+      router.push(dest);
     }
   };
 

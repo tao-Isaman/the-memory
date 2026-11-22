@@ -59,6 +59,25 @@ export function safeInternalPath(next: string | null | undefined): string | null
   return next;
 }
 
+/**
+ * Where to send a visitor AFTER login. A validated internal `next` wins;
+ * otherwise the unchanged default, `/dashboard`. So a normal login (no `next`)
+ * still lands on the dashboard exactly as before — existing users are untouched.
+ */
+export function loginDestination(rawNext: string | null | undefined): string {
+  return safeInternalPath(rawNext) ?? '/dashboard';
+}
+
+/**
+ * Where to send a visitor AFTER onboarding. The gift funnel's /create (with the
+ * recipient) when a gift context is waiting, otherwise the unchanged default,
+ * `/dashboard`. A normal new user (no gift context) still lands on the dashboard
+ * exactly as before.
+ */
+export function onboardDestination(ctx: GiftCtx | null): string {
+  return ctx ? giftCreateUrl(ctx) : '/dashboard';
+}
+
 /** The /create URL a gift CTA (or the onboarding hand-off) points at. */
 export function giftCreateUrl(ctx: GiftCtx): string {
   const q = new URLSearchParams({

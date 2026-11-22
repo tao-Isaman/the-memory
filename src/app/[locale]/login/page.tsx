@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { storePendingConsent } from '@/lib/consent';
-import { safeInternalPath } from '@/lib/gift/funnel';
+import { safeInternalPath, loginDestination } from '@/lib/gift/funnel';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import Mascot from '@/components/Mascot';
@@ -49,13 +49,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Already signed in (e.g. a logged-in user clicked a `?next=` link): go
-      // straight to the requested destination. `next` is a full literal path
-      // (locale prefix included), so navigate hard rather than through the
-      // locale-aware router, which would re-prefix it.
-      const next = pendingNext();
-      if (next) window.location.assign(next);
-      else router.push('/dashboard');
+      // Already signed in. With no (valid) `next` this is `/dashboard` exactly as
+      // before; a `next` is a full literal path (locale prefix included), so
+      // navigate hard rather than through the locale-aware router, which would
+      // re-prefix it.
+      const dest = loginDestination(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('next'));
+      if (dest === '/dashboard') router.push('/dashboard');
+      else window.location.assign(dest);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, router]);
