@@ -31,7 +31,14 @@ type EventName =
   | 'loy_template_start'
   | 'loy_popup_view'
   | 'loy_popup_click'
-  | 'loy_popup_dismiss';
+  | 'loy_popup_dismiss'
+  // Gift mini-game (/gift) — Christmas / New-Year campaign funnel.
+  | 'gift_start'
+  | 'gift_unwrap_done'
+  | 'gift_code_done'
+  | 'gift_open_done'
+  | 'gift_cta_click'
+  | 'gift_share_click';
 
 interface EventParams {
   use_case?: string;
