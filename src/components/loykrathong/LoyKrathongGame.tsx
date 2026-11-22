@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation';
 import LoyTemplateCta from './LoyTemplateCta';
 import { useAuth } from '@/hooks/useAuth';
 import Joystick from './Joystick';
+import LoyKrathongBgm from './LoyKrathongBgm';
 import Mascot from '@/components/Mascot';
 import { useRoom, type FloatItem, type RemotePlayer } from './useRoom';
 import { crabSprite, getImage, loadImage, SPRITE_PX } from '@/lib/loykrathong/sprites';
@@ -789,6 +790,7 @@ export default function LoyKrathongGame() {
           </div>
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
+          <LoyKrathongBgm />
           <div className="h-9 px-3 rounded-full bg-black/45 text-white text-xs sm:text-sm flex items-center gap-2 sm:gap-3 backdrop-blur-sm border border-white/10 whitespace-nowrap">
             <span title={t('hud.online', { count: room.onlineCount })}>
               🦀 <span className="sm:hidden">{room.onlineCount}</span>
