@@ -37,7 +37,13 @@ export default function LoyKrathongBgm() {
   // Whether the first user gesture has started playback. Until then the tab has
   // no permission to make sound, so the button just reflects the stored intent.
   const startedRef = useRef(false);
-  const fadeRaf = useRef<number | null>(null);
+  // The fade runs on a timer, NOT requestAnimationFrame: rAF callbacks are
+  // throttled to zero in a backgrounded / non-rendering tab (and in some
+  // browser-automation contexts), which would leave the fade — and the volume —
+  // stuck at 0 while the audio plays on inaudibly. A timer still fires there
+  // (clamped to ~1s in the background, fine for a 1s fade) and always lands on
+  // the target.
+  const fadeTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   // Mirror of state for listeners registered once (they close over stale state
   // otherwise).
   const mutedRef = useRef(false);
@@ -51,30 +57,37 @@ export default function LoyKrathongBgm() {
   }, []);
 
   const cancelFade = () => {
-    if (fadeRaf.current !== null) {
-      cancelAnimationFrame(fadeRaf.current);
-      fadeRaf.current = null;
+    if (fadeTimer.current !== null) {
+      clearInterval(fadeTimer.current);
+      fadeTimer.current = null;
     }
   };
 
-  // Ramp volume to `to` over FADE_MS. Used for the 1s fade-in; kept generic so a
-  // future fade-out is trivial.
+  // Ramp volume to `to` over FADE_MS, then pin it there. Used for the 1s
+  // fade-in; kept generic so a future fade-out is trivial. Applies the first
+  // step synchronously so there is never a frame at the old volume, and always
+  // clamps to the exact target on the final tick (no "stuck just under" drift).
   const fadeTo = useCallback((to: number) => {
     const el = audioRef.current;
     if (!el) return;
     cancelFade();
     const from = el.volume;
-    const start = performance.now();
-    const step = (now: number) => {
-      const p = Math.min(1, (now - start) / FADE_MS);
-      el.volume = from + (to - from) * p;
-      if (p < 1) {
-        fadeRaf.current = requestAnimationFrame(step);
-      } else {
-        fadeRaf.current = null;
+    const start = Date.now();
+    const tick = () => {
+      const a = audioRef.current;
+      if (!a) {
+        cancelFade();
+        return;
+      }
+      const p = Math.min(1, (Date.now() - start) / FADE_MS);
+      a.volume = from + (to - from) * p;
+      if (p >= 1) {
+        a.volume = to;
+        cancelFade();
       }
     };
-    fadeRaf.current = requestAnimationFrame(step);
+    tick();
+    fadeTimer.current = setInterval(tick, 50);
   }, []);
 
   // Begin (or resume) playback and fade in, unless muted. Safe to call from any
