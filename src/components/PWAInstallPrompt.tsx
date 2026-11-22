@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { X, Share, Plus } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
@@ -32,6 +33,7 @@ function alreadyInstalled(): boolean {
 
 export default function PWAInstallPrompt() {
   const t = useTranslations('dashboard.pwaPrompt');
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [iosMode, setIosMode] = useState(false);
@@ -116,6 +118,10 @@ export default function PWAInstallPrompt() {
     setVisible(false);
   };
 
+  // The /gift mini-game is a one-shot campaign experience whose interactive
+  // tray sits at the bottom of the screen; an install banner would both nag
+  // mid-game and overlap the controls. Keep the prompt off that route.
+  if (pathname?.includes('/gift')) return null;
   if (!visible) return null;
 
   return (

@@ -87,7 +87,10 @@ export default function GiftCodeScene({ code, hint, onSolved, onWrong }: Props) 
   }, [slots, code, onSolved, onWrong]);
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-between px-5 py-6" style={{ touchAction: 'none' }}>
+    <div
+      className="flex h-full w-full flex-col items-center justify-between px-5 pt-6"
+      style={{ touchAction: 'none', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+    >
       <div className="text-center">
         <h2 className="text-xl font-semibold text-white">ใส่รหัสปลดล็อกกล่อง 🔐</h2>
         <p className="mt-1 text-sm text-white/70">คำใบ้: <b>วันที่วันนี้</b></p>
