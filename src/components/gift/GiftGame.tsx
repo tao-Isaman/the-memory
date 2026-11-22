@@ -6,6 +6,7 @@ import { useRouter } from '@/i18n/navigation';
 import { trackEvent } from '@/lib/analytics';
 import { todayCode, todayCodeHint, effectForDate } from '@/lib/gift/date';
 import { GIFT_IMAGES, GIFT_AUDIO } from '@/lib/gift/assets';
+import { setGiftCtx, giftCreateUrl } from '@/lib/gift/funnel';
 import GiftCodeScene from './GiftCodeScene';
 import GiftEffects from './GiftEffects';
 
@@ -77,14 +78,10 @@ export default function GiftGame() {
 
   const goCreate = () => {
     trackEvent('gift_cta_click', { src });
-    const q = new URLSearchParams({
-      utm_source: 'gift',
-      utm_medium: 'minigame',
-      utm_campaign: 'xmas_ny',
-      to: name,
-    });
-    if (src) q.set('gift_src', src);
-    router.push(`/create?${q.toString()}`);
+    // Stash the recipient + source so they survive the login round-trip even on
+    // the new-user onboarding path, where `?next` is dropped (see lib/gift/funnel).
+    setGiftCtx({ name, src });
+    router.push(giftCreateUrl({ name, src }));
   };
 
   const shareGame = async () => {

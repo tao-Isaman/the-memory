@@ -19,6 +19,7 @@ import {
   type TemplateCopy,
 } from '@/lib/memory-templates';
 import { storePendingTemplate } from '@/lib/pending-template';
+import { readGiftCtx, clearGiftCtx } from '@/lib/gift/funnel';
 import { missingItems, resolveLayout, type MissingItem } from '@/lib/create-steps';
 import CreateTabsLayout from './CreateTabsLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -72,7 +73,11 @@ function CreatePageContent() {
     if (!authLoading && !user) {
       // Keep the chosen template across sign-in; the dashboard hands it back.
       if (templateSlug && getMemoryTemplate(templateSlug)) storePendingTemplate(templateSlug);
-      router.push('/login');
+      // Return here after login instead of dropping the visitor on /dashboard —
+      // preserves the gift campaign's recipient + UTM (and any deep link to
+      // /create). `next` is the full current path, honoured only if internal.
+      const self = window.location.pathname + window.location.search;
+      router.push(`/login?next=${encodeURIComponent(self)}`);
     }
   }, [authLoading, user, router, templateSlug]);
 
@@ -105,6 +110,17 @@ function CreatePageContent() {
         setTemplateName(copy.name);
         trackEvent('start_create', { source: `template_${template.slug}`, theme: draft.theme, layout });
         if (template.slug === 'loykrathong') trackEvent('loy_template_start');
+      } else if (searchParams.get('utm_source') === 'gift' || searchParams.get('to') || readGiftCtx()) {
+        // Gift mini-game hand-off: prefill the recipient into the title and
+        // attribute the create to the campaign. The name rides in `?to`
+        // (returning users) or localStorage (new users, who reach here via
+        // onboarding) — see lib/gift/funnel.
+        const ctx = readGiftCtx();
+        const toName = (searchParams.get('to') || ctx?.name || '').trim();
+        const giftSrc = searchParams.get('gift_src') || ctx?.src || '';
+        if (toName) setTitle(`ถึง ${toName}`);
+        clearGiftCtx();
+        trackEvent('start_create', { source: 'gift', gift_src: giftSrc, layout });
       } else {
         // Check for use case from sessionStorage (set by login page)
         const pendingUseCase = sessionStorage.getItem('pending_usecase');
