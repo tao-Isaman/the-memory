@@ -11,6 +11,7 @@ import HeartLoader from '@/components/HeartLoader';
 import { Phone, Cake, User, Briefcase, Heart, Gift } from 'lucide-react';
 import { PROFILE_COMPLETION_CREDITS, JOB_OPTIONS } from '@/lib/constants';
 import { authFetch } from '@/lib/auth-fetch';
+import { readGiftCtx, clearGiftCtx, onboardDestination } from '@/lib/gift/funnel';
 
 // The DB stores the Thai job string (JOB_OPTIONS is the canonical value list); only the
 // LABEL is translated, index-for-index, via profile.jobs. "Other" is the last entry — it
@@ -23,6 +24,23 @@ export default function OnboardingPage() {
   const { showToast } = useToast();
   const router = useRouter();
   const t = useTranslations('profile');
+
+  // Where to go once onboarding is done: back into the gift funnel's /create
+  // (with the recipient prefilled) when a gift context is waiting, else the
+  // dashboard. Only the redirect DESTINATION changes — the signup/identity flow
+  // above is untouched. The gift URL is a full literal path, so navigate hard.
+  const afterOnboarding = () => {
+    const ctx = readGiftCtx();
+    const dest = onboardDestination(ctx);
+    if (ctx) {
+      // Gift funnel: hand off to /create (full literal path) and consume the context.
+      clearGiftCtx();
+      window.location.assign(dest);
+    } else {
+      // Unchanged default — a normal new user still lands on the dashboard.
+      router.push(dest);
+    }
+  };
 
   const jobLabels = t.raw('jobs') as string[];
 
@@ -52,7 +70,7 @@ export default function OnboardingPage() {
 
         // If profile exists, redirect to dashboard
         if (data.profile) {
-          router.push('/dashboard');
+          afterOnboarding();
           return;
         }
 
@@ -80,7 +98,7 @@ export default function OnboardingPage() {
       });
 
       if (response.ok) {
-        router.push('/dashboard');
+        afterOnboarding();
       }
     } catch (error) {
       console.error('Error creating profile:', error);
@@ -156,7 +174,7 @@ export default function OnboardingPage() {
         }
       }
 
-      router.push('/dashboard');
+      afterOnboarding();
     } catch (error) {
       console.error('Error saving profile:', error);
       showToast(t('errors.GENERIC'), 'error');

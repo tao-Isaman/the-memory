@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { storePendingConsent } from '@/lib/consent';
+import { safeInternalPath, loginDestination } from '@/lib/gift/funnel';
 import HeartIcon from '@/components/HeartIcon';
 import HeartLoader from '@/components/HeartLoader';
 import Mascot from '@/components/Mascot';
@@ -32,16 +33,31 @@ export default function LoginPage() {
   // PDPA: users must read + accept the legal docs BEFORE login. The acceptance is
   // remembered locally here (no account yet) and persisted to user_consents by
   // ConsentGuard right after the OAuth round-trip.
+  // Read the post-login destination straight from the URL (no useSearchParams
+  // hook here, so LoginPage needs no Suspense boundary of its own). Only an
+  // internal path is honoured — open-redirect guard.
+  const pendingNext = () =>
+    typeof window === 'undefined'
+      ? null
+      : safeInternalPath(new URLSearchParams(window.location.search).get('next'));
+
   const handleSignIn = () => {
     if (!accepted) return;
     storePendingConsent();
-    signInWithGoogle();
+    signInWithGoogle(pendingNext() ?? undefined);
   };
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard');
+      // Already signed in. With no (valid) `next` this is `/dashboard` exactly as
+      // before; a `next` is a full literal path (locale prefix included), so
+      // navigate hard rather than through the locale-aware router, which would
+      // re-prefix it.
+      const dest = loginDestination(typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('next'));
+      if (dest === '/dashboard') router.push('/dashboard');
+      else window.location.assign(dest);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, router]);
 
   if (loading) {
