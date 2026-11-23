@@ -467,20 +467,25 @@ export default function LoyKrathongGame() {
           if (liveFloatIds.current.has(f.id)) anims.set(f.id, backlogAnim(sc, false));
         }
 
-        // Backlog (older krathongs): fill up to the soft cap. The first fill populates
-        // the scene at once (scattered); after that releases trickle in one at a time.
+        // Backlog (older krathongs): fill up to the soft cap.
         if (anims.size < LK_RIVER_MAX) {
-          const firstFill = riverFirstFill.current;
-          if (firstFill || nowMs >= nextReleaseAt.current) {
-            let released = false;
+          if (riverFirstFill.current) {
+            // First frame in a scene: populate the whole river at once (scattered), so
+            // it's full the instant you arrive — independent of the frame rate.
+            for (const f of pool) {
+              if (anims.size >= LK_RIVER_MAX) break;
+              if (anims.has(f.id) || retired.has(f.id)) continue;
+              anims.set(f.id, backlogAnim(sc, true));
+            }
+            if (pool.length > 0) riverFirstFill.current = false; // wait for the pool if it hasn't loaded yet
+          } else if (nowMs >= nextReleaseAt.current) {
+            // Afterwards, released krathongs trickle in one at a time from upstream.
             for (const f of pool) {
               if (anims.has(f.id) || retired.has(f.id)) continue;
-              anims.set(f.id, backlogAnim(sc, firstFill));
-              released = true;
+              anims.set(f.id, backlogAnim(sc, false));
               break;
             }
-            if (!firstFill) nextReleaseAt.current = nowMs + LK_RIVER_RELEASE_MS;
-            if (!released || anims.size >= LK_RIVER_MAX) riverFirstFill.current = false;
+            nextReleaseAt.current = nowMs + LK_RIVER_RELEASE_MS;
           }
         }
 
