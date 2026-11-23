@@ -196,10 +196,15 @@ export const LK_FLOAT_COOLDOWN_S = 20;
 // which frees a slot for the next queued one to drift in from upstream. A freshly
 // floated krathong (the player's own, or one that just arrived live) jumps the
 // queue and appears at the pier immediately.
-/** Max krathongs drifting on the water at once. Tune for mobile perf (20–30). */
+/** Soft cap: the backlog fills the river up to this many. Tune for mobile (20–30). */
 export const LK_RIVER_MAX = 24;
-/** A krathong this new (ms) is "fresh": it skips the queue and drops at the pier. */
-export const LK_RIVER_FRESH_MS = 15000;
+/**
+ * Hard ceiling: the most that can ever drift at once. Freshly arrived krathongs may
+ * push past the soft cap up to here (so a busy night still shows live activity), but
+ * no further — above it, other people's new krathongs wait at the head of the queue.
+ * The player's OWN krathong always drops immediately, even past this ceiling.
+ */
+export const LK_RIVER_HARD_MAX = LK_RIVER_MAX + 8;
 /** Min gap between two queued releases, so the backlog trickles in (ms). */
 export const LK_RIVER_RELEASE_MS = 1400;
 /** How far past the lane's left edge a krathong drifts before it retires (map px). */

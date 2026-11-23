@@ -21,7 +21,7 @@ import {
   LK_MAP_W,
   LK_NAME_MAX,
   LK_RIVER_EXIT_MARGIN,
-  LK_RIVER_FRESH_MS,
+  LK_RIVER_HARD_MAX,
   LK_RIVER_MAX,
   LK_RIVER_RELEASE_MS,
   LK_SCENES,
@@ -163,7 +163,7 @@ export default function LoyKrathongGame() {
 
   const activePlayer = entered ? player : null;
   const room = useRoom(activePlayer, roomParam, scene);
-  const { others, floats, sendMove, setMyState, announce, addFloat } = room;
+  const { others, floats, liveFloatIds, sendMove, setMyState, announce, addFloat } = room;
   useEffect(() => {
     krathongRef.current = krathong;
   }, [krathong]);
@@ -280,14 +280,31 @@ export default function LoyKrathongGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Testing aid (only with ?preview=1): report the river budget from the console.
+    // Testing aids (only with ?preview=1): read the river budget, and simulate live
+    // arrivals. __lkAdd only mutates client state (same path as a realtime INSERT) —
+    // it never writes to the database.
     if (preview) {
-      (window as unknown as { __lkRiver?: () => unknown }).__lkRiver = () => ({
+      const w = window as unknown as { __lkRiver?: () => unknown; __lkAdd?: (n?: number) => void };
+      w.__lkRiver = () => ({
         onWater: floatAnims.current.size,
-        cap: LK_RIVER_MAX,
+        softCap: LK_RIVER_MAX,
+        hardCap: LK_RIVER_HARD_MAX,
         pool: floatsRef.current.length,
         retired: retiredFloats.current.size,
       });
+      w.__lkAdd = (n = 1) => {
+        for (let i = 0; i < n; i++) {
+          addFloat({
+            id: `sim-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            display_name: `ซิม${Math.floor(Math.random() * 99)}`,
+            design: LK_DESIGNS[i % LK_DESIGNS.length],
+            wish: '',
+            to_name: null,
+            color: 'pink',
+            created_at: new Date().toISOString(),
+          });
+        }
+      };
     }
 
     let raf = 0;
@@ -311,7 +328,9 @@ export default function LoyKrathongGame() {
       const lane = sc.lanes[laneIdx];
       return {
         lane: laneIdx,
-        x: scatter ? lane.x + Math.random() * lane.w : lane.x + lane.w,
+        // Scatter across the lane on first fill; otherwise enter in the rightmost band
+        // (staggered, so several arriving together don't line up).
+        x: scatter ? lane.x + Math.random() * lane.w : lane.x + lane.w - Math.random() * 140,
         y: lane.y + Math.random() * lane.h,
         phase: Math.random() * Math.PI * 2,
         speed: 11 + Math.random() * 6,
@@ -426,17 +445,25 @@ export default function LoyKrathongGame() {
           }
         }
 
-        // Fresh krathongs (the player's own, or ones that just arrived live) jump
-        // the queue and drop at the pier immediately.
+        // The player's OWN krathong always drops at the pier immediately — even past
+        // the hard ceiling — so they always watch their own float out.
         for (const f of pool) {
           if (anims.has(f.id) || retired.has(f.id)) continue;
-          const ageMs = nowMs - Date.parse(f.created_at);
-          const fresh = ownFloatIds.current.has(f.id) || (Number.isFinite(ageMs) && ageMs < LK_RIVER_FRESH_MS);
-          if (fresh) anims.set(f.id, pierAnim(sc));
+          if (ownFloatIds.current.has(f.id)) anims.set(f.id, pierAnim(sc));
         }
 
-        // Backlog: fill up to the cap. The first fill populates the scene at once
-        // (scattered); after that releases trickle in one at a time from upstream.
+        // Other people's krathongs that arrived live (realtime) jump the backlog queue
+        // and drift in from upstream — but only up to the HARD ceiling. On a busy night,
+        // once the river is full the extra live ones wait at the head of the queue
+        // (newest first) and come in as drift-offs free a slot below the ceiling.
+        for (const f of pool) {
+          if (anims.size >= LK_RIVER_HARD_MAX) break;
+          if (anims.has(f.id) || retired.has(f.id)) continue;
+          if (liveFloatIds.current.has(f.id)) anims.set(f.id, backlogAnim(sc, false));
+        }
+
+        // Backlog (older krathongs): fill up to the soft cap. The first fill populates
+        // the scene at once (scattered); after that releases trickle in one at a time.
         if (anims.size < LK_RIVER_MAX) {
           const firstFill = riverFirstFill.current;
           if (firstFill || nowMs >= nextReleaseAt.current) {
@@ -635,7 +662,7 @@ export default function LoyKrathongGame() {
     if (debug) (window as unknown as { __lk?: unknown }).__lk = debug;
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [entered, assetsReady, player, others, sendMove, setMyState, switchScene, preview]);
+  }, [entered, assetsReady, player, others, liveFloatIds, sendMove, setMyState, switchScene, preview]);
 
   // ---- actions ------------------------------------------------------------
   const saveLook = useCallback(

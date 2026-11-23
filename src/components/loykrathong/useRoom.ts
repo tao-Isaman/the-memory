@@ -101,6 +101,9 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [floats, setFloats] = useState<FloatItem[]>([]);
   const [floatCount, setFloatCount] = useState(0);
+  // Ids that arrived while watching (realtime INSERT or this player's own float), as
+  // opposed to the initial page-load batch. These jump the river queue.
+  const liveFloatIds = useRef<Set<string>>(new Set());
   const others = useRef<Map<string, RemotePlayer>>(new Map());
   const channel = useRef<RealtimeChannel | null>(null);
   const myState = useRef<MyState>({ x: 0, y: 0, vx: 0, vy: 0, moving: false, krathong: null });
@@ -127,6 +130,7 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
   }, []);
 
   const addFloat = useCallback((f: FloatItem) => {
+    liveFloatIds.current.add(f.id);
     setFloats((prev) => {
       if (prev.some((p) => p.id === f.id)) return prev;
       return [f, ...prev].slice(0, 80);
@@ -337,5 +341,5 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
     [me],
   );
 
-  return { room, onlineCount, others, chat, floats, floatCount, addFloat, sendMove, setMyState, announce, sendChat };
+  return { room, onlineCount, others, chat, floats, floatCount, liveFloatIds, addFloat, sendMove, setMyState, announce, sendChat };
 }
