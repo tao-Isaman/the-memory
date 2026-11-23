@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import { getSupabaseBrowserClient } from '@/lib/supabase';
 import {
+  LK_DESIGNS,
   LK_ROOM_COUNT,
   LK_ROOM_MAX,
   type Accessory,
@@ -101,6 +102,9 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [floats, setFloats] = useState<FloatItem[]>([]);
   const [floatCount, setFloatCount] = useState(0);
+  // Ids that arrived while watching (realtime INSERT or this player's own float), as
+  // opposed to the initial page-load batch. These jump the river queue.
+  const liveFloatIds = useRef<Set<string>>(new Set());
   const others = useRef<Map<string, RemotePlayer>>(new Map());
   const channel = useRef<RealtimeChannel | null>(null);
   const myState = useRef<MyState>({ x: 0, y: 0, vx: 0, vy: 0, moving: false, krathong: null });
@@ -127,6 +131,7 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
   }, []);
 
   const addFloat = useCallback((f: FloatItem) => {
+    liveFloatIds.current.add(f.id);
     setFloats((prev) => {
       if (prev.some((p) => p.id === f.id)) return prev;
       return [f, ...prev].slice(0, 80);
@@ -337,5 +342,23 @@ export function useRoom(me: PlayerIdentity | null, initialRoom: number | null, s
     [me],
   );
 
-  return { room, onlineCount, others, chat, floats, floatCount, addFloat, sendMove, setMyState, announce, sendChat };
+  /**
+   * Testing only (?preview=1): inject synthetic backlog floats — the initial-batch
+   * path, NOT marked live and never written to the database — to load-test the river.
+   */
+  const seedBacklog = useCallback((n: number) => {
+    const items: FloatItem[] = Array.from({ length: n }, (_, i) => ({
+      id: `seed-${Date.now()}-${i}`,
+      display_name: `เก่า${i}`,
+      design: LK_DESIGNS[i % LK_DESIGNS.length],
+      wish: '',
+      to_name: null,
+      color: 'pink',
+      created_at: new Date(Date.now() - 3_600_000).toISOString(),
+    }));
+    setFloats((prev) => [...prev, ...items].slice(0, 400));
+    setFloatCount((c) => c + n);
+  }, []);
+
+  return { room, onlineCount, others, chat, floats, floatCount, liveFloatIds, addFloat, seedBacklog, sendMove, setMyState, announce, sendChat };
 }
