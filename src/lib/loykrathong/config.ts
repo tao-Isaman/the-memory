@@ -189,6 +189,27 @@ export const LK_CHAT_MAX = 120;
 /** Seconds a guest must wait between two krathongs (server-enforced). */
 export const LK_FLOAT_COOLDOWN_S = 20;
 
+// ---- River display budget (client-side only; does not touch the DB) --------
+// The river holds thousands of krathongs over the evening, but only a handful can
+// drift on screen at once without janking a phone. We cap how many float at a time
+// and queue the rest: an on-water krathong drifts off the left edge and retires,
+// which frees a slot for the next queued one to drift in from upstream. A freshly
+// floated krathong (the player's own, or one that just arrived live) jumps the
+// queue and appears at the pier immediately.
+/** Soft cap: the backlog fills the river up to this many. Tune for mobile (20–30). */
+export const LK_RIVER_MAX = 24;
+/**
+ * Hard ceiling: the most that can ever drift at once. Freshly arrived krathongs may
+ * push past the soft cap up to here (so a busy night still shows live activity), but
+ * no further — above it, other people's new krathongs wait at the head of the queue.
+ * The player's OWN krathong always drops immediately, even past this ceiling.
+ */
+export const LK_RIVER_HARD_MAX = LK_RIVER_MAX + 8;
+/** Min gap between two queued releases, so the backlog trickles in (ms). */
+export const LK_RIVER_RELEASE_MS = 1400;
+/** How far past the lane's left edge a krathong drifts before it retires (map px). */
+export const LK_RIVER_EXIT_MARGIN = 48;
+
 /**
  * Event window (Bangkok time). Loy Krathong 2569 is 24 Nov 2026; the village is
  * open early (from 8 Oct 2026) as a marketing run-up. After the window the page
