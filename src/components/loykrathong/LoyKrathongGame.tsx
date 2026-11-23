@@ -163,7 +163,7 @@ export default function LoyKrathongGame() {
 
   const activePlayer = entered ? player : null;
   const room = useRoom(activePlayer, roomParam, scene);
-  const { others, floats, liveFloatIds, sendMove, setMyState, announce, addFloat } = room;
+  const { others, floats, liveFloatIds, sendMove, setMyState, announce, addFloat, seedBacklog } = room;
   useEffect(() => {
     krathongRef.current = krathong;
   }, [krathong]);
@@ -284,7 +284,12 @@ export default function LoyKrathongGame() {
     // arrivals. __lkAdd only mutates client state (same path as a realtime INSERT) —
     // it never writes to the database.
     if (preview) {
-      const w = window as unknown as { __lkRiver?: () => unknown; __lkAdd?: (n?: number) => void };
+      const w = window as unknown as {
+        __lkRiver?: () => unknown;
+        __lkAdd?: (n?: number) => void;
+        __lkSeed?: (n?: number) => void;
+      };
+      w.__lkSeed = (n = 100) => seedBacklog(n);
       w.__lkRiver = () => ({
         onWater: floatAnims.current.size,
         softCap: LK_RIVER_MAX,
@@ -662,7 +667,7 @@ export default function LoyKrathongGame() {
     if (debug) (window as unknown as { __lk?: unknown }).__lk = debug;
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [entered, assetsReady, player, others, liveFloatIds, sendMove, setMyState, switchScene, preview]);
+  }, [entered, assetsReady, player, others, liveFloatIds, sendMove, setMyState, switchScene, preview, addFloat, seedBacklog]);
 
   // ---- actions ------------------------------------------------------------
   const saveLook = useCallback(
