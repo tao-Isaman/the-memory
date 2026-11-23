@@ -20,6 +20,10 @@ import {
   LK_MAP_H,
   LK_MAP_W,
   LK_NAME_MAX,
+  LK_RIVER_EXIT_MARGIN,
+  LK_RIVER_FRESH_MS,
+  LK_RIVER_MAX,
+  LK_RIVER_RELEASE_MS,
   LK_SCENES,
   LK_TO_MAX,
   LK_WALK_SPEED,
@@ -148,7 +152,14 @@ export default function LoyKrathongGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const floatsRef = useRef<FloatItem[]>([]);
+  // The krathongs currently drifting on the water (capped at LK_RIVER_MAX). An id
+  // in `floatAnims` is "on the water"; `retiredFloats` are ones that already drifted
+  // off and must not come back; `ownFloatIds` always jump the queue on this device.
   const floatAnims = useRef<Map<string, FloatAnim>>(new Map());
+  const retiredFloats = useRef<Set<string>>(new Set());
+  const ownFloatIds = useRef<Set<string>>(new Set());
+  const riverFirstFill = useRef(true);
+  const nextReleaseAt = useRef(0);
 
   const activePlayer = entered ? player : null;
   const room = useRoom(activePlayer, roomParam, scene);
@@ -248,7 +259,11 @@ export default function LoyKrathongGame() {
     me.current.vy = 0;
     me.current.moving = false;
     exitLockUntil.current = performance.now() + EXIT_COOLDOWN_MS;
-    floatAnims.current.clear(); // lanes differ per scene
+    // lanes differ per scene — rebuild the river for the new scene. Retired ids
+    // carry over so a krathong that already drifted off does not reappear.
+    floatAnims.current.clear();
+    riverFirstFill.current = true;
+    nextReleaseAt.current = 0;
     setFading(true);
     setScene(to);
     setShowHint(true);
@@ -265,35 +280,42 @@ export default function LoyKrathongGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Testing aid (only with ?preview=1): report the river budget from the console.
+    if (preview) {
+      (window as unknown as { __lkRiver?: () => unknown }).__lkRiver = () => ({
+        onWater: floatAnims.current.size,
+        cap: LK_RIVER_MAX,
+        pool: floatsRef.current.length,
+        retired: retiredFloats.current.size,
+      });
+    }
+
     let raf = 0;
     let last = performance.now();
     const lastSend = { dir: -99, moving: false, k: null as KrathongDesign | null, at: 0 };
     const playerLook = () => player;
 
-    const ensureFloatAnim = (f: FloatItem, sc: SceneConfig, now: number): FloatAnim => {
-      let a = floatAnims.current.get(f.id);
-      if (a) return a;
-      const ageMs = now - Date.parse(f.created_at);
-      const fresh = Number.isFinite(ageMs) && ageMs < 15000;
-      const laneIdx = fresh ? sc.dropLane : Math.floor(Math.random() * sc.lanes.length);
+    // A krathong dropped fresh at the pier (the player's own, or one that just arrived live).
+    const pierAnim = (sc: SceneConfig): FloatAnim => ({
+      lane: sc.dropLane,
+      x: sc.drop.x + (Math.random() * 30 - 15),
+      y: sc.drop.y + (Math.random() * 16 - 8),
+      phase: Math.random() * Math.PI * 2,
+      speed: 11 + Math.random() * 6,
+    });
+    // A backlog krathong. On a scene's first fill it is scattered across the lane
+    // (so the river looks already-populated on arrival); afterwards a released one
+    // drifts in from the right (upstream) edge.
+    const backlogAnim = (sc: SceneConfig, scatter: boolean): FloatAnim => {
+      const laneIdx = Math.floor(Math.random() * sc.lanes.length);
       const lane = sc.lanes[laneIdx];
-      a = fresh
-        ? {
-            lane: laneIdx,
-            x: sc.drop.x + (Math.random() * 30 - 15),
-            y: sc.drop.y + (Math.random() * 16 - 8),
-            phase: Math.random() * Math.PI * 2,
-            speed: 11 + Math.random() * 6,
-          }
-        : {
-            lane: laneIdx,
-            x: lane.x + Math.random() * lane.w,
-            y: lane.y + Math.random() * lane.h,
-            phase: Math.random() * Math.PI * 2,
-            speed: 11 + Math.random() * 6,
-          };
-      floatAnims.current.set(f.id, a);
-      return a;
+      return {
+        lane: laneIdx,
+        x: scatter ? lane.x + Math.random() * lane.w : lane.x + lane.w,
+        y: lane.y + Math.random() * lane.h,
+        phase: Math.random() * Math.PI * 2,
+        speed: 11 + Math.random() * 6,
+      };
     };
 
     const update = (dt: number, now: number) => {
@@ -379,14 +401,62 @@ export default function LoyKrathongGame() {
       }
       if (myBubble.current && myBubble.current.until < Date.now()) myBubble.current = null;
 
-      // river
-      for (const f of floatsRef.current) {
-        const a = ensureFloatAnim(f, sc, Date.now());
-        const lane = sc.lanes[a.lane] ?? sc.lanes[0];
-        a.x -= a.speed * dt;
-        if (a.x < lane.x) {
-          a.x = lane.x + lane.w;
-          a.y = lane.y + Math.random() * lane.h;
+      // river: only LK_RIVER_MAX krathongs drift at once; the rest wait in a queue.
+      {
+        const pool = floatsRef.current;
+        const anims = floatAnims.current;
+        const retired = retiredFloats.current;
+        const nowMs = Date.now();
+        const poolIds = new Set<string>();
+        for (const f of pool) poolIds.add(f.id);
+
+        // Drift the on-water krathongs; retire any that drift off the left edge, or
+        // that fell out of the pool (superseded by newer floats). Retired ones do
+        // not wrap back — they are gone, which frees a slot for the queue.
+        for (const [id, a] of anims) {
+          if (!poolIds.has(id)) {
+            anims.delete(id);
+            continue;
+          }
+          const lane = sc.lanes[a.lane] ?? sc.lanes[0];
+          a.x -= a.speed * dt;
+          if (a.x < lane.x - LK_RIVER_EXIT_MARGIN) {
+            anims.delete(id);
+            retired.add(id);
+          }
+        }
+
+        // Fresh krathongs (the player's own, or ones that just arrived live) jump
+        // the queue and drop at the pier immediately.
+        for (const f of pool) {
+          if (anims.has(f.id) || retired.has(f.id)) continue;
+          const ageMs = nowMs - Date.parse(f.created_at);
+          const fresh = ownFloatIds.current.has(f.id) || (Number.isFinite(ageMs) && ageMs < LK_RIVER_FRESH_MS);
+          if (fresh) anims.set(f.id, pierAnim(sc));
+        }
+
+        // Backlog: fill up to the cap. The first fill populates the scene at once
+        // (scattered); after that releases trickle in one at a time from upstream.
+        if (anims.size < LK_RIVER_MAX) {
+          const firstFill = riverFirstFill.current;
+          if (firstFill || nowMs >= nextReleaseAt.current) {
+            let released = false;
+            for (const f of pool) {
+              if (anims.has(f.id) || retired.has(f.id)) continue;
+              anims.set(f.id, backlogAnim(sc, firstFill));
+              released = true;
+              break;
+            }
+            if (!firstFill) nextReleaseAt.current = nowMs + LK_RIVER_RELEASE_MS;
+            if (!released || anims.size >= LK_RIVER_MAX) riverFirstFill.current = false;
+          }
+        }
+
+        // Keep the retired set bounded over a long evening (ids no longer in the pool).
+        if (retired.size > 600) {
+          const keep = new Set<string>();
+          for (const id of retired) if (poolIds.has(id)) keep.add(id);
+          retiredFloats.current = keep;
         }
       }
     };
@@ -565,7 +635,7 @@ export default function LoyKrathongGame() {
     if (debug) (window as unknown as { __lk?: unknown }).__lk = debug;
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
-  }, [entered, assetsReady, player, others, sendMove, setMyState, switchScene]);
+  }, [entered, assetsReady, player, others, sendMove, setMyState, switchScene, preview]);
 
   // ---- actions ------------------------------------------------------------
   const saveLook = useCallback(
@@ -620,6 +690,8 @@ export default function LoyKrathongGame() {
         setFormError(code === 'rate' ? t('errors.rate') : code === 'closed' ? t('errors.closed') : code === 'wish' ? t('errors.wish') : t('errors.generic'));
         return;
       }
+      // Mark it as ours so it always jumps the river queue on this device.
+      ownFloatIds.current.add(data.float.id);
       addFloat(data.float);
       setKrathong(null);
       setWish('');
