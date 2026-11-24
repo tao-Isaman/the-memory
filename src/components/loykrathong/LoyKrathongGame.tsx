@@ -30,6 +30,8 @@ import {
   LK_RIVER_HARD_MAX,
   LK_RIVER_MAX,
   LK_RIVER_RELEASE_MS,
+  LK_SCENE_FPS,
+  LK_SCENE_FRAMES,
   LK_SCENES,
   LK_SKY_MAX,
   LK_TO_MAX,
@@ -42,6 +44,8 @@ import {
   isWalkable,
   krathongSpriteUrl,
   lanternSpriteUrl,
+  sceneExtraFrameUrls,
+  sceneFrameUrl,
   type Accessory,
   type EventPhase,
   type FloatDesign,
@@ -227,6 +231,8 @@ export default function LoyKrathongGame() {
   const lanternAnims = useRef<Map<string, LanternAnim>>(new Map());
   const skyFirstFill = useRef(true);
   const nextLanternAt = useRef(0);
+  // Scenes animate as a short loop; held on frame 0 when the viewer prefers reduced motion.
+  const reduceMotion = useRef(false);
 
   const activePlayer = entered ? player : null;
   const room = useRoom(activePlayer, roomParam, scene);
@@ -251,9 +257,13 @@ export default function LoyKrathongGame() {
     setDraftAcc(p.accessory);
     const forceTouch = process.env.NODE_ENV !== 'production' && params.get('touch') === '1';
     setIsTouch(forceTouch || window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window);
+    reduceMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const start = sceneRef.current;
     me.current.x = start.spawn.x + (Math.random() * 80 - 40);
     me.current.y = start.spawn.y + (Math.random() * 40 - 20);
+    // The base map (frame 0) gates "ready"; the animation frames stream in after
+    // and the loop falls back to frame 0 until each is loaded, so the scene never
+    // blocks on them.
     Promise.all([
       loadImage(start.mapUrl),
       ...LK_DESIGNS.map((d) => loadImage(krathongSpriteUrl(d))),
@@ -261,7 +271,8 @@ export default function LoyKrathongGame() {
     ])
       .then(() => setAssetsReady(true))
       .catch(() => setAssetsReady(true));
-    // Prefetch the other scenes in the background.
+    for (const u of sceneExtraFrameUrls(start.id)) void loadImage(u).catch(() => {});
+    // Prefetch the other scenes (base maps now; their animation frames lazily on entry).
     for (const id of LK_SCENES) if (id !== start.id) void loadImage(SCENES[id].mapUrl).catch(() => {});
   }, [preview, params]);
 
@@ -345,6 +356,7 @@ export default function LoyKrathongGame() {
     setScene(to);
     setShowHint(true);
     void loadImage(next.mapUrl).catch(() => {});
+    for (const u of sceneExtraFrameUrls(to)) void loadImage(u).catch(() => {});
     window.setTimeout(() => setFading(false), 350);
   }, []);
 
@@ -761,7 +773,16 @@ export default function LoyKrathongGame() {
       ctx.setTransform(zoom * dpr, 0, 0, zoom * dpr, -camX * zoom * dpr, -camY * zoom * dpr);
       ctx.imageSmoothingEnabled = false;
 
-      const map = getImage(sc.mapUrl);
+      // Scene animation: forward-wrapping loop (0→1→…→0) at LK_SCENE_FPS. Held on
+      // frame 0 when the viewer prefers reduced motion or the tab is hidden. Any
+      // frame that hasn't finished loading falls back to the base map, so the loop
+      // never shows a gap.
+      let frameIdx = 0;
+      if (!reduceMotion.current && !document.hidden) {
+        frameIdx = Math.floor(now / (1000 / LK_SCENE_FPS)) % LK_SCENE_FRAMES;
+      }
+      let map = frameIdx > 0 ? getImage(sceneFrameUrl(sc.id, frameIdx)) : null;
+      if (!map) map = getImage(sc.mapUrl);
       if (map) ctx.drawImage(map, 0, 0, LK_MAP_W, LK_MAP_H);
 
       // river krathongs (oldest first so the newest draw on top)
