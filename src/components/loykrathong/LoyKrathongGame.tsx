@@ -605,7 +605,8 @@ export default function LoyKrathongGame() {
         const pool = floatsRef.current;
         const sky = lanternAnims.current;
         const retired = retiredFloats.current;
-        const nowMs = Date.now();
+        // Use the rAF clock (same `now` the draw uses for life/alpha), NOT Date.now().
+        const nowMs = now;
         const poolIds = new Set<string>();
         for (const f of pool) poolIds.add(f.id);
 
