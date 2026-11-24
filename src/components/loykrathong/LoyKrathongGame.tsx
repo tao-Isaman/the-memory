@@ -97,10 +97,11 @@ interface LanternAnim {
   rotPhase: number;
   riseMul: number; // 0.85..1.15, so the sky feels layered (different speeds)
   flickerPhase: number;
+  driftVx: number; // slow steady lateral drift (map px/s) so the sky isn't a rigid column
+  own: boolean; // this device's own lantern (launches from the pier + shows a label briefly)
 }
 
 const FLOAT_LABELS = 14; // newest krathongs that show name/to under them
-const SKY_LABELS = 6; // newest lanterns that show a name under them
 const BUBBLE_MS = 6000;
 const CHAT_COOLDOWN_MS = 1500;
 const KRATHONG_RIVER_PX = 56;
@@ -127,8 +128,9 @@ function warmGlow(): HTMLCanvasElement {
   c.height = s;
   const g = c.getContext('2d')!;
   const grad = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
-  grad.addColorStop(0, 'rgba(255,224,150,0.95)');
-  grad.addColorStop(0.45, 'rgba(255,150,60,0.4)');
+  grad.addColorStop(0, 'rgba(255,246,214,1)'); // bright warm-white core — reads as a flame
+  grad.addColorStop(0.3, 'rgba(255,201,112,0.62)');
+  grad.addColorStop(0.6, 'rgba(255,150,60,0.28)');
   grad.addColorStop(1, 'rgba(255,120,40,0)');
   g.fillStyle = grad;
   g.fillRect(0, 0, s, s);
@@ -422,18 +424,25 @@ export default function LoyKrathongGame() {
       };
     };
 
-    // A lantern released from the pier into the sky. `agedMs` back-dates the birth so
-    // first-fill lanterns are already partway up (the sky looks alive on arrival).
-    const lanternBirth = (sc: SceneConfig, nowMs: number, agedMs: number, design: LanternDesign): LanternAnim => ({
+    // A lantern rising into the sky. `agedMs` back-dates the birth so first-fill
+    // lanterns are already partway up (the sky looks alive on arrival). The player's
+    // OWN lantern lifts off from the pier; everyone else's is scattered across the
+    // scene width so the sky reads as many lanterns, not one stacked column.
+    const LAUNCH_MARGIN = 150; // keep launches away from the scene edges / HUD
+    const lanternBirth = (sc: SceneConfig, nowMs: number, agedMs: number, design: LanternDesign, own: boolean): LanternAnim => ({
       design,
-      x0: sc.drop.x + (Math.random() * 40 - 20),
-      y0: sc.drop.y + (Math.random() * 20 - 10),
+      x0: own
+        ? sc.drop.x + (Math.random() * 40 - 20)
+        : LAUNCH_MARGIN + Math.random() * (LK_MAP_W - 2 * LAUNCH_MARGIN),
+      y0: sc.drop.y + (Math.random() * 40 - 20),
       bornAt: nowMs - agedMs,
       swayPhase: Math.random() * Math.PI * 2,
       swaySeed: 0.7 + Math.random() * 0.6,
       rotPhase: Math.random() * Math.PI * 2,
       riseMul: 0.85 + Math.random() * 0.3,
       flickerPhase: Math.random() * Math.PI * 2,
+      driftVx: (Math.random() * 2 - 1) * 10, // -10..10 map px/s lateral drift
+      own,
     });
     const lanternDesignOf = (f: FloatItem): LanternDesign =>
       (LK_LANTERN_DESIGNS as readonly string[]).includes(f.design) ? (f.design as LanternDesign) : LK_LANTERN_DESIGNS[0];
@@ -617,18 +626,19 @@ export default function LoyKrathongGame() {
           }
         }
 
-        // Own lantern: rises immediately, even past the cap.
+        // Own lantern: lifts off from the pier immediately, even past the cap.
         for (const f of pool) {
           if (f.kind !== 'lantern') continue;
           if (sky.has(f.id) || retired.has(f.id)) continue;
-          if (ownFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+          if (ownFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f), true));
         }
-        // Live arrivals from other players, up to the cap.
+        // Live arrivals from other players: scattered across the scene, with a small
+        // random head-start so a burst doesn't rise as one stacked column.
         for (const f of pool) {
           if (sky.size >= LK_SKY_MAX) break;
           if (f.kind !== 'lantern') continue;
           if (sky.has(f.id) || retired.has(f.id)) continue;
-          if (liveFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+          if (liveFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, Math.random() * 1800, lanternDesignOf(f), false));
         }
         // Backlog: scatter at mixed heights on first fill, then trickle in gently.
         if (sky.size < LK_SKY_MAX) {
@@ -637,14 +647,14 @@ export default function LoyKrathongGame() {
               if (sky.size >= LK_SKY_MAX) break;
               if (f.kind !== 'lantern') continue;
               if (sky.has(f.id) || retired.has(f.id)) continue;
-              sky.set(f.id, lanternBirth(sc, nowMs, Math.random() * LK_LANTERN_LIFE_MS * 0.8, lanternDesignOf(f)));
+              sky.set(f.id, lanternBirth(sc, nowMs, Math.random() * LK_LANTERN_LIFE_MS * 0.8, lanternDesignOf(f), false));
             }
             if (pool.length > 0) skyFirstFill.current = false;
           } else if (nowMs >= nextLanternAt.current) {
             for (const f of pool) {
               if (f.kind !== 'lantern') continue;
               if (sky.has(f.id) || retired.has(f.id)) continue;
-              sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+              sky.set(f.id, lanternBirth(sc, nowMs, Math.random() * 600, lanternDesignOf(f), false));
               break;
             }
             nextLanternAt.current = nowMs + LANTERN_RELEASE_MS;
@@ -822,9 +832,12 @@ export default function LoyKrathongGame() {
         const t = Math.min(1, life / LK_LANTERN_LIFE_MS);
         const climb = easeOut(t) * LK_LANTERN_RISE_PX * (LK_LANTERN_LIFE_MS / 1000) * la.riseMul;
         const liftBob = life < 500 ? -Math.sin((life / 500) * Math.PI) * 5 : 0; // lift-off hop
-        const cx = la.x0 + Math.sin(life / 1300 + la.swayPhase) * LK_LANTERN_SWAY_PX * la.swaySeed * (0.3 + t);
+        const cx =
+          la.x0 +
+          la.driftVx * (life / 1000) + // slow steady lateral drift
+          Math.sin(life / 1300 + la.swayPhase) * LK_LANTERN_SWAY_PX * la.swaySeed * (0.3 + t);
         const cy = la.y0 - climb + liftBob;
-        const scale = 1 - 0.3 * easeOut(t);
+        const scale = 1 - 0.52 * easeOut(t); // shrink more with height so the top reads as far away
         const rot = Math.sin(life / 1600 + la.rotPhase) * 0.09;
         const flick = 0.78 + 0.22 * Math.sin(life / 110 + la.flickerPhase);
         let alpha = 1;
@@ -834,12 +847,17 @@ export default function LoyKrathongGame() {
         if (alpha <= 0) continue;
         const size = LANTERN_SKY_PX * scale;
 
-        // warm halo (additive), pulsing with the flame flicker
+        // warm halo (additive 'lighter'), pulsing with the flame flicker: a wide soft
+        // glow plus a tighter bright core, so the lantern reads as a light source even
+        // over the daylight-green village map.
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = alpha * flick * 0.55;
-        const halo = size * 1.7;
+        const halo = size * 2.6;
+        ctx.globalAlpha = alpha * (0.55 + 0.2 * flick);
         ctx.drawImage(glow, cx - halo / 2, cy - halo / 2, halo, halo);
+        const core = size * 1.25;
+        ctx.globalAlpha = alpha * (0.5 + 0.35 * flick);
+        ctx.drawImage(glow, cx - core / 2, cy - core / 2 - size * 0.05, core, core);
         ctx.restore();
 
         // ember sparks trailing below the flame
@@ -864,10 +882,12 @@ export default function LoyKrathongGame() {
         if (img) ctx.drawImage(img, -size / 2, -size / 2, size, size);
         ctx.restore();
 
-        if (i < SKY_LABELS) {
+        // Only the player's OWN lantern shows a name, and only briefly after launch —
+        // other people's lanterns stay label-free so the sky doesn't get cluttered.
+        if (la.own && life < 4200) {
           const label = f.to_name ? `${f.display_name} → ${f.to_name}` : f.display_name;
           ctx.save();
-          ctx.globalAlpha = alpha;
+          ctx.globalAlpha = alpha * Math.min(1, (4200 - life) / 800);
           drawTag(label, cx, cy + size / 2 + 8, '11px Kanit, sans-serif', '#fff', 'rgba(0,0,0,0.4)');
           ctx.restore();
         }
