@@ -101,6 +101,7 @@ Every page and endpoint under `src/app`, grouped by what a person does with it. 
 | Loy Krathong content pages (3 slugs) with template CTA | anyone | `/[locale]/loykrathong/[slug]` | Search engines; CTA opens create with the Loy template | `src/app/[locale]/(landing)/loykrathong/[slug]/page.tsx`, `src/data/loy-pages.ts`, `src/components/loykrathong/LoyTemplateCta.tsx` | — |
 | Float a krathong (wish, optional name, cooldown) | anyone | `/api/loykrathong/float` | In game at the pier, "ลอยกระทง" | `src/app/api/loykrathong/float/route.ts`, `src/lib/profanity.ts` | `src/lib/api-auth.test.mjs` |
 | River contents (count + latest floats) | anyone | `/api/loykrathong/floats` | Loaded by the game | `src/app/api/loykrathong/floats/route.ts`, `src/components/loykrathong/useRoom.ts` | `src/lib/api-auth.test.mjs` |
+| Christmas/New-Year gift mini-game (guess the date code) + login→create funnel | anyone | `/[locale]/gift` | QR-only seasonal link (not indexed); drag the digits to today's date, then the CTA → login → the create page, prefilled | `src/app/[locale]/(landing)/gift/page.tsx`, `src/components/gift/GiftGame.tsx`, `src/components/gift/GiftCodeScene.tsx`, `src/components/gift/GiftEffects.tsx` | `src/lib/gift/date.test.mjs`, `src/lib/gift/funnel.test.mjs` |
 
 The once-a-day season popup ("ชวนแฟนเลย") on app pages is covered by `src/lib/loykrathong/popup.test.mjs`.
 

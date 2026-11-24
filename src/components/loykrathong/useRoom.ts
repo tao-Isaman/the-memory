@@ -8,6 +8,8 @@ import {
   LK_ROOM_COUNT,
   LK_ROOM_MAX,
   type Accessory,
+  type FloatDesign,
+  type FloatKind,
   type KrathongDesign,
   type SceneId,
   type ShellColor,
@@ -40,7 +42,9 @@ export interface ChatMessage {
 export interface FloatItem {
   id: string;
   display_name: string;
-  design: KrathongDesign;
+  design: FloatDesign;
+  /** 'krathong' (river) or 'lantern' (sky). Absent on pre-migration rows → krathong. */
+  kind?: FloatKind;
   wish: string;
   to_name: string | null;
   color: string | null;

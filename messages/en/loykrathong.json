@@ -32,7 +32,8 @@
     "room": "Room {room}",
     "shop": "Pick a krathong",
     "float": "Float it",
-    "needKrathong": "Grab a krathong at the shop first",
+    "floatLantern": "Release it",
+    "needKrathong": "Grab a krathong or lantern at the shop first",
     "goToPier": "Got one! Walk down to the pier",
     "customize": "Dress up",
     "moveHint": "Touch and hold the left side of the screen, then drag to walk",
@@ -49,8 +50,13 @@
   "shop": {
     "heading": "Krathong shop",
     "sub": "Pick any one you like, they are all free",
+    "subLantern": "Pick any lantern, then release it at the pier — all free",
     "pick": "Take this one",
     "close": "Close",
+    "cat": {
+      "krathong": "Krathong",
+      "lantern": "Lantern"
+    },
     "designs": {
       "banana": "Banana-leaf krathong",
       "lotus": "Lotus krathong",
@@ -58,25 +64,40 @@
       "coconut": "Coconut krathong",
       "icecream": "Ice-cream krathong",
       "heart": "Heart krathong"
+    },
+    "lanterns": {
+      "red-dome": "Red dome",
+      "orange-band": "Orange band",
+      "striped": "Striped",
+      "glow-star": "Glowing star",
+      "gold": "Gold",
+      "cream": "Cream",
+      "red-flame": "Red flame",
+      "lanna-brown": "Lanna brown"
     }
   },
   "float": {
     "heading": "Make a wish",
+    "headingLantern": "Make a wish",
     "wish": "Your wish",
     "wishPlaceholder": "May...",
     "to": "For (optional)",
     "toPlaceholder": "Someone you are thinking of",
     "submit": "Float it",
+    "submitLantern": "Release it",
     "submitting": "Floating...",
     "cancel": "Not yet"
   },
   "done": {
     "heading": "Your krathong is floating",
+    "headingLantern": "Your lantern is rising",
     "body": "It is drifting down the river now. May your wish come true.",
+    "bodyLantern": "It is drifting up into the sky now. May your wish come true.",
     "share": "Invite friends to float with you",
     "copied": "Link copied",
     "again": "Float another",
-    "shareText": "I just floated a krathong online at Nong Pu Village. Come float one with me!"
+    "shareText": "I just floated a krathong online at Nong Pu Village. Come float one with me!",
+    "shareTextLantern": "I just released a sky lantern online at Nong Pu Village. Come play with me!"
   },
   "chat": {
     "placeholder": "Say something...",

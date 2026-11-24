@@ -877,6 +877,7 @@ export interface Database {
           guest_id: string
           display_name: string
           design: string
+          kind: string
           wish: string
           to_name: string | null
           color: string | null
@@ -891,6 +892,7 @@ export interface Database {
           guest_id: string
           display_name: string
           design: string
+          kind?: string
           wish: string
           to_name?: string | null
           color?: string | null
@@ -905,6 +907,7 @@ export interface Database {
           guest_id?: string
           display_name?: string
           design?: string
+          kind?: string
           wish?: string
           to_name?: string | null
           color?: string | null

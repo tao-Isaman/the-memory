@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServiceClient, getBearerUser } from '@/lib/supabase-server';
 import { cleanText, maskProfanity } from '@/lib/profanity';
 import {
-  LK_DESIGNS,
   LK_EVENT,
   LK_FLOAT_COOLDOWN_S,
   LK_NAME_MAX,
@@ -10,8 +9,11 @@ import {
   LK_TO_MAX,
   LK_WISH_MAX,
   eventPhase,
+  isDesignForKind,
+  isFloatKind,
   isSceneId,
-  type KrathongDesign,
+  type FloatDesign,
+  type FloatKind,
 } from '@/lib/loykrathong/config';
 import { isShellColor } from '@/lib/loykrathong/player';
 
@@ -21,6 +23,7 @@ interface Body {
   guestId?: string;
   name?: string;
   design?: string;
+  kind?: string;
   wish?: string;
   toName?: string;
   color?: string;
@@ -51,11 +54,12 @@ export async function POST(request: NextRequest) {
   const wish = cleanText(String(body.wish ?? ''), LK_WISH_MAX);
   const toName = cleanText(String(body.toName ?? ''), LK_TO_MAX);
   const design = String(body.design ?? '');
+  const kind: FloatKind = isFloatKind(body.kind) ? body.kind : 'krathong';
 
   if (!guestId) return NextResponse.json({ error: 'guest' }, { status: 400 });
   if (name.length < LK_NAME_MIN) return NextResponse.json({ error: 'name' }, { status: 400 });
   if (!wish) return NextResponse.json({ error: 'wish' }, { status: 400 });
-  if (!(LK_DESIGNS as readonly string[]).includes(design)) {
+  if (!isDesignForKind(kind, design)) {
     return NextResponse.json({ error: 'design' }, { status: 400 });
   }
 
@@ -73,27 +77,44 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'rate' }, { status: 429 });
   }
 
-  const { data, error } = await supabase
+  const baseRow = {
+    user_id: user?.id ?? null,
+    guest_id: guestId,
+    display_name: maskProfanity(name),
+    design: design as FloatDesign,
+    wish: maskProfanity(wish),
+    to_name: toName ? maskProfanity(toName) : null,
+    color: isShellColor(body.color) ? body.color : null,
+    room: typeof body.room === 'number' && Number.isFinite(body.room) ? Math.trunc(body.room) : null,
+    scene: isSceneId(body.scene) ? body.scene : null,
+    year: LK_EVENT.year,
+  };
+
+  // Insert with `kind`; if that column isn't there yet (migration not applied in
+  // this environment), fall back to the base columns so floating still works.
+  // Same column list on both paths (the kind we return comes from the request, not
+  // the row) so the fallback is type-identical.
+  const cols = 'id, display_name, design, wish, to_name, color, created_at';
+  let { data, error } = await supabase
     .from('krathong_floats')
-    .insert({
-      user_id: user?.id ?? null,
-      guest_id: guestId,
-      display_name: maskProfanity(name),
-      design: design as KrathongDesign,
-      wish: maskProfanity(wish),
-      to_name: toName ? maskProfanity(toName) : null,
-      color: isShellColor(body.color) ? body.color : null,
-      room: typeof body.room === 'number' && Number.isFinite(body.room) ? Math.trunc(body.room) : null,
-      scene: isSceneId(body.scene) ? body.scene : null,
-      year: LK_EVENT.year,
-    })
-    .select('id, display_name, design, wish, to_name, color, created_at')
+    .insert({ ...baseRow, kind })
+    .select(cols)
     .single();
+
+  if (error && isMissingKindColumn(error)) {
+    ({ data, error } = await supabase.from('krathong_floats').insert(baseRow).select(cols).single());
+  }
 
   if (error || !data) {
     console.error('[loykrathong] insert failed', error);
     return NextResponse.json({ error: 'db' }, { status: 500 });
   }
 
-  return NextResponse.json({ float: data });
+  // Always report the kind the client asked for, even on the fallback path.
+  return NextResponse.json({ float: { kind, ...data } });
+}
+
+/** Postgres "undefined column" (42703) for the not-yet-migrated `kind` column. */
+function isMissingKindColumn(error: { code?: string; message?: string }): boolean {
+  return error.code === '42703' || /\bkind\b/i.test(error.message ?? '');
 }

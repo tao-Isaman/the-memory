@@ -17,6 +17,12 @@ import {
   LK_COLORS,
   LK_DESIGNS,
   LK_EVENT,
+  LK_LANTERN_DESIGNS,
+  LK_LANTERN_FADE_IN_MS,
+  LK_LANTERN_FADE_OUT_MS,
+  LK_LANTERN_LIFE_MS,
+  LK_LANTERN_RISE_PX,
+  LK_LANTERN_SWAY_PX,
   LK_MAP_H,
   LK_MAP_W,
   LK_NAME_MAX,
@@ -25,6 +31,7 @@ import {
   LK_RIVER_MAX,
   LK_RIVER_RELEASE_MS,
   LK_SCENES,
+  LK_SKY_MAX,
   LK_TO_MAX,
   LK_WALK_SPEED,
   LK_WISH_MAX,
@@ -34,9 +41,13 @@ import {
   isSceneId,
   isWalkable,
   krathongSpriteUrl,
+  lanternSpriteUrl,
   type Accessory,
   type EventPhase,
+  type FloatDesign,
+  type FloatKind,
   type KrathongDesign,
+  type LanternDesign,
   type Point,
   type SceneConfig,
   type SceneExit,
@@ -65,16 +76,64 @@ interface FloatAnim {
   speed: number;
 }
 
+/** The item a player is carrying / about to float: a river krathong or a sky lantern. */
+interface Held {
+  kind: FloatKind;
+  design: FloatDesign;
+}
+
+/**
+ * A lantern rising in the sky. Position, sway, rotation, scale and alpha are all
+ * derived every frame from `bornAt` + now — nothing here mutates per frame, and the
+ * ember trail is computed inline, so the render allocates nothing per lantern.
+ */
+interface LanternAnim {
+  design: LanternDesign;
+  x0: number;
+  y0: number;
+  bornAt: number;
+  swayPhase: number;
+  swaySeed: number; // 0.7..1.3, so each lantern sways a little differently
+  rotPhase: number;
+  riseMul: number; // 0.85..1.15, so the sky feels layered (different speeds)
+  flickerPhase: number;
+}
+
 const FLOAT_LABELS = 14; // newest krathongs that show name/to under them
+const SKY_LABELS = 6; // newest lanterns that show a name under them
 const BUBBLE_MS = 6000;
 const CHAT_COOLDOWN_MS = 1500;
 const KRATHONG_RIVER_PX = 56;
+const LANTERN_SKY_PX = 52; // base draw size of a lantern (scaled down as it rises)
+const LANTERN_RELEASE_MS = 1700; // backlog lanterns trickle into the sky this often
+const LANTERN_EMBERS = 4; // tiny sparks trailing below each lantern
 const MIN_ZOOM = 0.8;
 const WALK_FRAME_MS = 140;
 const EXIT_COOLDOWN_MS = 900;
 
 function dir8(vx: number, vy: number): number {
   return Math.round(Math.atan2(vy, vx) / (Math.PI / 4));
+}
+
+const easeOut = (t: number) => 1 - (1 - t) * (1 - t); // decelerate as it climbs
+
+/** A warm radial glow, built once and reused (avoids per-frame gradient allocation). */
+let glowSprite: HTMLCanvasElement | null = null;
+function warmGlow(): HTMLCanvasElement {
+  if (glowSprite) return glowSprite;
+  const s = 96;
+  const c = document.createElement('canvas');
+  c.width = s;
+  c.height = s;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  grad.addColorStop(0, 'rgba(255,224,150,0.95)');
+  grad.addColorStop(0.45, 'rgba(255,150,60,0.4)');
+  grad.addColorStop(1, 'rgba(255,120,40,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, s, s);
+  glowSprite = c;
+  return c;
 }
 
 /** Small canvas preview of a crab look (used in the intro/customize modal). */
@@ -107,7 +166,9 @@ export default function LoyKrathongGame() {
   const [scene, setScene] = useState<SceneId>(() => (isSceneId(sceneParam) ? sceneParam : 'village'));
   const [fading, setFading] = useState(false);
   const [modal, setModal] = useState<Modal>(null);
-  const [krathong, setKrathong] = useState<KrathongDesign | null>(null);
+  const [held, setHeld] = useState<Held | null>(null);
+  const [lastKind, setLastKind] = useState<FloatKind>('krathong'); // what the 'done' screen just celebrated
+  const [shopCat, setShopCat] = useState<FloatKind>('krathong'); // which shop tab is open
   const [hotspot, setHotspot] = useState<Hotspot>(null);
   const [isTouch, setIsTouch] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -144,7 +205,7 @@ export default function LoyKrathongGame() {
   const keys = useRef<Set<string>>(new Set());
   const me = useRef<MeState>({ x: 0, y: 0, vx: 0, vy: 0, moving: false });
   const myBubble = useRef<{ text: string; until: number } | null>(null);
-  const krathongRef = useRef<KrathongDesign | null>(null);
+  const heldRef = useRef<Held | null>(null);
   const modalRef = useRef<Modal>(null);
   const sceneRef = useRef<SceneConfig>(SCENES[scene]);
   const hotspotRef = useRef<Hotspot>(null);
@@ -160,13 +221,17 @@ export default function LoyKrathongGame() {
   const ownFloatIds = useRef<Set<string>>(new Set());
   const riverFirstFill = useRef(true);
   const nextReleaseAt = useRef(0);
+  // Sky lanterns rise in their own animation map (not the river lanes).
+  const lanternAnims = useRef<Map<string, LanternAnim>>(new Map());
+  const skyFirstFill = useRef(true);
+  const nextLanternAt = useRef(0);
 
   const activePlayer = entered ? player : null;
   const room = useRoom(activePlayer, roomParam, scene);
   const { others, floats, liveFloatIds, sendMove, setMyState, announce, addFloat, seedBacklog } = room;
   useEffect(() => {
-    krathongRef.current = krathong;
-  }, [krathong]);
+    heldRef.current = held;
+  }, [held]);
   useEffect(() => {
     modalRef.current = modal;
   }, [modal]);
@@ -187,7 +252,11 @@ export default function LoyKrathongGame() {
     const start = sceneRef.current;
     me.current.x = start.spawn.x + (Math.random() * 80 - 40);
     me.current.y = start.spawn.y + (Math.random() * 40 - 20);
-    Promise.all([loadImage(start.mapUrl), ...LK_DESIGNS.map((d) => loadImage(krathongSpriteUrl(d)))])
+    Promise.all([
+      loadImage(start.mapUrl),
+      ...LK_DESIGNS.map((d) => loadImage(krathongSpriteUrl(d))),
+      ...LK_LANTERN_DESIGNS.map((d) => loadImage(lanternSpriteUrl(d))),
+    ])
       .then(() => setAssetsReady(true))
       .catch(() => setAssetsReady(true));
     // Prefetch the other scenes in the background.
@@ -212,12 +281,15 @@ export default function LoyKrathongGame() {
     return () => window.clearTimeout(id);
   }, [toast]);
 
-  // Presence must know about the krathong we carry (new arrivals read presence).
+  // Presence carries the krathong we hold (new arrivals read presence). A carried
+  // lantern isn't broadcast — remote players only see krathongs above a crab's head;
+  // a lantern becomes visible to everyone once it's released and rises.
+  const carriedKrathong: KrathongDesign | null = held?.kind === 'krathong' ? (held.design as KrathongDesign) : null;
   useEffect(() => {
     if (!entered) return;
-    setMyState({ ...me.current, krathong });
+    setMyState({ ...me.current, krathong: carriedKrathong });
     announce();
-  }, [krathong, entered, setMyState, announce]);
+  }, [carriedKrathong, entered, setMyState, announce]);
 
   // ---- keyboard -----------------------------------------------------------
   useEffect(() => {
@@ -264,6 +336,9 @@ export default function LoyKrathongGame() {
     floatAnims.current.clear();
     riverFirstFill.current = true;
     nextReleaseAt.current = 0;
+    lanternAnims.current.clear();
+    skyFirstFill.current = true;
+    nextLanternAt.current = 0;
     setFading(true);
     setScene(to);
     setShowHint(true);
@@ -286,7 +361,7 @@ export default function LoyKrathongGame() {
     if (preview) {
       const w = window as unknown as {
         __lkRiver?: () => unknown;
-        __lkAdd?: (n?: number) => void;
+        __lkAdd?: (n?: number, kind?: FloatKind) => void;
         __lkSeed?: (n?: number) => void;
       };
       w.__lkSeed = (n = 100) => seedBacklog(n);
@@ -294,15 +369,20 @@ export default function LoyKrathongGame() {
         onWater: floatAnims.current.size,
         softCap: LK_RIVER_MAX,
         hardCap: LK_RIVER_HARD_MAX,
+        inSky: lanternAnims.current.size,
+        skyCap: LK_SKY_MAX,
         pool: floatsRef.current.length,
         retired: retiredFloats.current.size,
       });
-      w.__lkAdd = (n = 1) => {
+      w.__lkAdd = (n = 1, kind: FloatKind = 'krathong') => {
         for (let i = 0; i < n; i++) {
+          const design: FloatDesign =
+            kind === 'lantern' ? LK_LANTERN_DESIGNS[i % LK_LANTERN_DESIGNS.length] : LK_DESIGNS[i % LK_DESIGNS.length];
           addFloat({
             id: `sim-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             display_name: `ซิม${Math.floor(Math.random() * 99)}`,
-            design: LK_DESIGNS[i % LK_DESIGNS.length],
+            design,
+            kind,
             wish: '',
             to_name: null,
             color: 'pink',
@@ -341,6 +421,22 @@ export default function LoyKrathongGame() {
         speed: 11 + Math.random() * 6,
       };
     };
+
+    // A lantern released from the pier into the sky. `agedMs` back-dates the birth so
+    // first-fill lanterns are already partway up (the sky looks alive on arrival).
+    const lanternBirth = (sc: SceneConfig, nowMs: number, agedMs: number, design: LanternDesign): LanternAnim => ({
+      design,
+      x0: sc.drop.x + (Math.random() * 40 - 20),
+      y0: sc.drop.y + (Math.random() * 20 - 10),
+      bornAt: nowMs - agedMs,
+      swayPhase: Math.random() * Math.PI * 2,
+      swaySeed: 0.7 + Math.random() * 0.6,
+      rotPhase: Math.random() * Math.PI * 2,
+      riseMul: 0.85 + Math.random() * 0.3,
+      flickerPhase: Math.random() * Math.PI * 2,
+    });
+    const lanternDesignOf = (f: FloatItem): LanternDesign =>
+      (LK_LANTERN_DESIGNS as readonly string[]).includes(f.design) ? (f.design as LanternDesign) : LK_LANTERN_DESIGNS[0];
 
     const update = (dt: number, now: number) => {
       const sc = sceneRef.current;
@@ -398,7 +494,8 @@ export default function LoyKrathongGame() {
 
       // network (throttled): on direction/krathong change, on stop, and once a second while moving
       const d = m.moving ? dir8(m.vx, m.vy) : -1;
-      const k = krathongRef.current;
+      const h = heldRef.current;
+      const k: KrathongDesign | null = h?.kind === 'krathong' ? (h.design as KrathongDesign) : null;
       const state = { x: m.x, y: m.y, vx: m.vx, vy: m.vy, moving: m.moving, krathong: k };
       if (d !== lastSend.dir || m.moving !== lastSend.moving || k !== lastSend.k || (m.moving && now - lastSend.at > 1000)) {
         sendMove(state);
@@ -453,6 +550,7 @@ export default function LoyKrathongGame() {
         // The player's OWN krathong always drops at the pier immediately — even past
         // the hard ceiling — so they always watch their own float out.
         for (const f of pool) {
+          if (f.kind === 'lantern') continue;
           if (anims.has(f.id) || retired.has(f.id)) continue;
           if (ownFloatIds.current.has(f.id)) anims.set(f.id, pierAnim(sc));
         }
@@ -463,6 +561,7 @@ export default function LoyKrathongGame() {
         // (newest first) and come in as drift-offs free a slot below the ceiling.
         for (const f of pool) {
           if (anims.size >= LK_RIVER_HARD_MAX) break;
+          if (f.kind === 'lantern') continue;
           if (anims.has(f.id) || retired.has(f.id)) continue;
           if (liveFloatIds.current.has(f.id)) anims.set(f.id, backlogAnim(sc, false));
         }
@@ -474,6 +573,7 @@ export default function LoyKrathongGame() {
             // it's full the instant you arrive — independent of the frame rate.
             for (const f of pool) {
               if (anims.size >= LK_RIVER_MAX) break;
+              if (f.kind === 'lantern') continue;
               if (anims.has(f.id) || retired.has(f.id)) continue;
               anims.set(f.id, backlogAnim(sc, true));
             }
@@ -481,6 +581,7 @@ export default function LoyKrathongGame() {
           } else if (nowMs >= nextReleaseAt.current) {
             // Afterwards, released krathongs trickle in one at a time from upstream.
             for (const f of pool) {
+              if (f.kind === 'lantern') continue;
               if (anims.has(f.id) || retired.has(f.id)) continue;
               anims.set(f.id, backlogAnim(sc, false));
               break;
@@ -494,6 +595,59 @@ export default function LoyKrathongGame() {
           const keep = new Set<string>();
           for (const id of retired) if (poolIds.has(id)) keep.add(id);
           retiredFloats.current = keep;
+        }
+      }
+
+      // sky: lanterns rise from the pier and fade. The player's own always rises;
+      // others fill up to LK_SKY_MAX. A lantern is a one-time event — once it finishes
+      // its climb it retires and never rises again.
+      {
+        const pool = floatsRef.current;
+        const sky = lanternAnims.current;
+        const retired = retiredFloats.current;
+        const nowMs = Date.now();
+        const poolIds = new Set<string>();
+        for (const f of pool) poolIds.add(f.id);
+
+        for (const [id, a] of sky) {
+          if (!poolIds.has(id) || nowMs - a.bornAt > LK_LANTERN_LIFE_MS) {
+            sky.delete(id);
+            retired.add(id);
+          }
+        }
+
+        // Own lantern: rises immediately, even past the cap.
+        for (const f of pool) {
+          if (f.kind !== 'lantern') continue;
+          if (sky.has(f.id) || retired.has(f.id)) continue;
+          if (ownFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+        }
+        // Live arrivals from other players, up to the cap.
+        for (const f of pool) {
+          if (sky.size >= LK_SKY_MAX) break;
+          if (f.kind !== 'lantern') continue;
+          if (sky.has(f.id) || retired.has(f.id)) continue;
+          if (liveFloatIds.current.has(f.id)) sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+        }
+        // Backlog: scatter at mixed heights on first fill, then trickle in gently.
+        if (sky.size < LK_SKY_MAX) {
+          if (skyFirstFill.current) {
+            for (const f of pool) {
+              if (sky.size >= LK_SKY_MAX) break;
+              if (f.kind !== 'lantern') continue;
+              if (sky.has(f.id) || retired.has(f.id)) continue;
+              sky.set(f.id, lanternBirth(sc, nowMs, Math.random() * LK_LANTERN_LIFE_MS * 0.8, lanternDesignOf(f)));
+            }
+            if (pool.length > 0) skyFirstFill.current = false;
+          } else if (nowMs >= nextLanternAt.current) {
+            for (const f of pool) {
+              if (f.kind !== 'lantern') continue;
+              if (sky.has(f.id) || retired.has(f.id)) continue;
+              sky.set(f.id, lanternBirth(sc, nowMs, 0, lanternDesignOf(f)));
+              break;
+            }
+            nextLanternAt.current = nowMs + LANTERN_RELEASE_MS;
+          }
         }
       }
     };
@@ -541,7 +695,7 @@ export default function LoyKrathongGame() {
       color: ShellColor,
       accessory: Accessory,
       moving: boolean,
-      k: KrathongDesign | null,
+      held: Held | null,
       name: string,
       bubble: { text: string; until: number } | null,
       now: number,
@@ -551,7 +705,7 @@ export default function LoyKrathongGame() {
       const step = Math.floor(now / WALK_FRAME_MS) % 2;
       const frame: 0 | 1 = moving ? (step as 0 | 1) : now % 4000 < 150 ? 1 : 0;
       const bob = moving ? (step === 0 ? -3 : 0) : 0;
-      const sprite = crabSprite(color, accessory, k ? 'happy' : 'idle', moving, frame);
+      const sprite = crabSprite(color, accessory, held ? 'happy' : 'idle', moving, frame);
       // soft shadow
       ctx.fillStyle = 'rgba(0,0,0,0.25)';
       ctx.beginPath();
@@ -559,8 +713,9 @@ export default function LoyKrathongGame() {
       ctx.fill();
       ctx.drawImage(sprite, Math.round(x - SPRITE_PX / 2), Math.round(y - SPRITE_PX + bob), SPRITE_PX, SPRITE_PX);
       let top = y - SPRITE_PX + 6 + bob;
-      if (k) {
-        const img = getImage(krathongSpriteUrl(k));
+      if (held) {
+        const url = held.kind === 'lantern' ? lanternSpriteUrl(held.design as LanternDesign) : krathongSpriteUrl(held.design as KrathongDesign);
+        const img = getImage(url);
         if (img) ctx.drawImage(img, Math.round(x - 16), Math.round(top - 34), 32, 32);
         top -= 34;
       }
@@ -601,9 +756,9 @@ export default function LoyKrathongGame() {
       for (let i = list.length - 1; i >= 0; i--) {
         const f = list[i];
         const a = floatAnims.current.get(f.id);
-        if (!a) continue;
+        if (!a) continue; // lanterns never get a river anim, so anything here is a krathong
         const bobW = Math.sin(now / 900 + a.phase) * 4;
-        const img = getImage(krathongSpriteUrl(f.design));
+        const img = getImage(krathongSpriteUrl(f.design as KrathongDesign));
         ctx.fillStyle = 'rgba(255, 190, 90, 0.18)';
         ctx.beginPath();
         ctx.ellipse(a.x, a.y + bobW + 6, 34, 14, 0, 0, Math.PI * 2);
@@ -646,11 +801,76 @@ export default function LoyKrathongGame() {
       const entries: Array<{ y: number; draw: () => void }> = [];
       for (const o of others.current.values()) {
         const r: RemotePlayer = o;
-        entries.push({ y: r.y, draw: () => drawCrab(r.x, r.y, r.color, r.accessory, r.moving, r.krathong, r.name, r.bubble, now, false) });
+        const rHeld: Held | null = r.krathong ? { kind: 'krathong', design: r.krathong } : null;
+        entries.push({ y: r.y, draw: () => drawCrab(r.x, r.y, r.color, r.accessory, r.moving, rHeld, r.name, r.bubble, now, false) });
       }
-      entries.push({ y: m.y, draw: () => drawCrab(m.x, m.y, look.color, look.accessory, m.moving, krathongRef.current, look.name, myBubble.current, now, true) });
+      entries.push({ y: m.y, draw: () => drawCrab(m.x, m.y, look.color, look.accessory, m.moving, heldRef.current, look.name, myBubble.current, now, true) });
       entries.sort((a, b) => a.y - b.y);
       for (const e of entries) e.draw();
+
+      // sky lanterns — drawn above players (they rise away into the air). Position,
+      // sway, rotation, scale, alpha and embers are all derived from bornAt, so nothing
+      // allocates per lantern per frame (halo uses a cached glow sprite).
+      const skyList = floatsRef.current;
+      const glow = warmGlow();
+      for (let i = skyList.length - 1; i >= 0; i--) {
+        const f = skyList[i];
+        const la = lanternAnims.current.get(f.id);
+        if (!la) continue;
+        const life = now - la.bornAt;
+        const t = Math.min(1, life / LK_LANTERN_LIFE_MS);
+        const climb = easeOut(t) * LK_LANTERN_RISE_PX * (LK_LANTERN_LIFE_MS / 1000) * la.riseMul;
+        const liftBob = life < 500 ? -Math.sin((life / 500) * Math.PI) * 5 : 0; // lift-off hop
+        const cx = la.x0 + Math.sin(life / 1300 + la.swayPhase) * LK_LANTERN_SWAY_PX * la.swaySeed * (0.3 + t);
+        const cy = la.y0 - climb + liftBob;
+        const scale = 1 - 0.3 * easeOut(t);
+        const rot = Math.sin(life / 1600 + la.rotPhase) * 0.09;
+        const flick = 0.78 + 0.22 * Math.sin(life / 110 + la.flickerPhase);
+        let alpha = 1;
+        if (life < LK_LANTERN_FADE_IN_MS) alpha = life / LK_LANTERN_FADE_IN_MS;
+        const remain = LK_LANTERN_LIFE_MS - life;
+        if (remain < LK_LANTERN_FADE_OUT_MS) alpha = Math.min(alpha, Math.max(0, remain / LK_LANTERN_FADE_OUT_MS));
+        if (alpha <= 0) continue;
+        const size = LANTERN_SKY_PX * scale;
+
+        // warm halo (additive), pulsing with the flame flicker
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = alpha * flick * 0.55;
+        const halo = size * 1.7;
+        ctx.drawImage(glow, cx - halo / 2, cy - halo / 2, halo, halo);
+        ctx.restore();
+
+        // ember sparks trailing below the flame
+        ctx.save();
+        ctx.globalAlpha = alpha * flick * 0.7;
+        ctx.fillStyle = '#FFCE73';
+        for (let e = 0; e < LANTERN_EMBERS; e++) {
+          const ep = (life / 600 + e * 1.7 + la.flickerPhase) % 1;
+          const ex = cx + Math.sin((e + la.swayPhase) * 2.3 + life / 500) * 4;
+          const ey = cy + size * 0.42 + ep * 16;
+          const es = (1 - ep) * 2.2;
+          if (es > 0.3) ctx.fillRect(ex - es / 2, ey - es / 2, es, es);
+        }
+        ctx.restore();
+
+        // the lantern sprite (rotated + scaled around its centre)
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(cx, cy);
+        ctx.rotate(rot);
+        const img = getImage(lanternSpriteUrl(la.design));
+        if (img) ctx.drawImage(img, -size / 2, -size / 2, size, size);
+        ctx.restore();
+
+        if (i < SKY_LABELS) {
+          const label = f.to_name ? `${f.display_name} → ${f.to_name}` : f.display_name;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          drawTag(label, cx, cy + size / 2 + 8, '11px Kanit, sans-serif', '#fff', 'rgba(0,0,0,0.4)');
+          ctx.restore();
+        }
+      }
 
       ctx.setTransform(1, 0, 0, 1, 0, 0);
     };
@@ -695,7 +915,7 @@ export default function LoyKrathongGame() {
   );
 
   const submitFloat = useCallback(async () => {
-    if (!player || !krathong) return;
+    if (!player || !held) return;
     const w = cleanText(wish, LK_WISH_MAX);
     if (!w) {
       setFormError(t('errors.wish'));
@@ -712,7 +932,8 @@ export default function LoyKrathongGame() {
         body: JSON.stringify({
           guestId: player.id,
           name: player.name,
-          design: krathong,
+          design: held.design,
+          kind: held.kind,
           wish: w,
           toName: cleanText(toName, LK_TO_MAX),
           color: player.color,
@@ -727,10 +948,11 @@ export default function LoyKrathongGame() {
         setFormError(code === 'rate' ? t('errors.rate') : code === 'closed' ? t('errors.closed') : code === 'wish' ? t('errors.wish') : t('errors.generic'));
         return;
       }
-      // Mark it as ours so it always jumps the river queue on this device.
+      // Mark it as ours so it always jumps the queue (river or sky) on this device.
       ownFloatIds.current.add(data.float.id);
       addFloat(data.float);
-      setKrathong(null);
+      setLastKind(held.kind);
+      setHeld(null);
       setWish('');
       setToName('');
       setModal('done');
@@ -739,7 +961,7 @@ export default function LoyKrathongGame() {
     } finally {
       setSubmitting(false);
     }
-  }, [player, krathong, wish, toName, session, room.room, scene, preview, addFloat, t]);
+  }, [player, held, wish, toName, session, room.room, scene, preview, addFloat, t]);
 
   const sendChatMessage = useCallback(() => {
     const text = cleanText(maskProfanity(chatText), LK_CHAT_MAX);
@@ -754,7 +976,7 @@ export default function LoyKrathongGame() {
 
   const share = useCallback(async () => {
     const url = `${window.location.origin}${window.location.pathname}?room=${room.room}&scene=${scene}`;
-    const text = t('done.shareText');
+    const text = lastKind === 'lantern' ? t('done.shareTextLantern') : t('done.shareText');
     try {
       if (navigator.share) {
         await navigator.share({ title: t('title'), text, url });
@@ -770,7 +992,7 @@ export default function LoyKrathongGame() {
     } catch {
       setToast(url);
     }
-  }, [room.room, scene, t]);
+  }, [room.room, scene, lastKind, t]);
 
   const loginForChat = useCallback(() => {
     void signInWithGoogle(`${window.location.pathname}${window.location.search}`);
@@ -815,16 +1037,17 @@ export default function LoyKrathongGame() {
 
   const colorKeys = Object.keys(LK_COLORS) as ShellColor[];
   const sc = SCENES[scene];
-  const actionLabel = hotspot === 'shop' ? t('hud.shop') : hotspot === 'pier' ? (krathong ? t('hud.float') : t('hud.needKrathong')) : null;
-  const canAct = hotspot === 'shop' || (hotspot === 'pier' && !!krathong);
+  const pierLabel = held ? (held.kind === 'lantern' ? t('hud.floatLantern') : t('hud.float')) : t('hud.needKrathong');
+  const actionLabel = hotspot === 'shop' ? t('hud.shop') : hotspot === 'pier' ? pierLabel : null;
+  const canAct = hotspot === 'shop' || (hotspot === 'pier' && !!held);
   const onAction = () => {
     if (hotspot === 'shop') setModal('shop');
-    else if (hotspot === 'pier' && krathong) {
+    else if (hotspot === 'pier' && held) {
       setFormError(null);
       setModal('float');
     }
   };
-  const hintText = krathong
+  const hintText = held
     ? t('hud.goToPier')
     : scene === 'village'
       ? isTouch
@@ -938,7 +1161,7 @@ export default function LoyKrathongGame() {
           </div>
         </div>
       )}
-      {entered && krathong && !hotspot && !showHint && (
+      {entered && held && !hotspot && !showHint && (
         <div className="absolute top-16 inset-x-0 flex justify-center pointer-events-none">
           <div className="bg-black/50 text-white text-sm px-4 py-2 rounded-full backdrop-blur-sm">{t('hud.goToPier')}</div>
         </div>
@@ -1086,26 +1309,60 @@ export default function LoyKrathongGame() {
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-[#FFFBF7] rounded-3xl p-6 shadow-2xl">
             <h2 className="text-xl font-bold text-[#4A1942]">{t('shop.heading')}</h2>
-            <p className="text-sm text-[#6B5E57] mb-4">{t('shop.sub')}</p>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              {LK_DESIGNS.map((d) => (
+            <p className="text-sm text-[#6B5E57] mb-3">{shopCat === 'lantern' ? t('shop.subLantern') : t('shop.sub')}</p>
+            {/* Category tabs: river krathongs or sky lanterns (same shop, same flow). */}
+            <div className="flex gap-2 mb-4">
+              {(['krathong', 'lantern'] as const).map((cat) => (
                 <button
-                  key={d}
+                  key={cat}
                   type="button"
-                  onClick={() => {
-                    setKrathong(d);
-                    setModal(null);
-                    setShowHint(true);
-                  }}
-                  className={`rounded-2xl border-2 p-2 flex flex-col items-center gap-1 bg-white hover:border-[#E63946] transition ${
-                    krathong === d ? 'border-[#E63946]' : 'border-[#F5EDE4]'
+                  onClick={() => setShopCat(cat)}
+                  className={`px-4 h-9 rounded-full text-sm border ${
+                    shopCat === cat ? 'bg-[#4A1942] text-white border-[#4A1942]' : 'bg-white text-[#4A1942] border-[#F5EDE4]'
                   }`}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={krathongSpriteUrl(d)} alt="" className="w-16 h-16" style={{ imageRendering: 'pixelated' }} />
-                  <span className="text-xs text-[#4A1942] text-center leading-tight">{t(`shop.designs.${d}`)}</span>
+                  {t(`shop.cat.${cat}`)}
                 </button>
               ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {shopCat === 'krathong'
+                ? LK_DESIGNS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => {
+                        setHeld({ kind: 'krathong', design: d });
+                        setModal(null);
+                        setShowHint(true);
+                      }}
+                      className={`rounded-2xl border-2 p-2 flex flex-col items-center gap-1 bg-white hover:border-[#E63946] transition ${
+                        held?.kind === 'krathong' && held.design === d ? 'border-[#E63946]' : 'border-[#F5EDE4]'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={krathongSpriteUrl(d)} alt="" className="w-16 h-16" style={{ imageRendering: 'pixelated' }} />
+                      <span className="text-xs text-[#4A1942] text-center leading-tight">{t(`shop.designs.${d}`)}</span>
+                    </button>
+                  ))
+                : LK_LANTERN_DESIGNS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => {
+                        setHeld({ kind: 'lantern', design: d });
+                        setModal(null);
+                        setShowHint(true);
+                      }}
+                      className={`rounded-2xl border-2 p-2 flex flex-col items-center gap-1 bg-[#1a1533] hover:border-[#FFD166] transition ${
+                        held?.kind === 'lantern' && held.design === d ? 'border-[#FFD166]' : 'border-[#2b2550]'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={lanternSpriteUrl(d)} alt="" className="w-16 h-16" style={{ imageRendering: 'pixelated' }} />
+                      <span className="text-xs text-[#FFE9B8] text-center leading-tight">{t(`shop.lanterns.${d}`)}</span>
+                    </button>
+                  ))}
             </div>
             <button type="button" onClick={() => setModal(null)} className="btn-secondary w-full py-3">
               {t('shop.close')}
@@ -1114,7 +1371,7 @@ export default function LoyKrathongGame() {
         </div>
       )}
 
-      {modal === 'float' && krathong && (
+      {modal === 'float' && held && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             className="w-full max-w-md bg-[#FFFBF7] rounded-3xl p-6 shadow-2xl"
@@ -1125,9 +1382,14 @@ export default function LoyKrathongGame() {
           >
             <div className="flex items-center gap-3 mb-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={krathongSpriteUrl(krathong)} alt="" className="w-14 h-14" style={{ imageRendering: 'pixelated' }} />
+              <img
+                src={held.kind === 'lantern' ? lanternSpriteUrl(held.design as LanternDesign) : krathongSpriteUrl(held.design as KrathongDesign)}
+                alt=""
+                className="w-14 h-14"
+                style={{ imageRendering: 'pixelated' }}
+              />
               <div>
-                <h2 className="text-xl font-bold text-[#4A1942]">{t('float.heading')}</h2>
+                <h2 className="text-xl font-bold text-[#4A1942]">{held.kind === 'lantern' ? t('float.headingLantern') : t('float.heading')}</h2>
                 <p className="text-xs text-[#6B5E57]">📍 {t(`scenes.${scene}`)}</p>
               </div>
             </div>
@@ -1155,7 +1417,7 @@ export default function LoyKrathongGame() {
                 {t('float.cancel')}
               </button>
               <button type="submit" className="btn-primary flex-1 py-3" disabled={submitting}>
-                {submitting ? t('float.submitting') : t('float.submit')}
+                {submitting ? t('float.submitting') : held.kind === 'lantern' ? t('float.submitLantern') : t('float.submit')}
               </button>
             </div>
           </form>
@@ -1165,9 +1427,9 @@ export default function LoyKrathongGame() {
       {modal === 'done' && (
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-[#FFFBF7] rounded-3xl p-6 shadow-2xl text-center">
-            <div className="text-5xl mb-2">🪷</div>
-            <h2 className="text-xl font-bold text-[#4A1942] mb-1">{t('done.heading')}</h2>
-            <p className="text-sm text-[#6B5E57] mb-5">{t('done.body')}</p>
+            <div className="text-5xl mb-2">{lastKind === 'lantern' ? '🏮' : '🪷'}</div>
+            <h2 className="text-xl font-bold text-[#4A1942] mb-1">{lastKind === 'lantern' ? t('done.headingLantern') : t('done.heading')}</h2>
+            <p className="text-sm text-[#6B5E57] mb-5">{lastKind === 'lantern' ? t('done.bodyLantern') : t('done.body')}</p>
             <LoyTemplateCta source="done" variant="card" />
             <button type="button" onClick={share} className="btn-secondary w-full py-3 mb-2">
               {t('done.share')}

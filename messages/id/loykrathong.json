@@ -31,7 +31,8 @@
     "room": "Ruang {room}",
     "shop": "Pilih krathong",
     "float": "Lepas krathong",
-    "needKrathong": "Ambil krathong di toko dulu ya",
+    "floatLantern": "Lepas lampion",
+    "needKrathong": "Ambil krathong atau lampion di toko dulu ya",
     "goToPier": "Sudah dapat! Jalan ke dermaga",
     "customize": "Dandan",
     "moveHint": "Sentuh dan tahan sisi kiri layar, lalu geser untuk jalan",
@@ -48,8 +49,13 @@
   "shop": {
     "heading": "Toko krathong",
     "sub": "Pilih yang kamu suka, semuanya gratis",
+    "subLantern": "Pilih lampion, lalu lepas di dermaga — semua gratis",
     "pick": "Ambil yang ini",
     "close": "Tutup",
+    "cat": {
+      "krathong": "Krathong",
+      "lantern": "Lampion"
+    },
     "designs": {
       "banana": "Krathong daun pisang",
       "lotus": "Krathong teratai",
@@ -57,25 +63,40 @@
       "coconut": "Krathong kelapa",
       "icecream": "Krathong es krim",
       "heart": "Krathong hati"
+    },
+    "lanterns": {
+      "red-dome": "Kubah merah",
+      "orange-band": "Pita oranye",
+      "striped": "Garis-garis",
+      "glow-star": "Bintang bercahaya",
+      "gold": "Emas",
+      "cream": "Krem",
+      "red-flame": "Nyala merah",
+      "lanna-brown": "Lanna cokelat"
     }
   },
   "float": {
     "heading": "Panjatkan harapan",
+    "headingLantern": "Panjatkan harapan",
     "wish": "Harapanmu",
     "wishPlaceholder": "Semoga...",
     "to": "Untuk (opsional)",
     "toPlaceholder": "Orang yang kamu pikirkan",
     "submit": "Lepas krathong",
+    "submitLantern": "Lepas lampion",
     "submitting": "Melepas...",
     "cancel": "Nanti dulu"
   },
   "done": {
     "heading": "Krathong-mu sudah mengapung",
+    "headingLantern": "Lampion-mu sedang naik",
     "body": "Sekarang hanyut di sungai. Semoga harapanmu terkabul.",
+    "bodyLantern": "Sekarang melayang naik ke langit. Semoga harapanmu terkabul.",
     "share": "Ajak teman ikut melepas",
     "copied": "Tautan disalin",
     "again": "Lepas lagi",
-    "shareText": "Aku baru melepas krathong online di Desa Nong Pu. Ayo ikut!"
+    "shareText": "Aku baru melepas krathong online di Desa Nong Pu. Ayo ikut!",
+    "shareTextLantern": "Aku baru melepas lampion online di Desa Nong Pu. Ayo main bareng!"
   },
   "chat": {
     "placeholder": "Tulis sesuatu...",
