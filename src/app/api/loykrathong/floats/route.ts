@@ -19,18 +19,26 @@ export async function GET() {
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '';
     if (!url || !key) throw new Error('Missing Supabase public credentials');
     const supabase = createClient<Database>(url, key, { auth: { persistSession: false } });
-    const [{ count }, { data }] = await Promise.all([
+    const latest = (cols: string) =>
+      supabase
+        .from('krathong_floats')
+        .select(cols)
+        .eq('year', LK_EVENT.year)
+        .order('created_at', { ascending: false })
+        .limit(LATEST);
+    const [{ count }, latestRes] = await Promise.all([
       supabase
         .from('krathong_floats')
         .select('id', { count: 'exact', head: true })
         .eq('year', LK_EVENT.year),
-      supabase
-        .from('krathong_floats')
-        .select('id, display_name, design, wish, to_name, color, created_at')
-        .eq('year', LK_EVENT.year)
-        .order('created_at', { ascending: false })
-        .limit(LATEST),
+      latest('id, display_name, design, kind, wish, to_name, color, created_at'),
     ]);
+    // Tolerate the `kind` column not being there yet (migration not applied): retry
+    // without it and let the client treat those rows as krathongs.
+    let data = latestRes.data;
+    if (latestRes.error && /\bkind\b/i.test(latestRes.error.message ?? '')) {
+      data = (await latest('id, display_name, design, wish, to_name, color, created_at')).data;
+    }
     return NextResponse.json(
       { count: count ?? 0, items: data ?? [] },
       { headers: { 'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=30' } },

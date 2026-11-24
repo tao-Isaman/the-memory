@@ -161,6 +161,65 @@ export function krathongSpriteUrl(design: KrathongDesign): string {
   return `/game/loykrathong/krathong-${design}.png`;
 }
 
+// ---- Sky lanterns (โคมลอย) -------------------------------------------------
+// A floated item is either a river `krathong` or a sky `lantern`. Both share the
+// same table / realtime feed / shop; `kind` tells them apart. A krathong drifts
+// down the river; a lantern rises from the release spot into the sky and fades.
+export const LK_KINDS = ['krathong', 'lantern'] as const;
+export type FloatKind = (typeof LK_KINDS)[number];
+
+export function isFloatKind(v: unknown): v is FloatKind {
+  return typeof v === 'string' && (LK_KINDS as readonly string[]).includes(v);
+}
+
+/** Lantern designs — PixelLab art at /game/loykrathong/lantern-<design>.png (32x32 RGBA). */
+export const LK_LANTERN_DESIGNS = [
+  'red-dome',
+  'orange-band',
+  'striped',
+  'glow-star',
+  'gold',
+  'cream',
+  'red-flame',
+  'lanna-brown',
+] as const;
+export type LanternDesign = (typeof LK_LANTERN_DESIGNS)[number];
+
+/** A held/floated design is a krathong design OR a lantern design. */
+export type FloatDesign = KrathongDesign | LanternDesign;
+
+export function isKrathongDesign(v: unknown): v is KrathongDesign {
+  return typeof v === 'string' && (LK_DESIGNS as readonly string[]).includes(v);
+}
+export function isLanternDesign(v: unknown): v is LanternDesign {
+  return typeof v === 'string' && (LK_LANTERN_DESIGNS as readonly string[]).includes(v);
+}
+/** Valid design string for a given kind (used by the API + UI). */
+export function isDesignForKind(kind: FloatKind, v: unknown): v is FloatDesign {
+  return kind === 'lantern' ? isLanternDesign(v) : isKrathongDesign(v);
+}
+
+/**
+ * Optional PNG sprite for a lantern. If present it overrides the procedural
+ * placeholder (PixelLab art drops in at /game/loykrathong/lantern-<design>.png).
+ */
+export function lanternSpriteUrl(design: LanternDesign): string {
+  return `/game/loykrathong/lantern-${design}.png`;
+}
+
+// ---- Sky display budget (client-side only; mirrors the river budget) --------
+/** The most lanterns that rise on screen at once (tuned for mobile). */
+export const LK_SKY_MAX = 16;
+/** How fast a lantern climbs (map px per second). */
+export const LK_LANTERN_RISE_PX = 115;
+/** A lantern's lifetime from release to fully faded (ms). ~rises LK_MAP height. */
+export const LK_LANTERN_LIFE_MS = 11000;
+/** Fade-in at birth and fade-out before retirement (ms). */
+export const LK_LANTERN_FADE_IN_MS = 600;
+export const LK_LANTERN_FADE_OUT_MS = 2600;
+/** Horizontal sway amplitude as it drifts up (map px). */
+export const LK_LANTERN_SWAY_PX = 16;
+
 /** Shell colours a player can pick (keys are stored in localStorage + DB). */
 export const LK_COLORS = {
   pink: '#FF6B9D',
