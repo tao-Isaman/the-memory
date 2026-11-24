@@ -32,6 +32,7 @@
     "shop": "Pilih krathong",
     "float": "Lepas krathong",
     "floatLantern": "Lepas lampion",
+    "releaseLanternHint": "Ketuk lepas — lampion naik dari tempatmu berdiri",
     "needKrathong": "Ambil krathong atau lampion di toko dulu ya",
     "goToPier": "Sudah dapat! Jalan ke dermaga",
     "customize": "Dandan",
@@ -96,7 +97,9 @@
     "copied": "Tautan disalin",
     "again": "Lepas lagi",
     "shareText": "Aku baru melepas krathong online di Desa Nong Pu. Ayo ikut!",
-    "shareTextLantern": "Aku baru melepas lampion online di Desa Nong Pu. Ayo main bareng!"
+    "shareTextLantern": "Aku baru melepas lampion online di Desa Nong Pu. Ayo main bareng!",
+    "toast": "🪷 Krathong-mu mengapung — semoga harapanmu terkabul",
+    "toastLantern": "🏮 Lampion-mu naik — semoga harapanmu terkabul"
   },
   "chat": {
     "placeholder": "Tulis sesuatu...",

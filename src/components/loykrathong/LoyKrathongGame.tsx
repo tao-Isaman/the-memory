@@ -431,10 +431,12 @@ export default function LoyKrathongGame() {
     const LAUNCH_MARGIN = 150; // keep launches away from the scene edges / HUD
     const lanternBirth = (sc: SceneConfig, nowMs: number, agedMs: number, design: LanternDesign, own: boolean): LanternAnim => ({
       design,
+      // Own lantern lifts off from where the player is standing (any spot, any scene);
+      // everyone else's is scattered across the scene width as ambient sky.
       x0: own
-        ? sc.drop.x + (Math.random() * 40 - 20)
+        ? me.current.x + (Math.random() * 24 - 12)
         : LAUNCH_MARGIN + Math.random() * (LK_MAP_W - 2 * LAUNCH_MARGIN),
-      y0: sc.drop.y + (Math.random() * 40 - 20),
+      y0: own ? me.current.y - 12 : sc.drop.y + (Math.random() * 40 - 20),
       bornAt: nowMs - agedMs,
       swayPhase: Math.random() * Math.PI * 2,
       swaySeed: 0.7 + Math.random() * 0.6,
@@ -972,11 +974,30 @@ export default function LoyKrathongGame() {
       // Mark it as ours so it always jumps the queue (river or sky) on this device.
       ownFloatIds.current.add(data.float.id);
       addFloat(data.float);
-      setLastKind(held.kind);
+      const kind = held.kind;
+      setLastKind(kind);
       setHeld(null);
       setWish('');
       setToName('');
-      setModal('done');
+      // The full 'done' popup (confirmation + share + invite CTA) shows only the FIRST
+      // time a guest releases anything; after that a short toast confirms the release so
+      // we stop nagging with the promo/share every time. (localStorage, best-effort.)
+      let celebrated = false;
+      try {
+        celebrated = localStorage.getItem('lk_release_celebrated') === '1';
+      } catch {
+        /* storage blocked: treat as not-yet, the modal just shows again */
+      }
+      if (celebrated) {
+        setToast(kind === 'lantern' ? t('done.toastLantern') : t('done.toast'));
+      } else {
+        setModal('done');
+        try {
+          localStorage.setItem('lk_release_celebrated', '1');
+        } catch {
+          /* storage blocked */
+        }
+      }
     } catch {
       setFormError(t('errors.generic'));
     } finally {
@@ -1058,23 +1079,37 @@ export default function LoyKrathongGame() {
 
   const colorKeys = Object.keys(LK_COLORS) as ShellColor[];
   const sc = SCENES[scene];
-  const pierLabel = held ? (held.kind === 'lantern' ? t('hud.floatLantern') : t('hud.float')) : t('hud.needKrathong');
-  const actionLabel = hotspot === 'shop' ? t('hud.shop') : hotspot === 'pier' ? pierLabel : null;
-  const canAct = hotspot === 'shop' || (hotspot === 'pier' && !!held);
+  // A lantern can be released from anywhere the player stands; a krathong still
+  // needs the river (the pier hotspot).
+  const holdingLantern = held?.kind === 'lantern';
+  const openFloat = () => {
+    setFormError(null);
+    setModal('float');
+  };
+  const actionLabel =
+    hotspot === 'shop'
+      ? t('hud.shop')
+      : holdingLantern
+        ? t('hud.floatLantern')
+        : hotspot === 'pier'
+          ? held
+            ? t('hud.float')
+            : t('hud.needKrathong')
+          : null;
+  const canAct = hotspot === 'shop' || holdingLantern || (hotspot === 'pier' && !!held);
   const onAction = () => {
     if (hotspot === 'shop') setModal('shop');
-    else if (hotspot === 'pier' && held) {
-      setFormError(null);
-      setModal('float');
-    }
+    else if (holdingLantern || (hotspot === 'pier' && held)) openFloat();
   };
-  const hintText = held
-    ? t('hud.goToPier')
-    : scene === 'village'
-      ? isTouch
-        ? t('hud.moveHint')
-        : t('hud.moveHintDesktop')
-      : t('hud.needKrathongHere', { scene: t('scenes.village') });
+  const hintText = holdingLantern
+    ? t('hud.releaseLanternHint')
+    : held
+      ? t('hud.goToPier')
+      : scene === 'village'
+        ? isTouch
+          ? t('hud.moveHint')
+          : t('hud.moveHintDesktop')
+        : t('hud.needKrathongHere', { scene: t('scenes.village') });
 
   return (
     <div ref={wrapRef} className="fixed inset-0 bg-[#0b1230] overflow-hidden select-none" style={{ touchAction: 'none' }}>
@@ -1182,7 +1217,7 @@ export default function LoyKrathongGame() {
           </div>
         </div>
       )}
-      {entered && held && !hotspot && !showHint && (
+      {entered && held?.kind === 'krathong' && !hotspot && !showHint && (
         <div className="absolute top-16 inset-x-0 flex justify-center pointer-events-none">
           <div className="bg-black/50 text-white text-sm px-4 py-2 rounded-full backdrop-blur-sm">{t('hud.goToPier')}</div>
         </div>

@@ -33,6 +33,7 @@
     "shop": "Pick a krathong",
     "float": "Float it",
     "floatLantern": "Release it",
+    "releaseLanternHint": "Tap release — a lantern floats from wherever you stand",
     "needKrathong": "Grab a krathong or lantern at the shop first",
     "goToPier": "Got one! Walk down to the pier",
     "customize": "Dress up",
@@ -97,7 +98,9 @@
     "copied": "Link copied",
     "again": "Float another",
     "shareText": "I just floated a krathong online at Nong Pu Village. Come float one with me!",
-    "shareTextLantern": "I just released a sky lantern online at Nong Pu Village. Come play with me!"
+    "shareTextLantern": "I just released a sky lantern online at Nong Pu Village. Come play with me!",
+    "toast": "🪷 Your krathong is floating — may your wish come true",
+    "toastLantern": "🏮 Your lantern is rising — may your wish come true"
   },
   "chat": {
     "placeholder": "Say something...",
